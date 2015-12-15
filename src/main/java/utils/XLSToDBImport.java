@@ -49,18 +49,24 @@ public class XLSToDBImport {
     public XLSToDBImport(ArrayList<ArrayList<String>> allCompareDetails) {
         this.allCompareDetails = allCompareDetails;
     }
-    public void startImport(ArrayList<ArrayList<String>> allImportXLSContent, ObservableList<ImportFields> importFields) {
+    public void startImport(ArrayList<ArrayList<String>> allImportXLSContent, ObservableList<ImportFields> importFields, ObservableList<String> allProducts) {
         allCompareDetails.stream().forEach((compareDetail) -> {
             if (compareDetail.get(1).equals("Наименование продукта")) {
                 titlesColumn.addAll(getColumnByHeader(allImportXLSContent, compareDetail.get(0)));
             }
-        });    
+        });
+        //try {
         allCompareDetails.stream().forEach((compareDetail) -> {
             switch (compareDetail.get(1)) {
             case("Краткое описание продукта"):
                 descriptionsColumn.addAll(getColumnByHeader(allImportXLSContent, compareDetail.get(0)));
                 for (int i = 0; i < descriptionsColumn.size(); i++) {
-                    updateProducts("description", descriptionsColumn.get(i), titlesColumn.get(i));
+                    if (allProducts.contains(titlesColumn.get(i))) {
+                        updateProducts("description", descriptionsColumn.get(i), titlesColumn.get(i));                        
+                    } else {
+                        insertProduct(titlesColumn.get(i));
+                        updateProducts("description", descriptionsColumn.get(i), titlesColumn.get(i));                        
+                    }
                 }                    
                 break;
             case("Анонс продукта"):
@@ -111,7 +117,11 @@ public class XLSToDBImport {
             case("Базовая стоимость"):
                 pricesColumn.addAll(getColumnByHeader(allImportXLSContent, compareDetail.get(0)));
                 for (int i = 0; i < pricesColumn.size(); i++) {
+                    
+                    
                     if (!(pricesColumn.get(i).equals(""))) {
+                        updateProducts("price", Double.parseDouble(pricesColumn.get(i).replace(",",".")), titlesColumn.get(i));
+                        /*
                         if (!(pricesColumn.get(i).contains(" "))) {
                             //System.out.println(Double.parseDouble(pricesColumn.get(i)));
                             updateProducts("price", Double.parseDouble(pricesColumn.get(i)), titlesColumn.get(i));                            
@@ -141,10 +151,11 @@ public class XLSToDBImport {
                                     }
                                 }
                             }
-                        }
+                        }*/
                     } else {
                     updateProducts("price", 0.0, titlesColumn.get(i));                        
                     }
+                    
                 }                    
                 break; 
             case("Производитель продукта"):
@@ -167,6 +178,7 @@ public class XLSToDBImport {
                 break;
             }
         });
+        //} catch (NumberFormatException ne) {}
     }
     private ArrayList<String> getColumnByHeader(ArrayList<ArrayList<String>> allImportXLSContent, String header) {
         Integer keyIndex = 0;
@@ -256,11 +268,13 @@ public class XLSToDBImport {
             if (!(id == 0)) {
                 Products product = (Products) session.load(Products.class, id);
                 for (Vendors vendor: vendorsList) {
-                    if (vendor.getTitle().equals(value)) {
-                        product.setVendor(vendor);  
-                    }
-                    session.save(product);
-                }               
+                    try {
+                        if (vendor.getTitle().equals(value)) {
+                            product.setVendor(vendor);  
+                        }
+                    } catch (NullPointerException ne) {}                        
+                }
+                session.save(product);                
             } else {
                 notInDBProducts.add(productTitle);
             }
@@ -288,11 +302,13 @@ public class XLSToDBImport {
             if (!(id == 0)) {
                 Products product = (Products) session.get(Products.class, id);
                 for (Series serie: seriesList) {
-                    if (serie.getTitle().equals(value)) {
-                        product.setSerie(serie);  
-                    }
-                    session.save(product);
-                }               
+                    try {
+                        if (serie.getTitle().equals(value)) {
+                            product.setSerie(serie);  
+                        }
+                    } catch (NullPointerException ne) {}                    
+                }
+                session.save(product);
             } else {
                 notInDBProducts.add(productTitle);
             }
@@ -319,18 +335,36 @@ public class XLSToDBImport {
             }
             if (!(id == 0)) {
                 Products product = (Products) session.get(Products.class, id);
-                System.out.println(kindsList.size());
                 for (ProductKinds kind: kindsList) {
-                    if (kind.getTitle().equals(value)) {
-                        product.setProductKindId(kind);  
-                    }
-                    session.save(product);
-                }               
+                    try {
+                        if (kind.getTitle().equals(value)) {
+                            product.setProductKindId(kind);  
+                        }
+                    } catch (NullPointerException ne) {}
+                }
+                session.save(product);                
             } else {
                 notInDBProducts.add(productTitle);
             }
             session.getTransaction().commit();
             session.close();
         }
-    }    
+    } 
+    
+    private void insertProduct(String productTitle) {
+        /*
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        session.beginTransaction();
+        
+        Products newProduct = new Products();
+        newProduct.setTitle(productTitle);
+         
+        //Save the employee in database
+        session.save(newProduct);
+ 
+        //Commit the transaction
+        session.getTransaction().commit();
+        HibernateUtil.shutdown(); 
+                */
+    }
 }

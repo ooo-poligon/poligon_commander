@@ -32,7 +32,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
@@ -46,7 +45,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TableColumn;
@@ -56,8 +54,6 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -66,11 +62,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
-import javafx.beans.value.ObservableValue;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.control.Toggle;
-import javafx.stage.Stage;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -881,15 +872,9 @@ public class PCGUIController implements Initializable {
         compareFieldsMechanics();
     }
     // Запускается при нажатии кнопки startImportXLSButton
-    @FXML private void startImportFromXLSToDB() {
-        System.out.println("allCompareDetails.size() = " + allCompareDetails.size());
-        allCompareDetails.stream().forEach((d) -> {
-            System.out.println(d.get(0) + " - " + d.get(1));
-        });
-        System.out.println("allImportXLSContent.size() = " + allImportXLSContent.size());
-        System.out.println("importFields.size() = " + importFields.size());        
+    @FXML private void startImportFromXLSToDB() {       
         XLSToDBImport importer = new XLSToDBImport(allCompareDetails);
-        importer.startImport(allImportXLSContent, importFields);
+        importer.startImport(allImportXLSContent, importFields, allProducts);
     }
     @FXML private void showWarningWindow(String warningText) {
         Alert alert = new Alert(AlertType.WARNING);
