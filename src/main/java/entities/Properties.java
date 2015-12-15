@@ -1,0 +1,123 @@
+/*
+ * 
+ * 
+ */
+package entities;
+
+import java.io.Serializable;
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlRootElement;
+
+/**
+ *
+ * @author kataev
+ */
+@Entity
+@Table(name = "properties")
+@XmlRootElement
+@NamedQueries({
+    @NamedQuery(name = "Properties.findAll", query = "SELECT p FROM Properties p"),
+    @NamedQuery(name = "Properties.findById", query = "SELECT p FROM Properties p WHERE p.id = :id"),
+    @NamedQuery(name = "Properties.findByTitle", query = "SELECT p FROM Properties p WHERE p.title = :title"),
+    @NamedQuery(name = "Properties.findByValue", query = "SELECT p FROM Properties p WHERE p.value = :value")})
+public class Properties implements Serializable {
+    private static final long serialVersionUID = 1L;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Basic(optional = false)
+    @Column(name = "id")
+    private Integer id;
+    @Column(name = "title")
+    private String title;
+    @Column(name = "value")
+    private String value;
+    @JoinColumn(name = "product_id", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private Products productId;
+    @JoinColumn(name = "property_type_id", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private PropertyTypes propertyTypeId;
+
+    public Properties() {
+    }
+
+    public Properties(Integer id) {
+        this.id = id;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public Products getProductId() {
+        return productId;
+    }
+
+    public void setProductId(Products productId) {
+        this.productId = productId;
+    }
+
+    public PropertyTypes getPropertyTypeId() {
+        return propertyTypeId;
+    }
+
+    public void setPropertyTypeId(PropertyTypes propertyTypeId) {
+        this.propertyTypeId = propertyTypeId;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 0;
+        hash += (id != null ? id.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        // TODO: Warning - this method won't work in the case the id fields are not set
+        if (!(object instanceof Properties)) {
+            return false;
+        }
+        Properties other = (Properties) object;
+        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "entities.Properties[ id=" + id + " ]";
+    }
+    
+}
