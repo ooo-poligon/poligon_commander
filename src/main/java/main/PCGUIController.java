@@ -5,6 +5,7 @@
 package main;
 
 import utils.ProductImage;
+import utils.NewCategory;
 import treeviews.CategoriesTreeView;
 import entities.Analogs;
 import entities.Categories;
@@ -14,7 +15,6 @@ import entities.ImportFields;
 import entities.Products;
 import entities.Quantity;
 import entities.Settings;
-//import java.awt.event.KeyEvent;
 import javafx.scene.control.TextField;
 import tableviews.ProductsTableView;
 import tableviews.AnalogsTableView;
@@ -43,7 +43,6 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ProgressBar;
@@ -55,6 +54,8 @@ import javafx.scene.control.TreeView;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.TextArea;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -70,8 +71,25 @@ import utils.HibernateUtil;
 import utils.XLSHandler;
 import utils.XLSToDBImport;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ContextMenuBuilder;
+import javafx.scene.control.MenuItemBuilder;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.Label;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.DialogPane;
 import javafx.scene.input.KeyEvent;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
+import javafx.stage.Modality;
+import java.util.Optional;
+import javafx.util.Callback;
 
 /**
  *
@@ -82,9 +100,13 @@ public class PCGUIController implements Initializable {
     // Scenes
     public static Scene scene;
     
+    //Stages
+        Stage newCatStage = new Stage();
+    
     // Panes
     @FXML private AnchorPane anchorPane; 
     @FXML private AnchorPane allTables;
+    @FXML private AnchorPane newCatDialogAnchorPane;
     
     @FXML private StackPane  stackPane; 
     
@@ -92,7 +114,11 @@ public class PCGUIController implements Initializable {
     @FXML private GridPane   gridPanePDF;
     
     // TreeViews
-    @FXML private TreeView<String>                       categoriesTree; 
+    @FXML private TreeView<String>                       categoriesTree;
+    
+    // ContextMenus
+    @ FXML private ContextMenu treeViewContextMenu;
+    @FXML private MenuItem createCategoryItem;
     
     // TableViews & TableColumns 
     @FXML private TableView<ProductsTableView>            productsTable;   
@@ -129,6 +155,8 @@ public class PCGUIController implements Initializable {
     @FXML private Button compareXLSToDBButton;
     @FXML private Button startImportXLSButton;
     @FXML private Button cancelSetImportButton;
+    @FXML private Button saveNewCategory;
+    @FXML private Button cancelNewCategory;
     
     // Labels
     
@@ -150,6 +178,9 @@ public class PCGUIController implements Initializable {
     
     // TextFields
     @FXML private TextField headersRowTextField;
+    @FXML private TextField newCategoryTitleTextField;
+    @FXML private TextArea newCategoryDescriptionTextArea;
+    
     
     // CheckBoxes
     @FXML private CheckBox treeViewHandlerMode;
@@ -179,7 +210,8 @@ public class PCGUIController implements Initializable {
      
     // Strings
     String selectedProduct;    
-
+    String newCatTitle = "";
+    String newCatDescription;
     String selectedDBKey = "Наименование продукта";
     String catalogHeader = "Каталог товаров";
     
@@ -198,7 +230,7 @@ public class PCGUIController implements Initializable {
         loadImportFields();
         //loadImportKeys();
     }
-    // Загружает в память настройки программы, сохранённые в БД    
+    // Загружает в память настройки программы, сохранённые в БД     
     private void loadSavedSettings() {
         Session session = HibernateUtil.getSessionFactory().openSession();
         List res = session.createQuery("From Settings where title=\'TreeViewMode\' and kind=\'ProgramSettings\'").list();
@@ -522,7 +554,24 @@ public class PCGUIController implements Initializable {
         EventHandler<MouseEvent> mouseEventHandle = (MouseEvent event) -> {
             handleCatregoryTreeMouseClicked(event);
         };               
-        categoriesTree.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseEventHandle);            
+        categoriesTree.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseEventHandle);
+        
+        treeViewContextMenu = ContextMenuBuilder.create().items(MenuItemBuilder.create().text("Создать категорию").onAction(
+                    new EventHandler<ActionEvent>()
+                    {
+                        @Override
+                        public void handle(ActionEvent arg0)
+                        {
+                            try {
+                                newCategoryDialog();                                
+                            } catch (IOException e) {}
+                        }
+                    }
+                )
+                .build()
+            )
+            .build();        
+        categoriesTree.setContextMenu(treeViewContextMenu);
         stackPane.getChildren().add(categoriesTree);            
     }
     private void buildTreeNode (ArrayList<CategoriesTreeView> categories, TreeItem<String> rootItem, CategoriesTreeView catalogRoot) {
@@ -547,17 +596,16 @@ public class PCGUIController implements Initializable {
         }
     }
     private void includeLowerItems(ObservableList<ProductsTableView> data, String selectedNode) {
-        reсursiveItems(data, getCategoryIdFromTitle(selectedNode)); 
-        // повторяет в SONDERE 2 раза - надо исправить!!!!!!!
+        recursiveItems(data, getCategoryIdFromTitle(selectedNode)); 
         getProductList(selectedNode).stream().forEach((product) -> {
             excludeLowerItems(data, selectedNode);
         });
     }
-    private void reсursiveItems(ObservableList<ProductsTableView> data, Integer selectedNode) {
+    private void recursiveItems(ObservableList<ProductsTableView> data, Integer selectedNode) {
         ArrayList<Integer> childs = arrayChilds(selectedNode);
         if(!childs.isEmpty()) {
             childs.stream().forEach((ch) -> {
-                reсursiveItems(data, ch);
+                recursiveItems(data, ch);
             });
         } else {
             getProductList(selectedNode).stream().forEach((product) -> {
@@ -872,7 +920,13 @@ public class PCGUIController implements Initializable {
         compareFieldsMechanics();
     }
     // Запускается при нажатии кнопки startImportXLSButton
-    @FXML private void startImportFromXLSToDB() {       
+    @FXML private void startImportFromXLSToDB() {
+        System.out.println("allCompareDetails.size() = " + allCompareDetails.size());
+        allCompareDetails.stream().forEach((d) -> {
+            System.out.println(d.get(0) + " - " + d.get(1));
+        });
+        System.out.println("allImportXLSContent.size() = " + allImportXLSContent.size());
+        System.out.println("importFields.size() = " + importFields.size());        
         XLSToDBImport importer = new XLSToDBImport(allCompareDetails);
         importer.startImport(allImportXLSContent, importFields, allProducts);
     }
@@ -957,5 +1011,57 @@ public class PCGUIController implements Initializable {
         comparedXLSAndDBFields.refresh();
         clear = true;
     }
+    
+    private void newCategoryDialog() throws IOException {
+        Dialog<NewCategory> dialog = new Dialog<>();
+        dialog.setTitle("Создание новой категории");
+        dialog.setHeaderText("Введите название новой категории. Она будет размещена внутри категории,из которой вызван этот диалог.");
+        dialog.setResizable(false);
+
+        Label label1 = new Label("Введите название:  ");
+        Label label2 = new Label("Описание (необязательно):  ");
+        TextField text1 = new TextField();
+        TextArea text2 = new TextArea();
+
+        GridPane grid = new GridPane();
+        grid.add(label1, 1, 1);
+        grid.add(text1, 2, 1);
+        grid.add(label2, 1, 2);
+        grid.add(text2, 2, 2);
+        dialog.getDialogPane().setContent(grid);
+
+        ButtonType buttonTypeOk = new ButtonType("Создать", ButtonData.OK_DONE);
+        ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonData.CANCEL_CLOSE);        
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
+        dialog.setResultConverter((ButtonType b) -> {
+            if (b == buttonTypeOk) {                
+                return new NewCategory(text1.getText(), text2.getText());
+            }            
+            return null;
+        });
+        Optional<NewCategory> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            newCatTitle = result.get().getTitle();
+            newCatDescription = result.get().getDescription();
+            createNewCategory();
+            buildCategoryTree();
+        }
+    }
+    
+    private void createNewCategory() {
+        String parentCategoryTitle = categoriesTree.getSelectionModel().getSelectedItem().getValue();
+        Integer parentId = getCategoryIdFromTitle (parentCategoryTitle);
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = session.beginTransaction();
+        Categories categorie = new Categories();
+        categorie.setTitle(newCatTitle);
+        categorie.setDescription(newCatDescription);
+        categorie.setParent(parentId);
+        session.save(categorie);
+        tx.commit();
+        session.close();
+    }
+   
 }
  

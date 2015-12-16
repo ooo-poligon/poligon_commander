@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Alert;
 import main.PCGUIController;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -353,6 +354,13 @@ public class XLSToDBImport {
     
     private void insertProduct(String productTitle) {
         /*
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Внимание!");
+        alert.setHeaderText("Обнаружен новый продукт.");
+        alert.setContentText(productTitle);
+        alert.showAndWait();
+        */
+        
         Session session = HibernateUtil.getSessionFactory().openSession();
         session.beginTransaction();
         
@@ -365,6 +373,6 @@ public class XLSToDBImport {
         //Commit the transaction
         session.getTransaction().commit();
         HibernateUtil.shutdown(); 
-                */
+        
     }
 }

@@ -226,6 +226,9 @@
                                                                <opaqueInsets>
                                                                   <Insets left="5.0" />
                                                                </opaqueInsets>
+                                                               <contextMenu>
+                                                                  <ContextMenu fx:id="treeViewContextMenu" />
+                                                               </contextMenu>
                                                             </TreeView>
                                                          </children>
                                                       </StackPane>
@@ -418,7 +421,7 @@
                                                                                  <children>
                                                                                     <AnchorPane prefHeight="200.0" prefWidth="200.0">
                                                                                        <children>
-                                                                                          <Button fx:id="cancelSetImportButton" mnemonicParsing="false" onAction="#cancelSetImportDetails" text="Отмена" AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0" />
+                                                                                          <Button fx:id="cancelSetImportButton" mnemonicParsing="false" onAction="#cancelSetImportDetails" text="Очистить" AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0" />
                                                                                        </children>
                                                                                     </AnchorPane>
                                                                                     <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1">
