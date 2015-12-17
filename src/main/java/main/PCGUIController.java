@@ -79,18 +79,12 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.Label;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ButtonBar.ButtonData;
-import javafx.scene.control.TextInputDialog;
-import javafx.scene.control.DialogPane;
 import javafx.scene.input.KeyEvent;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
-import javafx.stage.Modality;
 import java.util.Optional;
-import javafx.util.Callback;
 import org.hibernate.Query;
+import javafx.scene.control.TableView.TableViewSelectionModel;
 
 /**
  *
@@ -229,6 +223,7 @@ public class PCGUIController implements Initializable {
         populateComboBox ();
         getAllPrices();
         loadImportFields();
+        productsTable.getSelectionModel().setSelectionMode(javafx.scene.control.SelectionMode.MULTIPLE);
         //loadImportKeys();
     }
     // Загружает в память настройки программы, сохранённые в БД     
@@ -555,51 +550,15 @@ public class PCGUIController implements Initializable {
         EventHandler<MouseEvent> mouseEventHandle = (MouseEvent event) -> {
             handleCatregoryTreeMouseClicked(event);
         };               
-        categoriesTree.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseEventHandle);
-        
-        treeViewContextMenu = ContextMenuBuilder.create().items(MenuItemBuilder.create().text("Создать категорию").onAction(
-                    new EventHandler<ActionEvent>()
-                    {
-                        @Override
-                        public void handle(ActionEvent arg0)
-                        {
-                            try {
-                                newCategoryDialog();                                
-                            } catch (IOException e) {}
-                        }
-                    }
-                )
-                .build()
-            )
-            .build();
-
-        treeViewContextMenu = ContextMenuBuilder.create().items(MenuItemBuilder.create().text("Редактировать категорию").onAction(
-                    new EventHandler<ActionEvent>()
-                    {
-                        @Override
-                        public void handle(ActionEvent arg0)
-                        {
-                            editCategoryDialog();
-                        }
-                    }
-                )
-                .build()
-            )
-            .build();        
-        
-        treeViewContextMenu = ContextMenuBuilder.create().items(MenuItemBuilder.create().text("Удалить категорию").onAction(
-                    new EventHandler<ActionEvent>()
-                    {
-                        @Override
-                        public void handle(ActionEvent arg0)
-                        {
-                            deleteCategoryDialog();
-                        }
-                    }
-                )
-                .build()
-            )
-            .build();        
+        categoriesTree.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseEventHandle);        
+        treeViewContextMenu = ContextMenuBuilder.create().items(
+                MenuItemBuilder.create().text("Создать категорию").onAction((ActionEvent arg0) -> {
+                    newCategoryDialog();}).build(),
+                MenuItemBuilder.create().text("Редактировать категорию").onAction((ActionEvent arg0) -> {
+                    editCategoryDialog();}).build(),
+                MenuItemBuilder.create().text("Удалить категорию").onAction((ActionEvent arg0) -> {
+                    deleteCategoryDialog();}).build()                
+            ).build();        
         categoriesTree.setContextMenu(treeViewContextMenu);
         stackPane.getChildren().add(categoriesTree);            
     }
@@ -1041,10 +1000,10 @@ public class PCGUIController implements Initializable {
         clear = true;
     }
     
-    private void newCategoryDialog() throws IOException {
+    private void newCategoryDialog() {
         Dialog<NewCategory> dialog = new Dialog<>();
         dialog.setTitle("Создание новой категории");
-        dialog.setHeaderText("Введите название новой категории. Она будет размещена внутри категории,из которой вызван этот диалог.");
+        dialog.setHeaderText("Введите название новой категории. Она будет размещена внутри выбранной категории.");
         dialog.setResizable(false);
 
         Label label1 = new Label("Введите название:  ");
@@ -1089,7 +1048,7 @@ public class PCGUIController implements Initializable {
         TextField text1 = new TextField();
         TextArea text2 = new TextArea();
         text1.setText(details.get(0));
-        text2.setText(details.get(2));
+        text2.setText(details.get(1));
 
         GridPane grid = new GridPane();
         grid.add(label1, 1, 1);
@@ -1098,7 +1057,7 @@ public class PCGUIController implements Initializable {
         grid.add(text2, 2, 2);
         dialog.getDialogPane().setContent(grid);
 
-        ButtonType buttonTypeOk = new ButtonType("Создать", ButtonData.OK_DONE);
+        ButtonType buttonTypeOk = new ButtonType("Сохранить", ButtonData.OK_DONE);
         ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonData.CANCEL_CLOSE);        
         dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
         dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
@@ -1119,8 +1078,9 @@ public class PCGUIController implements Initializable {
     private void deleteCategoryDialog() {
         String catTitle = categoriesTree.getSelectionModel().getSelectedItem().getValue();
         Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setHeaderText("Внимание!");
         alert.setTitle("Удаление категории");
-        String s = "Внимание! Категория <b>" + catTitle + "</b> будет удалена из каталога. Все элементы, принадлежащие этой категории будут перенесены в ближайшшую вышестоящую категорию.";
+        String s = "Категория \"" + catTitle + "\" будет удалена из каталога. Все элементы, принадлежащие этой категории будут перенесены в ближайшшую вышестоящую категорию.";
         alert.setContentText(s);
         Optional<ButtonType> result = alert.showAndWait();
         if ((result.isPresent()) && (result.get() == ButtonType.OK)) {
@@ -1129,6 +1089,8 @@ public class PCGUIController implements Initializable {
             replaceProductsUp(catId, parentCatId);            
             deleteCategory(catTitle);
             buildCategoryTree();
+            ObservableList<ProductsTableView> data = FXCollections.observableArrayList();
+            productsTable.setItems(data);
         }    
     }    
     private void createNewCategory() {
@@ -1162,7 +1124,7 @@ public class PCGUIController implements Initializable {
         Integer id = getCategoryIdFromTitle (categoryTitle);
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
-        Query query = session.createQuery("delete Category where id = :id");
+        Query query = session.createQuery("delete Categories where id = :id");
         query.setParameter("id", id);
         query.executeUpdate();
         tx.commit();
