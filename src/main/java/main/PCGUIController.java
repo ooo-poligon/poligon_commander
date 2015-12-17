@@ -90,6 +90,7 @@ import javafx.stage.WindowEvent;
 import javafx.stage.Modality;
 import java.util.Optional;
 import javafx.util.Callback;
+import org.hibernate.Query;
 
 /**
  *
@@ -565,6 +566,34 @@ public class PCGUIController implements Initializable {
                             try {
                                 newCategoryDialog();                                
                             } catch (IOException e) {}
+                        }
+                    }
+                )
+                .build()
+            )
+            .build();
+
+        treeViewContextMenu = ContextMenuBuilder.create().items(MenuItemBuilder.create().text("Редактировать категорию").onAction(
+                    new EventHandler<ActionEvent>()
+                    {
+                        @Override
+                        public void handle(ActionEvent arg0)
+                        {
+                            editCategoryDialog();
+                        }
+                    }
+                )
+                .build()
+            )
+            .build();        
+        
+        treeViewContextMenu = ContextMenuBuilder.create().items(MenuItemBuilder.create().text("Удалить категорию").onAction(
+                    new EventHandler<ActionEvent>()
+                    {
+                        @Override
+                        public void handle(ActionEvent arg0)
+                        {
+                            deleteCategoryDialog();
                         }
                     }
                 )
@@ -1048,7 +1077,60 @@ public class PCGUIController implements Initializable {
             buildCategoryTree();
         }
     }
-    
+    private void editCategoryDialog() {
+        ArrayList<String> details = getCategoryDetails(categoriesTree.getSelectionModel().getSelectedItem().getValue());
+        Dialog<NewCategory> dialog = new Dialog<>();
+        dialog.setTitle("Редактирование категории");
+        dialog.setHeaderText("Здесь Вы можете отредактировать название и/или описание выбранной категории.");
+        dialog.setResizable(false);
+
+        Label label1 = new Label("Введите название:  ");
+        Label label2 = new Label("Описание (необязательно):  ");
+        TextField text1 = new TextField();
+        TextArea text2 = new TextArea();
+        text1.setText(details.get(0));
+        text2.setText(details.get(2));
+
+        GridPane grid = new GridPane();
+        grid.add(label1, 1, 1);
+        grid.add(text1, 2, 1);
+        grid.add(label2, 1, 2);
+        grid.add(text2, 2, 2);
+        dialog.getDialogPane().setContent(grid);
+
+        ButtonType buttonTypeOk = new ButtonType("Создать", ButtonData.OK_DONE);
+        ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonData.CANCEL_CLOSE);        
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
+        dialog.setResultConverter((ButtonType b) -> {
+            if (b == buttonTypeOk) {                
+                return new NewCategory(text1.getText(), text2.getText());
+            }            
+            return null;
+        });
+        Optional<NewCategory> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            newCatTitle = result.get().getTitle();
+            newCatDescription = result.get().getDescription();
+            editCategory(categoriesTree.getSelectionModel().getSelectedItem().getValue(), newCatTitle, newCatDescription);
+            buildCategoryTree();
+        }        
+    }
+    private void deleteCategoryDialog() {
+        String catTitle = categoriesTree.getSelectionModel().getSelectedItem().getValue();
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setTitle("Удаление категории");
+        String s = "Внимание! Категория <b>" + catTitle + "</b> будет удалена из каталога. Все элементы, принадлежащие этой категории будут перенесены в ближайшшую вышестоящую категорию.";
+        alert.setContentText(s);
+        Optional<ButtonType> result = alert.showAndWait();
+        if ((result.isPresent()) && (result.get() == ButtonType.OK)) {
+            Integer parentCatId = getParentCatId(catTitle);
+            Integer catId = getCategoryIdFromTitle (catTitle);
+            replaceProductsUp(catId, parentCatId);            
+            deleteCategory(catTitle);
+            buildCategoryTree();
+        }    
+    }    
     private void createNewCategory() {
         String parentCategoryTitle = categoriesTree.getSelectionModel().getSelectedItem().getValue();
         Integer parentId = getCategoryIdFromTitle (parentCategoryTitle);
@@ -1062,6 +1144,90 @@ public class PCGUIController implements Initializable {
         tx.commit();
         session.close();
     }
-   
+    
+    private void editCategory(String categoryTitle, String newTitle, String NewDescription) {
+        Integer id = getCategoryIdFromTitle (categoryTitle);
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = session.beginTransaction();
+        Query query = session.createQuery("update Categories set title = :title, description = :description where id = :id");
+        query.setParameter("title", newTitle);
+        query.setParameter("description", NewDescription);
+        query.setParameter("id", id);
+        query.executeUpdate();
+        tx.commit();
+        session.close();
+    }  
+    
+    private void deleteCategory(String categoryTitle) {
+        Integer id = getCategoryIdFromTitle (categoryTitle);
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = session.beginTransaction();
+        Query query = session.createQuery("delete Category where id = :id");
+        query.setParameter("id", id);
+        query.executeUpdate();
+        tx.commit();
+        session.close();
+    }
+    
+    private ArrayList<String> getCategoryDetails(String categoryTitle)  {
+        ArrayList<String> details = new ArrayList<>();
+        Integer id = getCategoryIdFromTitle (categoryTitle);
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            List response = session.createQuery("From Categories where id=" + id).list();
+            for (Iterator iterator = response.iterator(); iterator.hasNext();) {
+                Categories categorie = (Categories) iterator.next();
+                details.add(categorie.getTitle());
+                details.add(categorie.getDescription());
+            }
+        } catch (HibernateException e) {
+        } finally {
+            session.close();
+        } 
+        return details;
+    } 
+    
+    private Integer getParentCatId(String categoryTitle) {
+        Integer id = getCategoryIdFromTitle(categoryTitle); 
+        Integer parentId = 0;
+        Session session = HibernateUtil.getSessionFactory().openSession();        
+        try {
+            List response = session.createQuery("From Categories where id=" + id).list();
+            for (Iterator iterator = response.iterator(); iterator.hasNext();) {
+                Categories categorie = (Categories) iterator.next();
+                parentId = categorie.getParent();
+            }
+        } catch (HibernateException e) {
+        } finally {
+            session.close();
+        }
+        return parentId;
+    }
+    
+    private void replaceProductsUp(Integer catId, Integer parentCatId) {
+        ArrayList<Products> productsUp = new ArrayList<>();
+        Session session = HibernateUtil.getSessionFactory().openSession();        
+        try {
+            List response = session.createQuery("From Products where category_id=" + catId).list();
+            for (Iterator iterator = response.iterator(); iterator.hasNext();) {
+                Products product = (Products) iterator.next();
+                productsUp.add(product);
+            }
+        } catch (HibernateException e) {
+        } finally {
+            session.close();
+        }
+
+        Session session1 = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx1 = session1.beginTransaction();
+        productsUp.stream().forEach((product) -> {
+            Query query1 = session1.createQuery("update Products set category_id = :category_id where id = :id");
+            query1.setParameter("category_id", parentCatId);
+            query1.setParameter("id", product.getId());
+            query1.executeUpdate();
+            tx1.commit();        
+        });
+        session1.close();        
+    }
 }
  
