@@ -15,7 +15,7 @@
    <children>
       <BorderPane maxWidth="1.7976931348623157E308" prefHeight="768.0" prefWidth="1024.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <center>
-            <TabPane prefHeight="760.0" prefWidth="940.0" tabClosingPolicy="UNAVAILABLE" tabMinWidth="200.0" BorderPane.alignment="CENTER">
+            <TabPane fx:id="tabPane" prefHeight="760.0" prefWidth="940.0" tabClosingPolicy="UNAVAILABLE" tabMinWidth="200.0" BorderPane.alignment="CENTER">
               <tabs>
                 <Tab text="Номенклатура">
                   <content>
@@ -38,6 +38,9 @@
                                         <TableColumn fx:id="productTitle" prefWidth="182.0" text="Наименование" />
                                         <TableColumn fx:id="productDescription" maxWidth="1.7976931348623157E308" minWidth="411.0" prefWidth="416.0" text="Краткое описание" />
                                       </columns>
+                                       <contextMenu>
+                                          <ContextMenu fx:id="productTableContextMenu" />
+                                       </contextMenu>
                                     </TableView>
                                     <AnchorPane minHeight="-Infinity" prefHeight="261.0" prefWidth="305.0" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="TOP" GridPane.vgrow="ALWAYS">
                                        <children>
@@ -244,7 +247,7 @@
                         </AnchorPane>
                   </content>
                 </Tab>
-                  <Tab text="Страница товара">
+                  <Tab fx:id="productTab" text="Страница товара">
                     <content>
                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
                     </content>

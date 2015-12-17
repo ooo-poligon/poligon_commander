@@ -61,7 +61,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -83,8 +82,15 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.util.Optional;
+import javafx.scene.input.ClipboardContent;
 import org.hibernate.Query;
-import javafx.scene.control.TableView.TableViewSelectionModel;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
+import javafx.scene.text.Text;
+import javafx.scene.image.Image;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 
 /**
  *
@@ -109,11 +115,17 @@ public class PCGUIController implements Initializable {
     @FXML private GridPane   gridPanePDF;
     
     // TreeViews
-    @FXML private TreeView<String>                       categoriesTree;
+    @FXML private TreeView<String> categoriesTree;
+    
+    //Tabs
+    @FXML TabPane tabPane;
+    @FXML Tab productTab;
     
     // ContextMenus
     @ FXML private ContextMenu treeViewContextMenu;
-    @FXML private MenuItem createCategoryItem;
+    @ FXML private ContextMenu productTableContextMenu;
+    @ FXML private MenuItem openProductTabMenu;
+    @ FXML private MenuItem createCategoryItem;
     
     // TableViews & TableColumns 
     @FXML private TableView<ProductsTableView>            productsTable;   
@@ -224,6 +236,50 @@ public class PCGUIController implements Initializable {
         getAllPrices();
         loadImportFields();
         productsTable.getSelectionModel().setSelectionMode(javafx.scene.control.SelectionMode.MULTIPLE);
+        productsTable.setOnDragDetected((MouseEvent event) -> {
+            Dragboard db = productsTable.startDragAndDrop(TransferMode.ANY);
+            ClipboardContent content = new ClipboardContent();
+            content.putString(productsTable.getSelectionModel().getSelectedItem().getTitle());
+            /*
+            productsTable.getItems().stream().forEach((item) -> {
+            content.putString(item.getTitle());
+            });
+            */
+            db.setContent(content);
+            System.out.println(content.getString());
+            event.consume();
+        });   
+        categoriesTree.setOnDragOver((DragEvent event) -> {
+            final Dragboard db = event.getDragboard();
+            if (event.getGestureSource() != categoriesTree && event.getDragboard().hasString()) {
+                event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+            }
+            event.consume();
+        });        
+        categoriesTree.setOnDragEntered((DragEvent event) -> {
+            if (event.getGestureSource() != categoriesTree && event.getDragboard().hasString()) {
+                //TreeItem selTreeItem = categoriesTree.getFocusModel().getFocusedItem();
+                //selTreeItem.setGraphic(new ImageView(new Image("/images/greenTreePlus.gif")));
+            }
+            event.consume();
+        });              
+        categoriesTree.setOnDragDropped((DragEvent event) -> {
+            Dragboard db = event.getDragboard();
+            boolean success = false;
+            if (db.hasString()) {
+                System.out.println("Dropped -> " + db.getString());
+                success = true;
+            }
+            event.setDropCompleted(success);
+            event.consume();
+        });         
+        categoriesTree.setOnDragExited((DragEvent event) -> {
+            if (event.getGestureSource() != categoriesTree && event.getDragboard().hasString()) {
+                //TreeItem selTreeItem = categoriesTree.getFocusModel().getFocusedItem();
+                //selTreeItem.setGraphic(new ImageView());
+            }
+            event.consume();
+        });
         //loadImportKeys();
     }
     // Загружает в память настройки программы, сохранённые в БД     
@@ -389,6 +445,7 @@ public class PCGUIController implements Initializable {
             handleProductTableMousePressed(event1);
         };
         // Добавляем обработчик событий от мыши к нашей таблице
+
         productsTable.addEventHandler(MouseEvent.MOUSE_PRESSED, mouseEventHandle1);
         productsTable.setItems(data);
         productsTable.removeEventHandler(MouseEvent.MOUSE_PRESSED, mouseEventHandle1);                  
@@ -502,10 +559,7 @@ public class PCGUIController implements Initializable {
             List response = session.createQuery("From Files where ownerId=" + getProductIdFromTitle(selectedProduct) + " and fileTypeId=2").list();
             for (Iterator iterator = response.iterator(); iterator.hasNext();) {
                 Files f = (Files) iterator.next();
-                data.add(new DatasheetTableView(
-                    f.getName()
-                    )
-                );
+                data.add(new DatasheetTableView(f.getName()));
             }
         } catch (HibernateException e) {
         } finally {
@@ -781,6 +835,27 @@ public class PCGUIController implements Initializable {
             openPictureButton.setDisable(false);
             datasheetFileTable.refresh();
         } catch (NullPointerException ex) {}
+        
+        if (productsTable.getSelectionModel().getSelectedItems().size() <= 1) {
+            productTableContextMenu = ContextMenuBuilder.create().items(
+                    MenuItemBuilder.create().text("Открыть вкладку обзора").onAction((ActionEvent arg0) -> {
+                        openProductTab();}).build(),
+                    MenuItemBuilder.create().text("Переместить в категорию...").onAction((ActionEvent arg0) -> {
+                        changeProductCategoryDialog();}).build(),
+                    MenuItemBuilder.create().text("Добавить элемент...").onAction((ActionEvent arg0) -> {
+                        addProductDialog();}).build(),                
+                    MenuItemBuilder.create().text("Удалить элемент...").onAction((ActionEvent arg0) -> {
+                        deleteProductDialog();}).build()                
+                ).build();            
+        } else {
+            productTableContextMenu = ContextMenuBuilder.create().items(
+                    MenuItemBuilder.create().text("Переместить в категорию...").onAction((ActionEvent arg0) -> {
+                        changeProductCategoryDialog();}).build(),               
+                    MenuItemBuilder.create().text("Удалить выбранные элементы").onAction((ActionEvent arg0) -> {
+                        deleteProductDialog();}).build()                
+                ).build();            
+        }
+        productsTable.setContextMenu(productTableContextMenu);
     }    
     
     @FXML private void handleSearchComboBox() {
@@ -1191,5 +1266,25 @@ public class PCGUIController implements Initializable {
         });
         session1.close();        
     }
+    
+    private void openProductTab() {
+        ProductsTableView product = productsTable.getSelectionModel().getSelectedItem();
+        tabPane.getSelectionModel().select(productTab);  
+    }
+    
+    private void changeProductCategoryDialog() {
+        //ProductsTableView product = productsTable.getSelectionModel().getSelectedItem();
+        //tabPane.getSelectionModel().select(productTab);  
+    } 
+    
+    private void addProductDialog() {
+        //ProductsTableView product = productsTable.getSelectionModel().getSelectedItem();
+        //tabPane.getSelectionModel().select(productTab);  
+    }   
+    
+    private void deleteProductDialog() {
+        //ProductsTableView product = productsTable.getSelectionModel().getSelectedItem();
+        //tabPane.getSelectionModel().select(productTab);  
+    }      
 }
  
