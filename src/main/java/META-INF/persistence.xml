@@ -16,6 +16,8 @@
     <class>entities.Series</class>
     <class>entities.Settings</class>
     <class>entities.ImportFields</class>
+    <class>entities.PropertyValues</class>
+    <class>entities.Functions</class>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/poligon_commander?zeroDateTimeBehavior=convertToNull"/>
       <property name="javax.persistence.jdbc.user" value="root"/>

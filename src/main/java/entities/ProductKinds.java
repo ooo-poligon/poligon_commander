@@ -32,6 +32,8 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "ProductKinds.findById", query = "SELECT p FROM ProductKinds p WHERE p.id = :id"),
     @NamedQuery(name = "ProductKinds.findByTitle", query = "SELECT p FROM ProductKinds p WHERE p.title = :title")})
 public class ProductKinds implements Serializable {
+    @OneToMany(mappedBy = "productKindId")
+    private Collection<Functions> functionsCollection;
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -104,6 +106,15 @@ public class ProductKinds implements Serializable {
     @Override
     public String toString() {
         return "entities.ProductKinds[ id=" + id + " ]";
+    }
+
+    @XmlTransient
+    public Collection<Functions> getFunctionsCollection() {
+        return functionsCollection;
+    }
+
+    public void setFunctionsCollection(Collection<Functions> functionsCollection) {
+        this.functionsCollection = functionsCollection;
     }
     
 }

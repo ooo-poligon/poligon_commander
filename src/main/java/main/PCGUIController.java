@@ -1287,4 +1287,3 @@ public class PCGUIController implements Initializable {
         //tabPane.getSelectionModel().select(productTab);  
     }      
 }
- 

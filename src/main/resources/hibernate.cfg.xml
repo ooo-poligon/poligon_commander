@@ -25,15 +25,17 @@
     <mapping class="entities.Currencies" />
     <mapping class="entities.FileTypes" />
     <mapping class="entities.Files" />
+    <mapping class="entities.Functions" />
+    <mapping class="entities.ImportFields" />    
     <mapping class="entities.ProductKinds" />
     <mapping class="entities.Products" />
     <mapping class="entities.Properties" />
     <mapping class="entities.PropertyTypes" />
+    <mapping class="entities.PropertyValues" />
     <mapping class="entities.Quantity" />
     <mapping class="entities.Series" />
+    <mapping class="entities.Settings" />    
     <mapping class="entities.Vendors" />
-    <mapping class="entities.Settings" />
-    <mapping class="entities.ImportFields" />
  
  <!-- <mapping resource="com/mkyong/user/DBUser.hbm.xml"></mapping> -->
 </session-factory>
