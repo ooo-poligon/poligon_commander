@@ -108,11 +108,13 @@ public class PCGUIController implements Initializable {
     @FXML private AnchorPane anchorPane; 
     @FXML private AnchorPane allTables;
     @FXML private AnchorPane newCatDialogAnchorPane;
+
     
     @FXML private StackPane  stackPane; 
     
     @FXML private GridPane   gridPane;      
     @FXML private GridPane   gridPanePDF;
+    @FXML private GridPane productTabGridPaneImageView;    
     
     // TreeViews
     @FXML private TreeView<String> categoriesTree;
@@ -124,6 +126,7 @@ public class PCGUIController implements Initializable {
     // ContextMenus
     @ FXML private ContextMenu treeViewContextMenu;
     @ FXML private ContextMenu productTableContextMenu;
+    @ FXML private ContextMenu datasheetTableContextMenu;    
     @ FXML private MenuItem openProductTabMenu;
     @ FXML private MenuItem createCategoryItem;
     
@@ -166,6 +169,7 @@ public class PCGUIController implements Initializable {
     @FXML private Button cancelNewCategory;
     
     // Labels
+    @FXML private Label productTabTitle;
     
     // ProgressBars
     @FXML private ProgressBar progressBar;
@@ -173,6 +177,7 @@ public class PCGUIController implements Initializable {
     
     // ImageViews
     @FXML private ImageView imageView;
+    @FXML private ImageView productTabImageView;    
     
     // ListViews
     @FXML private ListView<String> headersXLS;
@@ -198,7 +203,6 @@ public class PCGUIController implements Initializable {
     
     // Lists
     ArrayList<ArrayList<String>> allImportXLSContent = new ArrayList<>();    
-
     ArrayList<ArrayList<String>> allCompareDetails = new ArrayList<>();
     ObservableList<CategoriesTreeView> subCategoriesTreeViewList;
     ObservableList<String> allProducts = FXCollections.observableArrayList();    
@@ -566,6 +570,11 @@ public class PCGUIController implements Initializable {
             session.close();
         }  
         datasheetFileName.setCellValueFactory(new PropertyValueFactory<>("name"));
+        datasheetTableContextMenu = ContextMenuBuilder.create().items(                
+            MenuItemBuilder.create().text("Изменить даташит pdf-файл").onAction((ActionEvent arg0) -> {
+                setDatasheetFile();}).build()                
+        ).build();
+        datasheetFileTable.setContextMenu(datasheetTableContextMenu);
         datasheetFileTable.setItems(data);     
     }
     private void buildImageView(String selectedProduct) {
@@ -856,6 +865,7 @@ public class PCGUIController implements Initializable {
                 ).build();            
         }
         productsTable.setContextMenu(productTableContextMenu);
+        fillProductTab();
     }    
     
     @FXML private void handleSearchComboBox() {
@@ -1268,8 +1278,8 @@ public class PCGUIController implements Initializable {
     }
     
     private void openProductTab() {
-        ProductsTableView product = productsTable.getSelectionModel().getSelectedItem();
-        tabPane.getSelectionModel().select(productTab);  
+        tabPane.getSelectionModel().select(productTab);
+        fillProductTab();
     }
     
     private void changeProductCategoryDialog() {
@@ -1285,5 +1295,17 @@ public class PCGUIController implements Initializable {
     private void deleteProductDialog() {
         //ProductsTableView product = productsTable.getSelectionModel().getSelectedItem();
         //tabPane.getSelectionModel().select(productTab);  
-    }      
+    } 
+    
+    private void fillProductTab() {
+        ProductsTableView product = productsTable.getSelectionModel().getSelectedItem();        
+        productTabTitle.setText(product.getTitle());
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List pics = session.createQuery("from Files where ownerId=" + getProductIdFromTitle(product.getTitle()) + " and fileTypeId=1").list();
+        for (Iterator iterator = pics.iterator(); iterator.hasNext();) {
+            Files pic = (Files) iterator.next();
+            File picFile = new File(pic.getPath());        
+        ProductImage.open(picFile, productTabGridPaneImageView, productTabImageView);
+        }
+    }
 }
