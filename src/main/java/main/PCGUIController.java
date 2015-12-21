@@ -4,6 +4,25 @@
  */
 package main;
 
+import com.sun.pdfview.PDFFile;
+import com.sun.pdfview.PDFPage;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.IntegerBinding;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.concurrent.WorkerStateEvent;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.stage.StageStyle;
+import javafx.stage.Window;
+import javafx.util.Callback;
 import utils.ProductImage;
 import utils.NewCategory;
 import treeviews.CategoriesTreeView;
@@ -15,23 +34,30 @@ import entities.ImportFields;
 import entities.Products;
 import entities.Quantity;
 import entities.Settings;
-import javafx.scene.control.TextField;
 import tableviews.ProductsTableView;
 import tableviews.AnalogsTableView;
 import tableviews.DatasheetTableView;
 import tableviews.PricesTableView;
 import tableviews.QuantityTableView;
-import java.io.File;
-import java.io.IOException;
+
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
@@ -43,24 +69,9 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TreeCell;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.TextArea;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -69,14 +80,7 @@ import utils.AutoCompleteComboBoxListener;
 import utils.HibernateUtil;
 import utils.XLSHandler;
 import utils.XLSToDBImport;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ContextMenuBuilder;
-import javafx.scene.control.MenuItemBuilder;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.Label;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.Scene;
@@ -89,8 +93,6 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.text.Text;
 import javafx.scene.image.Image;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
 
 /**
  *
@@ -108,6 +110,7 @@ public class PCGUIController implements Initializable {
     @FXML private AnchorPane anchorPane; 
     @FXML private AnchorPane allTables;
     @FXML private AnchorPane newCatDialogAnchorPane;
+    @FXML private AnchorPane datasheetAnchorPane;
 
     
     @FXML private StackPane  stackPane; 
@@ -122,6 +125,7 @@ public class PCGUIController implements Initializable {
     //Tabs
     @FXML TabPane tabPane;
     @FXML Tab productTab;
+    @FXML Tab pdfTab;
     
     // ContextMenus
     @ FXML private ContextMenu treeViewContextMenu;
@@ -129,6 +133,7 @@ public class PCGUIController implements Initializable {
     @ FXML private ContextMenu datasheetTableContextMenu;    
     @ FXML private MenuItem openProductTabMenu;
     @ FXML private MenuItem createCategoryItem;
+    @ FXML private ContextMenu imageViewContextMenu;
     
     // TableViews & TableColumns 
     @FXML private TableView<ProductsTableView>            productsTable;   
@@ -159,7 +164,7 @@ public class PCGUIController implements Initializable {
     @FXML private TableColumn<DatasheetTableView, String> datasheetFileName; 
     
     // Buttons
-    @FXML private Button openPictureButton; 
+    //@FXML private Button openPictureButton;
     @FXML private Button headersRowSetButton;
     @FXML private Button chooseXLSButton;
     @FXML private Button compareXLSToDBButton;
@@ -167,9 +172,12 @@ public class PCGUIController implements Initializable {
     @FXML private Button cancelSetImportButton;
     @FXML private Button saveNewCategory;
     @FXML private Button cancelNewCategory;
+    @FXML private Button changePhotoButton;
+    @FXML private Button changePicDescriptionButton;
     
     // Labels
     @FXML private Label productTabTitle;
+    @FXML private Label pdfTabTitle;
     
     // ProgressBars
     @FXML private ProgressBar progressBar;
@@ -192,8 +200,8 @@ public class PCGUIController implements Initializable {
     @FXML private TextField headersRowTextField;
     @FXML private TextField newCategoryTitleTextField;
     @FXML private TextArea newCategoryDescriptionTextArea;
-    
-    
+    @FXML private TextArea picDescriptionTextArea;
+
     // CheckBoxes
     @FXML private CheckBox treeViewHandlerMode;
     
@@ -218,6 +226,7 @@ public class PCGUIController implements Initializable {
     private Integer headersRowNumber = 0;
     public final  Double course = 74.5;    
     Double basePrice;
+    private static final double ZOOM_DELTA = 1.05;
      
     // Strings
     String selectedProduct;    
@@ -227,13 +236,22 @@ public class PCGUIController implements Initializable {
     String catalogHeader = "Каталог товаров";
     
     //booleans
-    boolean clear = true;   
- 
+    boolean clear = true;
+
+    @FXML  private ScrollPane scroller;
+    @FXML private Pagination pagination;
+    @FXML private Label currentZoomLabel;
+    private ObjectProperty<PDFFile> currentFile;
+    private ObjectProperty<ImageView> currentImage;
+    private DoubleProperty zoom;
+    private PageDimensions currentPageDimensions;
+    private ExecutorService imageLoadService;
+
     @Override
     // Выполняется при запуске программы
     public void initialize(URL url, ResourceBundle rb) { 
         loadSavedSettings();        
-        openPictureButton.setDisable(false);
+        //openPictureButton.setDisable(false);
         //startImportXLSButton.setDisable(true);
         buildCategoryTree();
         populateComboBox ();
@@ -285,6 +303,53 @@ public class PCGUIController implements Initializable {
             event.consume();
         });
         //loadImportKeys();
+        /*
+        imageViewContextMenu = ContextMenuBuilder.create().items(
+                MenuItemBuilder.create().text("Изменить даташит pdf-файл").onAction((ActionEvent arg0) -> {
+                    setDatasheetFile();}).build()
+        ).build();
+        imageView.setContextMenu(imageViewContextMenu);
+        */
+        productsTable.getSelectionModel().selectedItemProperty().addListener(
+                new ChangeListener<ProductsTableView>() {
+                    @Override
+                    public void changed(ObservableValue<? extends ProductsTableView> observable, ProductsTableView oldValue, ProductsTableView newValue) {
+                        System.out.println(newValue.getTitle());
+                    }
+                }
+
+        );
+        tabPane.getSelectionModel().selectedItemProperty().addListener(
+            new ChangeListener<Tab>() {
+                @Override
+                public void changed(ObservableValue<? extends Tab> ov, Tab t, Tab t1) {
+                    if (t1.equals(pdfTab)) {
+                        try {
+                            createAndConfigureImageLoadService();
+                            currentFile = new SimpleObjectProperty<>();
+                            currentImage = new SimpleObjectProperty<>();
+                            scroller.contentProperty().bind(currentImage);
+                            zoom = new SimpleDoubleProperty(1);
+                            // To implement zooming, we just get a new image from the PDFFile each time.
+                            // This seems to perform well in some basic tests but may need to be improved
+                            // E.g. load a larger image and scale in the ImageView, loading a new image only
+                            // when required.
+                            zoom.addListener(new ChangeListener<Number>() {
+                                @Override
+                                public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                                    updateImage(pagination.getCurrentPageIndex());
+                                }
+                            });
+                            currentZoomLabel.textProperty().bind(Bindings.format("%.0f %%", zoom.multiply(100)));
+                            bindPaginationToCurrentFile();
+                            createPaginationPageFactory();
+                            String product = productTabTitle.getText();
+                            loadPdfFile(product);
+                        } catch (NullPointerException ne) {}
+                    }
+                }
+            }
+        );
     }
     // Загружает в память настройки программы, сохранённые в БД     
     private void loadSavedSettings() {
@@ -328,7 +393,7 @@ public class PCGUIController implements Initializable {
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
             //tx = session.beginTransaction();
-            List response = session.createQuery("From Products where category_id=" + selectedNodeID).list();
+            List response = session.createQuery("From Products where categoryId=" + selectedNodeID).list();
             for (Iterator iterator = response.iterator(); iterator.hasNext();) {
                 Products product = (Products) iterator.next();
                 data.add(new ProductsTableView(
@@ -698,7 +763,7 @@ public class PCGUIController implements Initializable {
                         excludeLowerItems(data, selectedNode);
                         //System.out.println("unchecked");
                     } 
-                    openPictureButton.setDisable(true);
+                    //openPictureButton.setDisable(true);
                     buildProductsTable(data);
                 }
                 Platform.runLater(() -> {
@@ -841,14 +906,35 @@ public class PCGUIController implements Initializable {
             buildAnalogsTable(selectedProduct);
             buildDatasheetFileTable(selectedProduct);
             buildImageView(selectedProduct);
-            openPictureButton.setDisable(false);
+            //openPictureButton.setDisable(false);
             datasheetFileTable.refresh();
         } catch (NullPointerException ex) {}
         
         if (productsTable.getSelectionModel().getSelectedItems().size() <= 1) {
             productTableContextMenu = ContextMenuBuilder.create().items(
-                    MenuItemBuilder.create().text("Открыть вкладку обзора").onAction((ActionEvent arg0) -> {
+                    MenuItemBuilder.create().text("Открыть вкладку обзора свойств устройства").onAction((ActionEvent arg0) -> {
                         openProductTab();}).build(),
+                    MenuItemBuilder.create().text("Открыть просмотр PDF-файла").onAction((ActionEvent arg0) -> {
+                        createAndConfigureImageLoadService();
+                        currentFile = new SimpleObjectProperty<>();
+                        currentImage = new SimpleObjectProperty<>();
+                        scroller.contentProperty().bind(currentImage);
+                        zoom = new SimpleDoubleProperty(1);
+                        // To implement zooming, we just get a new image from the PDFFile each time.
+                        // This seems to perform well in some basic tests but may need to be improved
+                        // E.g. load a larger image and scale in the ImageView, loading a new image only
+                        // when required.
+                        zoom.addListener(new ChangeListener<Number>() {
+                            @Override
+                            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                                updateImage(pagination.getCurrentPageIndex());
+                            }
+                        });
+                        currentZoomLabel.textProperty().bind(Bindings.format("%.0f %%", zoom.multiply(100)));
+                        bindPaginationToCurrentFile();
+                        createPaginationPageFactory();
+                        tabPane.getSelectionModel().select(pdfTab);
+                        loadPdfFile(productsTable.getSelectionModel().getSelectedItem().getTitle());}).build(),
                     MenuItemBuilder.create().text("Переместить в категорию...").onAction((ActionEvent arg0) -> {
                         changeProductCategoryDialog();}).build(),
                     MenuItemBuilder.create().text("Добавить элемент...").onAction((ActionEvent arg0) -> {
@@ -891,16 +977,15 @@ public class PCGUIController implements Initializable {
     }    
 
     @FXML private void setPictureButtonPress() {
-        openPictureButton.setOnAction((final ActionEvent e) -> {
-            File file = fileChooser.showOpenDialog(anchorPane.getScene().getWindow());
-            if (file != null) {                
-                ProductImage.open(file, gridPane, imageView);
-                ProductImage.save(file, selectedProduct);
-            }
-        });         
+        File file = fileChooser.showOpenDialog(anchorPane.getScene().getWindow());
+        if (file != null) {
+            ProductImage.open(file, gridPane, imageView);
+            ProductImage.open(file, productTabGridPaneImageView, productTabImageView);
+            ProductImage.save(file, selectedProduct);
+        }
     }
     
-    @FXML private void setDatasheetFile() { 
+    private void setDatasheetFile() {
         datasheetFileTable.setOnMousePressed((final MouseEvent e) -> {
             File file = fileChooser.showOpenDialog(anchorPane.getScene().getWindow());
             if (file != null) { 
@@ -1255,7 +1340,7 @@ public class PCGUIController implements Initializable {
         ArrayList<Products> productsUp = new ArrayList<>();
         Session session = HibernateUtil.getSessionFactory().openSession();        
         try {
-            List response = session.createQuery("From Products where category_id=" + catId).list();
+            List response = session.createQuery("From Products where categoryId=" + catId).list();
             for (Iterator iterator = response.iterator(); iterator.hasNext();) {
                 Products product = (Products) iterator.next();
                 productsUp.add(product);
@@ -1268,7 +1353,7 @@ public class PCGUIController implements Initializable {
         Session session1 = HibernateUtil.getSessionFactory().openSession();
         Transaction tx1 = session1.beginTransaction();
         productsUp.stream().forEach((product) -> {
-            Query query1 = session1.createQuery("update Products set category_id = :category_id where id = :id");
+            Query query1 = session1.createQuery("update Products set categoryId = :category_id where id = :id");
             query1.setParameter("category_id", parentCatId);
             query1.setParameter("id", product.getId());
             query1.executeUpdate();
@@ -1305,7 +1390,262 @@ public class PCGUIController implements Initializable {
         for (Iterator iterator = pics.iterator(); iterator.hasNext();) {
             Files pic = (Files) iterator.next();
             File picFile = new File(pic.getPath());        
-        ProductImage.open(picFile, productTabGridPaneImageView, productTabImageView);
+            ProductImage.open(picFile, productTabGridPaneImageView, productTabImageView);
+            picDescriptionTextArea.setText(pic.getDescription());
+        }
+        session.close();
+    }
+
+    @FXML private void changePicDescription() {
+        String product = productTabTitle.getText();
+        String picDescription = picDescriptionTextArea.getText();
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = session.beginTransaction();
+        Query query = session.createQuery("update Files set description = :description" + " where ownerId =" + getProductIdFromTitle(product));
+        query.setParameter("description", picDescription);
+        int result = query.executeUpdate();
+        tx.commit();
+        session.close();
+    }
+
+    // Дальше позаимствовал реализацию PDF Reader из тырнета)))
+
+    private void createAndConfigureImageLoadService() {
+        imageLoadService = Executors.newSingleThreadExecutor(new ThreadFactory() {
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread thread = new Thread(r);
+                thread.setDaemon(true);
+                return thread;
+            }
+        });
+    }
+
+    private void bindPaginationToCurrentFile() {
+        currentFile.addListener(new ChangeListener<PDFFile>() {
+            @Override
+            public void changed(ObservableValue<? extends PDFFile> observable, PDFFile oldFile, PDFFile newFile) {
+                if (newFile != null) {
+                    pagination.setCurrentPageIndex(0);
+                }
+            }
+        });
+        pagination.pageCountProperty().bind(new IntegerBinding() {
+            {
+                super.bind(currentFile);
+            }
+            @Override
+            protected int computeValue() {
+                return currentFile.get()==null ? 0 : currentFile.get().getNumPages() ;
+            }
+        });
+        pagination.disableProperty().bind(Bindings.isNull(currentFile));
+    }
+
+    private void createPaginationPageFactory() {
+        pagination.setPageFactory(new Callback<Integer, Node>() {
+            @Override
+            public Node call(Integer pageNumber) {
+                if (currentFile.get() == null) {
+                    return null ;
+                } else {
+                    if (pageNumber >= currentFile.get().getNumPages() || pageNumber < 0) {
+                        return null ;
+                    } else {
+                        updateImage(pageNumber);
+                        return scroller ;
+                    }
+                }
+            }
+        });
+    }
+
+    // ************** Event Handlers ****************
+
+    private void loadPdfFile(String product) {
+        String pdfFilePath = new String();
+        //String product = productTabTitle.getText();
+        pdfTabTitle.setText(product);
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List pdfs = session.createQuery("from Files where ownerId=" + getProductIdFromTitle(product) + " and fileTypeId=2").list();
+        for (Iterator iterator = pdfs.iterator(); iterator.hasNext();) {
+            Files pdf = (Files) iterator.next();
+            pdfFilePath = pdf.getPath();
+        }
+        File file = new File(pdfFilePath);
+        if (file != null) {
+            final Task<PDFFile> loadFileTask = new Task<PDFFile>() {
+                @Override
+                protected PDFFile call() throws Exception {
+                    try (
+                            RandomAccessFile raf = new RandomAccessFile(file, "r");
+                            FileChannel channel = raf.getChannel()
+                    ) {
+                        ByteBuffer buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
+                        return new PDFFile(buffer);
+                    }
+                }
+            };
+            loadFileTask.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+                @Override
+                public void handle(WorkerStateEvent event) {
+                    pagination.getScene().getRoot().setDisable(false);
+                    final PDFFile pdfFile = loadFileTask.getValue();
+                    currentFile.set(pdfFile);
+                }
+            });
+            loadFileTask.setOnFailed(new EventHandler<WorkerStateEvent>() {
+                @Override
+                public void handle(WorkerStateEvent event) {
+                    pagination.getScene().getRoot().setDisable(false);
+                    showErrorMessage("Could not load file "+file.getName(), loadFileTask.getException());
+                }
+            });
+            pagination.getScene().getRoot().setDisable(true);
+            imageLoadService.submit(loadFileTask);
+        }
+    }
+
+    @FXML private void zoomIn() {
+        zoom.set(zoom.get()*ZOOM_DELTA);
+    }
+
+    @FXML private void zoomOut() {
+        zoom.set(zoom.get()/ZOOM_DELTA);
+    }
+
+    @FXML private void zoomFit() {
+        // TODO: the -20 is a kludge to account for the width of the scrollbars, if showing.
+        double horizZoom = (scroller.getWidth()-20) / currentPageDimensions.width ;
+        double verticalZoom = (scroller.getHeight()-20) / currentPageDimensions.height ;
+        zoom.set(Math.min(horizZoom, verticalZoom));
+    }
+
+    @FXML private void zoomWidth() {
+        zoom.set((scroller.getWidth()-20) / currentPageDimensions.width) ;
+    }
+
+    // *************** Background image loading ****************
+
+    private void updateImage(final int pageNumber) {
+        final Task<ImageView> updateImageTask = new Task<ImageView>() {
+            @Override
+            protected ImageView call() throws Exception {
+                PDFPage page = currentFile.get().getPage(pageNumber+1);
+                Rectangle2D bbox = page.getBBox();
+                final double actualPageWidth = bbox.getWidth();
+                final double actualPageHeight = bbox.getHeight();
+                // record page dimensions for zoomToFit and zoomToWidth:
+                currentPageDimensions = new PageDimensions(actualPageWidth, actualPageHeight);
+                // width and height of image:
+                final int width = (int) (actualPageWidth * zoom.get());
+                final int height = (int) (actualPageHeight * zoom.get());
+                // retrieve image for page:
+                // width, height, clip, imageObserver, paintBackground, waitUntilLoaded:
+                java.awt.Image awtImage = page.getImage(width, height, bbox, null, true, true);
+                // draw image to buffered image:
+                BufferedImage buffImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+                buffImage.createGraphics().drawImage(awtImage, 0, 0, null);
+                // convert to JavaFX image:
+                Image image = SwingFXUtils.toFXImage(buffImage, null);
+                // wrap in image view and return:
+                ImageView imageView = new ImageView(image);
+                imageView.setPreserveRatio(true);
+                return imageView ;
+            }
+        };
+
+        updateImageTask.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+            @Override
+            public void handle(WorkerStateEvent event) {
+                pagination.getScene().getRoot().setDisable(false);
+                currentImage.set(updateImageTask.getValue());
+            }
+        });
+
+        updateImageTask.setOnFailed(new EventHandler<WorkerStateEvent>() {
+            @Override
+            public void handle(WorkerStateEvent event) {
+                pagination.getScene().getRoot().setDisable(false);
+                updateImageTask.getException().printStackTrace();
+            }
+
+        });
+
+        pagination.getScene().getRoot().setDisable(true);
+        imageLoadService.submit(updateImageTask);
+    }
+
+    private void showErrorMessage(String message, Throwable exception) {
+
+        // TODO: move to fxml (or better, use ControlsFX)
+
+        final Stage dialog = new Stage();
+        dialog.initOwner(pagination.getScene().getWindow());
+        dialog.initStyle(StageStyle.UNDECORATED);
+        final VBox root = new VBox(10);
+        root.setPadding(new Insets(10));
+        StringWriter errorMessage = new StringWriter();
+        exception.printStackTrace(new PrintWriter(errorMessage));
+        final Label detailsLabel = new Label(errorMessage.toString());
+        TitledPane details = new TitledPane();
+        details.setText("Details:");
+        Label briefMessageLabel = new Label(message);
+        final HBox detailsLabelHolder =new HBox();
+
+        Button closeButton = new Button("OK");
+        closeButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                dialog.hide();
+            }
+        });
+        HBox closeButtonHolder = new HBox();
+        closeButtonHolder.getChildren().add(closeButton);
+        closeButtonHolder.setAlignment(Pos.CENTER);
+        closeButtonHolder.setPadding(new Insets(5));
+        root.getChildren().addAll(briefMessageLabel, details, detailsLabelHolder, closeButtonHolder);
+        details.setExpanded(false);
+        details.setAnimated(false);
+
+        details.expandedProperty().addListener(new ChangeListener<Boolean>() {
+
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable,
+                                Boolean oldValue, Boolean newValue) {
+                if (newValue) {
+                    detailsLabelHolder.getChildren().add(detailsLabel);
+                } else {
+                    detailsLabelHolder.getChildren().remove(detailsLabel);
+                }
+                dialog.sizeToScene();
+            }
+
+        });
+        final Scene scene = new Scene(root);
+
+        dialog.setScene(scene);
+        dialog.show();
+    }
+
+
+	/*
+	 * Struct-like class intended to represent the physical dimensions of a page in pixels
+	 * (as opposed to the dimensions of the (possibly zoomed) view.
+	 * Used to compute zoom factors for zoomToFit and zoomToWidth.
+	 *
+	 */
+
+    private class PageDimensions {
+        private double width ;
+        private double height ;
+        PageDimensions(double width, double height) {
+            this.width = width ;
+            this.height = height ;
+        }
+        @Override
+        public String toString() {
+            return String.format("[%.1f, %.1f]", width, height);
         }
     }
 }
