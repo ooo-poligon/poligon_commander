@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+  <persistence-unit name="PoligonCommanderPU" transaction-type="RESOURCE_LOCAL">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+    <class>entities.Properties</class>
+    <class>entities.Vendors</class>
+    <class>entities.Quantity</class>
+    <class>entities.Categories</class>
+    <class>entities.Analogs</class>
+    <class>entities.Currencies</class>
+    <class>entities.FileTypes</class>
+    <class>entities.ProductKinds</class>
+    <class>entities.Files</class>
+    <class>entities.PropertyTypes</class>
+    <class>entities.Products</class>
+    <class>entities.Series</class>
+    <class>entities.Settings</class>
+    <class>entities.ImportFields</class>
+    <class>entities.PropertyValues</class>
+    <class>entities.Functions</class>
+    <properties>
+      <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/poligon_commander?zeroDateTimeBehavior=convertToNull"/>
+      <property name="javax.persistence.jdbc.user" value="root"/>
+      <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
+      <property name="javax.persistence.jdbc.password" value="poligon"/>
+    </properties>
+  </persistence-unit>
+</persistence>
