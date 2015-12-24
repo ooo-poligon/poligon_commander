@@ -7,7 +7,7 @@ package utils;
 
 /**
  *
- * @author kataev
+ * @author Igor Klekotnev
  */
 public class NewCategory {
     private String title;

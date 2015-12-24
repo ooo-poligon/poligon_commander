@@ -207,21 +207,12 @@
                                              <children>
                                                 <AnchorPane VBox.vgrow="ALWAYS">
                                                    <children>
-                                                      <GridPane alignment="CENTER" AnchorPane.bottomAnchor="400.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="-5.0">
-                                                        <columnConstraints>
-                                                          <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" />
-                                                        </columnConstraints>
-                                                        <rowConstraints>
-                                                          <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="ALWAYS" />
-                                                        </rowConstraints>
-                                                         <children>
-                                                            <ComboBox fx:id="searchComboBox" editable="true" maxWidth="1.7976931348623157E308" onKeyPressed="#handleSearchComboBox" promptText="Введите название товара" GridPane.hgrow="ALWAYS" GridPane.valignment="TOP">
-                                                               <GridPane.margin>
-                                                                  <Insets top="5.0" />
-                                                               </GridPane.margin></ComboBox>
-                                                         </children>
-                                                      </GridPane>
-                                                      <StackPane fx:id="stackPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
+                                                      <ComboBox fx:id="searchComboBox" editable="true" maxWidth="1.7976931348623157E308" onKeyPressed="#handleSearchComboBox" promptText="Введите название товара" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                   </children>
+                                                </AnchorPane>
+                                                <AnchorPane>
+                                                   <children>
+                                                      <StackPane fx:id="stackPane" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
                                                          <children>
                                                             <TreeView fx:id="categoriesTree" onMouseClicked="#handleCatregoryTreeMouseClicked">
                                                                <opaqueInsets>
@@ -233,6 +224,23 @@
                                                             </TreeView>
                                                          </children>
                                                       </StackPane>
+                                                   </children>
+                                                </AnchorPane>
+                                                <AnchorPane>
+                                                   <children>
+                                                      <TableView fx:id="vendorsTable" prefHeight="300.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                        <columns>
+                                                          <TableColumn fx:id="vendorsTitleColumn" maxWidth="1.7976931348623157E308" minWidth="150.0" prefWidth="150.0" text="Производитель" />
+                                                          <TableColumn fx:id="vendorsAddressColumn" minWidth="70.0" text="Страна" />
+                                                            <TableColumn fx:id="vendorsRateColumn" minWidth="55.0" prefWidth="60.0" text="Наценка" />
+                                                        </columns>
+                                                         <columnResizePolicy>
+                                                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                                         </columnResizePolicy>
+                                                         <contextMenu>
+                                                            <ContextMenu fx:id="vendorsTableContextMenu" />
+                                                         </contextMenu>
+                                                      </TableView>
                                                    </children>
                                                 </AnchorPane>
                                              </children>
@@ -501,7 +509,7 @@
                                  <children>
                                     <AnchorPane>
                                        <children>
-                                          <Label fx:id="pdfTabTitle" alignment="CENTER" textFill="#057df7" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                          <Label fx:id="pdfTabTitle" alignment="CENTER" textFill="#057df7" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="10.0">
                                              <font>
                                                 <Font name="System Bold" size="24.0" />
                                              </font>
@@ -607,7 +615,7 @@
                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
                     </content>
                   </Tab>
-                  <Tab text="Настройки">
+                  <Tab fx:id="settingsTab" text="Настройки">
                     <content>
                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                            <children>

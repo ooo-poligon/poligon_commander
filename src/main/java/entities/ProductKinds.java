@@ -46,8 +46,7 @@ public class ProductKinds implements Serializable {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "productKindId")
     private Collection<Products> productsCollection;
 
-    public ProductKinds() {
-    }
+    public ProductKinds() {}
 
     public ProductKinds(Integer id) {
         this.id = id;

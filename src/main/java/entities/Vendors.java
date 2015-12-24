@@ -5,7 +5,7 @@
 package entities;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
+import java.lang.Double;
 import java.util.Collection;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -51,7 +51,7 @@ public class Vendors implements Serializable {
     private String address;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "rate")
-    private BigDecimal rate;
+    private Double rate;
     @Lob
     @Column(name = "description")
     private String description;
@@ -101,11 +101,11 @@ public class Vendors implements Serializable {
         this.address = address;
     }
 
-    public BigDecimal getRate() {
+    public Double getRate() {
         return rate;
     }
 
-    public void setRate(BigDecimal rate) {
+    public void setRate(Double rate) {
         this.rate = rate;
     }
 
