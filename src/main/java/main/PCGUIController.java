@@ -219,7 +219,8 @@ public class PCGUIController implements Initializable {
     ObservableList<CategoriesTreeView> subCategoriesTreeViewList;
     ObservableList<String> allProducts = FXCollections.observableArrayList();    
     ObservableList<ImportFields> importFields = FXCollections.observableArrayList();
-    ObservableList<String> comparedPairs = FXCollections.observableArrayList();    
+    ObservableList<String> comparedPairs = FXCollections.observableArrayList();
+
     // Maps
     Map<String, Double> allPrices = new HashMap<>();
     
@@ -440,7 +441,7 @@ public class PCGUIController implements Initializable {
         ObservableList<ProductsTableView> data = FXCollections.observableArrayList();    
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
-            List response = session.createQuery("From Products where category_id=" + getCategoryIdFromTitle(selectedNode)).list();
+            List response = session.createQuery("From Products where categoryId=" + getCategoryIdFromTitle(selectedNode)).list();
             for (Iterator iterator = response.iterator(); iterator.hasNext();) {
                 Products product = (Products) iterator.next();
                 data.add(new ProductsTableView(
@@ -526,7 +527,7 @@ public class PCGUIController implements Initializable {
             session.close();
         }        
     }
-    
+
     // Построение таблиц с данными полученными из БД
     private void buildProductsTable(ObservableList<ProductsTableView> data) {
         productArticle.setCellValueFactory(new PropertyValueFactory<>("article"));
@@ -808,19 +809,13 @@ public class PCGUIController implements Initializable {
                     String selectedNode = (String) ((TreeItem)categoriesTree.getSelectionModel().getSelectedItem()).getValue();
                     subCategoriesList(selectedNode);
                     if (treeViewHandlerMode.isSelected()) {
-                        //System.out.println("checked");
                         includeLowerItems(data, selectedNode);
                     } else {
                         excludeLowerItems(data, selectedNode);
-                        //System.out.println("unchecked");
-                    } 
-                    //openPictureButton.setDisable(true);
+                    }
                     buildProductsTable(data);
                 }
                 Platform.runLater(() -> {
-                    //progressIndicator.progressProperty().unbind();
-                    //progressIndicator.setVisible(false);
-                    //progressIndicator.setProgress(0.0);                    
                     progressBar.progressProperty().unbind();
                     progressBar.setProgress(0.0);
                 });                
@@ -934,6 +929,7 @@ public class PCGUIController implements Initializable {
         } catch (NullPointerException ne) {} 
         return sh;
     }
+
     // Обработчики событий от элементов интерфейса
     @FXML private void handleCatregoryTreeMouseClicked(MouseEvent event) {
         startProgressBar(event);        
@@ -941,8 +937,6 @@ public class PCGUIController implements Initializable {
     
     @FXML public void startProgressBar(MouseEvent event) {
         Task task = createTask(event);
-        //progressIndicator.setVisible(true);
-        //progressIndicator.progressProperty().bind(task.progressProperty());
         progressBar.progressProperty().bind(task.progressProperty());
         thread  = new Thread(task);
         thread.start();
@@ -957,7 +951,7 @@ public class PCGUIController implements Initializable {
             buildAnalogsTable(selectedProduct);
             buildDatasheetFileTable(selectedProduct);
             buildImageView(selectedProduct);
-            //openPictureButton.setDisable(false);
+            setVendorSelected(selectedProduct);
             datasheetFileTable.refresh();
         } catch (NullPointerException ex) {
         }
@@ -1036,7 +1030,29 @@ public class PCGUIController implements Initializable {
             session.close();
         }
         buildProductsTable(data);  
-    }    
+    }
+
+    //
+
+    private void setVendorSelected(String selectedProduct) {
+        Vendors vendor = new Vendors();
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Query query = session.createQuery("From Products where title = :title");
+        query.setParameter("title", selectedProduct);
+        List list = query.list();
+        for (Iterator iterator = list.iterator(); iterator.hasNext();) {
+            Products p = (Products) iterator.next();
+            if (p.getTitle().equals(selectedProduct)) {
+                vendor = p.getVendor();
+            }
+        }
+        for (int i = 0; i < vendorsTable.getItems().size(); i++) {
+            if (vendorsTable.getItems().get(i).getTitle().equals(vendor.getTitle())) {
+                vendorsTable.getSelectionModel().clearAndSelect(i);
+            }
+        }
+    }
+
 
     @FXML private void setPictureButtonPress() {
         File file = fileChooser.showOpenDialog(anchorPane.getScene().getWindow());
@@ -1257,7 +1273,7 @@ public class PCGUIController implements Initializable {
         if (result.isPresent()) {
             newCatTitle = result.get().getTitle();
             newCatDescription = result.get().getDescription();
-            createNewCategory();
+            createNewCategory(whatTree);
             if (whatTree.equals("main")) {
                 buildCategoryTree();
             } else if (whatTree.equals("modal")) {
@@ -1268,75 +1284,132 @@ public class PCGUIController implements Initializable {
         }
     }
     private void editCategoryDialog(String whatTree) {
-        ArrayList<String> details = getCategoryDetails(categoriesTree.getSelectionModel().getSelectedItem().getValue());
-        Dialog<NewCategory> dialog = new Dialog<>();
-        dialog.setTitle("Редактирование категории");
-        dialog.setHeaderText("Здесь Вы можете отредактировать название и/или описание выбранной категории.");
-        dialog.setResizable(false);
+        if (whatTree.equals("main")) {
+            ArrayList<String> details = getCategoryDetails(categoriesTree.getSelectionModel().getSelectedItem().getValue());
+            Dialog<NewCategory> dialog = new Dialog<>();
+            dialog.setTitle("Редактирование категории");
+            dialog.setHeaderText("Здесь Вы можете отредактировать название и/или описание выбранной категории.");
+            dialog.setResizable(false);
 
-        Label label1 = new Label("Введите название:  ");
-        Label label2 = new Label("Описание (необязательно):  ");
-        TextField text1 = new TextField();
-        TextArea text2 = new TextArea();
-        text1.setText(details.get(0));
-        text2.setText(details.get(1));
+            Label label1 = new Label("Введите название:  ");
+            Label label2 = new Label("Описание (необязательно):  ");
+            TextField text1 = new TextField();
+            TextArea text2 = new TextArea();
+            text1.setText(details.get(0));
+            text2.setText(details.get(1));
 
-        GridPane grid = new GridPane();
-        grid.add(label1, 1, 1);
-        grid.add(text1, 2, 1);
-        grid.add(label2, 1, 2);
-        grid.add(text2, 2, 2);
-        dialog.getDialogPane().setContent(grid);
+            GridPane grid = new GridPane();
+            grid.add(label1, 1, 1);
+            grid.add(text1, 2, 1);
+            grid.add(label2, 1, 2);
+            grid.add(text2, 2, 2);
+            dialog.getDialogPane().setContent(grid);
 
-        ButtonType buttonTypeOk = new ButtonType("Сохранить", ButtonData.OK_DONE);
-        ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonData.CANCEL_CLOSE);        
-        dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
-        dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
-        dialog.setResultConverter((ButtonType b) -> {
-            if (b == buttonTypeOk) {                
-                return new NewCategory(text1.getText(), text2.getText());
-            }            
-            return null;
-        });
-        Optional<NewCategory> result = dialog.showAndWait();
-        if (result.isPresent()) {
-            newCatTitle = result.get().getTitle();
-            newCatDescription = result.get().getDescription();
-            editCategory(categoriesTree.getSelectionModel().getSelectedItem().getValue(), newCatTitle, newCatDescription);
-            if (whatTree.equals("main")) {
+            ButtonType buttonTypeOk = new ButtonType("Сохранить", ButtonData.OK_DONE);
+            ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonData.CANCEL_CLOSE);
+            dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
+            dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
+            dialog.setResultConverter((ButtonType b) -> {
+                if (b == buttonTypeOk) {
+                    return new NewCategory(text1.getText(), text2.getText());
+                }
+                return null;
+            });
+            Optional<NewCategory> result = dialog.showAndWait();
+            if (result.isPresent()) {
+                newCatTitle = result.get().getTitle();
+                newCatDescription = result.get().getDescription();
+                editCategory(categoriesTree.getSelectionModel().getSelectedItem().getValue(), newCatTitle, newCatDescription);
                 buildCategoryTree();
-            } else if (whatTree.equals("modal")) {
+            }
+        } else if (whatTree.equals("modal")) {
+            ArrayList<String> details = getCategoryDetails(treeView.getSelectionModel().getSelectedItem().getValue());
+            Dialog<NewCategory> dialog = new Dialog<>();
+            dialog.setTitle("Редактирование категории");
+            dialog.setHeaderText("Здесь Вы можете отредактировать название и/или описание выбранной категории.");
+            dialog.setResizable(false);
+
+            Label label1 = new Label("Введите название:  ");
+            Label label2 = new Label("Описание (необязательно):  ");
+            TextField text1 = new TextField();
+            TextArea text2 = new TextArea();
+            text1.setText(details.get(0));
+            text2.setText(details.get(1));
+
+            GridPane grid = new GridPane();
+            grid.add(label1, 1, 1);
+            grid.add(text1, 2, 1);
+            grid.add(label2, 1, 2);
+            grid.add(text2, 2, 2);
+            dialog.getDialogPane().setContent(grid);
+
+            ButtonType buttonTypeOk = new ButtonType("Сохранить", ButtonData.OK_DONE);
+            ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonData.CANCEL_CLOSE);
+            dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
+            dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
+            dialog.setResultConverter((ButtonType b) -> {
+                if (b == buttonTypeOk) {
+                    return new NewCategory(text1.getText(), text2.getText());
+                }
+                return null;
+            });
+            Optional<NewCategory> result = dialog.showAndWait();
+            if (result.isPresent()) {
+                newCatTitle = result.get().getTitle();
+                newCatDescription = result.get().getDescription();
+                editCategory(treeView.getSelectionModel().getSelectedItem().getValue(), newCatTitle, newCatDescription);
                 buildCategoryTree();
                 buildModalCategoryTree(stackPaneModal);
             }
-        }        
+        }
     }
     private void deleteCategoryDialog(String whatTree) {
-        String catTitle = categoriesTree.getSelectionModel().getSelectedItem().getValue();
-        Alert alert = new Alert(AlertType.CONFIRMATION);
-        alert.setHeaderText("Внимание!");
-        alert.setTitle("Удаление категории");
-        String s = "Категория \"" + catTitle + "\" будет удалена из каталога. Все элементы, принадлежащие этой категории будут перенесены в ближайшшую вышестоящую категорию.";
-        alert.setContentText(s);
-        Optional<ButtonType> result = alert.showAndWait();
-        if ((result.isPresent()) && (result.get() == ButtonType.OK)) {
-            Integer parentCatId = getParentCatId(catTitle);
-            Integer catId = getCategoryIdFromTitle (catTitle);
-            replaceProductsUp(catId, parentCatId);            
-            deleteCategory(catTitle);
-            if (whatTree.equals("main")) {
+        if (whatTree.equals("main")) {
+            String catTitle = categoriesTree.getSelectionModel().getSelectedItem().getValue();
+            Alert alert = new Alert(AlertType.CONFIRMATION);
+            alert.setHeaderText("Внимание!");
+            alert.setTitle("Удаление категории");
+            String s = "Категория \"" + catTitle + "\" будет удалена из каталога. Все элементы, принадлежащие этой категории будут перенесены в ближайшшую вышестоящую категорию.";
+            alert.setContentText(s);
+            Optional<ButtonType> result = alert.showAndWait();
+            if ((result.isPresent()) && (result.get() == ButtonType.OK)) {
+                Integer parentCatId = getParentCatId(catTitle);
+                Integer catId = getCategoryIdFromTitle(catTitle);
+                replaceProductsUp(catId, parentCatId);
+                deleteCategory(catTitle);
                 buildCategoryTree();
-            } else if (whatTree.equals("modal")) {
+                ObservableList<ProductsTableView> data = FXCollections.observableArrayList();
+                productsTable.setItems(data);
+            }
+        } else if (whatTree.equals("modal")) {
+            String catTitle = treeView.getSelectionModel().getSelectedItem().getValue();
+            Alert alert = new Alert(AlertType.CONFIRMATION);
+            alert.setHeaderText("Внимание!");
+            alert.setTitle("Удаление категории");
+            String s = "Категория \"" + catTitle + "\" будет удалена из каталога. Все элементы, принадлежащие этой категории будут перенесены в ближайшшую вышестоящую категорию.";
+            alert.setContentText(s);
+            Optional<ButtonType> result = alert.showAndWait();
+            if ((result.isPresent()) && (result.get() == ButtonType.OK)) {
+                Integer parentCatId = getParentCatId(catTitle);
+                Integer catId = getCategoryIdFromTitle(catTitle);
+                replaceProductsUp(catId, parentCatId);
+                deleteCategory(catTitle);
                 buildCategoryTree();
                 buildModalCategoryTree(stackPaneModal);
+                ObservableList<ProductsTableView> data = FXCollections.observableArrayList();
+                productsTable.setItems(data);
             }
-            ObservableList<ProductsTableView> data = FXCollections.observableArrayList();
-            productsTable.setItems(data);
-        }    
-    }    
-    private void createNewCategory() {
-        String parentCategoryTitle = categoriesTree.getSelectionModel().getSelectedItem().getValue();
-        Integer parentId = getCategoryIdFromTitle (parentCategoryTitle);
+        }
+    }
+
+    private void createNewCategory(String whatTree) {
+        String parentCategoryTitle = new String();
+        if (whatTree.equals("main")) {
+            parentCategoryTitle = categoriesTree.getSelectionModel().getSelectedItem().getValue();
+        } else if (whatTree.equals("modal")) {
+            parentCategoryTitle = treeView.getSelectionModel().getSelectedItem().getValue();
+        }
+        Integer parentId = getCategoryIdFromTitle(parentCategoryTitle);
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
         Categories categorie = new Categories();
@@ -1608,11 +1681,10 @@ public class PCGUIController implements Initializable {
         if ((result.isPresent()) && (result.get() == buttonTypeOk)) {
             selectedCategory = treeView.getSelectionModel().getSelectedItem().getValue();
             for(ProductsTableView product: selectedItems) {
-                System.out.println(selectedCategory);
-                System.out.println(product.getTitle());
                 updateCategoryId(selectedCategory, product.getTitle());
             }
         }
+        refreshProductsTable();
     }
 
     private void updateCategoryId(String value, String productTitle) {
@@ -1744,6 +1816,16 @@ public class PCGUIController implements Initializable {
         int result = query.executeUpdate();
         tx.commit();
         session.close();
+    }
+
+    private void refreshProductsTable() {
+        try {
+            Integer selectedTreeId = getCategoryIdFromTitle(categoriesTree.getSelectionModel().getSelectedItem().getValue());
+            buildProductsTable(getProductList(selectedTreeId));
+        } catch (NullPointerException ne) {
+            Integer selectedTreeId = getCategoryIdFromTitle(treeView.getSelectionModel().getSelectedItem().getValue());
+            buildProductsTable(getProductList(selectedTreeId));
+        }
     }
 
     // Дальше позаимствовал реализацию PDF Reader из тырнета)))

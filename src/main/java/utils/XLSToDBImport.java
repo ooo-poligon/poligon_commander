@@ -52,9 +52,19 @@ public class XLSToDBImport {
     }
     public void startImport(ArrayList<ArrayList<String>> allImportXLSContent, ObservableList<ImportFields> importFields, ObservableList<String> allProducts) {
         ArrayList<String> newProductsTitles = new ArrayList<>();
+        ArrayList<String> titlesColumnUnchecked = new ArrayList<>();
         allCompareDetails.stream().forEach((compareDetail) -> {
             if (compareDetail.get(1).equals("Наименование продукта")) {
-                titlesColumn.addAll(getColumnByHeader(allImportXLSContent, compareDetail.get(0)));
+                titlesColumnUnchecked.addAll(getColumnByHeader(allImportXLSContent, compareDetail.get(0)));
+            }
+        });
+        titlesColumnUnchecked.stream().forEach((item) -> {
+            if (item.contains("?")) {
+                System.out.println(item);
+                item.replace('?', '_');
+                titlesColumn.add(item);
+            } else {
+                titlesColumn.add(item);
             }
         });
         for (int i = 0; i < titlesColumn.size(); i++) {
@@ -86,7 +96,7 @@ public class XLSToDBImport {
                 alert1.showAndWait();
             }
             } else {
-            updateExistProducts(allImportXLSContent);
+                updateExistProducts(allImportXLSContent);
         }
     }
 
@@ -203,6 +213,12 @@ public class XLSToDBImport {
                         kindsColumn.addAll(getColumnByHeader(allImportXLSContent, compareDetail.get(0)));
                         for (int i = 0; i < kindsColumn.size(); i++) {
                             updateKinds(kindsColumn.get(i), titlesColumn.get(i));
+                        }
+                        break;
+                    case ("Категория продукта"):
+                        categoriesColumn.addAll(getColumnByHeader(allImportXLSContent, compareDetail.get(0)));
+                        for (int i = 0; i < categoriesColumn.size(); i++) {
+                            updateCategories(categoriesColumn.get(i), titlesColumn.get(i));
                         }
                         break;
                 }
@@ -383,6 +399,7 @@ public class XLSToDBImport {
             session.close();
         }
     }
+
     private void updateKinds(String value, String productTitle) {
         if (!(value.equals("") || value.equals(null))) {
             ArrayList<String> notInDBProducts = new ArrayList<>();
@@ -540,6 +557,7 @@ public class XLSToDBImport {
         }
         return id;
     }
+
     private void importNewProducts(ArrayList<String> newProductsTitles) {
         for (int i = 0; i < newProductsTitles.size(); i++) {
             Session session = HibernateUtil.getSessionFactory().openSession();
