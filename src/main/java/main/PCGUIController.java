@@ -20,6 +20,7 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.*;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
@@ -88,6 +89,10 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.text.Text;
 import javafx.scene.image.Image;
+import javafx.scene.control.TableColumn.CellEditEvent;
+
+
+
 
 /**
  *
@@ -531,8 +536,44 @@ public class PCGUIController implements Initializable {
     // Построение таблиц с данными полученными из БД
     private void buildProductsTable(ObservableList<ProductsTableView> data) {
         productArticle.setCellValueFactory(new PropertyValueFactory<>("article"));
+        productArticle.setCellFactory(TextFieldTableCell.forTableColumn());
+        productArticle.setOnEditCommit(
+                new EventHandler<CellEditEvent<ProductsTableView, String>>() {
+                    @Override
+                    public void handle(CellEditEvent<ProductsTableView, String> t) {
+                        ((ProductsTableView) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())
+                        ).setArticle(t.getNewValue());
+                        setNewCellValue("article", t.getNewValue(), productsTable.getFocusModel().getFocusedItem().getTitle());
+                    }
+                }
+        );
         productTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
+        productTitle.setCellFactory(TextFieldTableCell.forTableColumn());
+        productTitle.setOnEditCommit(
+                new EventHandler<CellEditEvent<ProductsTableView, String>>() {
+                    @Override
+                    public void handle(CellEditEvent<ProductsTableView, String> t) {
+                        ((ProductsTableView) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())
+                        ).setTitle(t.getNewValue());
+                        setNewCellValue("title", t.getNewValue(), productsTable.getFocusModel().getFocusedItem().getTitle());
+                    }
+                }
+        );
         productDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
+        productDescription.setCellFactory(TextFieldTableCell.forTableColumn());
+        productDescription.setOnEditCommit(
+                new EventHandler<CellEditEvent<ProductsTableView, String>>() {
+                    @Override
+                    public void handle(CellEditEvent<ProductsTableView, String> t) {
+                        ((ProductsTableView) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())
+                        ).setDescription(t.getNewValue());
+                        setNewCellValue("description", t.getNewValue(), productsTable.getFocusModel().getFocusedItem().getTitle());
+                    }
+                }
+        );
         // Создаём обработчик событий от мыши
         EventHandler<MouseEvent> mouseEventHandle1 = (MouseEvent event1) -> {
             // Вызываем метод, возврщающий нам ...
@@ -650,7 +691,7 @@ public class PCGUIController implements Initializable {
         ObservableList<DatasheetTableView> data = FXCollections.observableArrayList();
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
-            List response = session.createQuery("From Files where ownerId=" + getProductIdFromTitle(selectedProduct) + " and fileTypeId=2").list();
+            List response = session.createQuery("From Files where ownerId=" + getProductIdFromTitle(selectedProduct) + " and fileTypeId=" + 2).list();
             for (Iterator iterator = response.iterator(); iterator.hasNext();) {
                 Files f = (Files) iterator.next();
                 data.add(new DatasheetTableView(f.getName()));
@@ -692,7 +733,7 @@ public class PCGUIController implements Initializable {
     }
     private void buildImageView(String selectedProduct) {
         Session session = HibernateUtil.getSessionFactory().openSession();
-        List pics = session.createQuery("from Files where ownerId=" + getProductIdFromTitle(selectedProduct) + " and fileTypeId=1").list();
+        List pics = session.createQuery("from Files where ownerId=" + getProductIdFromTitle(selectedProduct) + " and fileTypeId=" + 1).list();
         if (pics.size()==0) {
             ProductImage.open(new File(noImageFile), gridPane, imageView);
         } else {
@@ -1049,6 +1090,7 @@ public class PCGUIController implements Initializable {
         for (int i = 0; i < vendorsTable.getItems().size(); i++) {
             if (vendorsTable.getItems().get(i).getTitle().equals(vendor.getTitle())) {
                 vendorsTable.getSelectionModel().clearAndSelect(i);
+                vendorsTable.scrollTo(vendorsTable.getSelectionModel().getSelectedItem());
             }
         }
     }
@@ -1790,7 +1832,7 @@ public class PCGUIController implements Initializable {
         try {
             productTabTitle.setText(product.getTitle());
             Session session = HibernateUtil.getSessionFactory().openSession();
-            List pics = session.createQuery("from Files where ownerId=" + getProductIdFromTitle(product.getTitle()) + " and fileTypeId=1").list();
+            List pics = session.createQuery("from Files where ownerId=" + getProductIdFromTitle(product.getTitle()) + " and fileTypeId=" + 1).list();
             if (pics.size()==0) {
                 ProductImage.open(new File(noImageFile), productTabGridPaneImageView, productTabImageView);
                 picDescriptionTextArea.setText("");
@@ -1827,6 +1869,19 @@ public class PCGUIController implements Initializable {
             buildProductsTable(getProductList(selectedTreeId));
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     // Дальше позаимствовал реализацию PDF Reader из тырнета)))
 
@@ -1887,7 +1942,7 @@ public class PCGUIController implements Initializable {
         //String product = productTabTitle.getText();
         pdfTabTitle.setText(product);
         Session session = HibernateUtil.getSessionFactory().openSession();
-        List pdfs = session.createQuery("from Files where ownerId=" + getProductIdFromTitle(product) + " and fileTypeId=2").list();
+        List pdfs = session.createQuery("from Files where ownerId=" + getProductIdFromTitle(product) + " and fileTypeId=" + 2).list();
         for (Iterator iterator = pdfs.iterator(); iterator.hasNext();) {
             Files pdf = (Files) iterator.next();
             pdfFilePath = pdf.getPath();
@@ -2062,4 +2117,21 @@ public class PCGUIController implements Initializable {
     }
 
     // Конец заимствования здесь
+
+    private void setNewCellValue(String fieldName, String newValue, String productTitle) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = session.beginTransaction();
+        Query query = session.createQuery("UPDATE Products set " + fieldName + "= :newValue where title= :title");
+        query.setParameter("newValue", newValue);
+        query.setParameter("title", productTitle);
+        query.executeUpdate();
+        tx.commit();
+        session.close();
+    }
+
+
+
+
+
+
 }

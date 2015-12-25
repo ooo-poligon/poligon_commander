@@ -32,9 +32,9 @@
                                   <RowConstraints maxHeight="172.0" minHeight="50.0" percentHeight="39.0" prefHeight="172.0" vgrow="ALWAYS" />
                                 </rowConstraints>
                                  <children>
-                                    <TableView fx:id="productsTable" onMousePressed="#handleProductTableMousePressed" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.hgrow="ALWAYS" GridPane.valignment="TOP" GridPane.vgrow="ALWAYS">
+                                    <TableView fx:id="productsTable" editable="true" onMousePressed="#handleProductTableMousePressed" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.hgrow="ALWAYS" GridPane.valignment="TOP" GridPane.vgrow="ALWAYS">
                                       <columns>
-                                          <TableColumn prefWidth="127.0" text="Производитель" visible="false" />
+                                          <TableColumn maxWidth="20.0" minWidth="20.0" prefWidth="20.0" resizable="false" text="..." visible="false" />
                                           <TableColumn fx:id="productArticle" minWidth="100.0" prefWidth="200.0" text="Артикул" />
                                         <TableColumn fx:id="productTitle" minWidth="200.0" prefWidth="200.0" text="Наименование" />
                                         <TableColumn fx:id="productDescription" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="-1.0" text="Краткое описание" />

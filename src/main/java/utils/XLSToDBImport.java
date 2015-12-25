@@ -63,6 +63,12 @@ public class XLSToDBImport {
                 System.out.println(item);
                 item.replace('?', '_');
                 titlesColumn.add(item);
+            } else if (item.contains(":")) {
+                item.replace(':', ' ');
+                titlesColumn.add(item);
+            } else if (item.contains(":")) {
+                item.replace(':', ' ');
+                titlesColumn.add(item);
             } else {
                 titlesColumn.add(item);
             }
@@ -308,7 +314,7 @@ public class XLSToDBImport {
                 Vendors vendor = (Vendors) session.get(Vendors.class, i+1);
                 vendorsList.add(vendor);
             }            
-            List ids = session.createSQLQuery("select id from products where title=\"" + productTitle + "\"").list();
+            List ids = session.createSQLQuery("select id from products where title=\"" + productTitle.replace(':', ' ').replace('?', '_') + "\"").list();
             for (Iterator iterator = ids.iterator(); iterator.hasNext();) {
                 id = (Integer) iterator.next();
             }
@@ -317,11 +323,11 @@ public class XLSToDBImport {
                 for (Vendors vendor: vendorsList) {
                     try {
                         if (vendor.getTitle().equals(value)) {
-                            product.setVendor(vendor);  
+                            product.setVendor(vendor);
+                            session.save(product);
                         }
                     } catch (NullPointerException ne) {}                        
                 }
-                session.save(product);                
             } else {
                 notInDBProducts.add(productTitle);
             }
@@ -342,7 +348,7 @@ public class XLSToDBImport {
                 Vendors vendor = (Vendors) session.get(Vendors.class, i+1);
                 vendorsList.add(vendor);
             }
-            List ids = session.createSQLQuery("select id from products where title=\"" + productTitle + "\"").list();
+            List ids = session.createSQLQuery("select id from products where title=\"" + productTitle.replace(':', ' ').replace('?', '_') + "\"").list();
             for (Iterator iterator = ids.iterator(); iterator.hasNext();) {
                 id = (Integer) iterator.next();
             }
@@ -378,7 +384,7 @@ public class XLSToDBImport {
                 Series serie = (Series) session.get(Series.class, i+1);
                 seriesList.add(serie);
             }            
-            List ids = session.createSQLQuery("select id from products where title=\"" + productTitle + "\"").list();
+            List ids = session.createSQLQuery("select id from products where title=\"" + productTitle.replace(':', ' ').replace('?', '_') + "\"").list();
             for (Iterator iterator = ids.iterator(); iterator.hasNext();) {
                 id = (Integer) iterator.next();
             }
@@ -413,7 +419,7 @@ public class XLSToDBImport {
                 ProductKinds kind = (ProductKinds) session.get(ProductKinds.class, i+1);
                 kindsList.add(kind);
             }            
-            List ids = session.createSQLQuery("select id from products where title=\"" + productTitle + "\"").list();
+            List ids = session.createSQLQuery("select id from products where title=\"" + productTitle.replace(':', ' ').replace('?', '_') + "\"").list();
             for (Iterator iterator = ids.iterator(); iterator.hasNext();) {
                 id = (Integer) iterator.next();
             }
@@ -448,7 +454,7 @@ public class XLSToDBImport {
                 ProductKinds kind = (ProductKinds) session.get(ProductKinds.class, i+1);
                 kindsList.add(kind);
             }
-            List ids = session.createSQLQuery("select id from products where title=\"" + productTitle + "\"").list();
+            List ids = session.createSQLQuery("select id from products where title=\"" + productTitle.replace(':', ' ').replace('?', '_') + "\"").list();
             for (Iterator iterator = ids.iterator(); iterator.hasNext();) {
                 id = (Integer) iterator.next();
             }
@@ -484,7 +490,7 @@ public class XLSToDBImport {
                 Categories cat = (Categories) session.get(Categories.class, i+1);
                 catList.add(cat);
             }
-            List ids = session.createSQLQuery("select id from products where title=\"" + productTitle + "\"").list();
+            List ids = session.createSQLQuery("select id from products where title=\"" + productTitle.replace(':', ' ').replace('?', '_') + "\"").list();
             for (Iterator iterator = ids.iterator(); iterator.hasNext();) {
                 id = (Integer) iterator.next();
             }
@@ -519,7 +525,7 @@ public class XLSToDBImport {
                 Categories cat = (Categories) session.get(Categories.class, i+1);
                 catList.add(cat);
             }
-            List ids = session.createSQLQuery("select id from products where title=\"" + productTitle + "\"").list();
+            List ids = session.createSQLQuery("select id from products where title=\"" + productTitle.replace(':', ' ').replace('?', '_') + "\"").list();
             for (Iterator iterator = ids.iterator(); iterator.hasNext();) {
                 id = (Integer) iterator.next();
             }
