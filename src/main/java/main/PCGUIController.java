@@ -7,6 +7,7 @@ package main;
 import com.sun.pdfview.PDFFile;
 import com.sun.pdfview.PDFPage;
 import entities.*;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.IntegerBinding;
 import javafx.beans.property.DoubleProperty;
@@ -15,26 +16,41 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.TableColumn.CellEditEvent;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.*;
 import javafx.scene.layout.*;
+import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.stage.Window;
 import javafx.util.Callback;
-import utils.ProductImage;
-import utils.NewCategory;
-import utils.NewVendor;
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import tableviews.*;
 import treeviews.CategoriesTreeView;
-import tableviews.ProductsTableView;
-import tableviews.AnalogsTableView;
-import tableviews.DatasheetTableView;
-import tableviews.PricesTableView;
-import tableviews.QuantityTableView;
-import tableviews.VendorsTableView;
+import utils.*;
 
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -44,52 +60,12 @@ import java.math.RoundingMode;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.scene.Node;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
-import javafx.stage.FileChooser;
-import org.hibernate.HibernateException;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import utils.AutoCompleteComboBoxListener;
-import utils.HibernateUtil;
-import utils.XLSHandler;
-import utils.XLSToDBImport;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonBar.ButtonData;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-import java.util.Optional;
-import javafx.scene.input.ClipboardContent;
-import org.hibernate.Query;
-import javafx.scene.input.DragEvent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.TransferMode;
-import javafx.scene.text.Text;
-import javafx.scene.image.Image;
-import javafx.scene.control.TableColumn.CellEditEvent;
 
 
 
@@ -104,7 +80,7 @@ public class PCGUIController implements Initializable {
     public static Scene scene;
     
     //Stages
-        Stage newCatStage = new Stage();
+    Stage newCatStage = new Stage();
     
     // Panes
     @FXML private AnchorPane anchorPane; 
@@ -251,6 +227,7 @@ public class PCGUIController implements Initializable {
     String newVendorAddress;
     private final String noImageFile = "C:\\Users\\gnato\\Desktop\\Igor\\progs\\java_progs\\PoligonCommanderJ\\src\\main\\resources\\images\\noImage.gif";
     String selectedCategory = "";
+    String focusedProduct = "";
 
     //booleans
     boolean clear = true;
@@ -732,6 +709,9 @@ public class PCGUIController implements Initializable {
         vendorsTable.setItems(data);
     }
     private void buildImageView(String selectedProduct) {
+        if (selectedProduct == null) {
+            selectedProduct = focusedProduct;
+        }
         Session session = HibernateUtil.getSessionFactory().openSession();
         List pics = session.createQuery("from Files where ownerId=" + getProductIdFromTitle(selectedProduct) + " and fileTypeId=" + 1).list();
         if (pics.size()==0) {
@@ -743,6 +723,7 @@ public class PCGUIController implements Initializable {
                 ProductImage.open(picFile, gridPane, imageView);
             }
         }
+        session.close();
     }
     
     // Построение дерева категорий каталога
@@ -855,6 +836,10 @@ public class PCGUIController implements Initializable {
                         excludeLowerItems(data, selectedNode);
                     }
                     buildProductsTable(data);
+                    productsTable.getSelectionModel().select(0);
+                    setVendorSelected(productsTable.getSelectionModel().getSelectedItem().getTitle());
+                    focusedProduct = productsTable.getSelectionModel().getSelectedItem().getTitle();
+                    //buildImageView(productsTable.getSelectionModel().getSelectedItem().getTitle());
                 }
                 Platform.runLater(() -> {
                     progressBar.progressProperty().unbind();
@@ -1070,7 +1055,9 @@ public class PCGUIController implements Initializable {
         } finally {
             session.close();
         }
-        buildProductsTable(data);  
+        buildProductsTable(data);
+        productsTable.getSelectionModel().select(0);
+        setVendorSelected(productsTable.getSelectionModel().getSelectedItem().getTitle());
     }
 
     //

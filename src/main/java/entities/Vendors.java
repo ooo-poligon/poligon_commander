@@ -5,7 +5,7 @@
 package entities;
 
 import java.io.Serializable;
-import java.lang.Double;
+import java.math.BigDecimal;
 import java.util.Collection;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -32,11 +32,14 @@ import javax.xml.bind.annotation.XmlTransient;
 @Table(name = "vendors")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Vendors.findAll", query = "SELECT v FROM Vendors v"),
-    @NamedQuery(name = "Vendors.findById", query = "SELECT v FROM Vendors v WHERE v.id = :id"),
-    @NamedQuery(name = "Vendors.findByTitle", query = "SELECT v FROM Vendors v WHERE v.title = :title"),
-    @NamedQuery(name = "Vendors.findByRate", query = "SELECT v FROM Vendors v WHERE v.rate = :rate")})
+        @NamedQuery(name = "Vendors.findAll", query = "SELECT v FROM Vendors v"),
+        @NamedQuery(name = "Vendors.findById", query = "SELECT v FROM Vendors v WHERE v.id = :id"),
+        @NamedQuery(name = "Vendors.findByTitle", query = "SELECT v FROM Vendors v WHERE v.title = :title"),
+        @NamedQuery(name = "Vendors.findByRate", query = "SELECT v FROM Vendors v WHERE v.rate = :rate")})
 public class Vendors implements Serializable {
+    // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
+    @Column(name = "rate")
+    private Double rate;
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,9 +52,6 @@ public class Vendors implements Serializable {
     @Lob
     @Column(name = "address")
     private String address;
-    // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
-    @Column(name = "rate")
-    private Double rate;
     @Lob
     @Column(name = "description")
     private String description;
@@ -101,13 +101,6 @@ public class Vendors implements Serializable {
         this.address = address;
     }
 
-    public Double getRate() {
-        return rate;
-    }
-
-    public void setRate(Double rate) {
-        this.rate = rate;
-    }
 
     public String getDescription() {
         return description;
@@ -176,5 +169,13 @@ public class Vendors implements Serializable {
     public String toString() {
         return "entities.Vendors[ id=" + id + " ]";
     }
-    
+
+    public Double getRate() {
+        return rate;
+    }
+
+    public void setRate(Double rate) {
+        this.rate = rate;
+    }
+
 }

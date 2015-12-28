@@ -30,11 +30,12 @@ import javax.xml.bind.annotation.XmlTransient;
 @Table(name = "properties")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Properties.findAll", query = "SELECT p FROM Properties p"),
-    @NamedQuery(name = "Properties.findById", query = "SELECT p FROM Properties p WHERE p.id = :id"),
-    @NamedQuery(name = "Properties.findByTitle", query = "SELECT p FROM Properties p WHERE p.title = :title"),
-    @NamedQuery(name = "Properties.findByValue", query = "SELECT p FROM Properties p WHERE p.value = :value")})
+        @NamedQuery(name = "Properties.findAll", query = "SELECT p FROM Properties p"),
+        @NamedQuery(name = "Properties.findById", query = "SELECT p FROM Properties p WHERE p.id = :id"),
+        @NamedQuery(name = "Properties.findByTitle", query = "SELECT p FROM Properties p WHERE p.title = :title"),
+        @NamedQuery(name = "Properties.findByValue", query = "SELECT p FROM Properties p WHERE p.value = :value")})
 public class Properties implements Serializable {
+    @Basic(optional = false)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "propertyId")
     private Collection<PropertyValues> propertyValuesCollection;
     @JoinColumn(name = "value_id", referencedColumnName = "id")
@@ -145,5 +146,5 @@ public class Properties implements Serializable {
     public void setValueId(PropertyValues valueId) {
         this.valueId = valueId;
     }
-    
+
 }

@@ -31,15 +31,21 @@ import javax.xml.bind.annotation.XmlTransient;
 @Table(name = "products")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Products.findAll", query = "SELECT p FROM Products p"),
-    @NamedQuery(name = "Products.findById", query = "SELECT p FROM Products p WHERE p.id = :id"),
-    @NamedQuery(name = "Products.findByTitle", query = "SELECT p FROM Products p WHERE p.title = :title"),
-    @NamedQuery(name = "Products.findByArticle", query = "SELECT p FROM Products p WHERE p.article = :article"),
-    @NamedQuery(name = "Products.findByEan", query = "SELECT p FROM Products p WHERE p.ean = :ean"),
-    @NamedQuery(name = "Products.findByAvailable", query = "SELECT p FROM Products p WHERE p.available = :available"),
-    @NamedQuery(name = "Products.findByOutdated", query = "SELECT p FROM Products p WHERE p.outdated = :outdated"),
-    @NamedQuery(name = "Products.findByPrice", query = "SELECT p FROM Products p WHERE p.price = :price")})
+        @NamedQuery(name = "Products.findAll", query = "SELECT p FROM Products p"),
+        @NamedQuery(name = "Products.findById", query = "SELECT p FROM Products p WHERE p.id = :id"),
+        @NamedQuery(name = "Products.findByTitle", query = "SELECT p FROM Products p WHERE p.title = :title"),
+        @NamedQuery(name = "Products.findByArticle", query = "SELECT p FROM Products p WHERE p.article = :article"),
+        @NamedQuery(name = "Products.findByEan", query = "SELECT p FROM Products p WHERE p.ean = :ean"),
+        @NamedQuery(name = "Products.findByAvailable", query = "SELECT p FROM Products p WHERE p.available = :available"),
+        @NamedQuery(name = "Products.findByOutdated", query = "SELECT p FROM Products p WHERE p.outdated = :outdated"),
+        @NamedQuery(name = "Products.findByPrice", query = "SELECT p FROM Products p WHERE p.price = :price")})
 public class Products implements Serializable {
+    @Basic(optional = false)
+    @Column(name = "plugin_owner_id")
+    private int pluginOwnerId;
+    @Basic(optional = false)
+    @Column(name = "accessory_owner_id")
+    private int accessoryOwnerId;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "productId")
     private Collection<PropertyValues> propertyValuesCollection;
     private static final long serialVersionUID = 1L;
@@ -82,11 +88,11 @@ public class Products implements Serializable {
     @JoinColumn(name = "product_kind_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private ProductKinds productKindId;
-    
+
     @JoinColumn(name = "vendor", referencedColumnName = "title")
     @ManyToOne(optional = true)
     private Vendors vendor;
-    
+
     @OneToMany(mappedBy = "prototypeId")
     private Collection<Analogs> analogsCollection;
     @OneToMany(mappedBy = "ownerId")
@@ -288,5 +294,21 @@ public class Products implements Serializable {
     public void setPropertyValuesCollection(Collection<PropertyValues> propertyValuesCollection) {
         this.propertyValuesCollection = propertyValuesCollection;
     }
-    
+
+    public int getPluginOwnerId() {
+        return pluginOwnerId;
+    }
+
+    public void setPluginOwnerId(int pluginOwnerId) {
+        this.pluginOwnerId = pluginOwnerId;
+    }
+
+    public int getAccessoryOwnerId() {
+        return accessoryOwnerId;
+    }
+
+    public void setAccessoryOwnerId(int accessoryOwnerId) {
+        this.accessoryOwnerId = accessoryOwnerId;
+    }
+
 }

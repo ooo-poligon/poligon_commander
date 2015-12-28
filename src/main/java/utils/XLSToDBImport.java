@@ -46,6 +46,8 @@ public class XLSToDBImport {
     private ArrayList<String> seriesColumn = new ArrayList<>();
     private ArrayList<String> kindsColumn = new ArrayList<>();
     private ArrayList<String> categoriesColumn = new ArrayList<>();
+    private ArrayList<String> picPathColumn = new ArrayList<>();
+    private ArrayList<String> pdfPathColumn = new ArrayList<>();
 
     public XLSToDBImport(ArrayList<ArrayList<String>> allCompareDetails) {
         this.allCompareDetails = allCompareDetails;
@@ -84,11 +86,11 @@ public class XLSToDBImport {
             alert.setContentText("Обнаружена номенклатура, не содержащаяся в базе данных.\n\nЕсли Вы добавляете новые " +
                     "позиции, убедитесь, что \nв каталоге продукции создана категория для данной номенклатуры, и что эта категория " +
                     "не содержит других вложенных категорий.\nПосле этого оформите файл для импорта таким образом,\nчтобы в нём содержалась " +
-                    "колонка с заголовком \"parent\" (без кавычек, латиницей, в нижнем регистре), содержащая названия категорий, сопоставленные " +
-                    "каждому новому элементу номенклатуры.(На элементы номенклатуры, уже находящиеся в базе данных, содержимое этой колонки НЕ ПОВЛИЯЕТ).\n" +
+                    "колонка с заголовком, содержащая названия категорий, сопоставленные каждому новому элементу номенклатуры." +
+                    "(На элементы номенклатуры, уже находящиеся в базе данных, содержимое этой колонки НЕ ПОВЛИЯЕТ).\n" +
                     "В случае, если название категории обнаружено не будет,\nили не будет идентично созданному Вами на предыдущем шаге процесса импорта, номенклатура будет " +
                     "размещена\nв категории \"Без названия\", находящейся в корне каталога продукции.\nТакже, в случае импорта новой номенклатуры, " +
-                    "необходимо сопоставить с базой данных колонки, содержащие производителей и базовые цены для каждого нового товара. Их наименование в файле может быть произвольным.\n\n Если эти условия выполнены, и Вы " +
+                    "необходимо сопоставить с базой данных колонки, содержащие производителей и базовые цены для каждого нового товара.\n\n Если эти условия выполнены, и Вы " +
                     "желаете продолжить процедуру импорта, нажмите \"OK\". Для отмены нажмите \"Cancel\".");
             alert.setTitle("Обнаружена новая номенклатура!");
             alert.showAndWait();
@@ -166,41 +168,9 @@ public class XLSToDBImport {
                         for (int i = 0; i < pricesColumn.size(); i++) {
                             if (!(pricesColumn.get(i).equals(""))) {
                                 updateProducts("price", Double.parseDouble(pricesColumn.get(i).replace(",", ".")), titlesColumn.get(i));
-                        /*
-                        if (!(pricesColumn.get(i).contains(" "))) {
-                            //System.out.println(Double.parseDouble(pricesColumn.get(i)));
-                            updateProducts("price", Double.parseDouble(pricesColumn.get(i)), titlesColumn.get(i));
-                        } else {
-                            ArrayList<String> arr = new ArrayList<>();
-                            for (int k = 0; k < pricesColumn.get(i).split(" ").length; k++) {
-                                arr.add(pricesColumn.get(i).split(" ")[k]);
-                            }
-                            for (int m = 0; m < arr.size(); m++) {
-                                if (
-                                    arr.get(m).startsWith("0") ||
-                                    arr.get(m).startsWith("1") ||
-                                    arr.get(m).startsWith("2") ||
-                                    arr.get(m).startsWith("3") ||
-                                    arr.get(m).startsWith("4") ||
-                                    arr.get(m).startsWith("5") ||
-                                    arr.get(m).startsWith("6") ||
-                                    arr.get(m).startsWith("7") ||
-                                    arr.get(m).startsWith("8") ||
-                                    arr.get(m).startsWith("9")) {
-                                    if (!arr.get(m).contains(",")) {
-                                        //System.out.println(Double.parseDouble(element));
-                                        updateProducts("price", Double.parseDouble(arr.get(m)), titlesColumn.get(i));
-                                    } else {
-                                        //System.out.println(Double.parseDouble(element.replace(",",".")));
-                                        updateProducts("price", Double.parseDouble(arr.get(m).replace(",",".")), titlesColumn.get(i));
-                                    }
-                                }
-                            }
-                        }*/
                             } else {
                                 updateProducts("price", 0.0, titlesColumn.get(i));
                             }
-
                         }
                         break;
                     case ("Производитель продукта"):
@@ -225,6 +195,12 @@ public class XLSToDBImport {
                         categoriesColumn.addAll(getColumnByHeader(allImportXLSContent, compareDetail.get(0)));
                         for (int i = 0; i < categoriesColumn.size(); i++) {
                             updateCategories(categoriesColumn.get(i), titlesColumn.get(i));
+                        }
+                        break;
+                    case ("Путь к файлу изображения устройства"):
+                        picPathColumn.addAll(getColumnByHeader(allImportXLSContent, compareDetail.get(0)));
+                        for (int i = 0; i < picPathColumn.size(); i++) {
+                            ProductImage.save(picPathColumn.get(i), titlesColumn.get(i).replace(':', ' ').replace('?', '_'));
                         }
                         break;
                 }
@@ -370,7 +346,6 @@ public class XLSToDBImport {
         }
         return null;
     }
-
     private void updateSeries(String value, String productTitle) {
         if (!(value.equals("") || value.equals(null))) {
             ArrayList<String> notInDBProducts = new ArrayList<>();
@@ -405,7 +380,6 @@ public class XLSToDBImport {
             session.close();
         }
     }
-
     private void updateKinds(String value, String productTitle) {
         if (!(value.equals("") || value.equals(null))) {
             ArrayList<String> notInDBProducts = new ArrayList<>();
@@ -440,7 +414,6 @@ public class XLSToDBImport {
             session.close();
         }
     }
-
     private ProductKinds setKinds(String value, String productTitle) {
         if (!(value.equals("") || value.equals(null))) {
             ArrayList<String> notInDBProducts = new ArrayList<>();
@@ -476,7 +449,6 @@ public class XLSToDBImport {
         }
         return null;
     }
-
     private void updateCategories(String value, String productTitle) {
         if (!(value.equals("") || value.equals(null))) {
             ArrayList<String> notInDBProducts = new ArrayList<>();
@@ -511,7 +483,6 @@ public class XLSToDBImport {
             session.close();
         }
     }
-
     private Categories setCategoryId(String value, String productTitle) {
         if (!(value.equals("") || value.equals(null))) {
             ArrayList<String> notInDBProducts = new ArrayList<>();
@@ -547,7 +518,6 @@ public class XLSToDBImport {
         }
         return null;
     }
-
     private Integer getCategoryIdFromTitle (String title) {
         Integer id = 0;
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -563,7 +533,21 @@ public class XLSToDBImport {
         }
         return id;
     }
-
+    private Integer getProductIdFromTitle (String title) {
+        Integer id = 0;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            List ids = session.createSQLQuery("select id from products where title=\"" + title + "\"").list();
+            for (Iterator iterator = ids.iterator(); iterator.hasNext();) {
+                id = (Integer) iterator.next();
+                return id;
+            }
+        } catch (HibernateException e) {
+        } finally {
+            session.close();
+        }
+        return id;
+    }
     private void importNewProducts(ArrayList<String> newProductsTitles) {
         for (int i = 0; i < newProductsTitles.size(); i++) {
             Session session = HibernateUtil.getSessionFactory().openSession();
@@ -579,4 +563,5 @@ public class XLSToDBImport {
             session.close();
         }
     }
+
 }

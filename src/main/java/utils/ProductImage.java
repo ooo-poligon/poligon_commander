@@ -9,6 +9,7 @@ import entities.Files;
 import entities.Products;
 import java.io.File;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
@@ -16,8 +17,10 @@ import java.util.logging.Logger;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.TransientObjectException;
 
 /**
  *
@@ -63,5 +66,69 @@ public class ProductImage {
             }            
         }
         tx.commit();
+        session.close();
+    }
+
+    public static void save(String picPath, String selectedProduct) {
+        ArrayList<String> exceptionProducts = new ArrayList<>();
+        Products product = new Products();
+        Session sess = HibernateUtil.getSessionFactory().openSession();
+        Query query = sess.createQuery("from Products where title = :title");
+        query.setParameter("title", selectedProduct);
+        List ids = query.list();
+        for (Iterator iterator = ids.iterator(); iterator.hasNext();) {
+            Products p = (Products) iterator.next();
+            product = p;
+        }
+        sess.close();
+        try {
+            Session session = HibernateUtil.getSessionFactory().openSession();
+            Transaction tx = session.beginTransaction();
+            List pictureList = session.createQuery("From Files where ownerId=" + product.getId()).list();
+            if (pictureList.isEmpty()) {
+                Files pictureFile = new Files(picName(picPath), localWindowsPath(picPath), "Это изображение для " + selectedProduct, (new FileTypes(1)), product);
+                session.saveOrUpdate(pictureFile);
+            } else {
+                for (Iterator iterator = pictureList.iterator(); iterator.hasNext(); ) {
+                    Files pic = (Files) iterator.next();
+                    if ((pic.getFileTypeId().getId() == 1) && ((!pic.getName().equals(picName(picPath))) || (!pic.getPath().equals(localWindowsPath(picPath))))) {
+                        pic.setName(picName(picPath));
+                        pic.setPath(localWindowsPath(picPath));
+                        pic.setDescription("Это изображение для " + selectedProduct);
+                        pic.setOwnerId(product);
+                        pic.setFileTypeId(new FileTypes(1));
+                        session.saveOrUpdate(pic);
+                    }
+                }
+            }
+            tx.commit();
+            session.close();
+        } catch (TransientObjectException e) {
+            exceptionProducts.add(product.getTitle());
+        }
+        exceptionProducts.stream().forEach((p) -> {
+            System.out.println(p);
+        });
+    }
+
+    private static String picName(String picPath) {
+        ArrayList<String> pathParts = new ArrayList<>();
+        for (int i = 0; i < picPath.split("/").length; i++) {
+            pathParts.add(picPath.split("/")[i]);
+        }
+        return pathParts.get(picPath.split("/").length - 1);
+    }
+
+    private static String localWindowsPath(String picPath) {
+        ArrayList<String> pathParts = new ArrayList<>();
+        String localPath = "c:\\poligon_images";
+        if (picPath.split("/").length==0) {
+            return "";
+        } else {
+            for (int i = 0; i < picPath.split("/").length; i++) {
+                localPath += "\\" + picPath.split("/")[i];
+            }
+        }
+        return localPath;
     }
 }
