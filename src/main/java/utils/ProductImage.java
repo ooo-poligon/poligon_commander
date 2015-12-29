@@ -84,10 +84,10 @@ public class ProductImage {
         try {
             Session session = HibernateUtil.getSessionFactory().openSession();
             Transaction tx = session.beginTransaction();
-            List pictureList = session.createQuery("From Files where ownerId=" + product.getId()).list();
+            List pictureList = session.createQuery("From Files where ownerId=" + product.getId() + " and fileTypeId=" + 1).list();
             if (pictureList.isEmpty()) {
                 Files pictureFile = new Files(picName(picPath), localWindowsPath(picPath), "Это изображение для " + selectedProduct, (new FileTypes(1)), product);
-                session.saveOrUpdate(pictureFile);
+                session.save(pictureFile);
             } else {
                 for (Iterator iterator = pictureList.iterator(); iterator.hasNext(); ) {
                     Files pic = (Files) iterator.next();

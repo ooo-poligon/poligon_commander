@@ -228,6 +228,7 @@ public class PCGUIController implements Initializable {
     private final String noImageFile = "C:\\Users\\gnato\\Desktop\\Igor\\progs\\java_progs\\PoligonCommanderJ\\src\\main\\resources\\images\\noImage.gif";
     String selectedCategory = "";
     String focusedProduct = "";
+    TreeItem<String> productOwner = new TreeItem<>();
 
     //booleans
     boolean clear = true;
@@ -967,6 +968,13 @@ public class PCGUIController implements Initializable {
         thread  = new Thread(task);
         thread.start();
     }
+
+    @FXML public void startImportProgressBar() {
+        Task task = createImportTask();
+        progressBarImportXLS.progressProperty().bind(task.progressProperty());
+        thread  = new Thread(task);
+        thread.start();
+    }
     
     @FXML private void handleProductTableMousePressed(MouseEvent event1) {
         try {
@@ -1058,9 +1066,53 @@ public class PCGUIController implements Initializable {
         buildProductsTable(data);
         productsTable.getSelectionModel().select(0);
         setVendorSelected(productsTable.getSelectionModel().getSelectedItem().getTitle());
+        setCategorySelected(productsTable.getSelectionModel().getSelectedItem().getTitle());
     }
 
     //
+
+    private void setCategorySelected(String selectedProduct) {
+        Categories category = new Categories();
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Query query = session.createQuery("From Products where title = :title");
+        query.setParameter("title", selectedProduct);
+        List list = query.list();
+        for (Iterator iterator = list.iterator(); iterator.hasNext();) {
+            Products p = (Products) iterator.next();
+            if (p.getTitle().equals(selectedProduct)) {
+                category = p.getCategoryId();
+            }
+        }
+        session.close();
+        recursiveTreeCall(categoriesTree.getRoot(), category);
+        expandParents(productOwner);
+        categoriesTree.getSelectionModel().select(productOwner);
+        categoriesTree.scrollTo(categoriesTree.getRow(productOwner));
+    }
+
+    private ArrayList<TreeItem<String>> expandParents(TreeItem<String> owner) {
+        ArrayList<TreeItem<String>> allParents = new ArrayList<>();
+        try {
+            if (!owner.getParent().equals(null)) {
+                owner.getParent().setExpanded(true);
+                allParents.add(owner.getParent());
+                expandParents(owner.getParent());
+            }
+        } catch (NullPointerException ne) {}
+        return allParents;
+    }
+
+    private void recursiveTreeCall(TreeItem<String> root, Categories category) {
+        for (TreeItem<String> item: root.getChildren()) {
+            if (item.getValue().equals(category.getTitle())) {
+                productOwner = item;
+                //System.out.println("Circle Number " + i + " and owner is " + productOwner.getValue());
+            } else {
+                recursiveTreeCall(item, category);
+            }
+        }
+        //System.out.println(productOwner.getValue());
+    }
 
     private void setVendorSelected(String selectedProduct) {
         Vendors vendor = new Vendors();
@@ -1857,7 +1909,19 @@ public class PCGUIController implements Initializable {
         }
     }
 
-
+    private Task<Void> createImportTask() {
+        return new Task<Void>() {
+            @Override
+            public Void call() throws InterruptedException {
+                startImportFromXLSToDB();
+                Platform.runLater(() -> {
+                    progressBarImportXLS.progressProperty().unbind();
+                    progressBarImportXLS.setProgress(0.0);
+                });
+                return null;
+            }
+        };
+    }
 
 
 
@@ -1905,21 +1969,23 @@ public class PCGUIController implements Initializable {
     }
 
     private void createPaginationPageFactory() {
-        pagination.setPageFactory(new Callback<Integer, Node>() {
-            @Override
-            public Node call(Integer pageNumber) {
-                if (currentFile.get() == null) {
-                    return null ;
-                } else {
-                    if (pageNumber >= currentFile.get().getNumPages() || pageNumber < 0) {
-                        return null ;
+        try {
+            pagination.setPageFactory(new Callback<Integer, Node>() {
+                @Override
+                public Node call(Integer pageNumber) {
+                    if (currentFile.get() == null) {
+                        return null;
                     } else {
-                        updateImage(pageNumber);
-                        return scroller ;
+                        if (pageNumber >= currentFile.get().getNumPages() || pageNumber < 0) {
+                            return null;
+                        } else {
+                            updateImage(pageNumber);
+                            return scroller;
+                        }
                     }
                 }
-            }
-        });
+            });
+        } catch (StackOverflowError se) {}
     }
 
     // ************** Event Handlers ****************
@@ -2115,10 +2181,5 @@ public class PCGUIController implements Initializable {
         tx.commit();
         session.close();
     }
-
-
-
-
-
 
 }

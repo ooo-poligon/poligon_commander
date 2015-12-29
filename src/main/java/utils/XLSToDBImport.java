@@ -21,10 +21,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import main.PCGUIController;
-import org.hibernate.HibernateException;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.hibernate.Query;
+import org.hibernate.*;
 
 /**
  *
@@ -203,12 +200,79 @@ public class XLSToDBImport {
                             ProductImage.save(picPathColumn.get(i), titlesColumn.get(i).replace(':', ' ').replace('?', '_'));
                         }
                         break;
+                    case ("Путь к файлу даташит устройства"):
+                        pdfPathColumn.addAll(getColumnByHeader(allImportXLSContent, compareDetail.get(0)));
+                        for (int i = 0; i < pdfPathColumn.size(); i++) {
+                            savePdfFile(pdfPathColumn.get(i), titlesColumn.get(i).replace(':', ' ').replace('?', '_'));
+                        }
+                        break;
                 }
             });
         } catch (NumberFormatException ne) {
         }
     }
 
+    private static String fileName(String filePath) {
+        ArrayList<String> pathParts = new ArrayList<>();
+        for (int i = 0; i < filePath.split("/").length; i++) {
+            pathParts.add(filePath.split("/")[i]);
+        }
+        return pathParts.get(filePath.split("/").length - 1);
+    }
+
+    private static String localWindowsPath(String filePath) {
+        ArrayList<String> pathParts = new ArrayList<>();
+        String localPath = "c:\\poligon_datasheets";
+        if (filePath.split("/").length==0) {
+            return "";
+        } else {
+            for (int i = 0; i < filePath.split("/").length; i++) {
+                localPath += "\\" + filePath.split("/")[i];
+            }
+        }
+        return localPath;
+    }
+    private void savePdfFile(String pdfPath, String selectedProduct) {
+        ArrayList<String> exceptionProducts = new ArrayList<>();
+        Products product = new Products();
+        Session sess = HibernateUtil.getSessionFactory().openSession();
+        Query query = sess.createQuery("from Products where title = :title");
+        query.setParameter("title", selectedProduct);
+        List ids = query.list();
+        for (Iterator iterator = ids.iterator(); iterator.hasNext();) {
+            Products p = (Products) iterator.next();
+            product = p;
+        }
+        sess.close();
+        try {
+            Session session = HibernateUtil.getSessionFactory().openSession();
+            Transaction tx = session.beginTransaction();
+            List pdfList = session.createQuery("From Files where ownerId=" + product.getId() + " and fileTypeId=" + 2).list();
+            if (pdfList.isEmpty()) {
+                Files pdfFile = new Files(fileName(pdfPath), localWindowsPath(pdfPath), "Это даташит для " + selectedProduct, (new FileTypes(2)), product);
+                session.save(pdfFile);
+            } else {
+                for (Iterator iterator = pdfList.iterator(); iterator.hasNext(); ) {
+                    Files pdf = (Files) iterator.next();
+                    if ((pdf.getFileTypeId().getId() == 2) && ((!pdf.getName().equals(fileName(pdfPath))) || (!pdf.getPath().equals(localWindowsPath(pdfPath))))) {
+                        pdf.setName(fileName(pdfPath));
+                        pdf.setPath(localWindowsPath(pdfPath));
+                        pdf.setDescription("Это изображение для " + selectedProduct);
+                        pdf.setOwnerId(product);
+                        pdf.setFileTypeId(new FileTypes(2));
+                        session.saveOrUpdate(pdf);
+                    }
+                }
+            }
+            tx.commit();
+            session.close();
+        } catch (TransientObjectException e) {
+            exceptionProducts.add(product.getTitle());
+        }
+        exceptionProducts.stream().forEach((p) -> {
+            System.out.println(p);
+        });
+    }
     private ArrayList<String> getColumnByHeader(ArrayList<ArrayList<String>> allImportXLSContent, String header) {
         Integer keyIndex = 0;
         ArrayList<String> list = new ArrayList<>();
@@ -563,5 +627,4 @@ public class XLSToDBImport {
             session.close();
         }
     }
-
 }
