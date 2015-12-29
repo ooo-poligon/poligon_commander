@@ -15,7 +15,7 @@
         <setting name="validation-enabled" value="true" />
         <setting name="provider-name" value="" />
         <datasource-mapping>
-          <factory-entry name="PoligonCommanderPU" />
+          <factory-entry name="PoligonCommanderPU" value="df60a9aa-9f22-4239-8697-f4cd6bfabaff" />
         </datasource-mapping>
         <deploymentDescriptor name="persistence.xml" url="file://$MODULE_DIR$/src/main/java/META-INF/persistence.xml" />
       </configuration>
@@ -47,5 +47,7 @@
     <orderEntry type="library" name="Maven: log4j:log4j:1.2.14" level="project" />
     <orderEntry type="library" name="Maven: mysql:mysql-connector-java:5.1.18" level="project" />
     <orderEntry type="library" name="Maven: org.controlsfx:controlsfx:8.40.10" level="project" />
+    <orderEntry type="library" name="Maven: org.eclipse.persistence:eclipselink:2.5.0-RC1" level="project" />
+    <orderEntry type="library" name="Maven: org.eclipse.persistence:javax.persistence:2.1.0-RC1" level="project" />
   </component>
 </module>

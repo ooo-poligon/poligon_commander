@@ -7,6 +7,7 @@ package main;
 import com.sun.pdfview.PDFFile;
 import com.sun.pdfview.PDFPage;
 import entities.*;
+import entities.Properties;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.IntegerBinding;
@@ -50,6 +51,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import tableviews.*;
 import treeviews.CategoriesTreeView;
+import treeviews.PropertiesTreeView;
 import utils.*;
 
 import java.awt.geom.Rectangle2D;
@@ -90,6 +92,7 @@ public class PCGUIController implements Initializable {
 
     
     @FXML private StackPane  stackPane;
+    @FXML private StackPane  propertiesStackPane;
     StackPane stackPaneModal = new StackPane();
     
     @FXML private GridPane   gridPane;      
@@ -98,6 +101,7 @@ public class PCGUIController implements Initializable {
     
     // TreeViews
     @FXML private TreeView<String> categoriesTree;
+    @FXML private TreeView<String> propertiesTree;
     TreeView<String> treeView;
     
     //Tabs
@@ -245,7 +249,7 @@ public class PCGUIController implements Initializable {
     @Override
     // Выполняется при запуске программы
     public void initialize(URL url, ResourceBundle rb) { 
-        loadSavedSettings();        
+        loadSavedSettings();
         //openPictureButton.setDisable(false);
         //startImportXLSButton.setDisable(true);
         buildCategoryTree();
@@ -849,7 +853,44 @@ public class PCGUIController implements Initializable {
                 return null;
             }
         };
-    }    
+    }
+
+    private void buildPropertiesTree(String selectedProduct) {
+        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + selectedProduct);
+        ProductKinds kind = new ProductKinds();
+        ObservableList<PropertiesTreeView> data = FXCollections.observableArrayList();
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List list = session.createQuery("From Products where id =" + getProductIdFromTitle(selectedProduct)).list();
+        for (Iterator iterator = list.iterator(); iterator.hasNext();) {
+            Products product = (Products) iterator.next();
+            kind = product.getProductKindId();
+        }
+        session.close();
+        Session session1 = HibernateUtil.getSessionFactory().openSession();
+        List list1 = session1.createQuery("From ProductKinds where id =" + kind.getId()).list();
+        for (Iterator iterator1 = list1.iterator(); iterator1.hasNext();) {
+            ProductKinds productKind = (ProductKinds) iterator1.next();
+            data.add(new PropertiesTreeView(productKind.getTitle()));
+        }
+        session1.close();
+        ArrayList<PropertiesTreeView> properties = new ArrayList();
+        data.stream().forEach((section) -> {
+            properties.add(section);
+        });
+        PropertiesTreeView treeRoot = new PropertiesTreeView(0, "Все арактекистики", 0);
+        TreeItem<String> rootItem = new TreeItem<> (treeRoot.getTitle());
+        rootItem.setExpanded(true);
+        buildPropertiesTreeNode(properties, rootItem, treeRoot);
+        propertiesTree = new TreeView<> (rootItem);
+        propertiesStackPane.getChildren().add(propertiesTree);
+    }
+    private void buildPropertiesTreeNode (ArrayList<PropertiesTreeView> properties, TreeItem<String> rootItem, PropertiesTreeView treeRoot) {
+        properties.stream().filter((property) -> (property.getParent().equals(treeRoot.getId()))).forEach((PropertiesTreeView property) -> {
+            TreeItem<String> treeItem = new TreeItem<> (property.getTitle());
+            rootItem.getChildren().add(treeItem);
+            buildPropertiesTreeNode(properties, treeItem, property);
+        });
+    }
     
     // Получает из БД список всех названий продуктов и прикрепляет его к Combobox поиска по названию
     // Также вызывает экземпляр класса автодополнения при поиске
@@ -986,6 +1027,7 @@ public class PCGUIController implements Initializable {
             buildDatasheetFileTable(selectedProduct);
             buildImageView(selectedProduct);
             setVendorSelected(selectedProduct);
+            buildPropertiesTree(selectedProduct);
             datasheetFileTable.refresh();
         } catch (NullPointerException ex) {
         }

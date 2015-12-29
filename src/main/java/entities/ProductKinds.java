@@ -28,10 +28,12 @@ import javax.xml.bind.annotation.XmlTransient;
 @Table(name = "product_kinds")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "ProductKinds.findAll", query = "SELECT p FROM ProductKinds p"),
-    @NamedQuery(name = "ProductKinds.findById", query = "SELECT p FROM ProductKinds p WHERE p.id = :id"),
-    @NamedQuery(name = "ProductKinds.findByTitle", query = "SELECT p FROM ProductKinds p WHERE p.title = :title")})
+        @NamedQuery(name = "ProductKinds.findAll", query = "SELECT p FROM ProductKinds p"),
+        @NamedQuery(name = "ProductKinds.findById", query = "SELECT p FROM ProductKinds p WHERE p.id = :id"),
+        @NamedQuery(name = "ProductKinds.findByTitle", query = "SELECT p FROM ProductKinds p WHERE p.title = :title")})
 public class ProductKinds implements Serializable {
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "productKindId")
+    private Collection<KindsTypes> kindsTypesCollection;
     @OneToMany(mappedBy = "productKindId")
     private Collection<Functions> functionsCollection;
     private static final long serialVersionUID = 1L;
@@ -46,7 +48,8 @@ public class ProductKinds implements Serializable {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "productKindId")
     private Collection<Products> productsCollection;
 
-    public ProductKinds() {}
+    public ProductKinds() {
+    }
 
     public ProductKinds(Integer id) {
         this.id = id;
@@ -115,5 +118,14 @@ public class ProductKinds implements Serializable {
     public void setFunctionsCollection(Collection<Functions> functionsCollection) {
         this.functionsCollection = functionsCollection;
     }
-    
+
+    @XmlTransient
+    public Collection<KindsTypes> getKindsTypesCollection() {
+        return kindsTypesCollection;
+    }
+
+    public void setKindsTypesCollection(Collection<KindsTypes> kindsTypesCollection) {
+        this.kindsTypesCollection = kindsTypesCollection;
+    }
+
 }

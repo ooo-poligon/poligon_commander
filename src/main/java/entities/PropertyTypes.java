@@ -4,6 +4,7 @@
  */
 package entities;
 
+
 import java.io.Serializable;
 import java.util.Collection;
 import javax.persistence.Basic;
@@ -26,11 +27,13 @@ import javax.xml.bind.annotation.XmlTransient;
 @Table(name = "property_types")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "PropertyTypes.findAll", query = "SELECT p FROM PropertyTypes p"),
-    @NamedQuery(name = "PropertyTypes.findById", query = "SELECT p FROM PropertyTypes p WHERE p.id = :id"),
-    @NamedQuery(name = "PropertyTypes.findByTitle", query = "SELECT p FROM PropertyTypes p WHERE p.title = :title"),
-    @NamedQuery(name = "PropertyTypes.findByParent", query = "SELECT p FROM PropertyTypes p WHERE p.parent = :parent")})
+        @NamedQuery(name = "PropertyTypes.findAll", query = "SELECT p FROM PropertyTypes p"),
+        @NamedQuery(name = "PropertyTypes.findById", query = "SELECT p FROM PropertyTypes p WHERE p.id = :id"),
+        @NamedQuery(name = "PropertyTypes.findByTitle", query = "SELECT p FROM PropertyTypes p WHERE p.title = :title"),
+        @NamedQuery(name = "PropertyTypes.findByParent", query = "SELECT p FROM PropertyTypes p WHERE p.parent = :parent")})
 public class PropertyTypes implements Serializable {
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "propertyTypeId")
+    private Collection<KindsTypes> kindsTypesCollection;
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -113,5 +116,14 @@ public class PropertyTypes implements Serializable {
     public String toString() {
         return "entities.PropertyTypes[ id=" + id + " ]";
     }
-    
+
+    @XmlTransient
+    public Collection<KindsTypes> getKindsTypesCollection() {
+        return kindsTypesCollection;
+    }
+
+    public void setKindsTypesCollection(Collection<KindsTypes> kindsTypesCollection) {
+        this.kindsTypesCollection = kindsTypesCollection;
+    }
+
 }

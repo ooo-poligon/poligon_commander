@@ -36,6 +36,7 @@
     <mapping class="entities.Series" />
     <mapping class="entities.Settings" />    
     <mapping class="entities.Vendors" />
+    <mapping class="entities.KindsTypes" />
  
  <!-- <mapping resource="com/mkyong/user/DBUser.hbm.xml"></mapping> -->
 </session-factory>
