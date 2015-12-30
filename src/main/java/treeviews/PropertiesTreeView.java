@@ -29,6 +29,12 @@ public class PropertiesTreeView {
         this.parent = null;
     }
 
+    public PropertiesTreeView(Integer id, String title) {
+        this.id     = new SimpleIntegerProperty(id);
+        this.title  = new SimpleStringProperty(title);
+        this.parent = new SimpleIntegerProperty(0);
+    }
+
     public PropertiesTreeView(Integer id, String title, Integer parent) {
         this.id     = new SimpleIntegerProperty(id);
         this.title  = new SimpleStringProperty(title);

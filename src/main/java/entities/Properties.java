@@ -32,8 +32,8 @@ import javax.xml.bind.annotation.XmlTransient;
 @NamedQueries({
         @NamedQuery(name = "Properties.findAll", query = "SELECT p FROM Properties p"),
         @NamedQuery(name = "Properties.findById", query = "SELECT p FROM Properties p WHERE p.id = :id"),
-        @NamedQuery(name = "Properties.findByTitle", query = "SELECT p FROM Properties p WHERE p.title = :title"),
-        @NamedQuery(name = "Properties.findByValue", query = "SELECT p FROM Properties p WHERE p.value = :value")})
+        @NamedQuery(name = "Properties.findByTitle", query = "SELECT p FROM Properties p WHERE p.title = :title")/*,
+        @NamedQuery(name = "Properties.findByValue", query = "SELECT p FROM Properties p WHERE p.value = :value")*/})
 public class Properties implements Serializable {
     @Basic(optional = false)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "propertyId")
@@ -49,8 +49,8 @@ public class Properties implements Serializable {
     private Integer id;
     @Column(name = "title")
     private String title;
-    @Column(name = "value")
-    private String value;
+    //@Column(name = "value")
+    //private String value;
     @JoinColumn(name = "product_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Products productId;
@@ -81,13 +81,13 @@ public class Properties implements Serializable {
         this.title = title;
     }
 
-    public String getValue() {
-        return value;
-    }
+    //public String getValue() {
+    //    return value;
+    //}
 
-    public void setValue(String value) {
-        this.value = value;
-    }
+    //public void setValue(String value) {
+    //    this.value = value;
+    //}
 
     public Products getProductId() {
         return productId;

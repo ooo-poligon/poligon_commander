@@ -28,7 +28,9 @@ import org.hibernate.TransientObjectException;
  */
 public class ProductImage {
     public static void open(File file, GridPane gridPane, ImageView imageView) {
-            gridPane.getChildren().clear();        
+        if (gridPane.getChildren().size()!=0) {
+            gridPane.getChildren().clear();
+        }
         try {
             String localUrl = file.toURI().toURL().toString();
             imageView.setImage(new Image(localUrl));

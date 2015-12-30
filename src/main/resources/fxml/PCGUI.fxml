@@ -214,7 +214,7 @@
                                                    <children>
                                                       <StackPane fx:id="stackPane" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
                                                          <children>
-                                                            <TreeView fx:id="categoriesTree" onMouseClicked="#handleCatregoryTreeMouseClicked">
+                                                            <TreeView fx:id="categoriesTree" onMouseClicked="#handleCategoryTreeMouseClicked">
                                                                <opaqueInsets>
                                                                   <Insets left="5.0" />
                                                                </opaqueInsets>
@@ -297,7 +297,7 @@
                                                                <children>
                                                                   <StackPane fx:id="propertiesStackPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                                                                      <children>
-                                                                        <TreeView fx:id="propertiesTree" />
+                                                                        <TreeView fx:id="propertiesTree" onMouseClicked="#handlePropertiesTreeMouseClicked" />
                                                                      </children>
                                                                   </StackPane>
                                                                </children>
@@ -313,7 +313,7 @@
                                                             </AnchorPane>
                                                             <AnchorPane prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
                                                                <children>
-                                                                  <ListView AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0" />
+                                                                  <ListView fx:id="functionsList" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0" />
                                                                </children>
                                                             </AnchorPane>
                                                          </children>
@@ -326,12 +326,15 @@
                                                          <children>
                                                             <AnchorPane VBox.vgrow="ALWAYS">
                                                                <children>
-                                                                  <TableView AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                  <TableView fx:id="propertiesTable" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                     <columns>
-                                                                      <TableColumn prefWidth="96.0" text="Свойство" />
-                                                                      <TableColumn prefWidth="101.0" text="Значение" />
-                                                                        <TableColumn prefWidth="126.0" text="Условие" />
+                                                                      <TableColumn fx:id="propertyTitleColumn" prefWidth="156.0" text="Свойство" />
+                                                                        <TableColumn fx:id="propertyConditionColumn" prefWidth="148.0" text="Условие" />
+                                                                      <TableColumn fx:id="propertyValueColumn" prefWidth="152.0" text="Значение" />
                                                                     </columns>
+                                                                     <contextMenu>
+                                                                        <ContextMenu fx:id="propertiesTableContextMenu" />
+                                                                     </contextMenu>
                                                                   </TableView>
                                                                </children>
                                                             </AnchorPane>
@@ -658,12 +661,22 @@
                                                          <children>
                                                             <AnchorPane prefHeight="200.0" prefWidth="200.0">
                                                                <children>
-                                                                  <Label layoutX="100.0" layoutY="27.0" text="Включить отображенеие элементов из подкатегорий выбранной категории" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                                  <Label layoutX="100.0" layoutY="27.0" text="Включить отображение элементов из подкатегорий выбранной категории" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                                                </children>
                                                             </AnchorPane>
                                                             <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1">
                                                                <children>
                                                                   <CheckBox fx:id="treeViewHandlerMode" layoutX="55.0" layoutY="27.0" mnemonicParsing="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                               </children>
+                                                            </AnchorPane>
+                                                            <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1">
+                                                               <children>
+                                                                  <Label text="Включить отображение элементов из подкатегорий характеристик выбранной характеристики" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                               </children>
+                                                            </AnchorPane>
+                                                            <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                                               <children>
+                                                                  <CheckBox fx:id="treeViewHandlerMode1" mnemonicParsing="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                                                </children>
                                                             </AnchorPane>
                                                          </children>
