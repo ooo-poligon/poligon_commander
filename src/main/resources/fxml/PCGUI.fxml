@@ -830,14 +830,14 @@
                                                          <children>
                                                             <AnchorPane prefHeight="200.0" prefWidth="200.0">
                                                                <children>
-                                                                  <ListView layoutX="31.0" layoutY="-85.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0" />
+                                                                  <ListView fx:id="productKindsList" layoutX="31.0" layoutY="-85.0" onMousePressed="#handlePropertiesKindSelected" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0" />
                                                                </children>
                                                             </AnchorPane>
-                                                            <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1">
+                                                            <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
                                                                <children>
                                                                   <HBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
                                                                      <children>
-                                                                        <AnchorPane>
+                                                                        <AnchorPane HBox.hgrow="ALWAYS">
                                                                            <children>
                                                                               <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                                  <children>
@@ -848,9 +848,9 @@
                                                                                     </AnchorPane>
                                                                                     <AnchorPane>
                                                                                        <children>
-                                                                                          <TreeTableView AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
+                                                                                          <TreeTableView fx:id="propertiesTreeTable" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
                                                                                             <columns>
-                                                                                              <TreeTableColumn prefWidth="205.0" text="Наименование" />
+                                                                                              <TreeTableColumn fx:id="propertiesTreeTableTitleColumn" prefWidth="205.0" text="Наименование" />
                                                                                             </columns>
                                                                                           </TreeTableView>
                                                                                        </children>
@@ -859,7 +859,7 @@
                                                                               </VBox>
                                                                            </children>
                                                                         </AnchorPane>
-                                                                        <AnchorPane>
+                                                                        <AnchorPane HBox.hgrow="ALWAYS">
                                                                            <children>
                                                                               <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                                  <children>
@@ -870,9 +870,9 @@
                                                                                     </AnchorPane>
                                                                                     <AnchorPane>
                                                                                        <children>
-                                                                                          <TableView AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                                          <TableView fx:id="functionsTable" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                                             <columns>
-                                                                                              <TableColumn prefWidth="205.0" text="Наименование" />
+                                                                                              <TableColumn fx:id="functionsTableTitleColumn" prefWidth="205.0" text="Наименование" />
                                                                                             </columns>
                                                                                           </TableView>
                                                                                        </children>

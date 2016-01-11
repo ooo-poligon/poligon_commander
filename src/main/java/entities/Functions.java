@@ -30,6 +30,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Functions.findAll", query = "SELECT f FROM Functions f"),
     @NamedQuery(name = "Functions.findById", query = "SELECT f FROM Functions f WHERE f.id = :id"),
     @NamedQuery(name = "Functions.findByTitle", query = "SELECT f FROM Functions f WHERE f.title = :title"),
+    @NamedQuery(name = "Functions.findBySymbol", query = "SELECT f FROM Functions f WHERE f.symbol = :symbol"),
     @NamedQuery(name = "Functions.findByPictureName", query = "SELECT f FROM Functions f WHERE f.pictureName = :pictureName"),
     @NamedQuery(name = "Functions.findByPicturePath", query = "SELECT f FROM Functions f WHERE f.picturePath = :picturePath")})
 public class Functions implements Serializable {
@@ -42,6 +43,8 @@ public class Functions implements Serializable {
     @Basic(optional = false)
     @Column(name = "title")
     private String title;
+    @Column(name = "symbol")
+    private String symbol;
     @Lob
     @Column(name = "description")
     private String description;
@@ -79,6 +82,14 @@ public class Functions implements Serializable {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
     }
 
     public String getDescription() {
