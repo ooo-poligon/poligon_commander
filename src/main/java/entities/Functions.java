@@ -5,7 +5,9 @@
 package entities;
 
 import java.io.Serializable;
+import java.util.Collection;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -16,8 +18,10 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
@@ -27,24 +31,24 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "functions")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Functions.findAll", query = "SELECT f FROM Functions f"),
-    @NamedQuery(name = "Functions.findById", query = "SELECT f FROM Functions f WHERE f.id = :id"),
-    @NamedQuery(name = "Functions.findByTitle", query = "SELECT f FROM Functions f WHERE f.title = :title"),
-    @NamedQuery(name = "Functions.findBySymbol", query = "SELECT f FROM Functions f WHERE f.symbol = :symbol"),
-    @NamedQuery(name = "Functions.findByPictureName", query = "SELECT f FROM Functions f WHERE f.pictureName = :pictureName"),
-    @NamedQuery(name = "Functions.findByPicturePath", query = "SELECT f FROM Functions f WHERE f.picturePath = :picturePath")})
+        @NamedQuery(name = "Functions.findAll", query = "SELECT f FROM Functions f"),
+        @NamedQuery(name = "Functions.findById", query = "SELECT f FROM Functions f WHERE f.id = :id"),
+        @NamedQuery(name = "Functions.findByTitle", query = "SELECT f FROM Functions f WHERE f.title = :title"),
+        @NamedQuery(name = "Functions.findByPictureName", query = "SELECT f FROM Functions f WHERE f.pictureName = :pictureName"),
+        @NamedQuery(name = "Functions.findByPicturePath", query = "SELECT f FROM Functions f WHERE f.picturePath = :picturePath")})
 public class Functions implements Serializable {
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "functionId")
+    private Collection<ProductsFunctions> productsFunctionsCollection;
+    @Column(name = "symbol")
+    private String symbol;
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
     @Basic(optional = false)
     @Column(name = "title")
     private String title;
-    @Column(name = "symbol")
-    private String symbol;
     @Lob
     @Column(name = "description")
     private String description;
@@ -82,14 +86,6 @@ public class Functions implements Serializable {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public String getSymbol() {
-        return symbol;
-    }
-
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
     }
 
     public String getDescription() {
@@ -148,5 +144,22 @@ public class Functions implements Serializable {
     public String toString() {
         return "entities.Functions[ id=" + id + " ]";
     }
-    
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
+    }
+
+    @XmlTransient
+    public Collection<ProductsFunctions> getProductsFunctionsCollection() {
+        return productsFunctionsCollection;
+    }
+
+    public void setProductsFunctionsCollection(Collection<ProductsFunctions> productsFunctionsCollection) {
+        this.productsFunctionsCollection = productsFunctionsCollection;
+    }
+
 }

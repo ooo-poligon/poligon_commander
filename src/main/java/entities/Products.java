@@ -40,6 +40,8 @@ import javax.xml.bind.annotation.XmlTransient;
         @NamedQuery(name = "Products.findByOutdated", query = "SELECT p FROM Products p WHERE p.outdated = :outdated"),
         @NamedQuery(name = "Products.findByPrice", query = "SELECT p FROM Products p WHERE p.price = :price")})
 public class Products implements Serializable {
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "productId")
+    private Collection<ProductsFunctions> productsFunctionsCollection;
     @Basic(optional = false)
     @Column(name = "plugin_owner_id")
     private int pluginOwnerId;
@@ -51,7 +53,6 @@ public class Products implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
     @Basic(optional = false)
@@ -309,6 +310,15 @@ public class Products implements Serializable {
 
     public void setAccessoryOwnerId(int accessoryOwnerId) {
         this.accessoryOwnerId = accessoryOwnerId;
+    }
+
+    @XmlTransient
+    public Collection<ProductsFunctions> getProductsFunctionsCollection() {
+        return productsFunctionsCollection;
+    }
+
+    public void setProductsFunctionsCollection(Collection<ProductsFunctions> productsFunctionsCollection) {
+        this.productsFunctionsCollection = productsFunctionsCollection;
     }
 
 }

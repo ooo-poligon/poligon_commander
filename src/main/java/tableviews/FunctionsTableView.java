@@ -8,9 +8,16 @@ import javafx.beans.property.StringProperty;
  */
 public class FunctionsTableView {
     private final StringProperty title;
+    private final StringProperty symbol;
 
     public FunctionsTableView(String title) {
         this.title = new SimpleStringProperty(title);
+        this.symbol = new SimpleStringProperty("");
+    }
+
+    public FunctionsTableView(String title, String symbol) {
+        this.title =  new SimpleStringProperty(title);
+        this.symbol = new SimpleStringProperty(symbol);
     }
 
     public String getTitle() {
@@ -23,5 +30,17 @@ public class FunctionsTableView {
 
     public void setTitle(String title) {
         this.title.set(title);
+    }
+
+    public String getSymbol() {
+        return symbol.get();
+    }
+
+    public StringProperty symbolProperty() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol.set(symbol);
     }
 }
