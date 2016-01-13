@@ -297,7 +297,10 @@
                                                                <children>
                                                                   <StackPane fx:id="propertiesStackPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                                                                      <children>
-                                                                        <TreeView fx:id="propertiesTree" onMouseClicked="#handlePropertiesTreeMouseClicked" />
+                                                                        <TreeView fx:id="propertiesTree" onMouseClicked="#handlePropertiesTreeMouseClicked">
+                                                                           <contextMenu>
+                                                                              <ContextMenu fx:id="propertiesTreeContextMenu" />
+                                                                           </contextMenu></TreeView>
                                                                      </children>
                                                                   </StackPane>
                                                                </children>
@@ -318,6 +321,9 @@
                                                                         <TableColumn fx:id="functionsTableTitleColumn1" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="190.0" text="Наименование" />
                                                                         <TableColumn fx:id="functionsTableSymbolColumn1" maxWidth="75.0" prefWidth="57.0" text="Символ" />
                                                                      </columns>
+                                                                     <contextMenu>
+                                                                        <ContextMenu fx:id="functionsTable1ContextMenu" />
+                                                                     </contextMenu>
                                                                   </TableView>
                                                                </children>
                                                             </AnchorPane>
@@ -375,7 +381,7 @@
                                                                         </AnchorPane>
                                                                         <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1">
                                                                            <children>
-                                                                              <TextArea fx:id="functionDescriptionTextArea" layoutX="15.0" layoutY="-66.0" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                                              <TextArea fx:id="functionDescriptionTextArea" editable="false" layoutX="15.0" layoutY="-66.0" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                                                            </children>
                                                                         </AnchorPane>
                                                                         <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
@@ -892,7 +898,10 @@
                                                          <children>
                                                             <AnchorPane prefHeight="200.0" prefWidth="200.0">
                                                                <children>
-                                                                  <ListView fx:id="productKindsList" layoutX="31.0" layoutY="-85.0" onMousePressed="#handlePropertiesKindSelected" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0" />
+                                                                  <ListView fx:id="productKindsList" layoutX="31.0" layoutY="-85.0" onMousePressed="#handlePropertiesKindSelected" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
+                                                                     <contextMenu>
+                                                                        <ContextMenu fx:id="productKindsListContextMenu" />
+                                                                     </contextMenu></ListView>
                                                                </children>
                                                             </AnchorPane>
                                                             <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
@@ -914,6 +923,9 @@
                                                                                             <columns>
                                                                                               <TreeTableColumn fx:id="propertiesTreeTableTitleColumn" prefWidth="206.0" text="Наименование" />
                                                                                             </columns>
+                                                                                             <contextMenu>
+                                                                                                <ContextMenu fx:id="propertiesTreeTableContextMenu" />
+                                                                                             </contextMenu>
                                                                                           </TreeTableView>
                                                                                        </children>
                                                                                     </AnchorPane>
@@ -937,6 +949,9 @@
                                                                                               <TableColumn fx:id="functionsTableTitleColumn" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="155.0" text="Наименование" />
                                                                                                 <TableColumn fx:id="functionsTableSymbolColumn" maxWidth="75.0" prefWidth="51.0" text="Символ" />
                                                                                             </columns>
+                                                                                             <contextMenu>
+                                                                                                <ContextMenu fx:id="functionsTableContextMenu" />
+                                                                                             </contextMenu>
                                                                                           </TableView>
                                                                                        </children>
                                                                                     </AnchorPane>

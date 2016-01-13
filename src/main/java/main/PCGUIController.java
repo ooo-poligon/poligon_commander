@@ -1,13 +1,13 @@
 package main;
 
+import com.sun.pdfview.PDFParseException;
 import entities.*;
 import entities.Properties;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebView;
 import tableviews.*;
-import treetableviews.PropertiesTreeTableView;
 import treeviews.CategoriesTreeView;
 import treeviews.PropertiesTreeView;
+import treetableviews.PropertiesTreeTableView;
+import utils.*;
 
 import com.sun.pdfview.PDFFile;
 import com.sun.pdfview.PDFPage;
@@ -46,6 +46,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -55,8 +57,6 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-
-import utils.*;
 
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -85,26 +85,15 @@ import java.util.logging.Logger;
 
 public class PCGUIController implements Initializable {
 
-    // Scenes
-    //public static Scene scene;
-
-    //Stages
-    //Stage newCatStage = new Stage();
-
     // Panes
     @FXML private AnchorPane anchorPane;
-    //@FXML private AnchorPane allTables;
-    //@FXML private AnchorPane newCatDialogAnchorPane;
-    //@FXML private AnchorPane datasheetAnchorPane;
-
     @FXML private StackPane  stackPane;
     @FXML private StackPane  propertiesStackPane;
-    StackPane stackPaneModal = new StackPane();
-
     @FXML private GridPane   gridPane;
     @FXML private GridPane   gridPanePDF;
     @FXML private GridPane productTabGridPaneImageView;
     @FXML private GridPane functionGridPaneImageView;
+    StackPane stackPaneModal = new StackPane();
 
     // TreeViews
     @FXML private TreeView<String> categoriesTree;
@@ -121,11 +110,13 @@ public class PCGUIController implements Initializable {
     @ FXML private ContextMenu treeViewContextMenu;
     @ FXML private ContextMenu productTableContextMenu;
     @ FXML private ContextMenu datasheetTableContextMenu;
-    //@ FXML private MenuItem openProductTabMenu;
-    //@ FXML private MenuItem createCategoryItem;
-    //@ FXML private ContextMenu imageViewContextMenu;
     @ FXML private ContextMenu vendorsTableContextMenu;
     @ FXML private ContextMenu propertiesTableContextMenu;
+    @ FXML private ContextMenu productKindsListContextMenu;
+    @ FXML private ContextMenu propertiesTreeTableContextMenu;
+    @ FXML private ContextMenu functionsTableContextMenu;
+    @ FXML private ContextMenu functionsTable1ContextMenu;
+    @ FXML private ContextMenu propertiesTreeContextMenu;
 
     // TableViews & TableColumns
     @FXML private TableView<ProductsTableView>            productsTable;
@@ -181,16 +172,7 @@ public class PCGUIController implements Initializable {
     @FXML private WebView tabBrowserWebView;
 
     // Buttons
-    //@FXML private Button openPictureButton;
-    //@FXML private Button headersRowSetButton;
-    //@FXML private Button chooseXLSButton;
-    //@FXML private Button compareXLSToDBButton;
     @FXML private Button startImportXLSButton;
-    //@FXML private Button cancelSetImportButton;
-    //@FXML private Button saveNewCategory;
-    //@FXML private Button cancelNewCategory;
-    //@FXML private Button changePhotoButton;
-    //@FXML private Button changePicDescriptionButton;
 
     // Labels
     @FXML private Label productTabTitle;
@@ -383,6 +365,7 @@ public class PCGUIController implements Initializable {
                 }
         );
     }
+
     // Загружает в память настройки программы, сохранённые в БД
     // Пока не применяется и потому не реализовано полностью.
     private void loadSavedSettings() {
@@ -393,22 +376,92 @@ public class PCGUIController implements Initializable {
         }
         session.close();
     }
-    // Загружает в память список полей БД, доступных для импорта через xls-файл
-    //Заполняет список значений importFieldComboBox
-    private void loadImportFields() {
+
+    // Утилиты разные
+    private Integer getCategoryIdFromTitle (String title) {
+        Integer id = 0;
         Session session = HibernateUtil.getSessionFactory().openSession();
-        List res = session.createQuery("From ImportFields").list();
+        try {
+            List ids = session.createSQLQuery("select id from categories where title=\"" + title + "\"").list();
+            for (Iterator iterator = ids.iterator(); iterator.hasNext();) {
+                id = (Integer) iterator.next();
+                return id;
+            }
+        } catch (HibernateException e) {
+        } finally {
+            session.close();
+        }
+        return id;
+    }
+    private Integer getPropertyTypeIdFromTitle (String title) {
+        Integer id = 0;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            List ids = session.createSQLQuery("select id from property_types where title=\"" + title + "\"").list();
+            for (Iterator iterator = ids.iterator(); iterator.hasNext();) {
+                id = (Integer) iterator.next();
+                return id;
+            }
+        } catch (HibernateException e) {
+        } finally {
+            session.close();
+        }
+        return id;
+    }
+    private Integer getProductIdFromTitle (String title) {
+        Integer id = 0;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            List ids = session.createSQLQuery("select id from products where title=\"" + title + "\"").list();
+            for (Iterator iterator = ids.iterator(); iterator.hasNext();) {
+                id = (Integer) iterator.next();
+                return id;
+            }
+        } catch (HibernateException e) {
+        } finally {
+            session.close();
+        }
+        return id;
+    }
+    private Integer getPropertyKindIdFromTitle(String selectedPropertiesKind) {
+        Integer id = 0;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List res = session.createQuery("from ProductKinds where title=\'" + selectedPropertiesKind + "\'").list();
         for (Iterator iterator = res.iterator(); iterator.hasNext();) {
-            ImportFields field = (ImportFields) iterator.next();
-            importFields.add(new ImportFields(field.getId(), field.getTitle(), field.getTableName(), field.getField()));
+            ProductKinds kindId = (ProductKinds) iterator.next();
+            id = kindId.getId();
         }
         session.close();
-        ObservableList<String> fieldsNames = FXCollections.observableArrayList();
-        importFields.stream().forEach((field) -> {
-            fieldsNames.add(field.getTitle());
-        });
-        importFieldsComboBox.setItems(fieldsNames);
+        return id;
+    };
+    private String normalize(String string) {
+        //проверить корректность работы "normalize" позже
+        if (string.contains("\t") || (string.contains("\n"))) {
+            string.replace('\t', ' ');
+            string.replace('\n', ' ');
+        }
+        String s = "";
+        if ((string.contains("\""))) {
+            String[] sub = string.split("\"");
+            for (int i = 0; i < sub.length; i++) {
+                if (i == 0) {
+                    s = sub[i] + "\"";
+                } else if (i == sub.length - 1) {
+                    s = "\"" + sub[i];
+                } else {
+                    s = "\"" + sub[i] + "\"";
+                }
+                string += s;
+            }
+        }
+        return string;
     }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Таб "Номенклатура" //////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     // Получает все продукты из БД для отображения в таблице
     // В виде аргумента использует id родительской категории
     private ObservableList<ProductsTableView> getProductList(Integer selectedNodeID) {
@@ -433,6 +486,7 @@ public class PCGUIController implements Initializable {
         }
         return data;
     }
+
     // Получает все продукты из БД для отображения в таблице
     // В виде аргумента использует title родительской категории
     private ObservableList<ProductsTableView> getProductList(String selectedNode) {
@@ -456,6 +510,7 @@ public class PCGUIController implements Initializable {
         }
         return data;
     }
+
     // Получает данные о количестве продукта из БД
     // В виде аргумента принимает название продукта
     private ObservableList<QuantityTableView> getQuantities(String productName) {
@@ -482,6 +537,7 @@ public class PCGUIController implements Initializable {
         }
         return data;
     }
+
     // Получает данные об аналогах для продукта из БД
     // В виде аргумента принимает название продукта
     private ObservableList<AnalogsTableView> getAnalogs(String productName) {
@@ -511,6 +567,7 @@ public class PCGUIController implements Initializable {
         }
         return data;
     }
+
     // Получает из БД hashmap базовых цен, сопоставленных с продуктом по его названию
     private void getAllPrices() {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -525,6 +582,7 @@ public class PCGUIController implements Initializable {
             session.close();
         }
     }
+
     // Получает все характеристики из БД для отображения в таблице
     // В виде аргумента использует id выбранного пункта
     private ObservableList<PropertiesTableView> getPropertiesList(Integer selectedNodeID) {
@@ -548,6 +606,7 @@ public class PCGUIController implements Initializable {
         System.out.println(selectedNodeID + " ---- " + selectedProduct);
         return data;
     }
+
     // Построение таблиц с данными полученными из БД
     private void buildProductsTable(ObservableList<ProductsTableView> data) {
         productArticle.setCellValueFactory(new PropertyValueFactory<>("article"));
@@ -746,17 +805,6 @@ public class PCGUIController implements Initializable {
         vendorsTable.setContextMenu(vendorsTableContextMenu);
         vendorsTable.setItems(data);
     }
-    private void buildPropertiesTable(ObservableList<PropertiesTableView> data) {
-        propertyTitleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
-        propertyConditionColumn.setCellValueFactory(new PropertyValueFactory<>("condition"));
-        propertyValueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
-        propertiesTableContextMenu = ContextMenuBuilder.create().items(
-                MenuItemBuilder.create().text("Добавить новое свойство").onAction((ActionEvent arg0) -> {
-                    addPropertyDialog();}).build()
-        ).build();
-        propertiesTable.setContextMenu(propertiesTableContextMenu);
-        propertiesTable.setItems(data);
-    }
     private void buildImageView(String selectedProduct) {
         if (selectedProduct == null) {
             selectedProduct = focusedProduct;
@@ -774,92 +822,6 @@ public class PCGUIController implements Initializable {
         }
         session.close();
     }
-    private void buildProductKindsList() {
-        ObservableList<String> items = FXCollections.observableArrayList();
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        List res = session.createQuery("from ProductKinds").list();
-        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
-            ProductKinds pKind = (ProductKinds) iterator.next();
-            String item = new String(pKind.getTitle());
-            items.add(item);
-        }
-        session.close();
-        productKindsList.setItems(items);
-    }
-    private void buildPropertiesTreeTable(String selectedPropertiesKind) {
-        ArrayList<Integer> typesIds = new ArrayList<>();
-        ArrayList<PropertiesTreeTableView> properties = new ArrayList<>();
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        List res = session.createQuery("from KindsTypes where productKindId =" + getPropertyKindIdFromTitle(selectedPropertiesKind)).list();
-        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
-            KindsTypes kt = (KindsTypes) iterator.next();
-            typesIds.add(kt.getPropertyTypeId().getId());
-        }
-        session.close();
-        Session session1 = HibernateUtil.getSessionFactory().openSession();
-        List res1 = session1.createQuery("from PropertyTypes").list();
-        for(Iterator iterator =  res1.iterator(); iterator.hasNext();) {
-            PropertyTypes pt = (PropertyTypes) iterator.next();
-            if(typesIds.contains(pt.getId())) {
-                properties.add(new PropertiesTreeTableView(pt.getTitle()));
-            }
-        }
-        session1.close();
-        ObservableList<TreeItem<PropertiesTreeTableView>> treeItems = FXCollections.observableArrayList();
-        properties.stream().forEach((prop) -> {
-            treeItems.add(new TreeItem<PropertiesTreeTableView>(prop));
-        });
-        TreeItem<PropertiesTreeTableView> root = new TreeItem<>(new PropertiesTreeTableView("Все характеристики"));
-        root.setExpanded(true);
-        treeItems.stream().forEach((item) -> {
-            ArrayList<TreeItem> children = treeItemChildren(item);
-            if (children.size() > 0) {
-                children.stream().forEach((child) -> {
-                    item.getChildren().add(child);
-                });
-            }
-            root.getChildren().add(item);
-        });
-
-        propertiesTreeTable.setRoot(root);
-        propertiesTreeTable.getColumns().setAll(propertiesTreeTableTitleColumn);
-        propertiesTreeTableTitleColumn.setCellValueFactory(new TreeItemPropertyValueFactory("title"));
-    };
-    private void buildFunctionsTable(String selectedPropertiesKind) {
-        ArrayList<Functions> functions = new ArrayList<>();
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        List res = session.createQuery("from Functions where productKindId =" + getPropertyKindIdFromTitle(selectedPropertiesKind)).list();
-        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
-            Functions func = (Functions) iterator.next();
-            functions.add(func);
-        }
-        session.close();
-        ObservableList<FunctionsTableView> list = FXCollections.observableArrayList();
-        functions.stream().forEach((f) -> {
-            list.add(new FunctionsTableView(f.getTitle(), f.getSymbol()));
-        });
-        functionsTableTitleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
-        functionsTableSymbolColumn.setCellValueFactory(new PropertyValueFactory<>("symbol"));
-        functionsTable.setItems(list);
-    };
-    private void buildFunctionsTable1(String selectedProduct) {
-        ArrayList<Functions> functions = new ArrayList<>();
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        List res = session.createQuery("from ProductsFunctions where productId =" + getProductIdFromTitle(selectedProduct)).list();
-        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
-            ProductsFunctions func = (ProductsFunctions) iterator.next();
-            functions.add(func.getFunctionId());
-        }
-        session.close();
-
-        ObservableList<FunctionsTableView> list = FXCollections.observableArrayList();
-        functions.stream().forEach((f) -> {
-            list.add(new FunctionsTableView(f.getTitle(), f.getSymbol()));
-        });
-        functionsTableTitleColumn1.setCellValueFactory(new PropertyValueFactory<>("title"));
-        functionsTableSymbolColumn1.setCellValueFactory(new PropertyValueFactory<>("symbol"));
-        functionsTable1.setItems(list);
-    };
 
     // Построение дерева категорий каталога
     private void buildCategoryTree() {
@@ -890,11 +852,14 @@ public class PCGUIController implements Initializable {
         categoriesTree.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseEventHandle);
         treeViewContextMenu = ContextMenuBuilder.create().items(
                 MenuItemBuilder.create().text("Создать категорию").onAction((ActionEvent arg0) -> {
-                    newCategoryDialog("main");}).build(),
+                    newCategoryDialog("main");
+                }).build(),
                 MenuItemBuilder.create().text("Редактировать категорию").onAction((ActionEvent arg0) -> {
-                    editCategoryDialog("main");}).build(),
+                    editCategoryDialog("main");
+                }).build(),
                 MenuItemBuilder.create().text("Удалить категорию").onAction((ActionEvent arg0) -> {
-                    deleteCategoryDialog("main");}).build()
+                    deleteCategoryDialog("main");
+                }).build()
         ).build();
         categoriesTree.setContextMenu(treeViewContextMenu);
         stackPane.getChildren().add(categoriesTree);
@@ -1064,6 +1029,12 @@ public class PCGUIController implements Initializable {
             handlePropertiesTreeMouseClicked(event);
         };
         propertiesTree.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseEventHandle);
+        propertiesTreeContextMenu = ContextMenuBuilder.create().items(
+                MenuItemBuilder.create().text("Добавить новую характеристику").onAction((ActionEvent ae1) -> {}).build(),
+                MenuItemBuilder.create().text("Редактировать выбранную характеристику").onAction((ActionEvent ae2) -> {}).build(),
+                MenuItemBuilder.create().text("Удалить выбранную характеристику").onAction((ActionEvent ae3) -> {}).build()
+        ).build();
+        propertiesTree.setContextMenu(propertiesTreeContextMenu);
         propertiesStackPane.getChildren().add(propertiesTree);
     }
     private void buildPropertiesTreeNode (ArrayList<PropertiesTreeView> properties, TreeItem<String> rootItem, PropertiesTreeView treeRoot) {
@@ -1074,617 +1045,192 @@ public class PCGUIController implements Initializable {
         });
     }
 
-    // Получает из БД список всех названий продуктов и прикрепляет его к Combobox поиска по названию
-    // Также вызывает экземпляр класса автодополнения при поиске
-    private void populateComboBox () {
+    // Создаёт модальное окно с деревом категорий товаров для диалога переноса товаров в другую категорию.
+    private void buildModalCategoryTree(StackPane stackPane) {
+        ObservableList<CategoriesTreeView> sections = FXCollections.observableArrayList();
         Session session = HibernateUtil.getSessionFactory().openSession();
-        List res = session.createQuery("From Products").list();
-        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
-            Products p = (Products) iterator.next();
-            allProducts.add(p.getTitle());
+        try {
+            List categories = session.createQuery("FROM Categories").list();
+            for (Iterator iterator = categories.iterator(); iterator.hasNext();) {
+                Categories category = (Categories) iterator.next();
+                sections.add(new CategoriesTreeView(category.getId(), category.getTitle(), category.getParent()));
+            }
+        } catch (HibernateException e) {
+        } finally {
+            session.close();
         }
-        searchComboBox.getItems().clear();
-        searchComboBox.getItems().addAll(allProducts);
-        AutoCompleteComboBoxListener autoCompleteComboBoxListener = new AutoCompleteComboBoxListener(searchComboBox);
+        ArrayList<CategoriesTreeView> categories = new ArrayList();
+        sections.stream().forEach((section) -> {
+            categories.add(section);
+        });
+        CategoriesTreeView catalogRoot = new CategoriesTreeView(0, catalogHeader, 0);
+        TreeItem<String> rootItem = new TreeItem<> (catalogRoot.getTitle());
+        rootItem.setExpanded(true);
+        buildTreeNode(categories, rootItem, catalogRoot);
+
+        treeView = new TreeView(rootItem);
+        ContextMenu treeViewContextMenu1 = ContextMenuBuilder.create().items(
+                MenuItemBuilder.create().text("Создать категорию").onAction((ActionEvent arg0) -> {
+                    newCategoryDialog("modal");
+                }).build(),
+                MenuItemBuilder.create().text("Редактировать категорию").onAction((ActionEvent arg0) -> {
+                    editCategoryDialog("modal");
+                }).build(),
+                MenuItemBuilder.create().text("Удалить категорию").onAction((ActionEvent arg0) -> {
+                    deleteCategoryDialog("modal");
+                }).build()
+        ).build();
+        treeView.setContextMenu(treeViewContextMenu1);
+        stackPane.getChildren().add(treeView);
+        treeView.setPrefWidth(350.0);
+        treeView.setPrefHeight(400.0);
     }
 
-    // Группа методов для импорта данных в БД из xls-файла
-    public void startProgressBarImportXLS() {
-        Task task = createImportXLSTask();
-        progressBarImportXLS.progressProperty().bind(task.progressProperty());
-        Platform.runLater(task);
-        /*
-        thread  = new Thread(task);
-        thread.start();
-        */
+    // Вызывает диалог переноса товавра или нескольких товаров в новую категорию.
+    private void changeProductCategoryDialog() {
+        ObservableList<ProductsTableView> selectedItems = productsTable.getSelectionModel().getSelectedItems();
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        DialogPane dialog = new DialogPane();
+        alert.setDialogPane(dialog);
+
+        alert.setTitle("Переместить выбранные элементы");
+        alert.setHeaderText("Укажите категорию, в которую следует \nпереместить выбранные элементы:");
+        alert.setResizable(false);
+
+        AnchorPane anchorPane = new AnchorPane();
+
+        anchorPane.getChildren().add(stackPaneModal);
+        stackPaneModal.setAlignment(Pos.CENTER);
+        buildModalCategoryTree(stackPaneModal);
+
+        dialog.setContent(anchorPane);
+
+        ButtonType buttonTypeOk = new ButtonType("Переместить", ButtonData.OK_DONE);
+        ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonData.CANCEL_CLOSE);
+        dialog.getButtonTypes().add(buttonTypeOk);
+        dialog.getButtonTypes().add(buttonTypeCancel);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if ((result.isPresent()) && (result.get() == buttonTypeOk)) {
+            selectedCategory = treeView.getSelectionModel().getSelectedItem().getValue();
+            for(ProductsTableView product: selectedItems) {
+                updateCategoryId(selectedCategory, product.getTitle());
+            }
+        }
+        refreshProductsTable();
     }
-    private Task<Void> createImportXLSTask() {
-        return new Task<Void>() {
-            @Override
-            public Void call() throws InterruptedException {
+
+    // Вспомогательные методы, для смены id категории, к которой принадлежит товар.
+    // Две версии для разных вхзодных типов данных
+    // Позже можно будет решить более красиво, но пока так...
+    private void updateCategoryId(String value, String productTitle) {
+        if (!(value.equals("") || value.equals(null))) {
+            Categories cat = new Categories();
+            Session sess = HibernateUtil.getSessionFactory().openSession();
+            List list = sess.createQuery("From Categories").list();
+            for (Iterator iterator = list.iterator(); iterator.hasNext();) {
+                Categories category = (Categories) iterator.next();
+                if (category.getTitle().equals(value)) {
+                    cat = category;
+                }
+            }
+            sess.close();
+            Integer id = 0;
+            Session session = HibernateUtil.getSessionFactory().openSession();
+            session.beginTransaction();
+            List ids = session.createSQLQuery("select id from products where title=\"" + productTitle + "\"").list();
+            for (Iterator iterator = ids.iterator(); iterator.hasNext();) {
+                id = (Integer) iterator.next();
+            }
+            if (!(id == 0)) {
+                Products product = (Products) session.get(Products.class, id);
                 try {
-                    allImportXLSContent = XLSHandler.grabData(fileXLS.getAbsolutePath());
-                } catch (IOException ex) {
-                    Logger.getLogger(PCGUIController.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                Platform.runLater(() -> {
-                    //progressIndicator.progressProperty().unbind();
-                    //progressIndicator.setVisible(false);
-                    //progressIndicator.setProgress(0.0);
-                    progressBarImportXLS.progressProperty().unbind();
-                    progressBarImportXLS.setProgress(0.0);
-                });
-                return null;
+                    if (cat.getTitle().equals(value)) {
+                        product.setCategoryId(cat);
+                    }
+                } catch (NullPointerException ne) {}
+                session.save(product);
             }
-        };
+            session.getTransaction().commit();
+            session.close();
+        }
+    }
+    private void updateCategoryId(Integer value, String productTitle) {
+        if (!(value.equals("") || value.equals(null))) {
+            Categories cat = new Categories();
+            Session sess = HibernateUtil.getSessionFactory().openSession();
+            List list = sess.createQuery("From Categories").list();
+            for (Iterator iterator = list.iterator(); iterator.hasNext();) {
+                Categories category = (Categories) iterator.next();
+                if (category.getId().equals(value)) {
+                    cat = category;
+                }
+            }
+            sess.close();
+            Integer id = 0;
+            Session session = HibernateUtil.getSessionFactory().openSession();
+            session.beginTransaction();
+            List ids = session.createSQLQuery("select id from products where title=\"" + productTitle + "\"").list();
+            for (Iterator iterator = ids.iterator(); iterator.hasNext();) {
+                id = (Integer) iterator.next();
+            }
+            if (!(id == 0)) {
+                Products product = (Products) session.get(Products.class, id);
+                try {
+                    if (cat.getId().equals(value)) {
+                        product.setCategoryId(cat);
+                    }
+                } catch (NullPointerException ne) {}
+                session.save(product);
+            }
+            session.getTransaction().commit();
+            session.close();
+        }
     }
 
-    // Утилиты разные
-    private ArrayList<TreeItem> treeItemChildren(TreeItem<PropertiesTreeTableView> item) {
-        String itemTitle = item.getValue().getTitle();
-        ArrayList<TreeItem> childTreeItems = new ArrayList<>();
+    // Вносит в БД новые значения, полученные при редактировании таблицы товаров.
+    private void setNewCellValue(String fieldName, String newValue, String productTitle) {
         Session session = HibernateUtil.getSessionFactory().openSession();
-        List res = session.createQuery("from Properties where propertyTypeId=" + getPropertyTypeIdFromTitle(itemTitle)).list();
-        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
-            Properties property = (Properties) iterator.next();
-            childTreeItems.add(new TreeItem(new PropertiesTreeTableView(property.getTitle())));
-        }
+        Transaction tx = session.beginTransaction();
+        Query query = session.createQuery("UPDATE Products set " + fieldName + "= :newValue where title= :title");
+        query.setParameter("newValue", newValue);
+        query.setParameter("title", productTitle);
+        query.executeUpdate();
+        tx.commit();
         session.close();
-        return childTreeItems;
-    }
-    private Integer getCategoryIdFromTitle (String title) {
-        Integer id = 0;
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        try {
-            List ids = session.createSQLQuery("select id from categories where title=\"" + title + "\"").list();
-            for (Iterator iterator = ids.iterator(); iterator.hasNext();) {
-                id = (Integer) iterator.next();
-                return id;
-            }
-        } catch (HibernateException e) {
-        } finally {
-            session.close();
-        }
-        return id;
-    }
-    private Integer getPropertyTypeIdFromTitle (String title) {
-        Integer id = 0;
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        try {
-            List ids = session.createSQLQuery("select id from property_types where title=\"" + title + "\"").list();
-            for (Iterator iterator = ids.iterator(); iterator.hasNext();) {
-                id = (Integer) iterator.next();
-                return id;
-            }
-        } catch (HibernateException e) {
-        } finally {
-            session.close();
-        }
-        return id;
-    }
-    private Integer getProductIdFromTitle (String title) {
-        Integer id = 0;
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        try {
-            List ids = session.createSQLQuery("select id from products where title=\"" + title + "\"").list();
-            for (Iterator iterator = ids.iterator(); iterator.hasNext();) {
-                id = (Integer) iterator.next();
-                return id;
-            }
-        } catch (HibernateException e) {
-        } finally {
-            session.close();
-        }
-        return id;
-    }
-    private Integer getPropertyKindIdFromTitle(String selectedPropertiesKind) {
-        Integer id = 0;
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        List res = session.createQuery("from ProductKinds where title=\'" + selectedPropertiesKind + "\'").list();
-        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
-            ProductKinds kindId = (ProductKinds) iterator.next();
-            id = kindId.getId();
-        }
-        session.close();
-        return id;
-    };
-    private String normalize(String string) {
-        //проверить корректность работы "normalize" позже
-        if (string.contains("\t") || (string.contains("\n"))) {
-            string.replace('\t', ' ');
-            string.replace('\n', ' ');
-        }
-        String s = "";
-        if ((string.contains("\""))) {
-            String[] sub = string.split("\"");
-            for (int i = 0; i < sub.length; i++) {
-                if (i == 0) {
-                    s = sub[i] + "\"";
-                } else if (i == sub.length - 1) {
-                    s = "\"" + sub[i];
-                } else {
-                    s = "\"" + sub[i] + "\"";
-                }
-                string += s;
-            }
-        }
-        return string;
-    }
-    @FXML private void getSelectedHeader() {
-        sHeader();
-    }
-    private String sHeader() {
-        String sh = new String();
-        try {
-            sh = headersXLS.getSelectionModel().getSelectedItem();
-        } catch (NullPointerException ne) {}
-        return sh;
     }
 
-    // Обработчики событий от элементов интерфейса
-    @FXML private void handleCategoryTreeMouseClicked(MouseEvent event) {
-        startProgressBar(event);
-    }
-    @FXML public  void startProgressBar(MouseEvent event) {
-        Task task = createTask(event);
-        progressBar.progressProperty().bind(task.progressProperty());
-        Platform.runLater(task);
-        /*
-        thread  = new Thread(task);
-        thread.start();
-        */
-    }
-    @FXML private void handlePropertiesTreeMouseClicked(MouseEvent event) {
-        ObservableList<PropertiesTableView> data = FXCollections.observableArrayList();
-        // Вызываем метод, возврщающий нам название кликнутого узла
-        Node node = event.getPickResult().getIntersectedNode();
-        // Accept clicks only on node cells, and not on empty spaces of the TreeView
-        if (node instanceof Text || (node instanceof TreeCell && ((TreeCell) node).getText() != null)) {
-            String selectedNode = (String) ((TreeItem)propertiesTree.getSelectionModel().getSelectedItem()).getValue();
-            subPropertiesList(selectedNode);
-            if (treeViewHandlerMode1.isSelected()) {
-                includeLowerPropertyItems(data, selectedNode);
-            } else {
-                excludeLowerPropertyItems(data, selectedNode);
-            }
-            buildPropertiesTable(data);
-            propertiesTable.getSelectionModel().select(0);
+    // Перерисовывает таблицу товаров в зависимости от выбранного пункта в дереве категорий.
+    private void refreshProductsTable() {
+        try {
+            Integer selectedTreeId = getCategoryIdFromTitle(categoriesTree.getSelectionModel().getSelectedItem().getValue());
+            buildProductsTable(getProductList(selectedTreeId));
+        } catch (NullPointerException ne) {
+            Integer selectedTreeId = getCategoryIdFromTitle(treeView.getSelectionModel().getSelectedItem().getValue());
+            buildProductsTable(getProductList(selectedTreeId));
         }
     }
-    @FXML private void handleFunctionsTable1MouseClicked() {
-        String functionDescription = "";
-        String functionPicturePath = "";
-        String selectedFunction = functionsTable1.getSelectionModel().getSelectedItem().getTitle();
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        List res = session.createQuery("from Functions where title=\'" + selectedFunction + "\'").list();
-        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
-            Functions f = (Functions) iterator.next();
-            functionDescription = f.getDescription();
-            functionPicturePath = f.getPicturePath();
-        }
-        if ((functionDescription!=null) && (!functionDescription.equals("") &&
-                (functionPicturePath!=null) && (!functionPicturePath.equals("")))) {
-            functionDescriptionTextArea.setText(functionDescription);
-            setFunctionPicture(functionPicturePath);
-        } else {
-            functionDescriptionTextArea.setText("");
-            setFunctionPicture(noImageFile);
-        }
+
+    // Вызывает диалог добавления нового товара из контектстного меню таблицы товаров.
+    // Пока не реализован.
+    private void addProductDialog() {
+        //ProductsTableView product = productsTable.getSelectionModel().getSelectedItem();
+        //tabPane.getSelectionModel().select(productTab);
     }
-    @FXML public  void startImportProgressBar() {
-        Task task = createImportTask();
-        progressBarImportXLS.progressProperty().bind(task.progressProperty());
-        Platform.runLater(task);
-        /*
-        thread  = new Thread(task);
-        thread.start();
-        */
+
+    // Вызывает диалог удаления выбранного товара (или нескольких товаров) из контектстного меню таблицы товаров.
+    // Пока не реализован.
+    private void deleteProductDialog() {
+        //ProductsTableView product = productsTable.getSelectionModel().getSelectedItem();
+        //tabPane.getSelectionModel().select(productTab);
     }
-    @FXML private void handleProductTableMousePressed(MouseEvent event1) {
-        onFocusedProductTableItem();
-        if (productsTable.getSelectionModel().getSelectedItems().size() == 1) {
-            productTableContextMenu = ContextMenuBuilder.create().items(
-                    MenuItemBuilder.create().text("Открыть вкладку обзора свойств устройства").onAction((ActionEvent arg0) -> {
-                        openProductTab();
-                    }).build(),
-                    MenuItemBuilder.create().text("Открыть просмотр PDF-файла").onAction((ActionEvent arg0) -> {
-                        createAndConfigureImageLoadService();
-                        currentFile = new SimpleObjectProperty<>();
-                        currentImage = new SimpleObjectProperty<>();
-                        scroller.contentProperty().bind(currentImage);
-                        zoom = new SimpleDoubleProperty(1);
-                        // To implement zooming, we just get a new image from the PDFFile each time.
-                        // This seems to perform well in some basic tests but may need to be improved
-                        // E.g. load a larger image and scale in the ImageView, loading a new image only
-                        // when required.
-                        zoom.addListener(new ChangeListener<Number>() {
-                            @Override
-                            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                                updateImage(pagination.getCurrentPageIndex());
-                            }
-                        });
-                        currentZoomLabel.textProperty().bind(Bindings.format("%.0f %%", zoom.multiply(100)));
-                        bindPaginationToCurrentFile();
-                        createPaginationPageFactory();
-                        tabPane.getSelectionModel().select(pdfTab);
-                        loadPdfFile(productsTable.getSelectionModel().getSelectedItem().getTitle());
-                    }).build(),
-                    MenuItemBuilder.create().text("Переместить в категорию...").onAction((ActionEvent arg0) -> {
-                        changeProductCategoryDialog();
-                    }).build(),
-                    MenuItemBuilder.create().text("Добавить элемент...").onAction((ActionEvent arg0) -> {
-                        addProductDialog();
-                    }).build(),
-                    MenuItemBuilder.create().text("Удалить элемент...").onAction((ActionEvent arg0) -> {
-                        deleteProductDialog();
-                    }).build()
-            ).build();
-        } else if(productsTable.getSelectionModel().getSelectedItems().size() == 0) {
-            productTableContextMenu = ContextMenuBuilder.create().items(
-                    MenuItemBuilder.create().text("Импортировать элементы...").onAction((ActionEvent arg0) -> {
-                        tabPane.getSelectionModel().select(settingsTab);}).build()
-            ).build();
-        } else {
-            productTableContextMenu = ContextMenuBuilder.create().items(
-                    MenuItemBuilder.create().text("Переместить в категорию...").onAction((ActionEvent arg0) -> {
-                        changeProductCategoryDialog();}).build(),
-                    MenuItemBuilder.create().text("Удалить выбранные элементы").onAction((ActionEvent arg0) -> {
-                        deleteProductDialog();}).build()
-            ).build();
-        }
-        productsTable.setContextMenu(productTableContextMenu);
+
+    // Переводит программу на отображение вкладки со свойствами выбранного товара.
+    private void openProductTab() {
+        tabPane.getSelectionModel().select(productTab);
         fillProductTab();
     }
-    @FXML private void handleSearchComboBox() {
-        ObservableList<ProductsTableView> data = FXCollections.observableArrayList();
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        try {
-            List response = session.createQuery("From Products where title= \'" + normalize(searchComboBox.getValue()) + "\'").list();
-            for (Iterator iterator = response.iterator(); iterator.hasNext();) {
-                Products product = (Products) iterator.next();
-                data.add(new ProductsTableView(
-                                product.getArticle(),
-                                product.getTitle(),
-                                product.getDescription(),
-                                product.getDeliveryTime()
-                        )
-                );
-            }
-        } catch (HibernateException e) {
-        } finally {
-            session.close();
-        }
-        buildProductsTable(data);
-        productsTable.getSelectionModel().select(0);
-        setVendorSelected(productsTable.getSelectionModel().getSelectedItem().getTitle());
-        setCategorySelected(productsTable.getSelectionModel().getSelectedItem().getTitle());
-    }
-    @FXML private void handlePropertiesKindSelected() {
-        String selectedPropertiesKind = productKindsList.getSelectionModel().getSelectedItem();
-        buildPropertiesTreeTable(selectedPropertiesKind);
-        buildFunctionsTable(selectedPropertiesKind);
-        //System.out.println(selectedPropertiesKind);
 
-    }
-    @FXML private void setPictureButtonPress() {
-        File file = fileChooser.showOpenDialog(anchorPane.getScene().getWindow());
-        if (file != null) {
-            ProductImage.open(file, gridPane, imageView);
-            ProductImage.open(file, productTabGridPaneImageView, productTabImageView);
-            ProductImage.save(file, selectedProduct);
-        }
-    }
-    @FXML private void setChooseXLSButtonPress() {
-        fileXLS = fileChooser.showOpenDialog(anchorPane.getScene().getWindow());
-        if (fileXLS != null) {
-            startProgressBarImportXLS();
-        }
-    }
-    @FXML private void getHeadersRowNumber(KeyEvent e) {
-        if(e.getCode().toString().equals("ENTER"))
-        {
-            ObservableList<String> data = FXCollections.observableArrayList();
-            if (allImportXLSContent.isEmpty()) {
-                showWarningWindow("Сначала необходимо выбрать xls-файл, содержащий данные для импорта.");
-            }
-            try {
-                headersRowNumber = Integer.parseInt(headersRowTextField.getText()) - 1;
-                if (headersRowNumber < 0) {
-                    showWarningWindow("Вы ввели недопустимое число. Будет установленно значение по умолчанию, что соответствует числу 1.");
-                    headersRowTextField.setText("1");
-                    headersRowNumber = 0;
-                }
-            } catch (NumberFormatException ex) {
-                showWarningWindow("Вы ввели недопустимое число. Будет установленно значение по умолчанию, что соответствует числу 1.");
-                headersRowTextField.setText("1");
-                headersRowNumber = 0;
-            }
-            try {
-                allImportXLSContent.stream().forEach((column) -> {
-                    data.add(column.get(headersRowNumber));
-                });
-            } catch (NullPointerException ne) {
-                showWarningWindow("Не введён номер строки, содержащей заголовки колонок в xls-файле. Перед вводом номера строки убедитесь, что xls-файл с данными уже выбран.");
-            } catch (IndexOutOfBoundsException ie) {
-                showWarningWindow("Введён номер строки, превышшающий общее количество строк в выбранном xls-файле. Откорректируйте входящие данные.");
-            }
-            headersXLS.setItems(data);
-        }
-        clear = false;
-    }
-    //
-    private void showFunctionDescription() {
-        String selectedFunction = functionsTable1.getFocusModel().getFocusedItem().getTitle();
-        if (selectedFunction!=null) {
-            String functionDescription = "";
-            String functionPicturePath = "";
-            Session session = HibernateUtil.getSessionFactory().openSession();
-            List res = session.createQuery("from Functions where title=\'" + selectedFunction + "\'").list();
-            for (Iterator iterator = res.iterator(); iterator.hasNext(); ) {
-                Functions f = (Functions) iterator.next();
-                functionDescription = f.getDescription();
-                functionPicturePath = f.getPicturePath();
-            }
-            if ((functionDescription!=null) && (!functionDescription.equals("") &&
-                    (functionPicturePath!=null) && (!functionPicturePath.equals("")))) {
-                functionDescriptionTextArea.setText(functionDescription);
-                setFunctionPicture(functionPicturePath);
-            } else {
-                functionDescriptionTextArea.setText("");
-                setFunctionPicture(noImageFile);
-            }
-        }
-    }
-    private void setFunctionPicture(String functionPicturePath) {
-        File picFile = new File(functionPicturePath);
-        ProductImage.open(picFile, functionGridPaneImageView, functionImageView);
-    }
-    private void setSelectProperty() {
-        ObservableList<PropertiesTableView> data = FXCollections.observableArrayList();
-        propertiesTree.getSelectionModel().select(0);
-        String selectedPropertyTitle = propertiesTree.getSelectionModel().getSelectedItem().getValue();
-        subPropertiesList(selectedPropertyTitle);
-        if (treeViewHandlerMode1.isSelected()) {
-            includeLowerPropertyItems(data, selectedPropertyTitle);
-        } else {
-            excludeLowerPropertyItems(data, selectedPropertyTitle);
-        }
-        buildPropertiesTable(data);
-        propertiesTable.getSelectionModel().select(0);
-    }
-    private void setSelectFunction() {
-        functionDescriptionTextArea.setText("");
-        setFunctionPicture(noImageFile);
-        functionsTable1.getSelectionModel().select(0);
-        showFunctionDescription();
-    }
-    private void onFocusedProductTableItem() {
-        try {
-            selectedProduct = (String) (productsTable.getFocusModel().getFocusedItem()).getTitle();
-            buildPricesTable(selectedProduct);
-            buildQuantityTable(selectedProduct);
-            buildDeliveryTimeTable(selectedProduct);
-            buildAnalogsTable(selectedProduct);
-            buildDatasheetFileTable(selectedProduct);
-            buildImageView(selectedProduct);
-            setVendorSelected(selectedProduct);
-            buildPropertiesTree(selectedProduct);
-            datasheetFileTable.refresh();
-            setSelectProperty();
-            buildFunctionsTable1(selectedProduct);
-            setSelectFunction();
-        } catch (NullPointerException ex) {
-        }
-    }
-    private void subPropertiesList(String selectedNode) {
-        subPropertiesTreeViewList = FXCollections.observableArrayList();
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        try {
-            List subProperties = session.createSQLQuery(
-                    "SELECT title FROM property_types t1, (SELECT id FROM property_types WHERE title=" +
-                            "\"" + normalize(selectedNode) + "\") t2 WHERE t2.id = t1.parent").list();
-            for (Iterator iterator = subProperties.iterator(); iterator.hasNext();) {
-                String sub = (String) iterator.next();
-                subPropertiesTreeViewList.add(new PropertiesTreeView(sub));
-            }
-        } catch (HibernateException e) {
-        } finally {
-            session.close();
-        }
-    }
-    private void setCategorySelected(String selectedProduct) {
-        Categories category = new Categories();
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Query query = session.createQuery("From Products where title = :title");
-        query.setParameter("title", selectedProduct);
-        List list = query.list();
-        for (Iterator iterator = list.iterator(); iterator.hasNext();) {
-            Products p = (Products) iterator.next();
-            if (p.getTitle().equals(selectedProduct)) {
-                category = p.getCategoryId();
-            }
-        }
-        session.close();
-        recursiveTreeCall(categoriesTree.getRoot(), category);
-        expandParents(productOwner);
-        categoriesTree.getSelectionModel().select(productOwner);
-        categoriesTree.scrollTo(categoriesTree.getRow(productOwner));
-    }
-    private void recursiveTreeCall(TreeItem<String> root, Categories category) {
-        for (TreeItem<String> item: root.getChildren()) {
-            if (item.getValue().equals(category.getTitle())) {
-                productOwner = item;
-                //System.out.println("Circle Number " + i + " and owner is " + productOwner.getValue());
-            } else {
-                recursiveTreeCall(item, category);
-            }
-        }
-        //System.out.println(productOwner.getValue());
-    }
-    private void setVendorSelected(String selectedProduct) {
-        Vendors vendor = new Vendors();
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Query query = session.createQuery("From Products where title = :title");
-        query.setParameter("title", selectedProduct);
-        List list = query.list();
-        for (Iterator iterator = list.iterator(); iterator.hasNext();) {
-            Products p = (Products) iterator.next();
-            if (p.getTitle().equals(selectedProduct)) {
-                vendor = p.getVendor();
-            }
-        }
-        for (int i = 0; i < vendorsTable.getItems().size(); i++) {
-            if (vendorsTable.getItems().get(i).getTitle().equals(vendor.getTitle())) {
-                vendorsTable.getSelectionModel().clearAndSelect(i);
-                vendorsTable.scrollTo(vendorsTable.getSelectionModel().getSelectedItem());
-            }
-        }
-    }
-    private void setDatasheetFile() {
-        File file = fileChooser.showOpenDialog(anchorPane.getScene().getWindow());
-        if (file != null) {
-            Session session = HibernateUtil.getSessionFactory().openSession();
-            Transaction tx = session.beginTransaction();
-            List pdfList = session.createQuery("From Files where ownerId=" + getProductIdFromTitle(selectedProduct) + "and fileTypeId=2").list();
-            if (pdfList.isEmpty()) {
-                Files pdfFile = new Files(file.getName(), file.getPath(), "Это даташит для " + selectedProduct, (new FileTypes(2)), (new Products(getProductIdFromTitle(selectedProduct))));
-                session.saveOrUpdate(pdfFile);
-                datasheetFileTable.refresh();
-            } else {
-                for (Iterator iterator = pdfList.iterator(); iterator.hasNext();) {
-                    Files pdf = (Files) iterator.next();
-                    if ((!pdf.getName().equals(file.getName())) || (!pdf.getPath().equals(file.getPath()))) {
-                        pdf.setName(file.getName());
-                        pdf.setPath(file.getPath());
-                        pdf.setDescription("Это даташит для " + selectedProduct);
-                        session.saveOrUpdate(pdf);
-                        datasheetFileTable.refresh();
-                    }
-                }
-            }
-            tx.commit();
-            session.close();
-        }
-        buildDatasheetFileTable(selectedProduct);
-        gridPanePDF.getChildren().clear();
-        gridPanePDF.getChildren().add(datasheetFileTable);
-        gridPanePDF.getChildren().add(deliveryTable);
-        productsTable.setFocusTraversable(true);
-        datasheetFileTable.refresh();
-    }
-    private ArrayList<TreeItem<String>> expandParents(TreeItem<String> owner) {
-        ArrayList<TreeItem<String>> allParents = new ArrayList<>();
-        try {
-            if (!owner.getParent().equals(null)) {
-                owner.getParent().setExpanded(true);
-                allParents.add(owner.getParent());
-                expandParents(owner.getParent());
-            }
-        } catch (NullPointerException ne) {}
-        return allParents;
-    }
-
-    // Запускается при выборе значения в importFieldsComboBox
-    @FXML private void getSelectedDBField() {
-        sField();
-    }
-    private String sField() {
-        return importFieldsComboBox.getValue();
-    }
-    // Запускается при выборе значения в importKeysComboBox
-    @FXML private void getSelectedDBKey() {
-        selectedDBKey = "Наименование продукта";
-        startImportXLSButton.setDisable(false);
-    }
-    // Запускается при нажатии кнопки compareXLSToDBButton
-    @FXML private void compareFields() throws IOException {
-        compareFieldsMechanics();
-    }
-    // Запускается при нажатии кнопки startImportXLSButton
-    @FXML private void startImportFromXLSToDB() {
-        XLSToDBImport importer = new XLSToDBImport(allCompareDetails);
-        importer.startImport(allImportXLSContent, importFields, allProducts);
-    }
-    @FXML private void showWarningWindow(String warningText) {
-        Alert alert = new Alert(AlertType.WARNING);
-        alert.setTitle("Внимание!");
-        alert.setHeaderText("Неправильная настройка импорта данных.");
-        alert.setContentText(warningText);
-        alert.showAndWait();
-    }
-    private void compareFieldsMechanics() throws IOException {
-        ArrayList<String> compareDetails = new ArrayList<>();
-        String selectedHeader = sHeader();
-        String selectedDBField = sField();
-        if (allImportXLSContent.isEmpty()) {
-            showWarningWindow("Нечего импортировать. Выберите xls-файл с данными\nи сопоставьте его колонки с полями в базе данных.");
-        } else if (headersRowTextField.getText().equals("")) {
-            showWarningWindow("Выберите номер строки в xls-файле, где содержатся заголовки колонок для импорта.");
-        } else {
-            if (selectedHeader==null && selectedDBField==null) {
-                showWarningWindow("Не выбраны данные для сопоставления.");
-            } else if (selectedHeader==null) {
-                showWarningWindow("Не выбран заголовок колонки в xls-файле.");
-            } else if (selectedDBField==null) {
-                showWarningWindow("Не выбрано поле для импорта в базе данных.");
-            } else {
-
-                boolean wasAdded = false;
-                boolean wasHeader = false;
-                boolean wasField = false;
-                for (int i = 0; i < comparedXLSAndDBFields.getItems().size(); i++) {
-                    if (comparedXLSAndDBFields.getItems().get(i).equals(selectedHeader + "  -->  " + selectedDBField)) {
-                        wasAdded = true;
-                    } else if (comparedXLSAndDBFields.getItems().get(i).contains(selectedHeader)) {
-                        wasHeader = true;
-                    } else if (comparedXLSAndDBFields.getItems().get(i).contains(selectedDBField)) {
-                        wasField = true;
-                    }
-                }
-                if (!wasAdded && !wasHeader && !wasField) {
-                    compareDetails.add(selectedHeader);
-                    compareDetails.add(selectedDBField);
-                    allCompareDetails.add(compareDetails);
-                    comparedPairs.add(selectedHeader + "  -->  " + selectedDBField);
-                } else if (!wasAdded && wasHeader && !wasField) {
-                    showWarningWindow("Этот заголовок уже лобавлен.");
-                } else if (!wasAdded && !wasHeader && wasField) {
-                    showWarningWindow("Это поле уже сопоставлено с другим заголовком.");
-                } else {
-                    showWarningWindow("Эти данные уже участвовали в сопоставлении.");
-                }
-                comparedXLSAndDBFields.setItems(comparedPairs);
-                clear = false;
-            }
-        }
-    }
-    @FXML private void cancelSetImportDetails() {
-
-        ObservableList<String> data = FXCollections.observableArrayList();
-        headersRowNumber = 0;
-        try {
-            allImportXLSContent.clear();
-        } catch (NullPointerException ne) {
-            showWarningWindow("Нет данных для очистки.");
-        }
-        try {
-            allCompareDetails.clear();
-        } catch (NullPointerException ne) {
-            showWarningWindow("Нет данных для очистки.");
-        }
-        try {
-            comparedPairs.clear();
-        } catch (NullPointerException ne) {
-            showWarningWindow("Нет данных для очистки.");
-        }
-        headersRowTextField.clear();
-
-        headersXLS.setItems(data);
-        comparedXLSAndDBFields.setItems(data);
-        headersXLS.refresh();
-        comparedXLSAndDBFields.refresh();
-        clear = true;
-    }
     private void newCategoryDialog(String whatTree) {
         Dialog<NewCategory> dialog = new Dialog<>();
         dialog.setTitle("Создание новой категории");
@@ -1724,7 +1270,6 @@ public class PCGUIController implements Initializable {
                 buildCategoryTree();
                 buildModalCategoryTree(stackPaneModal);
             }
-
         }
     }
     private void editCategoryDialog(String whatTree) {
@@ -1938,46 +1483,6 @@ public class PCGUIController implements Initializable {
         session.close();
         setCurrency(newVendorCurrency, newVendorTitle);
     }
-    private void addPropertyDialog() {
-        Dialog<NewProperty> dialog = new Dialog<>();
-        dialog.setTitle("Добавление нового свойства.");
-        dialog.setHeaderText("Введите параметры нового свойства.");
-        dialog.setResizable(false);
-
-        Label label1 = new Label("Введите название:  ");
-        Label label2 = new Label("Описание (необязательно):  ");
-        TextField text1 = new TextField();
-        TextArea text2 = new TextArea();
-
-        GridPane grid = new GridPane();
-        grid.add(label1, 1, 1);
-        grid.add(text1, 2, 1);
-        grid.add(label2, 1, 2);
-        grid.add(text2, 2, 2);
-
-        dialog.getDialogPane().setContent(grid);
-
-        ButtonType buttonTypeOk = new ButtonType("Добавить", ButtonData.OK_DONE);
-        ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonData.CANCEL_CLOSE);
-        dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
-        dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
-        dialog.setResultConverter((ButtonType b) -> {
-            if (b == buttonTypeOk) {
-                return new NewProperty();
-            }
-            return null;
-        });
-        Optional<NewProperty> result = dialog.showAndWait();
-        if (result.isPresent()) {
-            //newVendorTitle = result.get().getTitle();
-            //newVendorDescription = result.get().getDescription();
-            //newVendorCurrency = result.get().getCurrency();
-            //newVendorAddress = result.get().getAddress();
-            //newVendorRate = result.get().getRate();
-            //createNewVendor();
-            //buildVendorsTable();
-        }
-    }
     private void setCurrency(String value, String vendorTitle) {
         if (!(value.equals("") || value.equals(null))) {
             ArrayList<Currencies> curList = new ArrayList<>();
@@ -2079,179 +1584,247 @@ public class PCGUIController implements Initializable {
             updateCategoryId(parentCatId, product.getTitle());
         }
     }
-    private void openProductTab() {
-        tabPane.getSelectionModel().select(productTab);
-        fillProductTab();
+    private void onFocusedProductTableItem() {
+        try {
+            selectedProduct = (String) (productsTable.getFocusModel().getFocusedItem()).getTitle();
+            buildPricesTable(selectedProduct);
+            buildQuantityTable(selectedProduct);
+            buildDeliveryTimeTable(selectedProduct);
+            buildAnalogsTable(selectedProduct);
+            buildDatasheetFileTable(selectedProduct);
+            buildImageView(selectedProduct);
+            setVendorSelected(selectedProduct);
+            buildPropertiesTree(selectedProduct);
+            datasheetFileTable.refresh();
+            setSelectProperty();
+            buildFunctionsTable1(selectedProduct);
+            setSelectFunction();
+        } catch (NullPointerException ex) {
+        }
     }
-    private void buildModalCategoryTree(StackPane stackPane) {
-        ObservableList<CategoriesTreeView> sections = FXCollections.observableArrayList();
+    private void subPropertiesList(String selectedNode) {
+        subPropertiesTreeViewList = FXCollections.observableArrayList();
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
-            List categories = session.createQuery("FROM Categories").list();
-            for (Iterator iterator = categories.iterator(); iterator.hasNext();) {
-                Categories category = (Categories) iterator.next();
-                sections.add(new CategoriesTreeView(category.getId(), category.getTitle(), category.getParent()));
+            List subProperties = session.createSQLQuery(
+                    "SELECT title FROM property_types t1, (SELECT id FROM property_types WHERE title=" +
+                            "\"" + normalize(selectedNode) + "\") t2 WHERE t2.id = t1.parent").list();
+            for (Iterator iterator = subProperties.iterator(); iterator.hasNext();) {
+                String sub = (String) iterator.next();
+                subPropertiesTreeViewList.add(new PropertiesTreeView(sub));
             }
         } catch (HibernateException e) {
         } finally {
             session.close();
         }
-        ArrayList<CategoriesTreeView> categories = new ArrayList();
-        sections.stream().forEach((section) -> {
-            categories.add(section);
-        });
-        CategoriesTreeView catalogRoot = new CategoriesTreeView(0, catalogHeader, 0);
-        TreeItem<String> rootItem = new TreeItem<> (catalogRoot.getTitle());
-        rootItem.setExpanded(true);
-        buildTreeNode(categories, rootItem, catalogRoot);
-
-        treeView = new TreeView(rootItem);
+    }
+    private void setCategorySelected(String selectedProduct) {
+        Categories category = new Categories();
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Query query = session.createQuery("From Products where title = :title");
+        query.setParameter("title", selectedProduct);
+        List list = query.list();
+        for (Iterator iterator = list.iterator(); iterator.hasNext();) {
+            Products p = (Products) iterator.next();
+            if (p.getTitle().equals(selectedProduct)) {
+                category = p.getCategoryId();
+            }
+        }
+        session.close();
+        recursiveTreeCall(categoriesTree.getRoot(), category);
+        expandParents(productOwner);
+        categoriesTree.getSelectionModel().select(productOwner);
+        categoriesTree.scrollTo(categoriesTree.getRow(productOwner));
+    }
+    private void recursiveTreeCall(TreeItem<String> root, Categories category) {
+        for (TreeItem<String> item: root.getChildren()) {
+            if (item.getValue().equals(category.getTitle())) {
+                productOwner = item;
+                //System.out.println("Circle Number " + i + " and owner is " + productOwner.getValue());
+            } else {
+                recursiveTreeCall(item, category);
+            }
+        }
+        //System.out.println(productOwner.getValue());
+    }
+    private void setVendorSelected(String selectedProduct) {
+        Vendors vendor = new Vendors();
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Query query = session.createQuery("From Products where title = :title");
+        query.setParameter("title", selectedProduct);
+        List list = query.list();
+        for (Iterator iterator = list.iterator(); iterator.hasNext();) {
+            Products p = (Products) iterator.next();
+            if (p.getTitle().equals(selectedProduct)) {
+                vendor = p.getVendor();
+            }
+        }
+        for (int i = 0; i < vendorsTable.getItems().size(); i++) {
+            if (vendorsTable.getItems().get(i).getTitle().equals(vendor.getTitle())) {
+                vendorsTable.getSelectionModel().clearAndSelect(i);
+                vendorsTable.scrollTo(vendorsTable.getSelectionModel().getSelectedItem());
+            }
+        }
+    }
+    private void setDatasheetFile() {
+        File file = fileChooser.showOpenDialog(anchorPane.getScene().getWindow());
+        if (file != null) {
+            Session session = HibernateUtil.getSessionFactory().openSession();
+            Transaction tx = session.beginTransaction();
+            List pdfList = session.createQuery("From Files where ownerId=" + getProductIdFromTitle(selectedProduct) + "and fileTypeId=2").list();
+            if (pdfList.isEmpty()) {
+                Files pdfFile = new Files(file.getName(), file.getPath(), "Это даташит для " + selectedProduct, (new FileTypes(2)), (new Products(getProductIdFromTitle(selectedProduct))));
+                session.saveOrUpdate(pdfFile);
+                datasheetFileTable.refresh();
+            } else {
+                for (Iterator iterator = pdfList.iterator(); iterator.hasNext();) {
+                    Files pdf = (Files) iterator.next();
+                    if ((!pdf.getName().equals(file.getName())) || (!pdf.getPath().equals(file.getPath()))) {
+                        pdf.setName(file.getName());
+                        pdf.setPath(file.getPath());
+                        pdf.setDescription("Это даташит для " + selectedProduct);
+                        session.saveOrUpdate(pdf);
+                        datasheetFileTable.refresh();
+                    }
+                }
+            }
+            tx.commit();
+            session.close();
+        }
+        buildDatasheetFileTable(selectedProduct);
+        gridPanePDF.getChildren().clear();
+        gridPanePDF.getChildren().add(datasheetFileTable);
+        gridPanePDF.getChildren().add(deliveryTable);
+        productsTable.setFocusTraversable(true);
+        datasheetFileTable.refresh();
+    }
+    private ArrayList<TreeItem<String>> expandParents(TreeItem<String> owner) {
+        ArrayList<TreeItem<String>> allParents = new ArrayList<>();
+        try {
+            if (!owner.getParent().equals(null)) {
+                owner.getParent().setExpanded(true);
+                allParents.add(owner.getParent());
+                expandParents(owner.getParent());
+            }
+        } catch (NullPointerException ne) {}
+        return allParents;
+    }
+    @FXML private void handleCategoryTreeMouseClicked(MouseEvent event) {
+        startProgressBar(event);
+    }
+    @FXML public  void startProgressBar(MouseEvent event) {
+        Task task = createTask(event);
+        progressBar.progressProperty().bind(task.progressProperty());
+        Platform.runLater(task);
         /*
-        EventHandler<MouseEvent> mouseEventHandle = (MouseEvent event) -> {
-            handleCategoryTreeMouseClicked(event);
-        };
-        treeView.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseEventHandle);
+        thread  = new Thread(task);
+        thread.start();
         */
-        ContextMenu treeViewContextMenu1 = ContextMenuBuilder.create().items(
-                MenuItemBuilder.create().text("Создать категорию").onAction((ActionEvent arg0) -> {
-                    newCategoryDialog("modal");}).build(),
-                MenuItemBuilder.create().text("Редактировать категорию").onAction((ActionEvent arg0) -> {
-                    editCategoryDialog("modal");}).build(),
-                MenuItemBuilder.create().text("Удалить категорию").onAction((ActionEvent arg0) -> {
-                    deleteCategoryDialog("modal");}).build()
-        ).build();
-        treeView.setContextMenu(treeViewContextMenu1);
-
-        stackPane.getChildren().add(treeView);
-        treeView.setPrefWidth(350.0);
-        treeView.setPrefHeight(400.0);
     }
-    private void changeProductCategoryDialog() {
-        ObservableList<ProductsTableView> selectedItems = productsTable.getSelectionModel().getSelectedItems();
-        Alert alert = new Alert(AlertType.CONFIRMATION);
-        DialogPane dialog = new DialogPane();
-        alert.setDialogPane(dialog);
-
-        alert.setTitle("Переместить выбранные элементы");
-        alert.setHeaderText("Укажите категорию, в которую следует \nпереместить выбранные элементы:");
-        alert.setResizable(false);
-
-        AnchorPane anchorPane = new AnchorPane();
-
-        anchorPane.getChildren().add(stackPaneModal);
-        stackPaneModal.setAlignment(Pos.CENTER);
-        buildModalCategoryTree(stackPaneModal);
-
-        dialog.setContent(anchorPane);
-
-        ButtonType buttonTypeOk = new ButtonType("Переместить", ButtonData.OK_DONE);
-        ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonData.CANCEL_CLOSE);
-        dialog.getButtonTypes().add(buttonTypeOk);
-        dialog.getButtonTypes().add(buttonTypeCancel);
-
-        Optional<ButtonType> result = alert.showAndWait();
-        if ((result.isPresent()) && (result.get() == buttonTypeOk)) {
-            selectedCategory = treeView.getSelectionModel().getSelectedItem().getValue();
-            for(ProductsTableView product: selectedItems) {
-                updateCategoryId(selectedCategory, product.getTitle());
+    @FXML private void handlePropertiesTreeMouseClicked(MouseEvent event) {
+        ObservableList<PropertiesTableView> data = FXCollections.observableArrayList();
+        // Вызываем метод, возврщающий нам название кликнутого узла
+        Node node = event.getPickResult().getIntersectedNode();
+        // Accept clicks only on node cells, and not on empty spaces of the TreeView
+        if (node instanceof Text || (node instanceof TreeCell && ((TreeCell) node).getText() != null)) {
+            String selectedNode = (String) ((TreeItem)propertiesTree.getSelectionModel().getSelectedItem()).getValue();
+            subPropertiesList(selectedNode);
+            if (treeViewHandlerMode1.isSelected()) {
+                includeLowerPropertyItems(data, selectedNode);
+            } else {
+                excludeLowerPropertyItems(data, selectedNode);
             }
+            buildPropertiesTable(data);
+            propertiesTable.getSelectionModel().select(0);
         }
-        refreshProductsTable();
     }
-    private void updateCategoryId(String value, String productTitle) {
-        if (!(value.equals("") || value.equals(null))) {
-            Categories cat = new Categories();
-            Session sess = HibernateUtil.getSessionFactory().openSession();
-            List list = sess.createQuery("From Categories").list();
-            for (Iterator iterator = list.iterator(); iterator.hasNext();) {
-                Categories category = (Categories) iterator.next();
-                if (category.getTitle().equals(value)) {
-                    cat = category;
-                }
+    @FXML private void handleProductTableMousePressed(MouseEvent event1) {
+        onFocusedProductTableItem();
+        if (productsTable.getSelectionModel().getSelectedItems().size() == 1) {
+            productTableContextMenu = ContextMenuBuilder.create().items(
+                    MenuItemBuilder.create().text("Открыть вкладку обзора свойств устройства").onAction((ActionEvent arg0) -> {
+                        openProductTab();
+                    }).build(),
+                    MenuItemBuilder.create().text("Открыть просмотр PDF-файла").onAction((ActionEvent arg0) -> {
+                        createAndConfigureImageLoadService();
+                        currentFile = new SimpleObjectProperty<>();
+                        currentImage = new SimpleObjectProperty<>();
+                        scroller.contentProperty().bind(currentImage);
+                        zoom = new SimpleDoubleProperty(1);
+                        // To implement zooming, we just get a new image from the PDFFile each time.
+                        // This seems to perform well in some basic tests but may need to be improved
+                        // E.g. load a larger image and scale in the ImageView, loading a new image only
+                        // when required.
+                        zoom.addListener(new ChangeListener<Number>() {
+                            @Override
+                            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                                updateImage(pagination.getCurrentPageIndex());
+                            }
+                        });
+                        currentZoomLabel.textProperty().bind(Bindings.format("%.0f %%", zoom.multiply(100)));
+                        bindPaginationToCurrentFile();
+                        createPaginationPageFactory();
+                        tabPane.getSelectionModel().select(pdfTab);
+                        loadPdfFile(productsTable.getSelectionModel().getSelectedItem().getTitle());
+                    }).build(),
+                    MenuItemBuilder.create().text("Переместить в категорию...").onAction((ActionEvent arg0) -> {
+                        changeProductCategoryDialog();
+                    }).build(),
+                    MenuItemBuilder.create().text("Добавить элемент...").onAction((ActionEvent arg0) -> {
+                        addProductDialog();
+                    }).build(),
+                    MenuItemBuilder.create().text("Удалить элемент...").onAction((ActionEvent arg0) -> {
+                        deleteProductDialog();
+                    }).build()
+            ).build();
+        } else if(productsTable.getSelectionModel().getSelectedItems().size() == 0) {
+            productTableContextMenu = ContextMenuBuilder.create().items(
+                    MenuItemBuilder.create().text("Импортировать элементы...").onAction((ActionEvent arg0) -> {
+                        tabPane.getSelectionModel().select(settingsTab);}).build()
+            ).build();
+        } else {
+            productTableContextMenu = ContextMenuBuilder.create().items(
+                    MenuItemBuilder.create().text("Переместить в категорию...").onAction((ActionEvent arg0) -> {
+                        changeProductCategoryDialog();}).build(),
+                    MenuItemBuilder.create().text("Удалить выбранные элементы").onAction((ActionEvent arg0) -> {
+                        deleteProductDialog();}).build()
+            ).build();
+        }
+        productsTable.setContextMenu(productTableContextMenu);
+        fillProductTab();
+    }
+    @FXML private void handleSearchComboBox() {
+        ObservableList<ProductsTableView> data = FXCollections.observableArrayList();
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            List response = session.createQuery("From Products where title= \'" + normalize(searchComboBox.getValue()) + "\'").list();
+            for (Iterator iterator = response.iterator(); iterator.hasNext();) {
+                Products product = (Products) iterator.next();
+                data.add(new ProductsTableView(
+                                product.getArticle(),
+                                product.getTitle(),
+                                product.getDescription(),
+                                product.getDeliveryTime()
+                        )
+                );
             }
-            sess.close();
-            System.out.println("inside updateCategories");
-            Integer id = 0;
-            Session session = HibernateUtil.getSessionFactory().openSession();
-            session.beginTransaction();
-            List ids = session.createSQLQuery("select id from products where title=\"" + productTitle + "\"").list();
-            for (Iterator iterator = ids.iterator(); iterator.hasNext();) {
-                id = (Integer) iterator.next();
-            }
-            if (!(id == 0)) {
-                System.out.println("inside if (!(id == 0))");
-                Products product = (Products) session.get(Products.class, id);
-                try {
-                    System.out.println("inside try");
-                    System.out.println(cat.getTitle());
-                    System.out.println(value);
-                    System.out.println(id);
-                    if (cat.getTitle().equals(value)) {
-                        System.out.println("inside if");
-                        product.setCategoryId(cat);
-                    }
-                } catch (NullPointerException ne) {
-                    System.out.println("inside catch");
-                }
-
-                session.save(product);
-            }
-            session.getTransaction().commit();
+        } catch (HibernateException e) {
+        } finally {
             session.close();
-            System.out.println("inside updateCategories - after session.close()");
         }
+        buildProductsTable(data);
+        productsTable.getSelectionModel().select(0);
+        setVendorSelected(productsTable.getSelectionModel().getSelectedItem().getTitle());
+        setCategorySelected(productsTable.getSelectionModel().getSelectedItem().getTitle());
     }
-    private void updateCategoryId(Integer value, String productTitle) {
-        if (!(value.equals("") || value.equals(null))) {
-            Categories cat = new Categories();
-            Session sess = HibernateUtil.getSessionFactory().openSession();
-            List list = sess.createQuery("From Categories").list();
-            for (Iterator iterator = list.iterator(); iterator.hasNext();) {
-                Categories category = (Categories) iterator.next();
-                if (category.getId().equals(value)) {
-                    cat = category;
-                }
-            }
-            sess.close();
-            System.out.println("inside updateCategories");
-            Integer id = 0;
-            Session session = HibernateUtil.getSessionFactory().openSession();
-            session.beginTransaction();
-            List ids = session.createSQLQuery("select id from products where title=\"" + productTitle + "\"").list();
-            for (Iterator iterator = ids.iterator(); iterator.hasNext();) {
-                id = (Integer) iterator.next();
-            }
-            if (!(id == 0)) {
-                System.out.println("inside if (!(id == 0))");
-                Products product = (Products) session.get(Products.class, id);
-                try {
-                    System.out.println("inside try");
-                    System.out.println(cat.getTitle());
-                    System.out.println(value);
-                    System.out.println(id);
-                    if (cat.getId().equals(value)) {
-                        System.out.println("inside if");
-                        product.setCategoryId(cat);
-                    }
-                } catch (NullPointerException ne) {
-                    System.out.println("inside catch");
-                }
 
-                session.save(product);
-            }
-            session.getTransaction().commit();
-            session.close();
-            System.out.println("inside updateCategories - after session.close()");
-        }
-    }
-    private void addProductDialog() {
-        //ProductsTableView product = productsTable.getSelectionModel().getSelectedItem();
-        //tabPane.getSelectionModel().select(productTab);
-    }
-    private void deleteProductDialog() {
-        //ProductsTableView product = productsTable.getSelectionModel().getSelectedItem();
-        //tabPane.getSelectionModel().select(productTab);
-    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Таб "Страница товара" ///////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Заполняет заголовок вкладки свойств товара названием текущего выбранного товара,
+    // а также отображает картинку товара, еасли она определена.
     private void fillProductTab() {
         ProductsTableView product = productsTable.getSelectionModel().getSelectedItem();
         try {
@@ -2272,6 +1845,8 @@ public class PCGUIController implements Initializable {
             session.close();
         } catch (NullPointerException ne) {}
     }
+
+    // Сохраняет в БД описание картинки товара.
     @FXML private void changePicDescription() {
         String product = productTabTitle.getText();
         String picDescription = picDescriptionTextArea.getText();
@@ -2283,49 +1858,108 @@ public class PCGUIController implements Initializable {
         tx.commit();
         session.close();
     }
-    private void refreshProductsTable() {
-        try {
-            Integer selectedTreeId = getCategoryIdFromTitle(categoriesTree.getSelectionModel().getSelectedItem().getValue());
-            buildProductsTable(getProductList(selectedTreeId));
-        } catch (NullPointerException ne) {
-            Integer selectedTreeId = getCategoryIdFromTitle(treeView.getSelectionModel().getSelectedItem().getValue());
-            buildProductsTable(getProductList(selectedTreeId));
+    private void buildPropertiesTable(ObservableList<PropertiesTableView> data) {
+        propertyTitleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
+        propertyConditionColumn.setCellValueFactory(new PropertyValueFactory<>("condition"));
+        propertyValueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
+        propertiesTableContextMenu = ContextMenuBuilder.create().items(
+                MenuItemBuilder.create().text("Добавить новое свойство").onAction((ActionEvent arg0) -> {
+                    ContextBuilder.createNewProperty();
+                }).build()
+        ).build();
+        propertiesTable.setContextMenu(propertiesTableContextMenu);
+        propertiesTable.setItems(data);
+    }
+    private void buildFunctionsTable1(String selectedProduct) {
+        ArrayList<Functions> functions = new ArrayList<>();
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List res = session.createQuery("from ProductsFunctions where productId =" + getProductIdFromTitle(selectedProduct)).list();
+        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+            ProductsFunctions func = (ProductsFunctions) iterator.next();
+            functions.add(func.getFunctionId());
+        }
+        session.close();
+
+        ObservableList<FunctionsTableView> list = FXCollections.observableArrayList();
+        functions.stream().forEach((f) -> {
+            list.add(new FunctionsTableView(f.getTitle(), f.getSymbol()));
+        });
+        functionsTableTitleColumn1.setCellValueFactory(new PropertyValueFactory<>("title"));
+        functionsTableSymbolColumn1.setCellValueFactory(new PropertyValueFactory<>("symbol"));
+        functionsTable1ContextMenu = ContextMenuBuilder.create().items(
+                MenuItemBuilder.create().text("Добавить новую функцию").onAction((ActionEvent ae1) -> {}).build(),
+                MenuItemBuilder.create().text("Редактировать выбранную функцию").onAction((ActionEvent ae2) -> {}).build(),
+                MenuItemBuilder.create().text("Удалить выбранную функцию").onAction((ActionEvent ae3) -> {}).build()
+        ).build();
+        functionsTable1.setContextMenu(functionsTable1ContextMenu);
+        functionsTable1.setItems(list);
+    };
+    private void setFunctionPicture(String functionPicturePath) {
+        File picFile = new File(functionPicturePath);
+        ProductImage.open(picFile, functionGridPaneImageView, functionImageView);
+    }
+    private void setSelectProperty() {
+        ObservableList<PropertiesTableView> data = FXCollections.observableArrayList();
+        propertiesTree.getSelectionModel().select(0);
+        String selectedPropertyTitle = propertiesTree.getSelectionModel().getSelectedItem().getValue();
+        subPropertiesList(selectedPropertyTitle);
+        if (treeViewHandlerMode1.isSelected()) {
+            includeLowerPropertyItems(data, selectedPropertyTitle);
+        } else {
+            excludeLowerPropertyItems(data, selectedPropertyTitle);
+        }
+        buildPropertiesTable(data);
+        propertiesTable.getSelectionModel().select(0);
+    }
+    private void setSelectFunction() {
+        functionDescriptionTextArea.setText("");
+        setFunctionPicture(noImageFile);
+        functionsTable1.getSelectionModel().select(0);
+        showFunctionDescription();
+    }
+    @FXML private void setPictureButtonPress() {
+        File file = fileChooser.showOpenDialog(anchorPane.getScene().getWindow());
+        if (file != null) {
+            ProductImage.open(file, gridPane, imageView);
+            ProductImage.open(file, productTabGridPaneImageView, productTabImageView);
+            ProductImage.save(file, selectedProduct);
         }
     }
-    private Task<Void> createImportTask() {
-        return new Task<Void>() {
-            @Override
-            public Void call() throws InterruptedException {
-                startImportFromXLSToDB();
-                Platform.runLater(() -> {
-                    progressBarImportXLS.progressProperty().unbind();
-                    progressBarImportXLS.setProgress(0.0);
-                });
-                return null;
-            }
-        };
-    }
-    private void setNewCellValue(String fieldName, String newValue, String productTitle) {
+    private void setFunctionDescriptionAndPicture(String selectedFunction) {
+        String functionDescription = "";
+        String functionPicturePath = "";
         Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = session.beginTransaction();
-        Query query = session.createQuery("UPDATE Products set " + fieldName + "= :newValue where title= :title");
-        query.setParameter("newValue", newValue);
-        query.setParameter("title", productTitle);
-        query.executeUpdate();
-        tx.commit();
-        session.close();
+        List res = session.createQuery("from Functions where title=\'" + selectedFunction + "\'").list();
+        for (Iterator iterator = res.iterator(); iterator.hasNext(); ) {
+            Functions f = (Functions) iterator.next();
+            functionDescription = f.getDescription();
+            functionPicturePath = f.getPicturePath();
+        }
+        if ((functionDescription!=null) && (!functionDescription.equals("") &&
+                (functionPicturePath!=null) && (!functionPicturePath.equals("")))) {
+            functionDescriptionTextArea.setText(functionDescription);
+            setFunctionPicture(functionPicturePath);
+        } else {
+            functionDescriptionTextArea.setText("");
+            setFunctionPicture(noImageFile);
+        }
+    }
+    private void showFunctionDescription() {
+        String selectedFunction = functionsTable1.getFocusModel().getFocusedItem().getTitle();
+        if (selectedFunction!=null) {
+            setFunctionDescriptionAndPicture(selectedFunction);
+        }
+    }
+    @FXML private void handleFunctionsTable1MouseClicked() {
+        String selectedFunction = functionsTable1.getSelectionModel().getSelectedItem().getTitle();
+        setFunctionDescriptionAndPicture(selectedFunction);
     }
 
 
 
-
-
-
-
-
-
-
-
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Таб "Даташит" ///////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Дальше позаимствовал реализацию PDF Reader из тырнета)))
     private void createAndConfigureImageLoadService() {
@@ -2551,4 +2185,386 @@ public class PCGUIController implements Initializable {
         }
     }
     // Конец заимствования здесь
+
+    /////////////////////////
+    // Таб "Контент сайта" //
+    /////////////////////////
+
+    ///////////////////
+    // Таб "Браузер" //
+    ///////////////////
+
+    /////////////////////
+    // Таб "Настройки" //
+    /////////////////////
+
+    // Загружает в память список полей БД, доступных для импорта через xls-файл
+    //Заполняет список значений importFieldComboBox
+    private void loadImportFields() {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List res = session.createQuery("From ImportFields").list();
+        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+            ImportFields field = (ImportFields) iterator.next();
+            importFields.add(new ImportFields(field.getId(), field.getTitle(), field.getTableName(), field.getField()));
+        }
+        session.close();
+        ObservableList<String> fieldsNames = FXCollections.observableArrayList();
+        importFields.stream().forEach((field) -> {
+            fieldsNames.add(field.getTitle());
+        });
+        importFieldsComboBox.setItems(fieldsNames);
+    }
+
+    // Получает из БД список всех названий продуктов и прикрепляет его к Combobox поиска по названию
+    // Также вызывает экземпляр класса автодополнения при поиске
+    private void populateComboBox () {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List res = session.createQuery("From Products").list();
+        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+            Products p = (Products) iterator.next();
+            allProducts.add(p.getTitle());
+        }
+        searchComboBox.getItems().clear();
+        searchComboBox.getItems().addAll(allProducts);
+        AutoCompleteComboBoxListener autoCompleteComboBoxListener = new AutoCompleteComboBoxListener(searchComboBox);
+    }
+
+    // Группа методов для импорта данных в БД из xls-файла
+    public void startProgressBarImportXLS() {
+        Task task = createImportXLSTask();
+        progressBarImportXLS.progressProperty().bind(task.progressProperty());
+        Platform.runLater(task);
+        /*
+        thread  = new Thread(task);
+        thread.start();
+        */
+    }
+    private Task<Void> createImportXLSTask() {
+        return new Task<Void>() {
+            @Override
+            public Void call() throws InterruptedException {
+                try {
+                    allImportXLSContent = XLSHandler.grabData(fileXLS.getAbsolutePath());
+                } catch (IOException ex) {
+                    Logger.getLogger(PCGUIController.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                Platform.runLater(() -> {
+                    //progressIndicator.progressProperty().unbind();
+                    //progressIndicator.setVisible(false);
+                    //progressIndicator.setProgress(0.0);
+                    progressBarImportXLS.progressProperty().unbind();
+                    progressBarImportXLS.setProgress(0.0);
+                });
+                return null;
+            }
+        };
+    }
+
+    // Создаёт задачу запуска процесса импорта данных из xls-файла в новом потоке.
+    // Параллельно отображается индикатор для этого процесса.
+    private Task<Void> createImportTask() {
+        return new Task<Void>() {
+            @Override
+            public Void call() throws InterruptedException {
+                startImportFromXLSToDB();
+                Platform.runLater(() -> {
+                    progressBarImportXLS.progressProperty().unbind();
+                    progressBarImportXLS.setProgress(0.0);
+                });
+                return null;
+            }
+        };
+    }
+
+    // Запускается при выборе значения в importFieldsComboBox
+    @FXML private void getSelectedDBField() {
+        sField();
+    }
+    private String sField() {
+        return importFieldsComboBox.getValue();
+    }
+
+    // Запускается при выборе значения в importKeysComboBox
+    @FXML private void getSelectedDBKey() {
+        selectedDBKey = "Наименование продукта";
+        startImportXLSButton.setDisable(false);
+    }
+
+    // Запускается при нажатии кнопки compareXLSToDBButton
+    @FXML private void compareFields() throws IOException {
+        compareFieldsMechanics();
+    }
+
+    // Запускается при нажатии кнопки startImportXLSButton
+    @FXML private void startImportFromXLSToDB() {
+        XLSToDBImport importer = new XLSToDBImport(allCompareDetails);
+        importer.startImport(allImportXLSContent, importFields, allProducts);
+    }
+
+    private void buildProductKindsList() {
+        ObservableList<String> items = FXCollections.observableArrayList();
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List res = session.createQuery("from ProductKinds").list();
+        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+            ProductKinds pKind = (ProductKinds) iterator.next();
+            String item = new String(pKind.getTitle());
+            items.add(item);
+        }
+        session.close();
+        productKindsListContextMenu = ContextMenuBuilder.create().items(
+                MenuItemBuilder.create().text("Создать новый тип устройств").onAction((ActionEvent ae1) -> {
+                    ContextBuilder.createNewProductKind();
+                }).build(),
+                MenuItemBuilder.create().text("Редактировать выбранный тип").onAction((ActionEvent ae2) -> {
+                    ContextBuilder.updateTheProductKind();
+                }).build(),
+                MenuItemBuilder.create().text("Удалить выбранный тип устройств").onAction((ActionEvent ae3) -> {
+                    ContextBuilder.deleteTheProductKind();
+                }).build()
+        ).build();
+        productKindsList.setContextMenu(productKindsListContextMenu);
+        productKindsList.setItems(items);
+    }
+    private void buildPropertiesTreeTable(String selectedPropertiesKind) {
+        ArrayList<Integer> typesIds = new ArrayList<>();
+        ArrayList<PropertiesTreeTableView> properties = new ArrayList<>();
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List res = session.createQuery("from KindsTypes where productKindId =" + getPropertyKindIdFromTitle(selectedPropertiesKind)).list();
+        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+            KindsTypes kt = (KindsTypes) iterator.next();
+            typesIds.add(kt.getPropertyTypeId().getId());
+        }
+        session.close();
+        Session session1 = HibernateUtil.getSessionFactory().openSession();
+        List res1 = session1.createQuery("from PropertyTypes").list();
+        for(Iterator iterator =  res1.iterator(); iterator.hasNext();) {
+            PropertyTypes pt = (PropertyTypes) iterator.next();
+            if(typesIds.contains(pt.getId())) {
+                properties.add(new PropertiesTreeTableView(pt.getTitle()));
+            }
+        }
+        session1.close();
+        ObservableList<TreeItem<PropertiesTreeTableView>> treeItems = FXCollections.observableArrayList();
+        properties.stream().forEach((prop) -> {
+            treeItems.add(new TreeItem<PropertiesTreeTableView>(prop));
+        });
+        TreeItem<PropertiesTreeTableView> root = new TreeItem<>(new PropertiesTreeTableView("Все характеристики"));
+        root.setExpanded(true);
+        treeItems.stream().forEach((item) -> {
+            ArrayList<TreeItem> children = treeItemChildren(item);
+            if (children.size() > 0) {
+                children.stream().forEach((child) -> {
+                    item.getChildren().add(child);
+                });
+            }
+            root.getChildren().add(item);
+        });
+        propertiesTreeTableContextMenu = ContextMenuBuilder.create().items(
+                MenuItemBuilder.create().text("Добавить новую характеристику").onAction((ActionEvent ae1) -> {
+                    ContextBuilder.createNewProperty();
+                }).build(),
+                MenuItemBuilder.create().text("Редактировать выбранную характеристику").onAction((ActionEvent ae2) -> {
+                    ContextBuilder.updateTheProperty();
+                }).build(),
+                MenuItemBuilder.create().text("Удалить выбранную характеристику").onAction((ActionEvent ae3) -> {
+                    ContextBuilder.deleteTheProperty();
+                }).build()
+        ).build();
+        propertiesTreeTable.setContextMenu(propertiesTreeTableContextMenu);
+        propertiesTreeTable.setRoot(root);
+        propertiesTreeTable.getColumns().setAll(propertiesTreeTableTitleColumn);
+        propertiesTreeTableTitleColumn.setCellValueFactory(new TreeItemPropertyValueFactory("title"));
+    };
+    private void buildFunctionsTable(String selectedPropertiesKind) {
+        ArrayList<Functions> functions = new ArrayList<>();
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List res = session.createQuery("from Functions where productKindId =" + getPropertyKindIdFromTitle(selectedPropertiesKind)).list();
+        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+            Functions func = (Functions) iterator.next();
+            functions.add(func);
+        }
+        session.close();
+        ObservableList<FunctionsTableView> list = FXCollections.observableArrayList();
+        functions.stream().forEach((f) -> {
+            list.add(new FunctionsTableView(f.getTitle(), f.getSymbol()));
+        });
+        functionsTableTitleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
+        functionsTableSymbolColumn.setCellValueFactory(new PropertyValueFactory<>("symbol"));
+        functionsTableContextMenu = ContextMenuBuilder.create().items(
+                MenuItemBuilder.create().text("Добавить новую функцию").onAction((ActionEvent ae1) -> {
+                    ContextBuilder.createNewFunction();
+                }).build(),
+                MenuItemBuilder.create().text("Редактировать выбранную функцию").onAction((ActionEvent ae2) -> {
+                    ContextBuilder.updateTheFunction();
+                }).build(),
+                MenuItemBuilder.create().text("Удалить выбранную функцию").onAction((ActionEvent ae3) -> {
+                    ContextBuilder.deleteTheFunction();
+                }).build()
+        ).build();
+        functionsTable.setContextMenu(functionsTableContextMenu);
+        functionsTable.setItems(list);
+    };
+
+    @FXML private void getSelectedHeader() {
+        sHeader();
+    }
+    private String sHeader() {
+        String sh = new String();
+        try {
+            sh = headersXLS.getSelectionModel().getSelectedItem();
+        } catch (NullPointerException ne) {}
+        return sh;
+    }
+    @FXML private void showWarningWindow(String warningText) {
+        Alert alert = new Alert(AlertType.WARNING);
+        alert.setTitle("Внимание!");
+        alert.setHeaderText("Неправильная настройка импорта данных.");
+        alert.setContentText(warningText);
+        alert.showAndWait();
+    }
+    private void compareFieldsMechanics() throws IOException {
+        ArrayList<String> compareDetails = new ArrayList<>();
+        String selectedHeader = sHeader();
+        String selectedDBField = sField();
+        if (allImportXLSContent.isEmpty()) {
+            showWarningWindow("Нечего импортировать. Выберите xls-файл с данными\nи сопоставьте его колонки с полями в базе данных.");
+        } else if (headersRowTextField.getText().equals("")) {
+            showWarningWindow("Выберите номер строки в xls-файле, где содержатся заголовки колонок для импорта.");
+        } else {
+            if (selectedHeader==null && selectedDBField==null) {
+                showWarningWindow("Не выбраны данные для сопоставления.");
+            } else if (selectedHeader==null) {
+                showWarningWindow("Не выбран заголовок колонки в xls-файле.");
+            } else if (selectedDBField==null) {
+                showWarningWindow("Не выбрано поле для импорта в базе данных.");
+            } else {
+
+                boolean wasAdded = false;
+                boolean wasHeader = false;
+                boolean wasField = false;
+                for (int i = 0; i < comparedXLSAndDBFields.getItems().size(); i++) {
+                    if (comparedXLSAndDBFields.getItems().get(i).equals(selectedHeader + "  -->  " + selectedDBField)) {
+                        wasAdded = true;
+                    } else if (comparedXLSAndDBFields.getItems().get(i).contains(selectedHeader)) {
+                        wasHeader = true;
+                    } else if (comparedXLSAndDBFields.getItems().get(i).contains(selectedDBField)) {
+                        wasField = true;
+                    }
+                }
+                if (!wasAdded && !wasHeader && !wasField) {
+                    compareDetails.add(selectedHeader);
+                    compareDetails.add(selectedDBField);
+                    allCompareDetails.add(compareDetails);
+                    comparedPairs.add(selectedHeader + "  -->  " + selectedDBField);
+                } else if (!wasAdded && wasHeader && !wasField) {
+                    showWarningWindow("Этот заголовок уже лобавлен.");
+                } else if (!wasAdded && !wasHeader && wasField) {
+                    showWarningWindow("Это поле уже сопоставлено с другим заголовком.");
+                } else {
+                    showWarningWindow("Эти данные уже участвовали в сопоставлении.");
+                }
+                comparedXLSAndDBFields.setItems(comparedPairs);
+                clear = false;
+            }
+        }
+    }
+    @FXML private void cancelSetImportDetails() {
+
+        ObservableList<String> data = FXCollections.observableArrayList();
+        headersRowNumber = 0;
+        try {
+            allImportXLSContent.clear();
+        } catch (NullPointerException ne) {
+            showWarningWindow("Нет данных для очистки.");
+        }
+        try {
+            allCompareDetails.clear();
+        } catch (NullPointerException ne) {
+            showWarningWindow("Нет данных для очистки.");
+        }
+        try {
+            comparedPairs.clear();
+        } catch (NullPointerException ne) {
+            showWarningWindow("Нет данных для очистки.");
+        }
+        headersRowTextField.clear();
+
+        headersXLS.setItems(data);
+        comparedXLSAndDBFields.setItems(data);
+        headersXLS.refresh();
+        comparedXLSAndDBFields.refresh();
+        clear = true;
+    }
+    @FXML private void setChooseXLSButtonPress() {
+        fileXLS = fileChooser.showOpenDialog(anchorPane.getScene().getWindow());
+        if (fileXLS != null) {
+            startProgressBarImportXLS();
+        }
+    }
+    @FXML private void getHeadersRowNumber(KeyEvent e) {
+        if(e.getCode().toString().equals("ENTER"))
+        {
+            ObservableList<String> data = FXCollections.observableArrayList();
+            if (allImportXLSContent.isEmpty()) {
+                showWarningWindow("Сначала необходимо выбрать xls-файл, содержащий данные для импорта.");
+            }
+            try {
+                headersRowNumber = Integer.parseInt(headersRowTextField.getText()) - 1;
+                if (headersRowNumber < 0) {
+                    showWarningWindow("Вы ввели недопустимое число. Будет установленно значение по умолчанию, что соответствует числу 1.");
+                    headersRowTextField.setText("1");
+                    headersRowNumber = 0;
+                }
+            } catch (NumberFormatException ex) {
+                showWarningWindow("Вы ввели недопустимое число. Будет установленно значение по умолчанию, что соответствует числу 1.");
+                headersRowTextField.setText("1");
+                headersRowNumber = 0;
+            }
+            try {
+                allImportXLSContent.stream().forEach((column) -> {
+                    data.add(column.get(headersRowNumber));
+                });
+            } catch (NullPointerException ne) {
+                showWarningWindow("Не введён номер строки, содержащей заголовки колонок в xls-файле. Перед вводом номера строки убедитесь, что xls-файл с данными уже выбран.");
+            } catch (IndexOutOfBoundsException ie) {
+                showWarningWindow("Введён номер строки, превышшающий общее количество строк в выбранном xls-файле. Откорректируйте входящие данные.");
+            }
+            headersXLS.setItems(data);
+        }
+        clear = false;
+    }
+    @FXML public  void startImportProgressBar() {
+        Task task = createImportTask();
+        progressBarImportXLS.progressProperty().bind(task.progressProperty());
+        Platform.runLater(task);
+        /*
+        thread  = new Thread(task);
+        thread.start();
+        */
+    }
+    @FXML private void handlePropertiesKindSelected() {
+        String selectedPropertiesKind = productKindsList.getSelectionModel().getSelectedItem();
+        buildPropertiesTreeTable(selectedPropertiesKind);
+        buildFunctionsTable(selectedPropertiesKind);
+    }
+    private ArrayList<TreeItem> treeItemChildren(TreeItem<PropertiesTreeTableView> item) {
+        String itemTitle = item.getValue().getTitle();
+        ArrayList<TreeItem> childTreeItems = new ArrayList<>();
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List res = session.createQuery("from Properties where propertyTypeId=" + getPropertyTypeIdFromTitle(itemTitle)).list();
+        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+            Properties property = (Properties) iterator.next();
+            childTreeItems.add(new TreeItem(new PropertiesTreeTableView(property.getTitle())));
+        }
+        session.close();
+        return childTreeItems;
+    }
+
+
+
+
+
+
+
+
 }
