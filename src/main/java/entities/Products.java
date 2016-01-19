@@ -38,7 +38,12 @@ import javax.xml.bind.annotation.XmlTransient;
         @NamedQuery(name = "Products.findByEan", query = "SELECT p FROM Products p WHERE p.ean = :ean"),
         @NamedQuery(name = "Products.findByAvailable", query = "SELECT p FROM Products p WHERE p.available = :available"),
         @NamedQuery(name = "Products.findByOutdated", query = "SELECT p FROM Products p WHERE p.outdated = :outdated"),
-        @NamedQuery(name = "Products.findByPrice", query = "SELECT p FROM Products p WHERE p.price = :price")})
+        @NamedQuery(name = "Products.findByPrice", query = "SELECT p FROM Products p WHERE p.price = :price"),
+        @NamedQuery(name = "Products.findByRate", query = "SELECT p FROM Products p WHERE p.rate = :rate"),
+        @NamedQuery(name = "Products.findByDiscount1", query = "SELECT p FROM Products p WHERE p.discount1 = :discount1"),
+        @NamedQuery(name = "Products.findByDiscount2", query = "SELECT p FROM Products p WHERE p.discount2 = :discount2"),
+        @NamedQuery(name = "Products.findByDiscount3", query = "SELECT p FROM Products p WHERE p.discount3 = :discount3"),
+        })
 public class Products implements Serializable {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "productId")
     private Collection<ProductsFunctions> productsFunctionsCollection;
@@ -78,6 +83,14 @@ public class Products implements Serializable {
     @Basic(optional = false)
     @Column(name = "price")
     private double price;
+    @Column(name = "rate")
+    private double rate;
+    @Column(name = "discount1")
+    private double discount1;
+    @Column(name = "discount2")
+    private double discount2;
+    @Column(name = "discount3")
+    private double discount3;
     @OneToMany(mappedBy = "productId")
     private Collection<Quantity> quantityCollection;
     @JoinColumn(name = "serie", referencedColumnName = "title")
@@ -192,6 +205,38 @@ public class Products implements Serializable {
 
     public void setPrice(double price) {
         this.price = price;
+    }
+
+    public double getRate() {
+        return rate;
+    }
+
+    public void setRate(double rate) {
+        this.rate = rate;
+    }
+
+    public double getDiscount1() {
+        return discount1;
+    }
+
+    public void setDiscount1(double discount1) {
+        this.discount1 = discount1;
+    }
+
+    public double getDiscount2() {
+        return discount2;
+    }
+
+    public void setDiscount2(double discount2) {
+        this.discount2 = discount2;
+    }
+
+    public double getDiscount3() {
+        return discount3;
+    }
+
+    public void setDiscount3(double discount3) {
+        this.discount3 = discount3;
     }
 
     @XmlTransient

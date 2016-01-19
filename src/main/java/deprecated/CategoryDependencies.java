@@ -39,7 +39,7 @@ public class CategoryDependencies {
         }
         return list;
     }
-    public ArrayList<Integer> getChildrensList() {
+    public ArrayList<Integer> getChildrenList() {
         ArrayList<Integer> children = new ArrayList<>();
         Integer parent = categoryId;
         Session session = HibernateUtil.getSessionFactory().openSession();

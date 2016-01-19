@@ -49,5 +49,6 @@
     <orderEntry type="library" name="Maven: org.controlsfx:controlsfx:8.40.10" level="project" />
     <orderEntry type="library" name="Maven: org.eclipse.persistence:eclipselink:2.5.0-RC1" level="project" />
     <orderEntry type="library" name="Maven: org.eclipse.persistence:javax.persistence:2.1.0-RC1" level="project" />
+    <orderEntry type="library" name="Maven: net.sf.jacob-project:jacob:1.14.3" level="project" />
   </component>
 </module>

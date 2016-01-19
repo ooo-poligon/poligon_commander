@@ -2,7 +2,10 @@
  * 
  * 
  */
-package deprecated;
+package utils;
+
+import entities.Settings;
+import settings.SiteDBSettings;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -12,7 +15,7 @@ import java.sql.SQLException;
 
 /**
  *
- * @author kataev
+ * @author Igor Klekotnev
  */
 public class DBConnection {
     // JDBC URL, username and password of MySQL server
@@ -21,9 +24,15 @@ public class DBConnection {
     private String password;
     
     public DBConnection() {
-        this.dbUrl = "jdbc:mysql://localhost:3306/poligon";
-        this.user = "root";
-        this.password = "poligon";
+        SiteDBSettings siteDBSettings = new SiteDBSettings();
+        String addressDB = siteDBSettings.loadSetting("addressSiteDB");
+        String portDB = siteDBSettings.loadSetting("portSiteDB");
+        String titleDB = siteDBSettings.loadSetting("titleSiteDB");
+        String userDB = siteDBSettings.loadSetting("userSiteDB");
+        String passwordDB = siteDBSettings.loadSetting("passwordSiteDB");
+        this.dbUrl = "jdbc:mysql://" + addressDB + ":" + portDB + "/" + titleDB;
+        this.user = userDB;
+        this.password = passwordDB;
     }
     
     public DBConnection(String dbUrl, String user, String password) {

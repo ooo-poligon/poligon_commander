@@ -1,8 +1,11 @@
 package utils;
 
+import entities.Products;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import modalwindows.SetRatesWindow;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 /**
@@ -86,4 +89,5 @@ public class ContextBuilder {
     public static void deleteTheFunction() {
 
     }
+
 }

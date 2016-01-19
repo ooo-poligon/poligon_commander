@@ -1,6 +1,8 @@
 package main;
 
-import com.sun.pdfview.PDFParseException;
+import modalwindows.SetRatesWindow;
+import settings.SiteDBSettings;
+import utils.DBConnection;
 import entities.*;
 import entities.Properties;
 import tableviews.*;
@@ -71,6 +73,7 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
+import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -200,6 +203,11 @@ public class PCGUIController implements Initializable {
     @FXML private TextField headersRowTextField;
     @FXML private TextArea picDescriptionTextArea;
     @FXML private TextArea functionDescriptionTextArea;
+    @FXML private TextField addressSiteDB;
+    @FXML private TextField portSiteDB;
+    @FXML private TextField titleSiteDB;
+    @FXML private TextField userSiteDB;
+    @FXML private PasswordField passwordSiteDB;
 
     // CheckBoxes
     @FXML private CheckBox treeViewHandlerMode;
@@ -367,14 +375,14 @@ public class PCGUIController implements Initializable {
     }
 
     // Загружает в память настройки программы, сохранённые в БД
-    // Пока не применяется и потому не реализовано полностью.
+    // Пока не реализовано полностью.
     private void loadSavedSettings() {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        List res = session.createQuery("From Settings where title=\'TreeViewMode\' and kind=\'ProgramSettings\'").list();
-        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
-            Settings setting = (Settings) iterator.next();
-        }
-        session.close();
+        SiteDBSettings siteDBSettings = new SiteDBSettings();
+        addressSiteDB.setText(siteDBSettings.loadSetting("addressSiteDB"));
+        portSiteDB.setText(siteDBSettings.loadSetting("portSiteDB"));
+        titleSiteDB.setText(siteDBSettings.loadSetting("titleSiteDB"));
+        userSiteDB.setText(siteDBSettings.loadSetting("userSiteDB"));
+        passwordSiteDB.setText(siteDBSettings.loadSetting("passwordSiteDB"));
     }
 
     // Утилиты разные
@@ -851,6 +859,12 @@ public class PCGUIController implements Initializable {
         };
         categoriesTree.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseEventHandle);
         treeViewContextMenu = ContextMenuBuilder.create().items(
+                MenuItemBuilder.create().text("Установить коэффициенты цен").onAction((ActionEvent arg0) -> {
+                    String selectedNode = (String)((TreeItem)categoriesTree.getSelectionModel().getSelectedItem()).getValue();
+                    Integer selectedNodeID = getCategoryIdFromTitle(selectedNode);
+                    SetRatesWindow ratesWindow = new SetRatesWindow(selectedNodeID, null);
+                    ratesWindow.showModalWindow();
+                }).build(),
                 MenuItemBuilder.create().text("Создать категорию").onAction((ActionEvent arg0) -> {
                     newCategoryDialog("main");
                 }).build(),
@@ -1408,6 +1422,96 @@ public class PCGUIController implements Initializable {
         tx.commit();
         session.close();
     }
+    private void editCategory(String categoryTitle, String newTitle, String NewDescription) {
+        Integer id = getCategoryIdFromTitle (categoryTitle);
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = session.beginTransaction();
+        Query query = session.createQuery("update Categories set title = :title, description = :description where id = :id");
+        query.setParameter("title", newTitle);
+        query.setParameter("description", NewDescription);
+        query.setParameter("id", id);
+        query.executeUpdate();
+        tx.commit();
+        session.close();
+    }
+    private void deleteCategory(String categoryTitle) {
+        Integer id = getCategoryIdFromTitle (categoryTitle);
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = session.beginTransaction();
+        Query query = session.createQuery("delete Categories where id = :id");
+        query.setParameter("id", id);
+        query.executeUpdate();
+        tx.commit();
+        session.close();
+    }
+    private ArrayList<String> getCategoryDetails(String categoryTitle)  {
+        ArrayList<String> details = new ArrayList<>();
+        Integer id = getCategoryIdFromTitle (categoryTitle);
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            List response = session.createQuery("From Categories where id=" + id).list();
+            for (Iterator iterator = response.iterator(); iterator.hasNext();) {
+                Categories categorie = (Categories) iterator.next();
+                details.add(categorie.getTitle());
+                details.add(categorie.getDescription());
+            }
+        } catch (HibernateException e) {
+        } finally {
+            session.close();
+        }
+        return details;
+    }
+    private Integer getParentCatId(String categoryTitle) {
+        Integer id = getCategoryIdFromTitle(categoryTitle);
+        Integer parentId = 0;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            List response = session.createQuery("From Categories where id=" + id).list();
+            for (Iterator iterator = response.iterator(); iterator.hasNext();) {
+                Categories categorie = (Categories) iterator.next();
+                parentId = categorie.getParent();
+            }
+        } catch (HibernateException e) {
+        } finally {
+            session.close();
+        }
+        return parentId;
+    }
+    private void replaceProductsUp(Integer catId, Integer parentCatId) {
+        ArrayList<Products> productsUp = new ArrayList<>();
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            List response = session.createQuery("From Products where categoryId=" + catId).list();
+            for (Iterator iterator = response.iterator(); iterator.hasNext();) {
+                Products product = (Products) iterator.next();
+                productsUp.add(product);
+            }
+        } catch (HibernateException e) {
+        } finally {
+            session.close();
+        }
+        for (Products product: productsUp) {
+            updateCategoryId(parentCatId, product.getTitle());
+        }
+    }
+    private void onFocusedProductTableItem() {
+        try {
+            selectedProduct = (String) (productsTable.getFocusModel().getFocusedItem()).getTitle();
+            buildPricesTable(selectedProduct);
+            buildQuantityTable(selectedProduct);
+            buildDeliveryTimeTable(selectedProduct);
+            buildAnalogsTable(selectedProduct);
+            buildDatasheetFileTable(selectedProduct);
+            buildImageView(selectedProduct);
+            setVendorSelected(selectedProduct);
+            buildPropertiesTree(selectedProduct);
+            datasheetFileTable.refresh();
+            setSelectProperty();
+            buildFunctionsTable1(selectedProduct);
+            setSelectFunction();
+        } catch (NullPointerException ex) {
+        }
+    }
     private void addVendorDialog() {
         ObservableList<String> currencies = FXCollections.observableArrayList();
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -1512,96 +1616,6 @@ public class PCGUIController implements Initializable {
             session.close();
         }
     }
-    private void editCategory(String categoryTitle, String newTitle, String NewDescription) {
-        Integer id = getCategoryIdFromTitle (categoryTitle);
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = session.beginTransaction();
-        Query query = session.createQuery("update Categories set title = :title, description = :description where id = :id");
-        query.setParameter("title", newTitle);
-        query.setParameter("description", NewDescription);
-        query.setParameter("id", id);
-        query.executeUpdate();
-        tx.commit();
-        session.close();
-    }
-    private void deleteCategory(String categoryTitle) {
-        Integer id = getCategoryIdFromTitle (categoryTitle);
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = session.beginTransaction();
-        Query query = session.createQuery("delete Categories where id = :id");
-        query.setParameter("id", id);
-        query.executeUpdate();
-        tx.commit();
-        session.close();
-    }
-    private ArrayList<String> getCategoryDetails(String categoryTitle)  {
-        ArrayList<String> details = new ArrayList<>();
-        Integer id = getCategoryIdFromTitle (categoryTitle);
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        try {
-            List response = session.createQuery("From Categories where id=" + id).list();
-            for (Iterator iterator = response.iterator(); iterator.hasNext();) {
-                Categories categorie = (Categories) iterator.next();
-                details.add(categorie.getTitle());
-                details.add(categorie.getDescription());
-            }
-        } catch (HibernateException e) {
-        } finally {
-            session.close();
-        }
-        return details;
-    }
-    private Integer getParentCatId(String categoryTitle) {
-        Integer id = getCategoryIdFromTitle(categoryTitle);
-        Integer parentId = 0;
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        try {
-            List response = session.createQuery("From Categories where id=" + id).list();
-            for (Iterator iterator = response.iterator(); iterator.hasNext();) {
-                Categories categorie = (Categories) iterator.next();
-                parentId = categorie.getParent();
-            }
-        } catch (HibernateException e) {
-        } finally {
-            session.close();
-        }
-        return parentId;
-    }
-    private void replaceProductsUp(Integer catId, Integer parentCatId) {
-        ArrayList<Products> productsUp = new ArrayList<>();
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        try {
-            List response = session.createQuery("From Products where categoryId=" + catId).list();
-            for (Iterator iterator = response.iterator(); iterator.hasNext();) {
-                Products product = (Products) iterator.next();
-                productsUp.add(product);
-            }
-        } catch (HibernateException e) {
-        } finally {
-            session.close();
-        }
-        for (Products product: productsUp) {
-            updateCategoryId(parentCatId, product.getTitle());
-        }
-    }
-    private void onFocusedProductTableItem() {
-        try {
-            selectedProduct = (String) (productsTable.getFocusModel().getFocusedItem()).getTitle();
-            buildPricesTable(selectedProduct);
-            buildQuantityTable(selectedProduct);
-            buildDeliveryTimeTable(selectedProduct);
-            buildAnalogsTable(selectedProduct);
-            buildDatasheetFileTable(selectedProduct);
-            buildImageView(selectedProduct);
-            setVendorSelected(selectedProduct);
-            buildPropertiesTree(selectedProduct);
-            datasheetFileTable.refresh();
-            setSelectProperty();
-            buildFunctionsTable1(selectedProduct);
-            setSelectFunction();
-        } catch (NullPointerException ex) {
-        }
-    }
     private void subPropertiesList(String selectedNode) {
         subPropertiesTreeViewList = FXCollections.observableArrayList();
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -1640,12 +1654,10 @@ public class PCGUIController implements Initializable {
         for (TreeItem<String> item: root.getChildren()) {
             if (item.getValue().equals(category.getTitle())) {
                 productOwner = item;
-                //System.out.println("Circle Number " + i + " and owner is " + productOwner.getValue());
             } else {
                 recursiveTreeCall(item, category);
             }
         }
-        //System.out.println(productOwner.getValue());
     }
     private void setVendorSelected(String selectedProduct) {
         Vendors vendor = new Vendors();
@@ -1742,6 +1754,11 @@ public class PCGUIController implements Initializable {
         onFocusedProductTableItem();
         if (productsTable.getSelectionModel().getSelectedItems().size() == 1) {
             productTableContextMenu = ContextMenuBuilder.create().items(
+                    MenuItemBuilder.create().text("Установить коэффициенты цен").onAction((ActionEvent arg0) -> {
+                        Integer selectedProductID = getProductIdFromTitle(selectedProduct);
+                        SetRatesWindow ratesWindow = new SetRatesWindow(null, selectedProductID);
+                        ratesWindow.showModalWindow();
+                    }).build(),
                     MenuItemBuilder.create().text("Открыть вкладку обзора свойств устройства").onAction((ActionEvent arg0) -> {
                         openProductTab();
                     }).build(),
@@ -1954,7 +1971,6 @@ public class PCGUIController implements Initializable {
         String selectedFunction = functionsTable1.getSelectionModel().getSelectedItem().getTitle();
         setFunctionDescriptionAndPicture(selectedFunction);
     }
-
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2560,11 +2576,34 @@ public class PCGUIController implements Initializable {
         return childTreeItems;
     }
 
+    @FXML Button testButton = new Button();
+    @FXML private void writeToSite() {
+        DBConnection siteConnection = new DBConnection();
+        try {
+            siteConnection.getUpdateResult("CREATE TABLE test1(id int, title varchar(50), PRIMARY KEY(id));");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
-
-
-
-
-
-
+    @FXML private void saveAddressSiteDB() {
+        SiteDBSettings address = new SiteDBSettings();
+        address.saveSetting("addressSiteDB", addressSiteDB.getText());
+    }
+    @FXML private void savePortSiteDB() {
+        SiteDBSettings port = new SiteDBSettings();
+        port.saveSetting("portSiteDB", portSiteDB.getText());
+    }
+    @FXML private void saveTitleSiteDB() {
+        SiteDBSettings title = new SiteDBSettings();
+        title.saveSetting("titleSiteDB", titleSiteDB.getText());
+    }
+    @FXML private void saveUserSiteDB() {
+        SiteDBSettings user = new SiteDBSettings();
+        user.saveSetting("userSiteDB", userSiteDB.getText());
+    }
+    @FXML private void savePasswordSiteDB() {
+        SiteDBSettings password = new SiteDBSettings();
+        password.saveSetting("passwordSiteDB", passwordSiteDB.getText());
+    }
 }
