@@ -101,7 +101,7 @@
                                              <children>
                                                 <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                    <children>
-                                                      <TableView fx:id="pricesTable" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.valignment="TOP" GridPane.vgrow="ALWAYS">
+                                                      <TableView fx:id="pricesTable" editable="true" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.valignment="TOP" GridPane.vgrow="ALWAYS">
                                                          <columns>
                                                             <TableColumn fx:id="priceType" prefWidth="577.0" text="Тип цены" />
                                                             <TableColumn fx:id="priceValue" prefWidth="132.0" text="Цена (EUR)" />
@@ -114,7 +114,7 @@
                                                             <Insets right="5.0" />
                                                          </GridPane.margin>
                                                       </TableView>
-                                                      <TableView fx:id="analogsTable" GridPane.hgrow="ALWAYS" GridPane.valignment="TOP" GridPane.vgrow="ALWAYS">
+                                                      <TableView fx:id="analogsTable" editable="true" GridPane.hgrow="ALWAYS" GridPane.valignment="TOP" GridPane.vgrow="ALWAYS">
                                                         <columns>
                                                           <TableColumn fx:id="analogTitle" prefWidth="210.0" text="Аналог" />
                                                           <TableColumn fx:id="analogVendor" prefWidth="143.0" text="Производитель" />
@@ -146,7 +146,7 @@
                                                       <RowConstraints maxHeight="1.7976931348623157E308" minHeight="-Infinity" percentHeight="100.0" prefHeight="150.0" vgrow="ALWAYS" />
                                                    </rowConstraints>
                                                    <children>
-                                                      <TableView fx:id="quantitiesTable" maxHeight="50.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="50.0" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="TOP" GridPane.vgrow="ALWAYS">
+                                                      <TableView fx:id="quantitiesTable" editable="true" maxHeight="50.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="50.0" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="TOP" GridPane.vgrow="ALWAYS">
                                                          <columns>
                                                             <TableColumn fx:id="quantityStock" prefWidth="62.0" text="Свободно" />
                                                             <TableColumn fx:id="quantityReserved" prefWidth="60.0" text="Резерв" />
@@ -173,7 +173,7 @@
                                                          <children>
                                                             <TableView fx:id="deliveryTable" maxHeight="50.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="50.0" prefWidth="100.0" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.valignment="TOP" GridPane.vgrow="ALWAYS">
                                                               <columns>
-                                                                <TableColumn fx:id="deliveryTime" editable="false" prefWidth="100.0" text="Срок доставки" />
+                                                                <TableColumn fx:id="deliveryTime" prefWidth="100.0" text="Срок доставки" />
                                                               </columns>
                                                                <columnResizePolicy>
                                                                   <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
@@ -232,7 +232,7 @@
                                                         <columns>
                                                           <TableColumn fx:id="vendorsTitleColumn" maxWidth="1.7976931348623157E308" minWidth="150.0" prefWidth="150.0" text="Производитель" />
                                                           <TableColumn fx:id="vendorsAddressColumn" minWidth="70.0" text="Страна" />
-                                                            <TableColumn fx:id="vendorsRateColumn" minWidth="55.0" prefWidth="60.0" text="Наценка" />
+                                                            <TableColumn fx:id="vendorsRateColumn" minWidth="55.0" prefWidth="60.0" text="Наценка" visible="false" />
                                                         </columns>
                                                          <columnResizePolicy>
                                                             <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

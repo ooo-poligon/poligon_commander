@@ -76,7 +76,8 @@ public class PricesTableView {
 
     public StringProperty typeProperty() {
         return type;
-    }    
+    }
+
     private void getAllPrices() {        
     }
     

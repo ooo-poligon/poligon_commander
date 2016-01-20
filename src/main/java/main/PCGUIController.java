@@ -1,5 +1,7 @@
 package main;
 
+import javafx.beans.property.*;
+import javafx.util.StringConverter;
 import modalwindows.SetRatesWindow;
 import settings.SiteDBSettings;
 import utils.DBConnection;
@@ -17,10 +19,6 @@ import com.sun.pdfview.PDFPage;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.IntegerBinding;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -231,10 +229,11 @@ public class PCGUIController implements Initializable {
 
     // Numbers
     private Integer headersRowNumber = 0;
-    public final  Double course = 74.5;
+    public Double course;
     Double basePrice;
     private static final double ZOOM_DELTA = 1.05;
     Double newVendorRate;
+    Double addCBR = 1.05;
 
     // Strings
     String selectedProduct;
@@ -266,6 +265,8 @@ public class PCGUIController implements Initializable {
     @Override
     // Выполняется при запуске программы
     public void initialize(URL url, ResourceBundle rb) {
+        course = loadCurrencyCourse("EUR");
+        course = course * addCBR;
         loadSavedSettings();
         buildCategoryTree();
         populateComboBox ();
@@ -463,6 +464,10 @@ public class PCGUIController implements Initializable {
             }
         }
         return string;
+    }
+    private Double loadCurrencyCourse(String currencyName) {
+        CurrencyCourse euro = new CurrencyCourse(currencyName);
+        return euro.getValueFromCBR();
     }
 
 
@@ -687,70 +692,79 @@ public class PCGUIController implements Initializable {
         deliveryTable.setItems(data);
     }
     private void buildPricesTable(String selectedProduct) {
-        //getAllPrices();
+        SetRates ratesPack = SetRates.getRatesPack(selectedProduct);
         allPrices.entrySet().stream().filter((entry) -> (entry.getKey().equals(selectedProduct))).map((entry) -> {
             return entry;
         }).forEach((entry) -> {
             basePrice = entry.getValue();
         });
-
         ObservableList<PricesTableView> data = FXCollections.observableArrayList();
         String[] priceTypes = {
-                "Розничная",
-                "Мелкий опт",
-                "Оптовая",
-                "Диллер1",
-                "Диллер2",
-                "Диллер3",
-                "Базовая",
-                "Входная"
+                "Розничная цена",
+                "Мелкий опт (+10)",
+                "Оптовая цена",
+                "Диллерская цена",
+                "Закупочная цена"
         };
 
         for (String type : priceTypes) {
             try {
-
+                Double retailPrice = basePrice * ratesPack.getRate();
+                Double tenPlusDiscount = retailPrice - (retailPrice*ratesPack.getTenPlusDiscount()/100.0);
+                Double optDiscount = retailPrice - (retailPrice*ratesPack.getOptDiscount()/100.0);
+                Double dealerDiscount = retailPrice - (retailPrice*ratesPack.getDealerDiscount()/100.0);
                 switch (type) {
-                    case "Розничная":
-                        data.add(new PricesTableView(type, ((new BigDecimal(basePrice * 1.5)).setScale(2, RoundingMode.UP)).doubleValue(),
-                                ((new BigDecimal(basePrice * 1.5 * course)).setScale(2, RoundingMode.UP)).doubleValue()));
+                    case "Розничная цена":
+                        data.add(new PricesTableView(type, ((new BigDecimal(retailPrice)).setScale(2, RoundingMode.UP)).doubleValue(),
+                                ((new BigDecimal(retailPrice * course)).setScale(2, RoundingMode.UP)).doubleValue()));
                         break;
-                    case "Мелкий опт":
-                        data.add(new PricesTableView(type, ((new BigDecimal(basePrice * 1.4)).setScale(2, RoundingMode.UP)).doubleValue(),
-                                ((new BigDecimal(basePrice * 1.4 * course)).setScale(2, RoundingMode.UP)).doubleValue()));
+                    case "Мелкий опт (+10)":
+                        data.add(new PricesTableView(type, ((new BigDecimal(tenPlusDiscount)).setScale(2, RoundingMode.UP)).doubleValue(),
+                                ((new BigDecimal(tenPlusDiscount * course)).setScale(2, RoundingMode.UP)).doubleValue()));
                         break;
-                    case "Оптовая":
-                        data.add(new PricesTableView(type, ((new BigDecimal(basePrice * 1.3)).setScale(2, RoundingMode.UP)).doubleValue(),
-                                ((new BigDecimal(basePrice * 1.3 * course)).setScale(2, RoundingMode.UP)).doubleValue()));
+                    case "Оптовая цена":
+                        data.add(new PricesTableView(type, ((new BigDecimal(optDiscount)).setScale(2, RoundingMode.UP)).doubleValue(),
+                                ((new BigDecimal(optDiscount * course)).setScale(2, RoundingMode.UP)).doubleValue()));
                         break;
-                    case "Диллер1":
-                        data.add(new PricesTableView(type, ((new BigDecimal(basePrice * 1.2)).setScale(2, RoundingMode.UP)).doubleValue(),
-                                ((new BigDecimal(basePrice * 1.2 * course)).setScale(2, RoundingMode.UP)).doubleValue()));
+                    case "Диллерская цена":
+                        data.add(new PricesTableView(type, ((new BigDecimal(dealerDiscount)).setScale(2, RoundingMode.UP)).doubleValue(),
+                                ((new BigDecimal(dealerDiscount * course)).setScale(2, RoundingMode.UP)).doubleValue()));
                         break;
-                    case "Диллер2":
-                        data.add(new PricesTableView(type, ((new BigDecimal(basePrice * 1.1)).setScale(2, RoundingMode.UP)).doubleValue(),
-                                ((new BigDecimal(basePrice * 1.1 * course)).setScale(2, RoundingMode.UP)).doubleValue()));
-                        break;
-                    case "Диллер3":
-                        data.add(new PricesTableView(type, ((new BigDecimal(basePrice * 1.05)).setScale(2, RoundingMode.UP)).doubleValue(),
-                                ((new BigDecimal(basePrice * 1.05 * course)).setScale(2, RoundingMode.UP)).doubleValue()));
-                        break;
-                    case "Базовая":
-                        data.add(new PricesTableView(type, ((new BigDecimal(basePrice * 1.0)).setScale(2, RoundingMode.UP)).doubleValue(),
-                                ((new BigDecimal(basePrice * 1.0 * course)).setScale(2, RoundingMode.UP)).doubleValue()));
-                        break;
-                    case "Входная":
-                        data.add(new PricesTableView(type, ((new BigDecimal(basePrice * 0.85)).setScale(2, RoundingMode.UP)).doubleValue(),
-                                ((new BigDecimal(basePrice * 0.85 * course)).setScale(2, RoundingMode.UP)).doubleValue()));
+                    case "Закупочная цена":
+                        data.add(new PricesTableView(type, ((new BigDecimal(basePrice)).setScale(2, RoundingMode.UP)).doubleValue(),
+                                ((new BigDecimal(basePrice * course)).setScale(2, RoundingMode.UP)).doubleValue()));
                         break;
                     default:
                         break;
                 }
-            } catch (NullPointerException nex) {
-                System.out.println("nulled pricesTable!!!");
-            }
+            } catch (NullPointerException nex) {}
         }
         priceType.setCellValueFactory(new PropertyValueFactory<>("type"));
         priceValue.setCellValueFactory(new PropertyValueFactory<>("price"));
+        priceValue.setCellFactory(TextFieldTableCell.forTableColumn(new StringConverter<Double>() {
+            @Override
+            public String toString(Double object) {
+                return object.toString();
+            }
+
+            @Override
+            public Double fromString(String string) {
+                return Double.parseDouble(string);
+            }
+        }));
+        priceValue.setOnEditCommit(
+                new EventHandler<CellEditEvent<PricesTableView, Double>>() {
+                    @Override
+                    public void handle(CellEditEvent<PricesTableView, Double> t) {
+                        ((PricesTableView) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())
+                        ).setPrice(t.getNewValue());
+                        setNewPriceValue("price", t.getNewValue(), productsTable.getFocusModel().getFocusedItem().getTitle());
+                        getAllPrices();
+                        buildPricesTable(selectedProduct);
+                    }
+                }
+        );
         priceValueRub.setCellValueFactory(new PropertyValueFactory<>("priceR"));
         pricesTable.setItems(data);
     }
@@ -1204,6 +1218,17 @@ public class PCGUIController implements Initializable {
 
     // Вносит в БД новые значения, полученные при редактировании таблицы товаров.
     private void setNewCellValue(String fieldName, String newValue, String productTitle) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = session.beginTransaction();
+        Query query = session.createQuery("UPDATE Products set " + fieldName + "= :newValue where title= :title");
+        query.setParameter("newValue", newValue);
+        query.setParameter("title", productTitle);
+        query.executeUpdate();
+        tx.commit();
+        session.close();
+    }
+
+    private void setNewPriceValue(String fieldName, Double newValue, String productTitle) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
         Query query = session.createQuery("UPDATE Products set " + fieldName + "= :newValue where title= :title");
