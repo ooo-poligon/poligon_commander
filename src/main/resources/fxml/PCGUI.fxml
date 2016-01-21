@@ -99,40 +99,81 @@
                                        <children>
                                           <AnchorPane fx:id="allTables" maxHeight="1.7976931348623157E308" minHeight="220.0" VBox.vgrow="ALWAYS">
                                              <children>
-                                                <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                <HBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                    <children>
-                                                      <TableView fx:id="pricesTable" editable="true" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.valignment="TOP" GridPane.vgrow="ALWAYS">
-                                                         <columns>
-                                                            <TableColumn fx:id="priceType" prefWidth="577.0" text="Тип цены" />
-                                                            <TableColumn fx:id="priceValue" prefWidth="132.0" text="Цена (EUR)" />
-                                                            <TableColumn fx:id="priceValueRub" prefWidth="75.0" text="Цена (RUB)" />
-                                                         </columns>
-                                                         <columnResizePolicy>
-                                                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                                                         </columnResizePolicy>
-                                                         <GridPane.margin>
-                                                            <Insets right="5.0" />
-                                                         </GridPane.margin>
-                                                      </TableView>
-                                                      <TableView fx:id="analogsTable" editable="true" GridPane.hgrow="ALWAYS" GridPane.valignment="TOP" GridPane.vgrow="ALWAYS">
-                                                        <columns>
-                                                          <TableColumn fx:id="analogTitle" prefWidth="210.0" text="Аналог" />
-                                                          <TableColumn fx:id="analogVendor" prefWidth="143.0" text="Производитель" />
-                                                        </columns>
-                                                         <columnResizePolicy>
-                                                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                                                         </columnResizePolicy>
-                                                      </TableView>
+                                                      <AnchorPane minWidth="-Infinity" prefWidth="360.0" HBox.hgrow="ALWAYS">
+                                                         <children>
+                                                            <TableView fx:id="analogsTable" editable="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
+                                                              <columns>
+                                                                <TableColumn fx:id="analogTitle" prefWidth="210.0" text="Аналог" />
+                                                                <TableColumn fx:id="analogVendor" prefWidth="143.0" text="Производитель" />
+                                                              </columns>
+                                                               <columnResizePolicy>
+                                                                  <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                                               </columnResizePolicy>
+                                                            </TableView>
+                                                         </children>
+                                                      </AnchorPane>
+                                                      <AnchorPane minWidth="-Infinity" prefWidth="350.0" HBox.hgrow="ALWAYS">
+                                                         <children>
+                                                            <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                               <children>
+                                                                  <AnchorPane prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+                                                                     <children>
+                                                                        <TableView fx:id="pricesTable" editable="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                           <columns>
+                                                                              <TableColumn fx:id="priceType" prefWidth="577.0" text="Тип цены" />
+                                                                              <TableColumn fx:id="priceValue" prefWidth="132.0" text="Цена (EUR)" />
+                                                                              <TableColumn fx:id="priceValueRub" prefWidth="75.0" text="Цена (RUB)" />
+                                                                           </columns>
+                                                                           <columnResizePolicy>
+                                                                              <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                                                           </columnResizePolicy>
+                                                                        </TableView>
+                                                                     </children>
+                                                                  </AnchorPane>
+                                                                  <AnchorPane>
+                                                                     <children>
+                                                                        <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                           <children>
+                                                                              <AnchorPane>
+                                                                                 <children>
+                                                                                    <HBox nodeOrientation="RIGHT_TO_LEFT" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+                                                                                       <children>
+                                                                                          <Label text=" рублей за 1 EUR." />
+                                                                                          <Label fx:id="courseEUROLabel" textFill="RED">
+                                                                                             <font>
+                                                                                                <Font name="System Bold" size="12.0" />
+                                                                                             </font>
+                                                                                          </Label>
+                                                                                          <Label text=" составляет " />
+                                                                                          <Label fx:id="courseDateLabel" />
+                                                                                          <Label text="Курс ЦБР на " />
+                                                                                       </children>
+                                                                                    </HBox>
+                                                                                 </children>
+                                                                              </AnchorPane>
+                                                                              <AnchorPane>
+                                                                                 <children>
+                                                                                    <HBox nodeOrientation="RIGHT_TO_LEFT" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
+                                                                                       <children>
+                                                                                          <Label text=" %" />
+                                                                                          <TextField fx:id="addCBRTextField" alignment="CENTER" maxHeight="-Infinity" minHeight="-Infinity" onAction="#saveAddCBRToDB" prefHeight="19.0" prefWidth="40.0" HBox.hgrow="NEVER" />
+                                                                                          <Label text="Наценка на курс ЦБР составляет : " />
+                                                                                       </children>
+                                                                                    </HBox>
+                                                                                 </children>
+                                                                              </AnchorPane>
+                                                                           </children>
+                                                                        </VBox>
+                                                                     </children>
+                                                                  </AnchorPane>
+                                                               </children>
+                                                            </VBox>
+                                                         </children>
+                                                      </AnchorPane>
                                                    </children>
-                                                   <columnConstraints>
-                                                      <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" maxWidth="809.0" minWidth="10.0" percentWidth="100.0" prefWidth="461.0" />
-                                                      <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" maxWidth="5.0" minWidth="5.0" prefWidth="5.0" />
-                                                      <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" maxWidth="809.0" minWidth="10.0" percentWidth="100.0" prefWidth="461.0" />
-                                                   </columnConstraints>
-                                                   <rowConstraints>
-                                                      <RowConstraints minHeight="-Infinity" percentHeight="100.0" prefHeight="150.0" vgrow="ALWAYS" />
-                                                   </rowConstraints>
-                                                </GridPane>
+                                                </HBox>
                                              </children>
                                           </AnchorPane>
                                           <AnchorPane prefHeight="38.0" prefWidth="710.0" VBox.vgrow="NEVER">
@@ -261,11 +302,28 @@
                                  <children>
                                     <AnchorPane>
                                        <children>
-                                          <Label fx:id="productTabTitle" alignment="CENTER" textFill="#057df7" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="10.0">
-                                             <font>
-                                                <Font name="System Bold" size="24.0" />
-                                             </font>
-                                          </Label>
+                                          <HBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                             <children>
+                                                <AnchorPane>
+                                                   <children>
+                                                      <Label fx:id="productTabKind" textFill="#0206f5" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="10.0">
+                                                         <font>
+                                                            <Font size="18.0" />
+                                                         </font>
+                                                      </Label>
+                                                   </children>
+                                                </AnchorPane>
+                                                <AnchorPane>
+                                                   <children>
+                                                      <Label fx:id="productTabTitle" alignment="CENTER" textFill="#057df7" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="10.0">
+                                                         <font>
+                                                            <Font name="System Bold" size="24.0" />
+                                                         </font>
+                                                      </Label>
+                                                   </children>
+                                                </AnchorPane>
+                                             </children>
+                                          </HBox>
                                        </children>
                                     </AnchorPane>
                                     <AnchorPane VBox.vgrow="ALWAYS">

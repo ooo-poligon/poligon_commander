@@ -5,6 +5,7 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -35,7 +36,8 @@ public class CurrencyCourse {
         this.value = value;
     }
 
-    public Double getValueFromCBR() {
+    public ArrayList getValueFromCBR() {
+        ArrayList result = new ArrayList();
         DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         Date date = new Date();
         String currentDate = dateFormat.format(date);
@@ -47,6 +49,8 @@ public class CurrencyCourse {
             e.printStackTrace();
         }
         XMLParser xmlParser = new XMLParser(content);
-        return xmlParser.getValueOfCurrency("EUR");
+        result.add(xmlParser.getValueOfCurrency("EUR"));
+        result.add(currentDate);
+        return result;
     }
 }

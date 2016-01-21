@@ -107,10 +107,20 @@ public class SetRatesWindow {
     }
 
     public void showModalWindow() {
+        SetRates currentlySetRates = new SetRates();
+        String textAtAlertHeader = "";
+        if (selectedNodeID == null) {
+            currentlySetRates = getExistingRatesPack("products", selectedProductID);
+            textAtAlertHeader = "Коэффициенты, установленные в этом окне\nбудут применены " +
+                    "только к товару,\n для которого вызван данный диалог.";
+        } else {
+            currentlySetRates = getExistingRatesPack("categories", selectedNodeID);
+            textAtAlertHeader = "Коэффициенты, установленные в этом окне\nбудут применены " +
+                    "ко всей группе товаров,\n из которой вызван данный диалог.";
+        }
         Dialog<SetRates> dialog = new Dialog<>();
         dialog.setTitle("Установка коэффициентов");
-        dialog.setHeaderText("Коэффициенты, установленные в этом окне\nбудут применены " +
-                "ко всей группе товаров,\n из которой вызван данноый диалог.");
+        dialog.setHeaderText(textAtAlertHeader);
         dialog.setResizable(false);
 
         Label label1 = new Label("Коэффициент наценки:  ");
@@ -129,12 +139,6 @@ public class SetRatesWindow {
         TextField text3 = new TextField();
         TextField text4 = new TextField();
         TextField text5 = new TextField();
-        SetRates currentlySetRates = new SetRates();
-        if (selectedNodeID == null) {
-            currentlySetRates = getExistingRatesPack("products", selectedProductID);
-        } else {
-            currentlySetRates = getExistingRatesPack("categories", selectedNodeID);
-        }
         try {
             if ( currentlySetRates.getRate().equals(-999.0)) {
                 alertDifferentRates();

@@ -10,7 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Created by kataev on 15.01.2016.
+ * Created by Igor Klekotnev on 15.01.2016.
  */
 public class SiteDBSettings {
     private String addressSiteDB;

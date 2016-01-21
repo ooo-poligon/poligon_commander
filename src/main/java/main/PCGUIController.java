@@ -3,6 +3,7 @@ package main;
 import javafx.beans.property.*;
 import javafx.util.StringConverter;
 import modalwindows.SetRatesWindow;
+import settings.PriceCalcSettings;
 import settings.SiteDBSettings;
 import utils.DBConnection;
 import entities.*;
@@ -178,6 +179,10 @@ public class PCGUIController implements Initializable {
     // Labels
     @FXML private Label productTabTitle;
     @FXML private Label pdfTabTitle;
+    @FXML private Label courseEUROLabel;
+    @FXML private Label courseDateLabel;
+    @FXML private Label addCBRLabel;
+    @FXML private Label productTabKind;
 
     // ProgressBars
     @FXML private ProgressBar progressBar;
@@ -206,6 +211,7 @@ public class PCGUIController implements Initializable {
     @FXML private TextField titleSiteDB;
     @FXML private TextField userSiteDB;
     @FXML private PasswordField passwordSiteDB;
+    @FXML private TextField addCBRTextField;
 
     // CheckBoxes
     @FXML private CheckBox treeViewHandlerMode;
@@ -233,7 +239,7 @@ public class PCGUIController implements Initializable {
     Double basePrice;
     private static final double ZOOM_DELTA = 1.05;
     Double newVendorRate;
-    Double addCBR = 1.05;
+    Double addCBR;
 
     // Strings
     String selectedProduct;
@@ -245,6 +251,13 @@ public class PCGUIController implements Initializable {
     String newVendorDescription;
     String newVendorCurrency;
     String newVendorAddress;
+
+    String newFunctionTitle;
+    String newFunctionSymbol;
+    String newFunctionDescription;
+    String newFunctionPictureName;
+    String newFunctionPicturePath;
+
     private final String noImageFile = "C:\\Users\\gnato\\Desktop\\Igor\\progs\\java_progs\\PoligonCommanderJ\\src\\main\\resources\\images\\noImage.gif";
     String selectedCategory = "";
     String focusedProduct = "";
@@ -265,9 +278,16 @@ public class PCGUIController implements Initializable {
     @Override
     // Выполняется при запуске программы
     public void initialize(URL url, ResourceBundle rb) {
-        course = loadCurrencyCourse("EUR");
-        course = course * addCBR;
         loadSavedSettings();
+
+        addCBR = Double.parseDouble(addCBRTextField.getText());
+        CurrencyCourse euro = new CurrencyCourse("EUR");
+        course = (Double) euro.getValueFromCBR().get(0);
+        courseEUROLabel.setText(course.toString());
+        courseDateLabel.setText(((String) euro.getValueFromCBR().get(1)).replace('/', '.'));
+        addCBRTextField.setText(addCBR.toString());
+        course = course + ((course/100) * addCBR);
+
         buildCategoryTree();
         populateComboBox ();
         getAllPrices();
@@ -379,6 +399,8 @@ public class PCGUIController implements Initializable {
     // Пока не реализовано полностью.
     private void loadSavedSettings() {
         SiteDBSettings siteDBSettings = new SiteDBSettings();
+        PriceCalcSettings priceCalcSettings = new PriceCalcSettings();
+        addCBRTextField.setText(priceCalcSettings.loadSetting("addCBR"));
         addressSiteDB.setText(siteDBSettings.loadSetting("addressSiteDB"));
         portSiteDB.setText(siteDBSettings.loadSetting("portSiteDB"));
         titleSiteDB.setText(siteDBSettings.loadSetting("titleSiteDB"));
@@ -465,11 +487,22 @@ public class PCGUIController implements Initializable {
         }
         return string;
     }
-    private Double loadCurrencyCourse(String currencyName) {
-        CurrencyCourse euro = new CurrencyCourse(currencyName);
-        return euro.getValueFromCBR();
-    }
+    @FXML private void saveAddCBRToDB() {
+        PriceCalcSettings priceCalcSettings = new PriceCalcSettings();
+        priceCalcSettings.saveSetting("addCBR", addCBRTextField.getText());
 
+        loadSavedSettings();
+
+        addCBR = Double.parseDouble(addCBRTextField.getText());
+        CurrencyCourse euro = new CurrencyCourse("EUR");
+        course = (Double) euro.getValueFromCBR().get(0);
+        courseEUROLabel.setText(course.toString());
+        courseDateLabel.setText(((String) euro.getValueFromCBR().get(1)).replace('/', '.'));
+        addCBRTextField.setText(addCBR.toString());
+        course = course + ((course/100) * addCBR);
+        getAllPrices();
+        buildPricesTable(selectedProduct);
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Таб "Номенклатура" //////////////////////////////////////////////////////////////////////////////////////////////
@@ -756,12 +789,23 @@ public class PCGUIController implements Initializable {
                 new EventHandler<CellEditEvent<PricesTableView, Double>>() {
                     @Override
                     public void handle(CellEditEvent<PricesTableView, Double> t) {
-                        ((PricesTableView) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())
-                        ).setPrice(t.getNewValue());
-                        setNewPriceValue("price", t.getNewValue(), productsTable.getFocusModel().getFocusedItem().getTitle());
-                        getAllPrices();
-                        buildPricesTable(selectedProduct);
+                        if (t.getRowValue().getType().equals("Закупочная цена")) {
+                            ((PricesTableView) t.getTableView().getItems().get(
+                                    t.getTablePosition().getRow())
+                            ).setPrice(t.getNewValue());
+                            setNewPriceValue("price", t.getNewValue(), productsTable.getFocusModel().getFocusedItem().getTitle());
+                            getAllPrices();
+                            buildPricesTable(selectedProduct);
+                        } else {
+                            Alert alert = new Alert(AlertType.WARNING);
+                            alert.setTitle("Внимание!");
+                            alert.setHeaderText("Недопустимое действие!");
+                            alert.setContentText("В таблице цен можно устанавливать только закупочную валютную цену.\n" +
+                                    "Все остальные цены являются расчётными и редактированию не подлежат.");
+                            alert.showAndWait();
+                            buildPricesTable(selectedProduct);
+                        }
+
                     }
                 }
         );
@@ -1534,6 +1578,7 @@ public class PCGUIController implements Initializable {
             setSelectProperty();
             buildFunctionsTable1(selectedProduct);
             setSelectFunction();
+            showProductKind();
         } catch (NullPointerException ex) {
         }
     }
@@ -1993,8 +2038,19 @@ public class PCGUIController implements Initializable {
         }
     }
     @FXML private void handleFunctionsTable1MouseClicked() {
-        String selectedFunction = functionsTable1.getSelectionModel().getSelectedItem().getTitle();
-        setFunctionDescriptionAndPicture(selectedFunction);
+        try {
+            String selectedFunction = functionsTable1.getSelectionModel().getSelectedItem().getTitle();
+            setFunctionDescriptionAndPicture(selectedFunction);
+        } catch (NullPointerException ne) {}
+    }
+    private void showProductKind() {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List res = session.createQuery("from Products where title = \'" + selectedProduct + "\'").list();
+        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+            Products product = (Products) iterator.next();
+            productTabKind.setText(product.getProductKindId().getTitle());
+        }
+        session.close();
     }
 
 
@@ -2433,13 +2489,15 @@ public class PCGUIController implements Initializable {
         functionsTableSymbolColumn.setCellValueFactory(new PropertyValueFactory<>("symbol"));
         functionsTableContextMenu = ContextMenuBuilder.create().items(
                 MenuItemBuilder.create().text("Добавить новую функцию").onAction((ActionEvent ae1) -> {
-                    ContextBuilder.createNewFunction();
+                    ContextBuilder.createNewFunction(getPropertyKindIdFromTitle(selectedPropertiesKind));
+                    buildFunctionsTable(selectedPropertiesKind);
                 }).build(),
                 MenuItemBuilder.create().text("Редактировать выбранную функцию").onAction((ActionEvent ae2) -> {
-                    ContextBuilder.updateTheFunction();
+                    ContextBuilder.updateTheFunction(getPropertyKindIdFromTitle(selectedPropertiesKind), functionsTable);
                 }).build(),
                 MenuItemBuilder.create().text("Удалить выбранную функцию").onAction((ActionEvent ae3) -> {
-                    ContextBuilder.deleteTheFunction();
+                    ContextBuilder.deleteTheFunction(functionsTable);
+                    buildFunctionsTable(selectedPropertiesKind);
                 }).build()
         ).build();
         functionsTable.setContextMenu(functionsTableContextMenu);
