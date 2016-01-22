@@ -306,9 +306,27 @@
                                              <children>
                                                 <AnchorPane>
                                                    <children>
-                                                      <Label fx:id="productTabKind" textFill="#0206f5" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="10.0">
+                                                      <Label text="Тип устройства: " AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="10.0">
                                                          <font>
-                                                            <Font size="18.0" />
+                                                            <Font name="System Bold" size="18.0" />
+                                                         </font>
+                                                      </Label>
+                                                   </children>
+                                                </AnchorPane>
+                                                <AnchorPane>
+                                                   <children>
+                                                      <Label fx:id="productTabKind" textFill="#057df7" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="10.0">
+                                                         <font>
+                                                            <Font name="System Bold" size="18.0" />
+                                                         </font>
+                                                      </Label>
+                                                   </children>
+                                                </AnchorPane>
+                                                <AnchorPane>
+                                                   <children>
+                                                      <Label text="Наименование: " AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+                                                         <font>
+                                                            <Font name="System Bold" size="18.0" />
                                                          </font>
                                                       </Label>
                                                    </children>

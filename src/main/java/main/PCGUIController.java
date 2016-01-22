@@ -252,12 +252,6 @@ public class PCGUIController implements Initializable {
     String newVendorCurrency;
     String newVendorAddress;
 
-    String newFunctionTitle;
-    String newFunctionSymbol;
-    String newFunctionDescription;
-    String newFunctionPictureName;
-    String newFunctionPicturePath;
-
     private final String noImageFile = "C:\\Users\\gnato\\Desktop\\Igor\\progs\\java_progs\\PoligonCommanderJ\\src\\main\\resources\\images\\noImage.gif";
     String selectedCategory = "";
     String focusedProduct = "";
@@ -274,6 +268,7 @@ public class PCGUIController implements Initializable {
     private DoubleProperty zoom;
     private PageDimensions currentPageDimensions;
     private ExecutorService imageLoadService;
+    ProductKinds selectedProductKind = new ProductKinds();
 
     @Override
     // Выполняется при запуске программы
@@ -649,7 +644,6 @@ public class PCGUIController implements Initializable {
         } finally {
             session.close();
         }
-        System.out.println(selectedNodeID + " ---- " + selectedProduct);
         return data;
     }
 
@@ -1578,7 +1572,6 @@ public class PCGUIController implements Initializable {
             setSelectProperty();
             buildFunctionsTable1(selectedProduct);
             setSelectFunction();
-            showProductKind();
         } catch (NullPointerException ex) {
         }
     }
@@ -1916,6 +1909,7 @@ public class PCGUIController implements Initializable {
         ProductsTableView product = productsTable.getSelectionModel().getSelectedItem();
         try {
             productTabTitle.setText(product.getTitle());
+            productTabKind.setText(getProductKindTitle(product.getTitle()));
             Session session = HibernateUtil.getSessionFactory().openSession();
             List pics = session.createQuery("from Files where ownerId=" + getProductIdFromTitle(product.getTitle()) + " and fileTypeId=" + 1).list();
             if (pics.size()==0) {
@@ -1951,7 +1945,7 @@ public class PCGUIController implements Initializable {
         propertyValueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
         propertiesTableContextMenu = ContextMenuBuilder.create().items(
                 MenuItemBuilder.create().text("Добавить новое свойство").onAction((ActionEvent arg0) -> {
-                    ContextBuilder.createNewProperty();
+                    ContextBuilder.createNewProperty(productKindsList);
                 }).build()
         ).build();
         propertiesTable.setContextMenu(propertiesTableContextMenu);
@@ -2043,14 +2037,25 @@ public class PCGUIController implements Initializable {
             setFunctionDescriptionAndPicture(selectedFunction);
         } catch (NullPointerException ne) {}
     }
-    private void showProductKind() {
+    private String getProductKindTitle(String selectedProductTitle) {
+        Integer selectedProductKindID = 0;
+        String productTabKindText = "";
         Session session = HibernateUtil.getSessionFactory().openSession();
-        List res = session.createQuery("from Products where title = \'" + selectedProduct + "\'").list();
+        List res = session.createQuery("from Products where title = \'" + selectedProductTitle + "\'").list();
         for (Iterator iterator = res.iterator(); iterator.hasNext();) {
             Products product = (Products) iterator.next();
-            productTabKind.setText(product.getProductKindId().getTitle());
+            selectedProductKindID = product.getProductKindId().getId();
         }
         session.close();
+
+        Session session1 = HibernateUtil.getSessionFactory().openSession();
+        List res1 = session1.createQuery("from ProductKinds where id = " + selectedProductKindID).list();
+        for (Iterator iterator = res1.iterator(); iterator.hasNext();) {
+            ProductKinds productKind = (ProductKinds) iterator.next();
+            productTabKindText = productKind.getTitle();
+        }
+        session1.close();
+        return productTabKindText;
     }
 
 
@@ -2411,12 +2416,15 @@ public class PCGUIController implements Initializable {
         productKindsListContextMenu = ContextMenuBuilder.create().items(
                 MenuItemBuilder.create().text("Создать новый тип устройств").onAction((ActionEvent ae1) -> {
                     ContextBuilder.createNewProductKind();
+                    buildProductKindsList();
                 }).build(),
                 MenuItemBuilder.create().text("Редактировать выбранный тип").onAction((ActionEvent ae2) -> {
-                    ContextBuilder.updateTheProductKind();
+                    ContextBuilder.updateTheProductKind(productKindsList);
+                    buildProductKindsList();
                 }).build(),
                 MenuItemBuilder.create().text("Удалить выбранный тип устройств").onAction((ActionEvent ae3) -> {
-                    ContextBuilder.deleteTheProductKind();
+                    ContextBuilder.deleteTheProductKind(productKindsList);
+                    buildProductKindsList();
                 }).build()
         ).build();
         productKindsList.setContextMenu(productKindsListContextMenu);
@@ -2458,7 +2466,8 @@ public class PCGUIController implements Initializable {
         });
         propertiesTreeTableContextMenu = ContextMenuBuilder.create().items(
                 MenuItemBuilder.create().text("Добавить новую характеристику").onAction((ActionEvent ae1) -> {
-                    ContextBuilder.createNewProperty();
+                    ContextBuilder.createNewProperty(productKindsList);
+                    buildPropertiesTreeTable(selectedPropertiesKind);
                 }).build(),
                 MenuItemBuilder.create().text("Редактировать выбранную характеристику").onAction((ActionEvent ae2) -> {
                     ContextBuilder.updateTheProperty();
