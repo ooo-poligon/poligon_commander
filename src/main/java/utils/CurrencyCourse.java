@@ -1,5 +1,6 @@
 package utils;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
@@ -36,7 +37,7 @@ public class CurrencyCourse {
         this.value = value;
     }
 
-    public ArrayList getValueFromCBR() {
+    public ArrayList getValueFromCBR() throws IOException {
         ArrayList result = new ArrayList();
         DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         Date date = new Date();

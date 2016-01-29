@@ -10,12 +10,12 @@ import javafx.beans.property.StringProperty;
  */
 public class PropertiesTableView {
     private final StringProperty title;
-    private final StringProperty condition;
+    private final StringProperty cond;
     private final StringProperty value;
 
-    public PropertiesTableView(String title, String condition, String value) {
+    public PropertiesTableView(String title, String cond, String value) {
         this.title = new SimpleStringProperty(title);
-        this.condition = new SimpleStringProperty(condition);
+        this.cond = new SimpleStringProperty(cond);
         this.value = new SimpleStringProperty(value);
     }
 
@@ -31,16 +31,16 @@ public class PropertiesTableView {
         this.title.set(title);
     }
 
-    public String getCondition() {
-        return condition.get();
+    public String getCond() {
+        return cond.get();
     }
 
-    public StringProperty conditionProperty() {
-        return condition;
+    public StringProperty condProperty() {
+        return cond;
     }
 
-    public void setCondition(String condition) {
-        this.condition.set(condition);
+    public void setCond(String cond) {
+        this.cond.set(cond);
     }
 
     public String getValue() {

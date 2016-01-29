@@ -49,7 +49,7 @@ public class Properties implements Serializable {
     @Column(name = "title")
     private String title;
     @JoinColumn(name = "product_id", referencedColumnName = "id")
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = true)
     private Products productId;
     @JoinColumn(name = "property_type_id", referencedColumnName = "id")
     @ManyToOne(optional = false)

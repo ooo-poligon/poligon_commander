@@ -20,7 +20,14 @@ public class ProductsTableView {
     
     public ProductsTableView() {
         this(null, null, null, null);
-    } 
+    }
+
+    public ProductsTableView(String article, String title) {
+        this.article       = new SimpleStringProperty(article);
+        this.title       = new SimpleStringProperty(title);
+        this.description = null;
+        this.delivery_time = null;
+    }
     
     public ProductsTableView(String delivery_time) {
         this.article       = null;

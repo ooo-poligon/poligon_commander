@@ -23,25 +23,28 @@ import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
- * @author kataev
+ * @author Igor Klekotnev
  */
 @Entity
 @Table(name = "property_values")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "PropertyValues.findAll", query = "SELECT p FROM PropertyValues p"),
-    @NamedQuery(name = "PropertyValues.findById", query = "SELECT p FROM PropertyValues p WHERE p.id = :id"),
-    @NamedQuery(name = "PropertyValues.findByCondition", query = "SELECT p FROM PropertyValues p WHERE p.condition = :condition"),
-    @NamedQuery(name = "PropertyValues.findByValue", query = "SELECT p FROM PropertyValues p WHERE p.value = :value")})
+        @NamedQuery(name = "PropertyValues.findAll", query = "SELECT p FROM PropertyValues p"),
+        @NamedQuery(name = "PropertyValues.findById", query = "SELECT p FROM PropertyValues p WHERE p.id = :id"),
+        @NamedQuery(name = "PropertyValues.findByCond", query = "SELECT p FROM PropertyValues p WHERE p.cond = :cond"),
+        @NamedQuery(name = "PropertyValues.findByValue", query = "SELECT p FROM PropertyValues p WHERE p.value = :value")})
 public class PropertyValues implements Serializable {
+    @Column(name = "cond")
+    private String cond;
+    @JoinColumn(name = "measure_id", referencedColumnName = "id")
+    @ManyToOne(optional = true)
+    private Measures measureId;
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
-    @Column(name = "condition")
-    private String condition;
     @Column(name = "value")
     private String value;
     @JoinColumn(name = "product_id", referencedColumnName = "id")
@@ -68,12 +71,12 @@ public class PropertyValues implements Serializable {
         this.id = id;
     }
 
-    public String getCondition() {
-        return condition;
+    public String getCond() {
+        return cond;
     }
 
-    public void setCondition(String condition) {
-        this.condition = condition;
+    public void setCond(String cond) {
+        this.cond = cond;
     }
 
     public String getValue() {
@@ -133,5 +136,13 @@ public class PropertyValues implements Serializable {
     public String toString() {
         return "entities.PropertyValues[ id=" + id + " ]";
     }
-    
+
+    public Measures getMeasureId() {
+        return measureId;
+    }
+
+    public void setMeasureId(Measures measureId) {
+        this.measureId = measureId;
+    }
+
 }

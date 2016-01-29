@@ -65,13 +65,30 @@ public class SiteDBSettings {
     }
 
     public void saveSetting(String settingTitle, String settingValue) {
+        Integer setId = 0;
         Session session = HibernateUtil.getSessionFactory().openSession();
+        List res = session.createQuery("from Settings " +
+                "where title=\'"+ settingTitle +"\'" +
+                "and kind=\'SiteDBSettings\'").list();
+        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+            Settings setting = (Settings) iterator.next();
+            setId = setting.getId();
+        }
         Transaction tx = session.beginTransaction();
-        Query query = session.createSQLQuery("insert into settings (title, kind, text_value) VALUES (\'"
-                + settingTitle + "\', \'"
-                + settingsType + "\', \'"
-                + settingValue + "\')");
-        query.executeUpdate();
+        if (setId == 0) {
+            Query query = session.createSQLQuery("insert into settings (title, kind, text_value) VALUES (\'"
+                    + settingTitle + "\', \'"
+                    + settingsType + "\', \'"
+                    + settingValue + "\')");
+            query.executeUpdate();
+        } else {
+            Query query = session.createQuery("update Settings set textValue = :textValue" +
+                    " where title = :title and kind = :kind");
+            query.setParameter("textValue", settingValue);
+            query.setParameter("title", settingTitle);
+            query.setParameter("kind", settingsType);
+            query.executeUpdate();
+        }
         tx.commit();
         session.close();
     }

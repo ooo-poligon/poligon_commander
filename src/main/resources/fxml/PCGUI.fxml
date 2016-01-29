@@ -18,7 +18,7 @@
          <center>
             <TabPane fx:id="tabPane" prefHeight="760.0" prefWidth="940.0" tabClosingPolicy="UNAVAILABLE" tabMinWidth="200.0" BorderPane.alignment="CENTER">
               <tabs>
-                <Tab text="Номенклатура">
+                <Tab fx:id="mainTab" text="Номенклатура">
                   <content>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="728.0" prefWidth="1024.0">
                            <children>
@@ -317,7 +317,7 @@
                                                    <children>
                                                       <Label fx:id="productTabKind" textFill="#057df7" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="10.0">
                                                          <font>
-                                                            <Font name="System Bold" size="18.0" />
+                                                            <Font name="System Bold" size="24.0" />
                                                          </font>
                                                       </Label>
                                                    </children>
@@ -413,16 +413,17 @@
                                                          <children>
                                                             <AnchorPane VBox.vgrow="ALWAYS">
                                                                <children>
-                                                                  <TableView fx:id="propertiesTable" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                  <TreeTableView fx:id="propertiesTable" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                     <columns>
-                                                                      <TableColumn fx:id="propertyTitleColumn" prefWidth="156.0" text="Свойство" />
-                                                                        <TableColumn fx:id="propertyConditionColumn" prefWidth="148.0" text="Условие" />
-                                                                      <TableColumn fx:id="propertyValueColumn" prefWidth="152.0" text="Значение" />
+                                                                      <TreeTableColumn fx:id="propertyTitleColumn" prefWidth="136.0" text="Свойство" />
+                                                                        <TreeTableColumn fx:id="propertyConditionColumn" prefWidth="128.0" text="Условие" />
+                                                                      <TreeTableColumn fx:id="propertyValueColumn" prefWidth="122.0" text="Значение" />
+                                                                        <TreeTableColumn fx:id="propertyMeasureColumn" prefWidth="75.0" text="Ед. изм." visible="false" />
                                                                     </columns>
                                                                      <contextMenu>
                                                                         <ContextMenu fx:id="propertiesTableContextMenu" />
                                                                      </contextMenu>
-                                                                  </TableView>
+                                                                  </TreeTableView>
                                                                </children>
                                                             </AnchorPane>
                                                             <AnchorPane prefHeight="200.0" VBox.vgrow="ALWAYS">
@@ -575,7 +576,6 @@
                                        <children>
                                           <GridPane AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                                             <columnConstraints>
-                                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="50.0" prefWidth="100.0" />
                                               <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                             </columnConstraints>
                                             <rowConstraints>
@@ -597,38 +597,14 @@
                                                             </AnchorPane>
                                                             <AnchorPane prefHeight="200.0" prefWidth="200.0">
                                                                <children>
-                                                                  <TableView prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="2.5" AnchorPane.topAnchor="0.0">
+                                                                  <TableView fx:id="accessoriesTable" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                     <columns>
-                                                                      <TableColumn prefWidth="161.0" text="Название" />
-                                                                      <TableColumn prefWidth="342.0" text="Описание" />
+                                                                      <TableColumn fx:id="accessoriesTableTitleColumn" minWidth="-Infinity" prefWidth="300.0" text="Название" />
+                                                                      <TableColumn fx:id="accessoriesTableDescriptionColumn" minWidth="-Infinity" prefWidth="712.0" text="Описание" />
                                                                     </columns>
-                                                                  </TableView>
-                                                               </children>
-                                                            </AnchorPane>
-                                                         </children>
-                                                      </VBox>
-                                                   </children>
-                                                </AnchorPane>
-                                                <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1">
-                                                   <children>
-                                                      <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                         <children>
-                                                            <AnchorPane>
-                                                               <children>
-                                                                  <Label text="Подключаемые модули:" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                                     <font>
-                                                                        <Font name="System Bold" size="14.0" />
-                                                                     </font>
-                                                                  </Label>
-                                                               </children>
-                                                            </AnchorPane>
-                                                            <AnchorPane prefHeight="200.0" prefWidth="200.0">
-                                                               <children>
-                                                                  <TableView prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="2.5" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                                    <columns>
-                                                                      <TableColumn prefWidth="164.0" text="Название" />
-                                                                      <TableColumn prefWidth="340.0" text="Описание" />
-                                                                    </columns>
+                                                                     <contextMenu>
+                                                                        <ContextMenu fx:id="accessoriesTableContextMenu" />
+                                                                     </contextMenu>
                                                                   </TableView>
                                                                </children>
                                                             </AnchorPane>
@@ -739,17 +715,64 @@
                            </children></AnchorPane>
                     </content>
                   </Tab>
-                <Tab text="Контент сайта">
+                <Tab fx:id="editorTab" text="Контент сайта">
                   <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                    <AnchorPane fx:id="editorAnchorPane" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                            <children>
                               <BorderPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                 <center>
-                                    <HTMLEditor htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contenteditable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" prefHeight="741.0" prefWidth="1024.0" BorderPane.alignment="CENTER" />
-                                 </center>
                                  <right>
-                                    <TreeView prefHeight="739.0" prefWidth="304.0" BorderPane.alignment="CENTER" />
+                                    <AnchorPane minWidth="-Infinity" prefWidth="350.0" BorderPane.alignment="CENTER">
+                                       <children>
+                                          <Accordion AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                            <panes>
+                                              <TitledPane animated="false" text="Новости">
+                                                <content>
+                                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                         <children>
+                                                            <ListView fx:id="newsListView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                         </children>
+                                                      </AnchorPane>
+                                                </content>
+                                                   <font>
+                                                      <Font name="System Bold" size="16.0" />
+                                                   </font>
+                                              </TitledPane>
+                                              <TitledPane animated="false" text="Статьи">
+                                                <content>
+                                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                         <children>
+                                                            <ListView fx:id="articlesListView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                         </children>
+                                                      </AnchorPane>
+                                                </content>
+                                                   <font>
+                                                      <Font name="System Bold" size="16.0" />
+                                                   </font>
+                                              </TitledPane>
+                                              <TitledPane animated="false" text="Контент">
+                                                <content>
+                                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                         <children>
+                                                            <ListView fx:id="contentsListView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                         </children>
+                                                      </AnchorPane>
+                                                </content>
+                                                   <font>
+                                                      <Font name="System Bold" size="16.0" />
+                                                   </font>
+                                              </TitledPane>
+                                            </panes>
+                                          </Accordion>
+                                       </children>
+                                    </AnchorPane>
                                  </right>
+                                 <center>
+                                    <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                                       <children>
+                                          <HTMLEditor fx:id="htmlEditor" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contenteditable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                       </children>
+                                    </AnchorPane>
+                                 </center>
                               </BorderPane>
                            </children></AnchorPane>
                   </content>
@@ -813,16 +836,8 @@
                                                                   <CheckBox fx:id="treeViewHandlerMode" layoutX="55.0" layoutY="27.0" mnemonicParsing="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                                                </children>
                                                             </AnchorPane>
-                                                            <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1">
-                                                               <children>
-                                                                  <Label text="Включить отображение элементов из подкатегорий характеристик выбранной характеристики" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                                               </children>
-                                                            </AnchorPane>
-                                                            <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                                                               <children>
-                                                                  <CheckBox fx:id="treeViewHandlerMode1" mnemonicParsing="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                                               </children>
-                                                            </AnchorPane>
+                                                            <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1" />
+                                                            <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                                          </children>
                                                       </GridPane>
                                                    </children>
@@ -1129,7 +1144,24 @@
                                                       </GridPane>
                                                    </children>
                                                 </AnchorPane>
-                                                <Button fx:id="testButton" mnemonicParsing="false" onAction="#writeToSite" text="test" />
+                                                <AnchorPane VBox.vgrow="ALWAYS">
+                                                   <children>
+                                                      <HBox AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+                                                         <children>
+                                                            <AnchorPane>
+                                                               <children>
+                                                                  <Button fx:id="testButton" mnemonicParsing="false" onAction="#writeToSite" text="test" AnchorPane.rightAnchor="5.0" />
+                                                               </children>
+                                                            </AnchorPane>
+                                                            <AnchorPane>
+                                                               <children>
+                                                                  <Button fx:id="applySiteDBSettings" mnemonicParsing="false" onAction="#loadSavedSettings" text="Применить" AnchorPane.leftAnchor="5.0" />
+                                                               </children>
+                                                            </AnchorPane>
+                                                         </children>
+                                                      </HBox>
+                                                   </children>
+                                                </AnchorPane>
                                              </children>
                                           </VBox>
                                        </children>

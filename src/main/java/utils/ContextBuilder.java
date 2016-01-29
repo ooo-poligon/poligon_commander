@@ -14,6 +14,8 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import tableviews.FunctionsTableView;
 import javafx.event.ActionEvent;
+import treetableviews.PropertiesTreeTableView;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -27,15 +29,384 @@ public class ContextBuilder {
     private static String picPath = "";
     private static String picName = "";
     private static Integer selectedPropertyTypeID = 0;
+    private static Integer selectedProductKindID  = 0;
+    private static Integer selectedProductID  = 0;
+    private static Integer selectedPropertyID = 0;
+    private static Integer selectedMeasureID  = 1000000; // В БД в тавблице Measures определил такой id для свойств без ед. изм.
+    private static Integer selectedPropertyValueID = 0;
+    private static Integer selectedFunctionID = 0;
+    private static Integer selectedProductsFunctionsID = 0;
+    private static String selectedFunctionTitle = "";
 
-    public static void createNewCategory() {
+    public static void createNewPropertyValue(Label productTabTitle, TreeView<String> propertiesTree) {
+        String selectedProduct = productTabTitle.getText();
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List res = session.createQuery("from Products where title=\'" + selectedProduct + "\'").list();
+        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+            Products product = (Products) iterator.next();
+            selectedProductID = product.getId();
+        }
+        session.close();
 
+        String selectedPropertyType = propertiesTree.getSelectionModel().getSelectedItem().getValue();
+        Session session1 = HibernateUtil.getSessionFactory().openSession();
+        List res1 = session1.createQuery("from PropertyTypes where title=\'" + selectedPropertyType + "\'").list();
+        for (Iterator iterator = res1.iterator(); iterator.hasNext();) {
+            PropertyTypes pt = (PropertyTypes) iterator.next();
+            selectedPropertyTypeID = pt.getId();
+        }
+        session1.close();
+
+        ArrayList<Properties> propertyList = new ArrayList<>();
+        Session session2 = HibernateUtil.getSessionFactory().openSession();
+        List res2 = session2.createQuery("from Properties where propertyTypeId=" + selectedPropertyTypeID).list();
+        for (Iterator iterator = res2.iterator(); iterator.hasNext();) {
+            Properties prop = (Properties) iterator.next();
+            propertyList.add(prop);
+        }
+        session2.close();
+
+        ObservableList<String> propertyTitles = FXCollections.observableArrayList();
+        propertyList.stream().forEach((p) -> {
+            propertyTitles.add(p.getTitle());
+        });
+        ComboBox<String> propertiesComboBox = new ComboBox<>();
+        propertiesComboBox.setItems(propertyTitles);
+        propertiesComboBox.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                for (Properties prop: propertyList) {
+                    if (prop.getTitle().equals(propertiesComboBox.getValue())) {
+                        selectedPropertyID = prop.getId();
+                    }
+                }
+            }
+        });
+
+        ArrayList<Measures> measuresList = new ArrayList<>();
+        Session session3 = HibernateUtil.getSessionFactory().openSession();
+        List res3 = session3.createQuery("from Measures").list();
+        for (Iterator iterator = res3.iterator(); iterator.hasNext();) {
+            Measures measure = (Measures) iterator.next();
+            measuresList.add(measure);
+        }
+        session3.close();
+
+        ObservableList<String> measureTitles = FXCollections.observableArrayList();
+        measuresList.stream().forEach((m) -> {
+            measureTitles.add(m.getTitle());
+        });
+        ComboBox<String> measuresComboBox = new ComboBox<>();
+
+        measuresComboBox.getItems().clear();
+        measuresComboBox.getItems().addAll(measureTitles);
+        AutoCompleteComboBoxListener autoCompleteComboBoxListener = new AutoCompleteComboBoxListener(measuresComboBox);
+        // measuresComboBox.setItems(measureTitles);
+        measuresComboBox.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                for (Measures measure: measuresList) {
+                    if (measure.getTitle().equals(measuresComboBox.getValue())) {
+                        selectedMeasureID = measure.getId();
+                    }
+                }
+            }
+        });
+
+        Dialog<NewPropertyValue> dialog = new Dialog<>();
+        dialog.setTitle("Добавление нового свойства.");
+        dialog.setHeaderText("Укажите значение .");
+        dialog.setResizable(false);
+
+        Label label1 = new Label("Выберите свойство: ");
+        Label label2 = new Label("Укажите значение: ");
+        Label label3 = new Label("");
+        Label label4 = new Label("");
+        Label label5 = new Label("Укажите условие:\n(не обязательно) ");
+        Label label6 = new Label("");
+        TextField text2 = new TextField();
+        TextField text3 = new TextField();
+
+        Label label7 = new Label("Выберите единицу измерения:\n" +
+                "(только для измеряемых свойств) ");
+        Label label8 = new Label("");
+
+        GridPane grid = new GridPane();
+        grid.add(label1, 1, 1);
+        grid.add(propertiesComboBox, 2, 1);
+        grid.add(label3, 1, 2);
+
+        grid.add(label5, 1, 3);
+        grid.add(text3, 2, 3);
+        grid.add(label4, 1, 4);
+
+        grid.add(label2, 1, 5);
+        grid.add(text2, 2, 5);
+        grid.add(label6, 1, 6);
+
+        grid.add(label7, 1, 7);
+        grid.add(measuresComboBox, 2, 7);
+        grid.add(label8, 1, 8);
+
+        dialog.getDialogPane().setContent(grid);
+
+        ButtonType buttonTypeOk = new ButtonType("Добавить", ButtonBar.ButtonData.OK_DONE);
+        ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
+        dialog.setResultConverter((ButtonType b) -> {
+            if (b == buttonTypeOk) {
+                if (text3.getText().isEmpty()) {
+                    return new NewPropertyValue("", text2.getText(), selectedPropertyID, selectedProductID, selectedMeasureID);
+                } else {
+                    return new NewPropertyValue(text3.getText(), text2.getText(), selectedPropertyID, selectedProductID, selectedMeasureID);
+                }
+            }
+            return null;
+        });
+        Optional<NewPropertyValue> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            Session session4 = HibernateUtil.getSessionFactory().openSession();
+            Transaction tx = session4.beginTransaction();
+            PropertyValues pv = new PropertyValues();
+            pv.setCond(result.get().getCond());
+            pv.setValue(result.get().getValue());
+            pv.setPropertyId(new Properties(selectedPropertyID));
+            pv.setProductId(new Products(selectedProductID));
+            pv.setMeasureId(new Measures(selectedMeasureID));
+            session4.save(pv);
+            tx.commit();
+            session4.close();
+        }
     }
-    public static void updateTheCategory() {
+    public static void updateThePropertyValue(Label productTabTitle, TreeView<String> propertiesTree, TreeTableView propertiesTable) {
+        String selectedProduct = productTabTitle.getText();
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List res = session.createQuery("from Products where title=\'" + selectedProduct + "\'").list();
+        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+            Products product = (Products) iterator.next();
+            selectedProductID = product.getId();
+        }
+        session.close();
 
+        String selectedPropertyType = propertiesTree.getSelectionModel().getSelectedItem().getValue();
+        Session session1 = HibernateUtil.getSessionFactory().openSession();
+        List res1 = session1.createQuery("from PropertyTypes where title=\'" + selectedPropertyType + "\'").list();
+        for (Iterator iterator = res1.iterator(); iterator.hasNext();) {
+            PropertyTypes pt = (PropertyTypes) iterator.next();
+            selectedPropertyTypeID = pt.getId();
+        }
+        session1.close();
+
+        ArrayList<Properties> propertyList = new ArrayList<>();
+        Session session2 = HibernateUtil.getSessionFactory().openSession();
+        List res2 = session2.createQuery("from Properties where propertyTypeId=" + selectedPropertyTypeID).list();
+        for (Iterator iterator = res2.iterator(); iterator.hasNext();) {
+            Properties prop = (Properties) iterator.next();
+            propertyList.add(prop);
+        }
+        session2.close();
+
+        ObservableList<String> propertyTitles = FXCollections.observableArrayList();
+        propertyList.stream().forEach((p) -> {
+            propertyTitles.add(p.getTitle());
+        });
+        ComboBox<String> propertiesComboBox = new ComboBox<>();
+        propertiesComboBox.setItems(propertyTitles);
+        propertiesComboBox.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                for (Properties prop: propertyList) {
+                    if (prop.getTitle().equals(propertiesComboBox.getValue())) {
+                        selectedPropertyID = prop.getId();
+                    }
+                }
+            }
+        });
+
+        ArrayList<Measures> measuresList = new ArrayList<>();
+        Session session3 = HibernateUtil.getSessionFactory().openSession();
+        List res3 = session3.createQuery("from Measures").list();
+        for (Iterator iterator = res3.iterator(); iterator.hasNext();) {
+            Measures measure = (Measures) iterator.next();
+            measuresList.add(measure);
+        }
+        session3.close();
+
+        ObservableList<String> measureTitles = FXCollections.observableArrayList();
+        measuresList.stream().forEach((m) -> {
+            measureTitles.add(m.getTitle());
+        });
+        ComboBox<String> measuresComboBox = new ComboBox<>();
+
+        measuresComboBox.getItems().clear();
+        measuresComboBox.getItems().addAll(measureTitles);
+        AutoCompleteComboBoxListener autoCompleteComboBoxListener = new AutoCompleteComboBoxListener(measuresComboBox);
+        measuresComboBox.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                for (Measures measure: measuresList) {
+                    if (measure.getTitle().equals(measuresComboBox.getValue())) {
+                        selectedMeasureID = measure.getId();
+                    }
+                }
+            }
+        });
+
+        ObservableList<TreeTablePosition> treeTablePositions = propertiesTable.getSelectionModel().getSelectedCells();
+        for (TreeTablePosition treeTablePosition: treeTablePositions) {
+            PropertiesTreeTableView propertiesTreeTableView = (PropertiesTreeTableView)treeTablePosition.getTreeItem().getValue();
+            selectedPropertyValueID = propertiesTreeTableView.getPropertyValueID();
+        }
+
+        PropertyValues propertyValue = new PropertyValues();
+        Session session5 = HibernateUtil.getSessionFactory().openSession();
+        List res5 = session5.createQuery("from PropertyValues where id=" + selectedPropertyValueID).list();
+        for (Iterator iterator = res5.iterator(); iterator.hasNext();) {
+            propertyValue = (PropertyValues) iterator.next();
+        }
+        session5.close();
+
+        Dialog<NewPropertyValue> dialog = new Dialog<>();
+        dialog.setTitle("Редактирование выбранного свойства.");
+        dialog.setHeaderText("Здесь можно отредактировать значение выбранного свойства.");
+        dialog.setResizable(false);
+
+        Label label1 = new Label("Выберите новое свойство:\n" +
+                "(не выбирайте, если хотите сохранить текущее. ");
+        Label label2 = new Label("Укажите новое значение: ");
+        Label label3 = new Label("");
+        Label label4 = new Label("");
+        Label label5 = new Label("Укажите новое условие:\n(не обязательно) ");
+        Label label6 = new Label("");
+        TextField text2 = new TextField();
+        text2.setText(propertyValue.getValue());
+        TextField text3 = new TextField();
+        text3.setText(propertyValue.getCond());
+
+        propertiesComboBox.setValue(propertyValue.getPropertyId().getTitle());
+        selectedPropertyID = propertyValue.getPropertyId().getId();
+        measuresComboBox.setValue(propertyValue.getMeasureId().getTitle());
+        selectedMeasureID = propertyValue.getMeasureId().getId();
+
+        Label label7 = new Label("Выберите новую единицу измерения:\n" +
+                "(только для измеряемых свойств) ");
+        Label label8 = new Label("");
+
+        GridPane grid = new GridPane();
+        grid.add(label1, 1, 1);
+        grid.add(propertiesComboBox, 2, 1);
+        grid.add(label3, 1, 2);
+
+        grid.add(label5, 1, 3);
+        grid.add(text3, 2, 3);
+        grid.add(label4, 1, 4);
+
+        grid.add(label2, 1, 5);
+        grid.add(text2, 2, 5);
+        grid.add(label6, 1, 6);
+
+        grid.add(label7, 1, 7);
+        grid.add(measuresComboBox, 2, 7);
+        grid.add(label8, 1, 8);
+
+        dialog.getDialogPane().setContent(grid);
+
+        ButtonType buttonTypeOk = new ButtonType("Сохранить", ButtonBar.ButtonData.OK_DONE);
+        ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
+        dialog.setResultConverter((ButtonType b) -> {
+            if (b == buttonTypeOk) {
+                if (text3.getText().isEmpty()) {
+                    return new NewPropertyValue("", text2.getText(), selectedPropertyID, selectedProductID, selectedMeasureID);
+                } else {
+                    return new NewPropertyValue(text3.getText(), text2.getText(), selectedPropertyID, selectedProductID, selectedMeasureID);
+                }
+            }
+            return null;
+        });
+        Optional<NewPropertyValue> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            Session session4 = HibernateUtil.getSessionFactory().openSession();
+            Transaction tx = session4.beginTransaction();
+            propertyValue.setCond(result.get().getCond());
+            propertyValue.setValue(result.get().getValue());
+            propertyValue.setPropertyId(new Properties(selectedPropertyID));
+            propertyValue.setProductId(new Products(selectedProductID));
+            propertyValue.setMeasureId(new Measures(selectedMeasureID));
+            session4.saveOrUpdate(propertyValue);
+            tx.commit();
+            session4.close();
+        }
     }
-    public static void deleteTheCategory() {
+    public static void deleteThePropertyValue(Label productTabTitle, TreeView<String> propertiesTree, TreeTableView propertiesTable) {
+        String selectedProduct = productTabTitle.getText();
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List res = session.createQuery("from Products where title=\'" + selectedProduct + "\'").list();
+        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+            Products product = (Products) iterator.next();
+            selectedProductID = product.getId();
+        }
+        session.close();
 
+        String selectedPropertyType = propertiesTree.getSelectionModel().getSelectedItem().getValue();
+        Session session1 = HibernateUtil.getSessionFactory().openSession();
+        List res1 = session1.createQuery("from PropertyTypes where title=\'" + selectedPropertyType + "\'").list();
+        for (Iterator iterator = res1.iterator(); iterator.hasNext();) {
+            PropertyTypes pt = (PropertyTypes) iterator.next();
+            selectedPropertyTypeID = pt.getId();
+        }
+        session1.close();
+
+        ObservableList<TreeTablePosition> treeTablePositions = propertiesTable.getSelectionModel().getSelectedCells();
+        for (TreeTablePosition treeTablePosition: treeTablePositions) {
+            PropertiesTreeTableView propertiesTreeTableView = (PropertiesTreeTableView)treeTablePosition.getTreeItem().getValue();
+            selectedPropertyValueID = propertiesTreeTableView.getPropertyValueID();
+        }
+
+        PropertyValues propertyValue = new PropertyValues();
+        Session session5 = HibernateUtil.getSessionFactory().openSession();
+        List res5 = session5.createQuery("from PropertyValues where id=" + selectedPropertyValueID).list();
+        for (Iterator iterator = res5.iterator(); iterator.hasNext();) {
+            propertyValue = (PropertyValues) iterator.next();
+        }
+        session5.close();
+
+        Dialog<NewPropertyValue> dialog = new Dialog<>();
+        dialog.setTitle("Удаление выбранного свойства.");
+        dialog.setHeaderText("Внимание! Выбранное свойство будет удалено из базы данных.");
+        dialog.setResizable(true);
+
+        Label label1 = new Label("Вы действительно хотите выполнить удаление?");
+
+        GridPane grid = new GridPane();
+
+        grid.add(label1, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        ButtonType buttonTypeOk = new ButtonType("Удалить", ButtonBar.ButtonData.OK_DONE);
+        ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
+        dialog.setResultConverter((ButtonType b) -> {
+            if (b == buttonTypeOk) {
+                return new NewPropertyValue(selectedPropertyID, selectedProductID, selectedMeasureID);
+            }
+            return null;
+        });
+        Optional<NewPropertyValue> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            Session session6 = HibernateUtil.getSessionFactory().openSession();
+            Transaction tx = session6.beginTransaction();
+
+            Query q = session6.createQuery("delete PropertyValues where id =" + selectedPropertyValueID);
+            q.executeUpdate();
+
+            tx.commit();
+            session6.close();
+        }
     }
 
     public static void createNewProductKind() {
@@ -166,12 +537,21 @@ public class ContextBuilder {
         }
     }
 
-    public static void createNewProperty(ListView<String> productKindsList) {
-        ComboBox<String> propertyTypesComboBox = new ComboBox<>();
+    public static void addPropertyType(ListView<String> productKindsList) {
         String selectedProductKind = productKindsList.getSelectionModel().getSelectedItem();
+        ProductKinds productKind = new ProductKinds();
+
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List res = session.createQuery("from ProductKinds where title=\'" + selectedProductKind + "\'").list();
+        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+            ProductKinds pk = (ProductKinds) iterator.next();
+            productKind = pk;
+        }
+        session.close();
+
+        ComboBox<String> propertyTypesComboBox = new ComboBox<>();
         ArrayList<PropertyTypes> propertyTypesList = new ArrayList<>();
         ObservableList<String> propertyTypesTitlesList = FXCollections.observableArrayList();
-
 
         Session session2 = HibernateUtil.getSessionFactory().openSession();
         List res2 = session2.createQuery("from PropertyTypes").list();
@@ -189,6 +569,144 @@ public class ContextBuilder {
             @Override
             public void handle(ActionEvent event) {
 
+                for (PropertyTypes pt: propertyTypesList) {
+                    if (pt.getTitle().equals(propertyTypesComboBox.getValue())) {
+                        selectedPropertyTypeID = pt.getId();
+                    }
+                }
+            }
+        });
+
+        Dialog<NewPropertyType> dialog = new Dialog<>();
+        dialog.setTitle("Добавление нового набора характеристик.");
+        dialog.setHeaderText("Выберите набор характеристик из списка:");
+        dialog.setResizable(false);
+
+        Label label1 = new Label("Добавить набор: ");
+        Label label3 = new Label("");
+
+        propertyTypesComboBox.setItems(propertyTypesTitlesList);
+
+        GridPane grid = new GridPane();
+        grid.add(label1, 1, 1);
+        grid.add(propertyTypesComboBox, 2, 1);
+        grid.add(label3, 1, 2);
+        dialog.getDialogPane().setContent(grid);
+
+        ButtonType buttonTypeOk = new ButtonType("Добавить", ButtonBar.ButtonData.OK_DONE);
+        ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
+        dialog.setResultConverter((ButtonType b) -> {
+            if (b == buttonTypeOk) {
+                return new NewPropertyType(selectedPropertyTypeID);
+            }
+            return null;
+        });
+        Optional<NewPropertyType> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            Session session3 = HibernateUtil.getSessionFactory().openSession();
+            Transaction tx = session3.beginTransaction();
+            KindsTypes kindsTypes = new KindsTypes();
+            kindsTypes.setProductKindId(productKind);
+            kindsTypes.setPropertyTypeId(new PropertyTypes(result.get().getPropertyTypeID()));
+            session3.save(kindsTypes);
+            tx.commit();
+            session3.close();
+        }
+    }
+    public static void removePropertyType(ListView<String> productKindsList, TreeTableView<PropertiesTreeTableView>  propertiesTreeTable) {
+        KindsTypes selectedKindsTypes = new KindsTypes();
+        String selectedProductKind  = productKindsList.getSelectionModel().getSelectedItem();
+        String selectedPropertyType = propertiesTreeTable.getSelectionModel().getSelectedItem().getValue().getTitle();
+
+        Dialog<NewKindsTypes> dialog = new Dialog<>();
+        dialog.setTitle("Удаление выбранного набора характеристик.");
+        dialog.setHeaderText("Выбранный набор характеристик не удалится из базы данных,\n" +
+                "но перестанет принадлежать выбранному типу устройств.");
+        dialog.setResizable(false);
+
+        Label label1 = new Label("Удалить выбранный набор?");
+        Label label3 = new Label("");
+
+        GridPane grid = new GridPane();
+        grid.add(label1, 1, 1);
+        grid.add(label3, 1, 2);
+        dialog.getDialogPane().setContent(grid);
+
+        ButtonType buttonTypeOk = new ButtonType("Добавить", ButtonBar.ButtonData.OK_DONE);
+        ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
+        dialog.setResultConverter((ButtonType b) -> {
+            if (b == buttonTypeOk) {
+                ProductKinds productKind = new ProductKinds();
+                PropertyTypes propertyType = new PropertyTypes();
+                Session session5 = HibernateUtil.getSessionFactory().openSession();
+                List res5 = session5.createQuery("from PropertyTypes where title=\'" + selectedPropertyType + "\'").list();
+                for (Iterator iterator = res5.iterator(); iterator.hasNext();) {
+                    propertyType = (PropertyTypes) iterator.next();
+                    selectedPropertyTypeID = propertyType.getId();
+                }
+                session5.close();
+
+                Session session6 = HibernateUtil.getSessionFactory().openSession();
+                List res6 = session6.createQuery("from ProductKinds where title=\'" + selectedProductKind + "\'").list();
+                for (Iterator iterator = res6.iterator(); iterator.hasNext();) {
+                    productKind = (ProductKinds) iterator.next();
+                    selectedProductKindID = productKind.getId();
+                }
+                session6.close();
+                return new NewKindsTypes(selectedProductKindID, selectedPropertyTypeID);
+            }
+            return null;
+        });
+        Optional<NewKindsTypes> result = dialog.showAndWait();
+        if (result.isPresent()) {
+
+            Session session = HibernateUtil.getSessionFactory().openSession();
+            List res = session.createQuery("from KindsTypes where productKindId =" + result.get().getProductKindID() +
+                    " and propertyTypeId =" + result.get().getPropertyTypeID()).list();
+            for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+                selectedKindsTypes = (KindsTypes) iterator.next();
+            }
+            session.close();
+
+            Session session3 = HibernateUtil.getSessionFactory().openSession();
+            Transaction tx = session3.beginTransaction();
+            System.out.println("delete KindsTypes where id =" + selectedKindsTypes.getId());
+            Query q = session3.createQuery("delete KindsTypes where id =" + selectedKindsTypes.getId());
+            q.executeUpdate();
+            tx.commit();
+            session3.close();
+            System.out.println("selectedProductKind " + selectedProductKind);
+            System.out.println("selectedPropertyType " + selectedPropertyType);
+            System.out.println("selectedProductKindID " + selectedProductKindID);
+            System.out.println("selectedPropertyTypeID " + selectedPropertyTypeID);
+            System.out.println("selectedKindsTypes.getId() " + selectedKindsTypes.getId());
+        }
+    }
+
+    public static void createNewProperty() {
+        ComboBox<String> propertyTypesComboBox = new ComboBox<>();
+        ArrayList<PropertyTypes> propertyTypesList = new ArrayList<>();
+        ObservableList<String> propertyTypesTitlesList = FXCollections.observableArrayList();
+
+        Session session2 = HibernateUtil.getSessionFactory().openSession();
+        List res2 = session2.createQuery("from PropertyTypes").list();
+        for (Iterator iterator = res2.iterator(); iterator.hasNext();) {
+            PropertyTypes propertyType = (PropertyTypes) iterator.next();
+            propertyTypesList.add(propertyType);
+        }
+        session2.close();
+
+        propertyTypesList.stream().forEach((type) -> {
+            propertyTypesTitlesList.add(type.getTitle());
+        });
+
+        propertyTypesComboBox.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
                 for (PropertyTypes pt: propertyTypesList) {
                     if (pt.getTitle().equals(propertyTypesComboBox.getValue())) {
                         selectedPropertyTypeID = pt.getId();
@@ -229,23 +747,147 @@ public class ContextBuilder {
         });
         Optional<NewProperty> result = dialog.showAndWait();
         if (result.isPresent()) {
-
             Session session3 = HibernateUtil.getSessionFactory().openSession();
             Transaction tx = session3.beginTransaction();
             Properties property = new Properties();
-            property.setTitle("test");
-            property.setValueId(new PropertyValues());
-            property.setProductId(new Products());
+            property.setTitle(text2.getText());
+            //property.setValueId(new PropertyValues());
+            //property.setProductId(new Products());
             property.setPropertyTypeId(new PropertyTypes(selectedPropertyTypeID, propertyTypesComboBox.getValue()));
             session3.save(property);
             tx.commit();
             session3.close();
         }
     }
-    public static void updateTheProperty() {
-    }
-    public static void deleteTheProperty() {
+    public static void updateTheProperty(TreeTableView<PropertiesTreeTableView>  propertiesTreeTable) {
+        Properties property = new Properties();
+        String propertyTitle = propertiesTreeTable.getSelectionModel().getSelectedItem().getValue().getTitle();
+        ComboBox<String> propertyTypesComboBox = new ComboBox<>();
+        ArrayList<PropertyTypes> propertyTypesList = new ArrayList<>();
+        ObservableList<String> propertyTypesTitlesList = FXCollections.observableArrayList();
 
+        Session sess = HibernateUtil.getSessionFactory().openSession();
+        List res = sess.createQuery("from Properties where title=\'" + propertyTitle + "\'").list();
+        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+            property = (Properties) iterator.next();
+            selectedPropertyTypeID = property.getPropertyTypeId().getId();
+        }
+        sess.close();
+
+        Session session2 = HibernateUtil.getSessionFactory().openSession();
+        List res2 = session2.createQuery("from PropertyTypes").list();
+        for (Iterator iterator = res2.iterator(); iterator.hasNext();) {
+            PropertyTypes propertyType = (PropertyTypes) iterator.next();
+            propertyTypesList.add(propertyType);
+        }
+        session2.close();
+
+        propertyTypesList.stream().forEach((type) -> {
+            propertyTypesTitlesList.add(type.getTitle());
+        });
+
+        propertyTypesComboBox.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+
+                for (PropertyTypes pt: propertyTypesList) {
+                    if (pt.getTitle().equals(propertyTypesComboBox.getValue())) {
+                        selectedPropertyTypeID = pt.getId();
+                    }
+                }
+            }
+        });
+
+        Dialog<NewProperty> dialog = new Dialog<>();
+        dialog.setTitle("Редактирование свойства.");
+        dialog.setHeaderText("Здесь вы можете отредактировать\nпараметры выбранного свойства.");
+        dialog.setResizable(false);
+
+        Label label1 = new Label("Изменить тип свойства: ");
+        Label label2 = new Label("Изменить название свойства: ");
+        Label label3 = new Label("");
+
+        propertyTypesComboBox.setItems(propertyTypesTitlesList);
+        TextField text2 = new TextField();
+        text2.setText(propertyTitle);
+
+        GridPane grid = new GridPane();
+        grid.add(label1, 1, 1);
+        grid.add(propertyTypesComboBox, 2, 1);
+        grid.add(label3, 1, 2);
+        grid.add(label2, 1, 3);
+        grid.add(text2, 2, 3);
+        dialog.getDialogPane().setContent(grid);
+
+        ButtonType buttonTypeOk = new ButtonType("Добавить", ButtonBar.ButtonData.OK_DONE);
+        ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
+        dialog.setResultConverter((ButtonType b) -> {
+            if (b == buttonTypeOk) {
+                    return new NewProperty(text2.getText(), selectedPropertyTypeID);
+            }
+            return null;
+        });
+        Optional<NewProperty> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            Session session3 = HibernateUtil.getSessionFactory().openSession();
+            Transaction tx = session3.beginTransaction();
+
+            property.setTitle(result.get().getTitle());
+            property.setPropertyTypeId(new PropertyTypes(selectedPropertyTypeID));
+
+            session3.saveOrUpdate(property);
+
+            tx.commit();
+            session3.close();
+        }
+    }
+    public static void deleteTheProperty(TreeTableView<PropertiesTreeTableView>  propertiesTreeTable) {
+        Properties property = new Properties();
+        String selectedProperty = propertiesTreeTable.getSelectionModel().getSelectedItem().getValue().getTitle();
+
+        Session session2 = HibernateUtil.getSessionFactory().openSession();
+        List res2 = session2.createQuery("from Properties where title =\'" + selectedProperty + "\'").list();
+        for (Iterator iterator = res2.iterator(); iterator.hasNext();) {
+            property = (Properties) iterator.next();
+        }
+        session2.close();
+
+        Dialog<NewProperty> dialog = new Dialog<>();
+        dialog.setTitle("Удаление выбранного свойства.");
+        dialog.setHeaderText("Внимание! Выбранное свойство будет удалено из базы данных.");
+        dialog.setResizable(true);
+
+        Label label1 = new Label("Вы действительно хотите выполнить удаление?");
+
+        GridPane grid = new GridPane();
+
+        grid.add(label1, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        ButtonType buttonTypeOk = new ButtonType("Удалить", ButtonBar.ButtonData.OK_DONE);
+        ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
+        dialog.setResultConverter((ButtonType b) -> {
+            if (b == buttonTypeOk) {
+                return new NewProperty();
+            }
+            return null;
+        });
+        Optional<NewProperty> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            Session session1 = HibernateUtil.getSessionFactory().openSession();
+            Transaction tx = session1.beginTransaction();
+
+            Query q = session1.createQuery("delete Properties where id =" + property.getId());
+            q.executeUpdate();
+
+            tx.commit();
+            session1.close();
+        }
     }
 
     public static void createNewFunction(Integer selectedPropertiesKindID) {
@@ -501,4 +1143,161 @@ public class ContextBuilder {
         }
     }
 
+    public static String addFunctionToProduct(TableView functionsTable1, Label productTabTitle, Label productTabKind) {
+        String selectedProduct = productTabTitle.getText();
+        String selectedProductKind  = productTabKind.getText();
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List res = session.createQuery("from Products where title=\'" + selectedProduct + "\'").list();
+        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+            Products product = (Products) iterator.next();
+            selectedProductID = product.getId();
+        }
+        session.close();
+
+        Session session2 = HibernateUtil.getSessionFactory().openSession();
+        List res2 = session2.createQuery("from ProductKinds where title=\'" + selectedProductKind + "\'").list();
+        for (Iterator iterator = res2.iterator(); iterator.hasNext();) {
+            ProductKinds productKind = (ProductKinds) iterator.next();
+            selectedProductKindID = productKind.getId();
+        }
+        session2.close();
+
+        ArrayList<Functions> functionsList = new ArrayList<>();
+        Session session3 = HibernateUtil.getSessionFactory().openSession();
+        List res3 = session3.createQuery("from Functions where productKindId=" + selectedProductKindID).list();
+        for (Iterator iterator = res3.iterator(); iterator.hasNext();) {
+            Functions function = (Functions) iterator.next();
+            functionsList.add(function);
+        }
+        session3.close();
+
+        ObservableList<String> functionTitles = FXCollections.observableArrayList();
+        functionsList.stream().forEach((f) -> {
+            functionTitles.add(f.getTitle() + " (" + f.getSymbol() + ")");
+        });
+        ComboBox<String> functionsComboBox = new ComboBox<>();
+
+        functionsComboBox.getItems().clear();
+        functionsComboBox.getItems().addAll(functionTitles);
+        AutoCompleteComboBoxListener autoCompleteComboBoxListener = new AutoCompleteComboBoxListener(functionsComboBox);
+        functionsComboBox.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                for (Functions function: functionsList) {
+                    if ((function.getTitle() + " (" + function.getSymbol() + ")").equals(functionsComboBox.getValue())) {
+                        selectedFunctionID = function.getId();
+                        selectedFunctionTitle = function.getTitle();
+                    }
+                }
+            }
+        });
+
+        Dialog<NewFunctionsProducts> dialog = new Dialog<>();
+        dialog.setTitle("Добавление новой функции к устройству");
+        dialog.setHeaderText("Выберите требуемую функцию из списка функций,\n" +
+                "доступных для данного типа устройств.");
+        dialog.setResizable(false);
+
+        Label label1 = new Label("Выберите функцию: ");
+        Label label3 = new Label("");
+
+        GridPane grid = new GridPane();
+        grid.add(label1, 1, 1);
+        grid.add(functionsComboBox, 2, 1);
+        grid.add(label3, 1, 2);
+
+        dialog.getDialogPane().setContent(grid);
+
+        ButtonType buttonTypeOk = new ButtonType("Добавить", ButtonBar.ButtonData.OK_DONE);
+        ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
+        dialog.setResultConverter((ButtonType b) -> {
+            if (b == buttonTypeOk) {
+                System.out.println(selectedFunctionID);
+                System.out.println(selectedProductKindID);
+                return new NewFunctionsProducts(selectedFunctionID, selectedProductID);
+            }
+            return null;
+        });
+        Optional<NewFunctionsProducts> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            Session session4 = HibernateUtil.getSessionFactory().openSession();
+            Transaction tx = session4.beginTransaction();
+            ProductsFunctions nfp = new ProductsFunctions();
+            nfp.setFunctionId(new Functions(selectedFunctionID));
+            nfp.setProductId(new Products(selectedProductID));
+            session4.save(nfp);
+            tx.commit();
+            session4.close();
+        }
+        return selectedFunctionTitle;
+    }
+    public static void editFunctionOfProduct() {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Внимание!");
+        alert.setHeaderText("Редактирование функции для отдельного устройства не допускается.");
+        alert.setContentText("Вы можете добавлять, редактировать и удалять описания функций устройств" +
+                " только на вкладке \"Настройки\" данного приложения.");
+        alert.showAndWait();
+    }
+
+    public static void removeFunctionFromProduct(TableView functionsTable1, Label productTabTitle) {
+        String selectedProduct = productTabTitle.getText();
+        FunctionsTableView functionsTableView = (FunctionsTableView)functionsTable1.getSelectionModel().getSelectedItem();
+        selectedFunctionID = functionsTableView.getId();
+
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List res = session.createQuery("from Products where title=\'" + selectedProduct + "\'").list();
+        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+            Products product = (Products) iterator.next();
+            selectedProductID = product.getId();
+        }
+        session.close();
+
+        Session session3 = HibernateUtil.getSessionFactory().openSession();
+        List res3 = session3.createQuery("from ProductsFunctions where productId=" + selectedProductID + " and functionId=" + selectedFunctionID).list();
+        for (Iterator iterator = res3.iterator(); iterator.hasNext();) {
+            ProductsFunctions pf = (ProductsFunctions) iterator.next();
+            selectedProductsFunctionsID = pf.getId();
+        }
+        session3.close();
+
+        Dialog<NewFunctionsProducts> dialog = new Dialog<>();
+        dialog.setTitle("Удаление функции из списка");
+        dialog.setHeaderText("Выбранная функция будет удалена из списка функций,\n" +
+                "принадлежащих этому устройству. Удаление не повлечет за собой\n" +
+                "удаления отписания данной функции из базы данных.\n" +
+                "В дальнейшем можно будет закрепить эту функцию за любым\n" +
+                "выбранным устройством соответствующего типа.");
+        dialog.setResizable(false);
+
+        Label label1 = new Label("Удалить функцию из списка?");
+        Label label3 = new Label("");
+
+        GridPane grid = new GridPane();
+        grid.add(label1, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        ButtonType buttonTypeOk = new ButtonType("Удалить", ButtonBar.ButtonData.OK_DONE);
+        ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
+        dialog.setResultConverter((ButtonType b) -> {
+            if (b == buttonTypeOk) {
+                return new NewFunctionsProducts(selectedFunctionID, selectedProductID);
+            }
+            return null;
+        });
+        Optional<NewFunctionsProducts> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            Session session4 = HibernateUtil.getSessionFactory().openSession();
+            Transaction tx = session4.beginTransaction();
+            Query q = session4.createQuery("delete ProductsFunctions where id=" + selectedProductsFunctionsID);
+            q.executeUpdate();
+            tx.commit();
+            session4.close();
+        }
+    }
 }

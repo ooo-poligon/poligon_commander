@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 public class URLReader {
 
-    public static ArrayList<String> getContentFromAddress(URL url) {
+    public static ArrayList<String> getContentFromAddress(URL url) throws IOException {
         ArrayList<String> result = new ArrayList<>();
         String inputLine;
         BufferedReader in = null;

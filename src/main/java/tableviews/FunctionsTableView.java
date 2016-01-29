@@ -9,15 +9,17 @@ import javafx.beans.property.StringProperty;
 public class FunctionsTableView {
     private final StringProperty title;
     private final StringProperty symbol;
+    private Integer id;
 
     public FunctionsTableView(String title) {
         this.title = new SimpleStringProperty(title);
         this.symbol = new SimpleStringProperty("");
     }
 
-    public FunctionsTableView(String title, String symbol) {
+    public FunctionsTableView(String title, String symbol, Integer id) {
         this.title =  new SimpleStringProperty(title);
         this.symbol = new SimpleStringProperty(symbol);
+        this.id = id;
     }
 
     public String getTitle() {
@@ -42,5 +44,13 @@ public class FunctionsTableView {
 
     public void setSymbol(String symbol) {
         this.symbol.set(symbol);
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 }

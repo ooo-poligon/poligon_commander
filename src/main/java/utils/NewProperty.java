@@ -8,6 +8,11 @@ public class NewProperty {
     private String title;
     private Integer propertyTypeID;
 
+    public NewProperty() {
+        this.title = "";
+        this.propertyTypeID = 0;
+    }
+
     public NewProperty(String title, Integer propertyTypeID) {
         this.title = title;
         this.propertyTypeID = propertyTypeID;
@@ -28,4 +33,5 @@ public class NewProperty {
     public void setPropertyTypeID(Integer propertyTypeID) {
         this.propertyTypeID = propertyTypeID;
     }
+
 }
