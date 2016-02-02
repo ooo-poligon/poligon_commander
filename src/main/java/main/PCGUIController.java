@@ -4,8 +4,10 @@ import javafx.beans.property.*;
 import javafx.scene.web.HTMLEditor;
 import javafx.util.StringConverter;
 import modalwindows.SetRatesWindow;
+import settings.LocalDBSettings;
 import settings.PriceCalcSettings;
 import settings.SiteDBSettings;
+import settings.SystemConfig;
 import utils.DBConnection;
 import entities.*;
 import entities.Properties;
@@ -127,6 +129,9 @@ public class PCGUIController implements Initializable {
     @ FXML private ContextMenu functionsTable1ContextMenu;
     @ FXML private ContextMenu accessoriesTableContextMenu;
     @ FXML private ContextMenu propertiesTreeContextMenu;
+    @ FXML private ContextMenu newsItemsListContextMenu;
+    @ FXML private ContextMenu articlesListContextMenu;
+    @ FXML private ContextMenu contentsListContextMenu;
 
     // TableViews & TableColumns
     @FXML private TableView<ProductsTableView>            productsTable;
@@ -188,6 +193,7 @@ public class PCGUIController implements Initializable {
 
     // Buttons
     @FXML private Button startImportXLSButton;
+    @FXML private Button loadSavedSettingsButton;
 
     // Labels
     @FXML private Label productTabTitle;
@@ -224,11 +230,19 @@ public class PCGUIController implements Initializable {
     @FXML private TextField headersRowTextField;
     @FXML private TextArea picDescriptionTextArea;
     @FXML private TextArea functionDescriptionTextArea;
+
     @FXML private TextField addressSiteDB;
     @FXML private TextField portSiteDB;
     @FXML private TextField titleSiteDB;
     @FXML private TextField userSiteDB;
     @FXML private PasswordField passwordSiteDB;
+
+    @FXML private TextField addressLocalDB;
+    @FXML private TextField portLocalDB;
+    @FXML private TextField titleLocalDB;
+    @FXML private TextField userLocalDB;
+    @FXML private PasswordField passwordLocalDB;
+
     @FXML private TextField addCBRTextField;
 
     // CheckBoxes
@@ -293,9 +307,10 @@ public class PCGUIController implements Initializable {
     // Выполняется при запуске программы
     public void initialize(URL url, ResourceBundle rb) {
 
-
+        SystemConfig.getSettingsDialog();
 
         loadSavedSettings();
+        populateContentSiteLists();
 
         try {
             addCBR = Double.parseDouble(addCBRTextField.getText());
@@ -320,7 +335,7 @@ public class PCGUIController implements Initializable {
         buildVendorsTable();
         buildProductKindsList();
         WebEngine webEngine = tabBrowserWebView.getEngine();
-        webEngine.load("http://www.poligon.info");
+        webEngine.load("http://localhost:3000");
         productsTable.getSelectionModel().setSelectionMode(javafx.scene.control.SelectionMode.MULTIPLE);
         productsTable.setOnDragDetected((MouseEvent event) -> {
             Dragboard db = productsTable.startDragAndDrop(TransferMode.ANY);
@@ -426,13 +441,21 @@ public class PCGUIController implements Initializable {
     // Пока не реализовано полностью.
     @FXML private void loadSavedSettings() {
         SiteDBSettings siteDBSettings = new SiteDBSettings();
+        LocalDBSettings localDBSettings = new LocalDBSettings();
         PriceCalcSettings priceCalcSettings = new PriceCalcSettings();
         addCBRTextField.setText(priceCalcSettings.loadSetting("addCBR"));
+
         addressSiteDB.setText(siteDBSettings.loadSetting("addressSiteDB"));
         portSiteDB.setText(siteDBSettings.loadSetting("portSiteDB"));
         titleSiteDB.setText(siteDBSettings.loadSetting("titleSiteDB"));
         userSiteDB.setText(siteDBSettings.loadSetting("userSiteDB"));
         passwordSiteDB.setText(siteDBSettings.loadSetting("passwordSiteDB"));
+
+        addressLocalDB.setText(localDBSettings.loadSetting("addressLocalDB"));
+        portLocalDB.setText(localDBSettings.loadSetting("portLocalDB"));
+        titleLocalDB.setText(localDBSettings.loadSetting("titleLocalDB"));
+        userLocalDB.setText(localDBSettings.loadSetting("userLocalDB"));
+        passwordLocalDB.setText(localDBSettings.loadSetting("passwordLocalDB"));
     }
 
     // Утилиты разные
@@ -2476,11 +2499,169 @@ public class PCGUIController implements Initializable {
             return String.format("[%.1f, %.1f]", width, height);
         }
     }
+
     // Конец заимствования здесь
 
-    /////////////////////////
-    // Таб "Контент сайта" //
-    /////////////////////////
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Таб "Контент сайта" ///////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private ObservableList<String> getListItems(String itemsType) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        ObservableList<String> items = FXCollections.observableArrayList();
+        if (itemsType.equals("news")) {
+            List res = session.createQuery("from NewsItems").list();
+            for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+                NewsItems newsItem = (NewsItems) iterator.next();
+                items.add(new String(newsItem.getTitle()));
+            }
+        } else if (itemsType.equals("articles")) {
+            List res = session.createQuery("from Articles").list();
+            for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+                Articles article = (Articles) iterator.next();
+                items.add(new String(article.getTitle()));
+            }
+        } else if (itemsType.equals("contents")) {
+            List res = session.createQuery("from StaticContents").list();
+            for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+                StaticContents staticContent = (StaticContents) iterator.next();
+                items.add(new String(staticContent.getTitle()));
+            }
+        }
+        session.close();
+        return items;
+    }
+    private void populateContentSiteLists() {
+        newsItemsListContextMenu = ContextMenuBuilder.create().items(
+                MenuItemBuilder.create().text("Создать новость").onAction((ActionEvent ae1) -> {
+                    ContextBuilder.makeNewsItem();
+                    populateContentSiteLists();
+                }).build(),
+                MenuItemBuilder.create().text("Удалить выбранную новость").onAction((ActionEvent ae3) -> {
+                    ContextBuilder.deleteNewsItem(newsListView);
+                    populateContentSiteLists();
+                }).build()
+        ).build();
+        articlesListContextMenu = ContextMenuBuilder.create().items(
+                MenuItemBuilder.create().text("Создать статью").onAction((ActionEvent ae1) -> {
+                    ContextBuilder.makeArticle();
+                    populateContentSiteLists();
+                }).build(),
+                MenuItemBuilder.create().text("Удалить выбранную статью").onAction((ActionEvent ae3) -> {
+                    ContextBuilder.deleteArticle(articlesListView);
+                    populateContentSiteLists();
+                }).build()
+        ).build();
+        contentsListContextMenu = ContextMenuBuilder.create().items(
+                MenuItemBuilder.create().text("Создать страницу со статическим контентом").onAction((ActionEvent ae1) -> {
+                    ContextBuilder.makeContent();
+                    populateContentSiteLists();
+                }).build(),
+                MenuItemBuilder.create().text("Удалить выбранную страницу со статическим контентом").onAction((ActionEvent ae3) -> {
+                    ContextBuilder.deleteContent(contentsListView);
+                    populateContentSiteLists();
+                }).build()
+        ).build();
+        newsListView.setContextMenu(newsItemsListContextMenu);
+        newsListView.setItems(getListItems("news"));
+        articlesListView.setContextMenu(articlesListContextMenu);
+        articlesListView.setItems(getListItems("articles"));
+        contentsListView.setContextMenu(contentsListContextMenu);
+        contentsListView.setItems(getListItems("contents"));
+    }
+    @FXML private void editSelectedNewsItem() {
+        NewsItems newsItem = new NewsItems();
+        String selectedNewsItem = (String)newsListView.getSelectionModel().getSelectedItem();
+
+        Session session2 = HibernateUtil.getSessionFactory().openSession();
+        List res2 = session2.createQuery("from NewsItems where title =\'" + selectedNewsItem + "\'").list();
+        for (Iterator iterator = res2.iterator(); iterator.hasNext();) {
+            newsItem = (NewsItems) iterator.next();
+        }
+        session2.close();
+        htmlEditor.setHtmlText("");
+        htmlEditor.setHtmlText(newsItem.getContent());
+    }
+    @FXML private void editSelectedArticle() {
+        Articles article = new Articles();
+        String selectedArticle = (String)articlesListView.getSelectionModel().getSelectedItem();
+
+        Session session2 = HibernateUtil.getSessionFactory().openSession();
+        List res2 = session2.createQuery("from Articles where title =\'" + selectedArticle + "\'").list();
+        for (Iterator iterator = res2.iterator(); iterator.hasNext();) {
+            article = (Articles) iterator.next();
+        }
+        session2.close();
+        htmlEditor.setHtmlText("");
+        htmlEditor.setHtmlText(article.getContent());
+    }
+    @FXML private void editSelectedContent() {
+        StaticContents staticContent = new StaticContents();
+        String selectedStaticContent = (String)contentsListView.getSelectionModel().getSelectedItem();
+
+        Session session2 = HibernateUtil.getSessionFactory().openSession();
+        List res2 = session2.createQuery("from StaticContents where title =\'" + selectedStaticContent + "\'").list();
+        for (Iterator iterator = res2.iterator(); iterator.hasNext();) {
+            staticContent = (StaticContents) iterator.next();
+        }
+        session2.close();
+        htmlEditor.setHtmlText("");
+        htmlEditor.setHtmlText(staticContent.getContent());
+    }
+    @FXML private void saveContent () {
+        if (!newsListView.getSelectionModel().getSelectedItems().isEmpty()) {
+            NewsItems newsItem = new NewsItems();
+            Session session = HibernateUtil.getSessionFactory().openSession();
+            List res = session.createQuery(
+                    "from NewsItems where title=\'" + newsListView.getSelectionModel().getSelectedItem() + "\'").list();
+            for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+                newsItem = (NewsItems) iterator.next();
+            }
+            Transaction tx = session.beginTransaction();
+            newsItem.setContent(cleanHtml(htmlEditor.getHtmlText()));
+            newsItem.setUpdatedAt(new Date());
+            session.save(newsItem);
+            tx.commit();
+            session.close();
+        } else if (!articlesListView.getSelectionModel().getSelectedItems().isEmpty()) {
+            Articles article = new Articles();
+            Session session = HibernateUtil.getSessionFactory().openSession();
+            List res = session.createQuery(
+                    "from Articles where title=\'" + articlesListView.getSelectionModel().getSelectedItem() + "\'").list();
+            for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+                article = (Articles) iterator.next();
+            }
+            Transaction tx = session.beginTransaction();
+            article.setContent(cleanHtml(htmlEditor.getHtmlText()));
+            article.setUpdatedAt(new Date());
+            session.save(article);
+            tx.commit();
+            session.close();
+        } else if (!contentsListView.getSelectionModel().getSelectedItems().isEmpty()) {
+            StaticContents staticContent = new StaticContents();
+            Session session = HibernateUtil.getSessionFactory().openSession();
+            List res = session.createQuery(
+                    "from StaticContents where title=\'" + contentsListView.getSelectionModel().getSelectedItem() + "\'").list();
+            for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+                staticContent = (StaticContents) iterator.next();
+            }
+            Transaction tx = session.beginTransaction();
+            staticContent.setContent(cleanHtml(htmlEditor.getHtmlText()));
+            staticContent.setUpdatedAt(new Date());
+            session.save(staticContent);
+            tx.commit();
+            session.close();
+        }
+    }
+    private String cleanHtml(String rawHtml) {
+        String cleanHtml = new String();
+        String cutString1 = "<html dir=\"ltr\"><head></head><body contenteditable=\"true\">";
+        String cutString2 = "</body></html>";
+        cleanHtml = rawHtml.replace(cutString1, "");
+        cleanHtml = cleanHtml.replace(cutString2, "");
+        return cleanHtml;
+    }
 
     ///////////////////
     // Таб "Браузер" //
@@ -2925,33 +3106,25 @@ public class PCGUIController implements Initializable {
         password.saveSetting("passwordSiteDB", passwordSiteDB.getText());
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Таб "Контент сайта" ///////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    private ObservableList<String> getListItems(String itemsType) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        ObservableList<String> items = FXCollections.observableArrayList();
-        if (itemsType.equals("news")) {
-            List res = session.createQuery("from NewsItems").list();
-            for (Iterator iterator = res.iterator(); iterator.hasNext();) {
-                NewsItems newsItem = (NewsItems) iterator.next();
-                items.add(new String(newsItem.getTitle()));
-            }
-        } else if (itemsType.equals("articles")) {
-            List res = session.createQuery("from Articles").list();
-            for (Iterator iterator = res.iterator(); iterator.hasNext();) {
-                Articles article = (Articles) iterator.next();
-                items.add(new String(article.getTitle()));
-            }
-        } else if (itemsType.equals("contents")) {
-            List res = session.createQuery("from StaticContents").list();
-            for (Iterator iterator = res.iterator(); iterator.hasNext();) {
-                StaticContents staticContent = (StaticContents) iterator.next();
-                items.add(new String(staticContent.getTitle()));
-            }
-        }
-        session.close();
-        return items;
+    @FXML private void saveAddressLocalDB() {
+        LocalDBSettings address = new LocalDBSettings();
+        address.saveSetting("addressLocalDB", addressLocalDB.getText());
     }
+    @FXML private void savePortLocalDB() {
+        LocalDBSettings port = new LocalDBSettings();
+        port.saveSetting("portLocalDB", portLocalDB.getText());
+    }
+    @FXML private void saveTitleLocalDB() {
+        LocalDBSettings title = new LocalDBSettings();
+        title.saveSetting("titleLocalDB", titleLocalDB.getText());
+    }
+    @FXML private void saveUserLocalDB() {
+        LocalDBSettings user = new LocalDBSettings();
+        user.saveSetting("userLocalDB", userLocalDB.getText());
+    }
+    @FXML private void savePasswordLocalDB() {
+        LocalDBSettings password = new LocalDBSettings();
+        password.saveSetting("passwordLocalDB", passwordLocalDB.getText());
+    }
+
 }

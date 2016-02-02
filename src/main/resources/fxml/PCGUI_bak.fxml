@@ -18,7 +18,7 @@
          <center>
             <TabPane fx:id="tabPane" prefHeight="760.0" prefWidth="940.0" tabClosingPolicy="UNAVAILABLE" tabMinWidth="200.0" BorderPane.alignment="CENTER">
               <tabs>
-                <Tab fx:id="mainTab" text="Номенклатура">
+                <Tab text="Номенклатура">
                   <content>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="728.0" prefWidth="1024.0">
                            <children>
@@ -317,7 +317,7 @@
                                                    <children>
                                                       <Label fx:id="productTabKind" textFill="#057df7" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="10.0">
                                                          <font>
-                                                            <Font name="System Bold" size="24.0" />
+                                                            <Font name="System Bold" size="18.0" />
                                                          </font>
                                                       </Label>
                                                    </children>
@@ -576,6 +576,7 @@
                                        <children>
                                           <GridPane AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                                             <columnConstraints>
+                                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="50.0" prefWidth="100.0" />
                                               <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                             </columnConstraints>
                                             <rowConstraints>
@@ -597,14 +598,38 @@
                                                             </AnchorPane>
                                                             <AnchorPane prefHeight="200.0" prefWidth="200.0">
                                                                <children>
-                                                                  <TableView fx:id="accessoriesTable" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                  <TableView prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="2.5" AnchorPane.topAnchor="0.0">
                                                                     <columns>
-                                                                      <TableColumn fx:id="accessoriesTableTitleColumn" minWidth="-Infinity" prefWidth="300.0" text="Название" />
-                                                                      <TableColumn fx:id="accessoriesTableDescriptionColumn" minWidth="-Infinity" prefWidth="712.0" text="Описание" />
+                                                                      <TableColumn prefWidth="161.0" text="Название" />
+                                                                      <TableColumn prefWidth="342.0" text="Описание" />
                                                                     </columns>
-                                                                     <contextMenu>
-                                                                        <ContextMenu fx:id="accessoriesTableContextMenu" />
-                                                                     </contextMenu>
+                                                                  </TableView>
+                                                               </children>
+                                                            </AnchorPane>
+                                                         </children>
+                                                      </VBox>
+                                                   </children>
+                                                </AnchorPane>
+                                                <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1">
+                                                   <children>
+                                                      <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                         <children>
+                                                            <AnchorPane>
+                                                               <children>
+                                                                  <Label text="Подключаемые модули:" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                     <font>
+                                                                        <Font name="System Bold" size="14.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                               </children>
+                                                            </AnchorPane>
+                                                            <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                                                               <children>
+                                                                  <TableView prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="2.5" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                    <columns>
+                                                                      <TableColumn prefWidth="164.0" text="Название" />
+                                                                      <TableColumn prefWidth="340.0" text="Описание" />
+                                                                    </columns>
                                                                   </TableView>
                                                                </children>
                                                             </AnchorPane>
@@ -715,102 +740,17 @@
                            </children></AnchorPane>
                     </content>
                   </Tab>
-                <Tab fx:id="editorTab" text="Контент сайта">
+                <Tab text="Контент сайта">
                   <content>
-                    <AnchorPane fx:id="editorAnchorPane" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                            <children>
                               <BorderPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                 <right>
-                                    <AnchorPane minWidth="-Infinity" prefWidth="350.0" BorderPane.alignment="CENTER">
-                                       <children>
-                                          <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                             <children>
-                                                <AnchorPane VBox.vgrow="ALWAYS">
-                                                   <children>
-                                                      <Accordion AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                        <panes>
-                                                          <TitledPane animated="false" text="Новости">
-                                                            <content>
-                                                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                                                     <children>
-                                                                        <ListView fx:id="newsListView" onMousePressed="#editSelectedNewsItem" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                                           <contextMenu>
-                                                                              <ContextMenu fx:id="newsItemsListContextMenu" />
-                                                                           </contextMenu>
-                                                                        </ListView>
-                                                                     </children>
-                                                                  </AnchorPane>
-                                                            </content>
-                                                               <font>
-                                                                  <Font name="System Bold" size="16.0" />
-                                                               </font>
-                                                          </TitledPane>
-                                                          <TitledPane animated="false" text="Статьи">
-                                                            <content>
-                                                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                                                     <children>
-                                                                        <ListView fx:id="articlesListView" onMousePressed="#editSelectedArticle" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                                           <contextMenu>
-                                                                              <ContextMenu fx:id="articlesListContextMenu" />
-                                                                           </contextMenu>
-                                                                        </ListView>
-                                                                     </children>
-                                                                  </AnchorPane>
-                                                            </content>
-                                                               <font>
-                                                                  <Font name="System Bold" size="16.0" />
-                                                               </font>
-                                                          </TitledPane>
-                                                          <TitledPane animated="false" text="Контент">
-                                                            <content>
-                                                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                                                     <children>
-                                                                        <ListView fx:id="contentsListView" onMousePressed="#editSelectedContent" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                                           <contextMenu>
-                                                                              <ContextMenu fx:id="contentsListContextMenu" />
-                                                                           </contextMenu>
-                                                                        </ListView>
-                                                                     </children>
-                                                                  </AnchorPane>
-                                                            </content>
-                                                               <font>
-                                                                  <Font name="System Bold" size="16.0" />
-                                                               </font>
-                                                          </TitledPane>
-                                                        </panes>
-                                                      </Accordion>
-                                                   </children>
-                                                </AnchorPane>
-                                                <AnchorPane />
-                                             </children>
-                                          </VBox>
-                                       </children>
-                                    </AnchorPane>
-                                 </right>
                                  <center>
-                                    <AnchorPane BorderPane.alignment="CENTER">
-                                       <children>
-                                          <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                             <children>
-                                                <AnchorPane VBox.vgrow="ALWAYS">
-                                                   <children>
-                                                      <HTMLEditor fx:id="htmlEditor" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contenteditable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                                   </children>
-                                                </AnchorPane>
-                                                <AnchorPane>
-                                                   <children>
-                                                      <ToolBar nodeOrientation="RIGHT_TO_LEFT" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                        <items>
-                                                          <Button fx:id="saveContentButton" alignment="CENTER" mnemonicParsing="false" onAction="#saveContent" text="Сохранить редактируемый контент" />
-                                                        </items>
-                                                      </ToolBar>
-                                                   </children>
-                                                </AnchorPane>
-                                             </children>
-                                          </VBox>
-                                       </children>
-                                    </AnchorPane>
+                                    <HTMLEditor htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contenteditable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" prefHeight="741.0" prefWidth="1024.0" BorderPane.alignment="CENTER" />
                                  </center>
+                                 <right>
+                                    <TreeView prefHeight="739.0" prefWidth="304.0" BorderPane.alignment="CENTER" />
+                                 </right>
                               </BorderPane>
                            </children></AnchorPane>
                   </content>
@@ -1102,216 +1042,87 @@
                                     </AnchorPane>
                                     <AnchorPane GridPane.rowIndex="1">
                                        <children>
-                                          <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                          <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
                                              <children>
-                                                <AnchorPane VBox.vgrow="ALWAYS">
+                                                <AnchorPane prefHeight="40.0" prefWidth="512.0">
                                                    <children>
-                                                      <TabPane tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                        <tabs>
-                                                          <Tab text="Локальная БД">
-                                                            <content>
-                                                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                                                     <children>
-                                                                        <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                                           <children>
-                                                                              <AnchorPane prefHeight="40.0" prefWidth="512.0">
-                                                                                 <children>
-                                                                                    <Label layoutX="110.0" layoutY="9.0" text="Соединение с локальной БД" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                                                       <font>
-                                                                                          <Font name="System Bold" size="14.0" />
-                                                                                       </font>
-                                                                                    </Label>
-                                                                                 </children>
-                                                                              </AnchorPane>
-                                                                              <AnchorPane>
-                                                                                 <children>
-                                                                                    <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                                                      <columnConstraints>
-                                                                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="40.0" prefWidth="100.0" />
-                                                                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                                                                      </columnConstraints>
-                                                                                      <rowConstraints>
-                                                                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                                                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                                                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                                                      </rowConstraints>
-                                                                                       <children>
-                                                                                          <AnchorPane prefHeight="200.0" prefWidth="200.0">
-                                                                                             <children>
-                                                                                                <Label layoutX="38.0" layoutY="18.0" text="Адрес БД:" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="0.0" />
-                                                                                             </children>
-                                                                                          </AnchorPane>
-                                                                                          <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1">
-                                                                                             <children>
-                                                                                                <Label layoutX="38.0" layoutY="18.0" text="Порт соединения:" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="0.0" />
-                                                                                             </children>
-                                                                                          </AnchorPane>
-                                                                                          <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="2">
-                                                                                             <children>
-                                                                                                <Label layoutX="38.0" layoutY="18.0" text="Название БД:" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="0.0" />
-                                                                                             </children>
-                                                                                          </AnchorPane>
-                                                                                          <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="3">
-                                                                                             <children>
-                                                                                                <Label layoutX="38.0" layoutY="17.0" text="Пользователь БД:" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="0.0" />
-                                                                                             </children>
-                                                                                          </AnchorPane>
-                                                                                          <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="4">
-                                                                                             <children>
-                                                                                                <Label layoutX="38.0" layoutY="17.0" text="Пароль:" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="0.0" />
-                                                                                             </children>
-                                                                                          </AnchorPane>
-                                                                                          <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1">
-                                                                                             <children>
-                                                                                                <TextField fx:id="addressLocalDB" layoutX="2.0" layoutY="14.0" onAction="#saveAddressLocalDB" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                                                                             </children>
-                                                                                          </AnchorPane>
-                                                                                          <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                                                                                             <children>
-                                                                                                <TextField fx:id="portLocalDB" layoutX="2.0" layoutY="14.0" onAction="#savePortLocalDB" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                                                                             </children>
-                                                                                          </AnchorPane>
-                                                                                          <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
-                                                                                             <children>
-                                                                                                <TextField fx:id="titleLocalDB" layoutX="2.0" layoutY="14.0" onAction="#saveTitleLocalDB" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                                                                             </children>
-                                                                                          </AnchorPane>
-                                                                                          <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
-                                                                                             <children>
-                                                                                                <TextField fx:id="userLocalDB" layoutX="2.0" layoutY="13.0" onAction="#saveUserLocalDB" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                                                                             </children>
-                                                                                          </AnchorPane>
-                                                                                          <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
-                                                                                             <children>
-                                                                                                <PasswordField fx:id="passwordLocalDB" layoutX="2.0" layoutY="4.0" onAction="#savePasswordLocalDB" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                                                                             </children>
-                                                                                          </AnchorPane>
-                                                                                       </children>
-                                                                                    </GridPane>
-                                                                                 </children>
-                                                                              </AnchorPane>
-                                                                              <AnchorPane VBox.vgrow="ALWAYS" />
-                                                                           </children>
-                                                                        </VBox>
-                                                                     </children>
-                                                                  </AnchorPane>
-                                                            </content>
-                                                          </Tab>
-                                                          <Tab text="Удалённая БД">
-                                                            <content>
-                                                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                                                     <children>
-                                                                        <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                                           <children>
-                                                                              <AnchorPane prefHeight="40.0" prefWidth="512.0">
-                                                                                 <children>
-                                                                                    <Label layoutX="110.0" layoutY="9.0" text="Соединение с БД сайта" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                                                       <font>
-                                                                                          <Font name="System Bold" size="14.0" />
-                                                                                       </font>
-                                                                                    </Label>
-                                                                                 </children>
-                                                                              </AnchorPane>
-                                                                              <AnchorPane>
-                                                                                 <children>
-                                                                                    <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                                                       <children>
-                                                                                          <AnchorPane prefHeight="200.0" prefWidth="200.0">
-                                                                                             <children>
-                                                                                                <Label layoutX="38.0" layoutY="18.0" text="Адрес БД сайта:" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="0.0" />
-                                                                                             </children>
-                                                                                          </AnchorPane>
-                                                                                          <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1">
-                                                                                             <children>
-                                                                                                <Label layoutX="38.0" layoutY="18.0" text="Порт соединения:" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="0.0" />
-                                                                                             </children>
-                                                                                          </AnchorPane>
-                                                                                          <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="2">
-                                                                                             <children>
-                                                                                                <Label layoutX="38.0" layoutY="18.0" text="Название БД:" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="0.0" />
-                                                                                             </children>
-                                                                                          </AnchorPane>
-                                                                                          <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="3">
-                                                                                             <children>
-                                                                                                <Label layoutX="38.0" layoutY="17.0" text="Пользователь БД:" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="0.0" />
-                                                                                             </children>
-                                                                                          </AnchorPane>
-                                                                                          <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="4">
-                                                                                             <children>
-                                                                                                <Label layoutX="38.0" layoutY="17.0" text="Пароль:" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="0.0" />
-                                                                                             </children>
-                                                                                          </AnchorPane>
-                                                                                          <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1">
-                                                                                             <children>
-                                                                                                <TextField fx:id="addressSiteDB" layoutX="2.0" layoutY="14.0" onAction="#saveAddressSiteDB" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                                                                             </children>
-                                                                                          </AnchorPane>
-                                                                                          <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                                                                                             <children>
-                                                                                                <TextField fx:id="portSiteDB" layoutX="2.0" layoutY="14.0" onAction="#savePortSiteDB" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                                                                             </children>
-                                                                                          </AnchorPane>
-                                                                                          <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
-                                                                                             <children>
-                                                                                                <TextField fx:id="titleSiteDB" layoutX="2.0" layoutY="14.0" onAction="#saveTitleSiteDB" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                                                                             </children>
-                                                                                          </AnchorPane>
-                                                                                          <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
-                                                                                             <children>
-                                                                                                <TextField fx:id="userSiteDB" layoutX="2.0" layoutY="13.0" onAction="#saveUserSiteDB" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                                                                             </children>
-                                                                                          </AnchorPane>
-                                                                                          <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
-                                                                                             <children>
-                                                                                                <PasswordField fx:id="passwordSiteDB" layoutX="2.0" layoutY="4.0" onAction="#savePasswordSiteDB" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                                                                             </children>
-                                                                                          </AnchorPane>
-                                                                                       </children>
-                                                                                       <columnConstraints>
-                                                                                          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="40.0" prefWidth="100.0" />
-                                                                                          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                                                                       </columnConstraints>
-                                                                                       <rowConstraints>
-                                                                                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                                                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                                                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                                                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                                                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                                                       </rowConstraints>
-                                                                                    </GridPane>
-                                                                                 </children>
-                                                                              </AnchorPane>
-                                                                              <AnchorPane VBox.vgrow="ALWAYS" />
-                                                                           </children>
-                                                                        </VBox>
-                                                                     </children>
-                                                                  </AnchorPane>
-                                                            </content>
-                                                          </Tab>
-                                                        </tabs>
-                                                      </TabPane>
-                                                   </children>
-                                                </AnchorPane>
-                                                <AnchorPane>
-                                                   <children>
-                                                      <Label text="После каждого ввода нажимайте &lt;ENTER&gt;" textFill="RED" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                      <Label layoutX="110.0" layoutY="9.0" text="Соединение с БД сайта" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                          <font>
-                                                            <Font name="System Bold" size="12.0" />
+                                                            <Font name="System Bold" size="20.0" />
                                                          </font>
                                                       </Label>
                                                    </children>
                                                 </AnchorPane>
                                                 <AnchorPane>
                                                    <children>
-                                                      <ToolBar prefHeight="40.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                        <items>
-                                                          <Button fx:id="loadSavedSettingsButton" mnemonicParsing="false" onAction="#loadSavedSettings" text="Применить" />
-                                                        </items>
-                                                      </ToolBar>
+                                                      <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                        <columnConstraints>
+                                                          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="40.0" prefWidth="100.0" />
+                                                          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                        </columnConstraints>
+                                                        <rowConstraints>
+                                                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                        </rowConstraints>
+                                                         <children>
+                                                            <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                                                               <children>
+                                                                  <Label layoutX="38.0" layoutY="18.0" text="Адрес БД сайта:" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="0.0" />
+                                                               </children>
+                                                            </AnchorPane>
+                                                            <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1">
+                                                               <children>
+                                                                  <Label layoutX="38.0" layoutY="18.0" text="Порт соединения:" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="0.0" />
+                                                               </children>
+                                                            </AnchorPane>
+                                                            <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="2">
+                                                               <children>
+                                                                  <Label layoutX="38.0" layoutY="18.0" text="Название БД:" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="0.0" />
+                                                               </children>
+                                                            </AnchorPane>
+                                                            <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="3">
+                                                               <children>
+                                                                  <Label layoutX="38.0" layoutY="17.0" text="Пользователь БД:" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="0.0" />
+                                                               </children>
+                                                            </AnchorPane>
+                                                            <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="4">
+                                                               <children>
+                                                                  <Label layoutX="38.0" layoutY="17.0" text="Пароль:" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="0.0" />
+                                                               </children>
+                                                            </AnchorPane>
+                                                            <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1">
+                                                               <children>
+                                                                  <TextField fx:id="addressSiteDB" layoutX="2.0" layoutY="14.0" onAction="#saveAddressSiteDB" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                               </children>
+                                                            </AnchorPane>
+                                                            <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                                               <children>
+                                                                  <TextField fx:id="portSiteDB" layoutX="2.0" layoutY="14.0" onAction="#savePortSiteDB" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                               </children>
+                                                            </AnchorPane>
+                                                            <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                                               <children>
+                                                                  <TextField fx:id="titleSiteDB" layoutX="2.0" layoutY="14.0" onAction="#saveTitleSiteDB" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                               </children>
+                                                            </AnchorPane>
+                                                            <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                                                               <children>
+                                                                  <TextField fx:id="userSiteDB" layoutX="2.0" layoutY="13.0" onAction="#saveUserSiteDB" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                               </children>
+                                                            </AnchorPane>
+                                                            <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                                                               <children>
+                                                                  <PasswordField fx:id="passwordSiteDB" layoutX="2.0" layoutY="4.0" onAction="#savePasswordSiteDB" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                               </children>
+                                                            </AnchorPane>
+                                                         </children>
+                                                      </GridPane>
                                                    </children>
                                                 </AnchorPane>
+                                                <Button fx:id="testButton" mnemonicParsing="false" onAction="#writeToSite" text="test" />
                                              </children>
                                           </VBox>
                                        </children>

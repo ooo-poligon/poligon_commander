@@ -1,6 +1,7 @@
 package utils;
 
 import entities.*;
+import entities.Properties;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -17,10 +18,7 @@ import javafx.event.ActionEvent;
 import treetableviews.PropertiesTreeTableView;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Created by Igor Klekotnev on 13.01.2016.
@@ -1241,7 +1239,6 @@ public class ContextBuilder {
                 " только на вкладке \"Настройки\" данного приложения.");
         alert.showAndWait();
     }
-
     public static void removeFunctionFromProduct(TableView functionsTable1, Label productTabTitle) {
         String selectedProduct = productTabTitle.getText();
         FunctionsTableView functionsTableView = (FunctionsTableView)functionsTable1.getSelectionModel().getSelectedItem();
@@ -1298,6 +1295,276 @@ public class ContextBuilder {
             q.executeUpdate();
             tx.commit();
             session4.close();
+        }
+    }
+
+    public static void makeNewsItem() {
+        Dialog<NewNewsItem> dialog = new Dialog<>();
+        dialog.setTitle("Добавить новость");
+        dialog.setHeaderText("После добавления новости, её содержимое можно\nотредактировать и сохранить в окне редактора.");
+        dialog.setResizable(false);
+
+        Label label1 = new Label("Введите название новости: ");
+        TextField textField1 = new TextField();
+
+        GridPane grid = new GridPane();
+        grid.add(label1, 1, 1);
+        grid.add(textField1, 2, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        ButtonType buttonTypeOk = new ButtonType("Добавить", ButtonBar.ButtonData.OK_DONE);
+        ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
+        dialog.setResultConverter((ButtonType b) -> {
+            if (b == buttonTypeOk) {
+                return new NewNewsItem();
+            }
+            return null;
+        });
+        Optional<NewNewsItem> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            Date currentDate = new Date();
+            Session session = HibernateUtil.getSessionFactory().openSession();
+            Transaction tx = session.beginTransaction();
+            NewsItems ni = new NewsItems();
+            ni.setTitle(textField1.getText());
+            ni.setCreatedAt(currentDate);
+            ni.setUpdatedAt(currentDate);
+            session.save(ni);
+            tx.commit();
+            session.close();
+        }
+    }
+    public static void makeArticle() {
+        Dialog<NewArticle> dialog = new Dialog<>();
+        dialog.setTitle("Добавить статью");
+        dialog.setHeaderText("После добавления статьи, её содержимое можно\nотредактировать и сохранить в окне редактора.");
+        dialog.setResizable(false);
+
+        Label label1 = new Label("Введите название статьи: ");
+        TextField textField1 = new TextField();
+
+        GridPane grid = new GridPane();
+        grid.add(label1, 1, 1);
+        grid.add(textField1, 2, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        ButtonType buttonTypeOk = new ButtonType("Добавить", ButtonBar.ButtonData.OK_DONE);
+        ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
+        dialog.setResultConverter((ButtonType b) -> {
+            if (b == buttonTypeOk) {
+                return new NewArticle();
+            }
+            return null;
+        });
+        Optional<NewArticle> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            Date currentDate = new Date();
+            Session session = HibernateUtil.getSessionFactory().openSession();
+            Transaction tx = session.beginTransaction();
+            Articles a = new Articles();
+            a.setTitle(textField1.getText());
+            a.setCreatedAt(currentDate);
+            a.setUpdatedAt(currentDate);
+            session.save(a);
+            tx.commit();
+            session.close();
+        }
+    }
+    public static void makeContent() {
+        Dialog<NewContent> dialog = new Dialog<>();
+        dialog.setTitle("Добавить страницу со статическим содержимым");
+        dialog.setHeaderText("После добавления страницы, её содержимое можно\nотредактировать и сохранить в окне редактора.");
+        dialog.setResizable(false);
+
+        Label label1 = new Label("Введите название страницы: ");
+        Label label2 = new Label("Введите название категории: ");
+        Label label3 = new Label("Введите заглоловок содержимого страницы: ");
+        TextField textField1 = new TextField();
+        TextField textField2 = new TextField();
+        TextField textField3 = new TextField();
+        Label space1 = new Label();
+        Label space2 = new Label();
+
+        GridPane grid = new GridPane();
+        grid.add(label1, 1, 1);
+        grid.add(textField1, 2, 1);
+        grid.add(space1, 1, 2);
+        grid.add(label2, 1, 3);
+        grid.add(textField2, 2, 3);
+        grid.add(space2, 1, 4);
+        grid.add(label3, 1, 5);
+        grid.add(textField3, 2, 5);
+
+        dialog.getDialogPane().setContent(grid);
+
+        ButtonType buttonTypeOk = new ButtonType("Добавить", ButtonBar.ButtonData.OK_DONE);
+        ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
+        dialog.setResultConverter((ButtonType b) -> {
+            if (b == buttonTypeOk) {
+                return new NewContent();
+            }
+            return null;
+        });
+        Optional<NewContent> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            Date currentDate = new Date();
+            Session session = HibernateUtil.getSessionFactory().openSession();
+            Transaction tx = session.beginTransaction();
+            StaticContents sc = new StaticContents();
+            sc.setPage(textField1.getText());
+            sc.setDirectory(textField2.getText());
+            sc.setTitle(textField3.getText());
+            sc.setCreatedAt(currentDate);
+            sc.setUpdatedAt(currentDate);
+            session.save(sc);
+            tx.commit();
+            session.close();
+        }
+    }
+    public static void deleteNewsItem(ListView newsListView) {
+        NewsItems newsItem = new NewsItems();
+        String selectedNewsItem = (String)newsListView.getSelectionModel().getSelectedItem();
+
+        Session session2 = HibernateUtil.getSessionFactory().openSession();
+        List res2 = session2.createQuery("from NewsItems where title =\'" + selectedNewsItem + "\'").list();
+        for (Iterator iterator = res2.iterator(); iterator.hasNext();) {
+            newsItem = (NewsItems) iterator.next();
+        }
+        session2.close();
+
+        Dialog<NewNewsItem> dialog = new Dialog<>();
+        dialog.setTitle("Удаление выбранной новости.");
+        dialog.setHeaderText("Внимание! Выбранная новость будет удалена из базы данных.");
+        dialog.setResizable(true);
+
+        Label label1 = new Label("Вы действительно хотите выполнить удаление?");
+
+        GridPane grid = new GridPane();
+
+        grid.add(label1, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        ButtonType buttonTypeOk = new ButtonType("Удалить", ButtonBar.ButtonData.OK_DONE);
+        ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
+        dialog.setResultConverter((ButtonType b) -> {
+            if (b == buttonTypeOk) {
+                return new NewNewsItem();
+            }
+            return null;
+        });
+        Optional<NewNewsItem> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            Session session1 = HibernateUtil.getSessionFactory().openSession();
+            Transaction tx = session1.beginTransaction();
+
+            Query q = session1.createQuery("delete NewsItems where id =" + newsItem.getId());
+            q.executeUpdate();
+
+            tx.commit();
+            session1.close();
+        }
+    }
+    public static void deleteArticle(ListView articlesListView) {
+        Articles article = new Articles();
+        String selectedArticle = (String)articlesListView.getSelectionModel().getSelectedItem();
+
+        Session session2 = HibernateUtil.getSessionFactory().openSession();
+        List res2 = session2.createQuery("from Articles where title =\'" + selectedArticle + "\'").list();
+        for (Iterator iterator = res2.iterator(); iterator.hasNext();) {
+            article = (Articles) iterator.next();
+        }
+        session2.close();
+
+        Dialog<NewArticle> dialog = new Dialog<>();
+        dialog.setTitle("Удаление выбранной статьи.");
+        dialog.setHeaderText("Внимание! Выбранная статья будет удалена из базы данных.");
+        dialog.setResizable(true);
+
+        Label label1 = new Label("Вы действительно хотите выполнить удаление?");
+
+        GridPane grid = new GridPane();
+
+        grid.add(label1, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        ButtonType buttonTypeOk = new ButtonType("Удалить", ButtonBar.ButtonData.OK_DONE);
+        ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
+        dialog.setResultConverter((ButtonType b) -> {
+            if (b == buttonTypeOk) {
+                return new NewArticle();
+            }
+            return null;
+        });
+        Optional<NewArticle> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            Session session1 = HibernateUtil.getSessionFactory().openSession();
+            Transaction tx = session1.beginTransaction();
+
+            Query q = session1.createQuery("delete Articles where id =" + article.getId());
+            q.executeUpdate();
+
+            tx.commit();
+            session1.close();
+        }
+    }
+    public static void deleteContent(ListView contentsListView) {
+        StaticContents staticContent = new StaticContents();
+        String selectedStaticContent = (String)contentsListView.getSelectionModel().getSelectedItem();
+
+        Session session2 = HibernateUtil.getSessionFactory().openSession();
+        List res2 = session2.createQuery("from StaticContents where title =\'" + selectedStaticContent + "\'").list();
+        for (Iterator iterator = res2.iterator(); iterator.hasNext();) {
+            staticContent = (StaticContents) iterator.next();
+        }
+        session2.close();
+
+        Dialog<NewContent> dialog = new Dialog<>();
+        dialog.setTitle("Удаление выбранной страницы статического содержимого.");
+        dialog.setHeaderText("Внимание! Выбранная страница статического содержимого\nбудет удалена из базы данных.");
+        dialog.setResizable(true);
+
+        Label label1 = new Label("Вы действительно хотите выполнить удаление?");
+
+        GridPane grid = new GridPane();
+
+        grid.add(label1, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        ButtonType buttonTypeOk = new ButtonType("Удалить", ButtonBar.ButtonData.OK_DONE);
+        ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
+        dialog.setResultConverter((ButtonType b) -> {
+            if (b == buttonTypeOk) {
+                return new NewContent();
+            }
+            return null;
+        });
+        Optional<NewContent> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            Session session1 = HibernateUtil.getSessionFactory().openSession();
+            Transaction tx = session1.beginTransaction();
+
+            Query q = session1.createQuery("delete StaticContents where id =" + staticContent.getId());
+            q.executeUpdate();
+
+            tx.commit();
+            session1.close();
         }
     }
 }
