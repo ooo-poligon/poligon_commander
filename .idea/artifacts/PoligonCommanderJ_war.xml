@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="PoligonCommanderJ:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <root id="archive" name="PoligonCommander-1.0-SNAPSHOT.war">
+      <element id="artifact" artifact-name="PoligonCommanderJ:war exploded" />
+    </root>
+  </artifact>
+</component>

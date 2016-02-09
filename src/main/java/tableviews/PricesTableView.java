@@ -28,9 +28,11 @@ public class PricesTableView {
     private final DoubleProperty price;
     private final DoubleProperty priceR;
     
+    /*
     private Double basePrice;
     private final Double course = 74.5; 
-    private final Map<String, Double> allPrices = new HashMap<>();    
+    private final Map<String, Double> allPrices = new HashMap<>();
+    */
     
     public PricesTableView() {
         this(null, null, null);

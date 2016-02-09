@@ -103,6 +103,7 @@ public class PCGUIController implements Initializable {
     StackPane stackPaneModal = new StackPane();
 
     @FXML private HTMLEditor htmlEditor;
+    @FXML private TextArea htmlCode;
 
     // TreeViews
     @FXML private TreeView<String> categoriesTree;
@@ -2582,6 +2583,7 @@ public class PCGUIController implements Initializable {
         session2.close();
         htmlEditor.setHtmlText("");
         htmlEditor.setHtmlText(newsItem.getContent());
+        htmlCode.setText(cleanHtml(htmlEditor.getHtmlText()));
     }
     @FXML private void editSelectedArticle() {
         Articles article = new Articles();
@@ -2595,6 +2597,7 @@ public class PCGUIController implements Initializable {
         session2.close();
         htmlEditor.setHtmlText("");
         htmlEditor.setHtmlText(article.getContent());
+        htmlCode.setText(cleanHtml(htmlEditor.getHtmlText()));
     }
     @FXML private void editSelectedContent() {
         StaticContents staticContent = new StaticContents();
@@ -2608,6 +2611,7 @@ public class PCGUIController implements Initializable {
         session2.close();
         htmlEditor.setHtmlText("");
         htmlEditor.setHtmlText(staticContent.getContent());
+        htmlCode.setText(cleanHtml(htmlEditor.getHtmlText()));
     }
     @FXML private void saveContent () {
         if (!newsListView.getSelectionModel().getSelectedItems().isEmpty()) {
@@ -2661,6 +2665,10 @@ public class PCGUIController implements Initializable {
         cleanHtml = rawHtml.replace(cutString1, "");
         cleanHtml = cleanHtml.replace(cutString2, "");
         return cleanHtml;
+    }
+
+    @FXML private void refreshHtml() {
+        htmlEditor.setHtmlText(htmlCode.getText());
     }
 
     ///////////////////

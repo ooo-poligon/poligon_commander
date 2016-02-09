@@ -111,6 +111,9 @@
                                                                <columnResizePolicy>
                                                                   <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                                                                </columnResizePolicy>
+                                                               <contextMenu>
+                                                                  <ContextMenu fx:id="analogsTableContextMenu" />
+                                                               </contextMenu>
                                                             </TableView>
                                                          </children>
                                                       </AnchorPane>
@@ -794,7 +797,20 @@
                                              <children>
                                                 <AnchorPane VBox.vgrow="ALWAYS">
                                                    <children>
-                                                      <HTMLEditor fx:id="htmlEditor" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contenteditable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                      <SplitPane dividerPositions="0.5" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                        <items>
+                                                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                                                               <children>
+                                                                  <HTMLEditor fx:id="htmlEditor" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contenteditable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                               </children>
+                                                            </AnchorPane>
+                                                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                                                               <children>
+                                                                  <TextArea fx:id="htmlCode" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                               </children>
+                                                            </AnchorPane>
+                                                        </items>
+                                                      </SplitPane>
                                                    </children>
                                                 </AnchorPane>
                                                 <AnchorPane>
@@ -802,6 +818,7 @@
                                                       <ToolBar nodeOrientation="RIGHT_TO_LEFT" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                         <items>
                                                           <Button fx:id="saveContentButton" alignment="CENTER" mnemonicParsing="false" onAction="#saveContent" text="Сохранить редактируемый контент" />
+                                                            <Button fx:id="refreshHtmlButton" mnemonicParsing="false" onAction="#refreshHtml" text="Обновить" />
                                                         </items>
                                                       </ToolBar>
                                                    </children>
