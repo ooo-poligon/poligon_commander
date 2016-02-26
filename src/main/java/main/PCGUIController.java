@@ -2315,11 +2315,11 @@ public class PCGUIController implements Initializable {
                 MenuItemBuilder.create().text("Добавить новый аксессуар").onAction((ActionEvent arg0) -> {
                     Accessory.addToSelectedOn(selectedProduct);
                     buildAccessoriesTable(selectedProduct);
-                    }).build(),
+                }).build(),
                 MenuItemBuilder.create().text("Удалить выбранный аксессуар").onAction((ActionEvent arg0) -> {
                     Accessory.removeAccessoryFrom(accessoriesTable, selectedProduct);
                     buildAccessoriesTable(selectedProduct);
-                    }).build()
+                }).build()
         ).build();
         accessoriesTable.setContextMenu(accessoriesTableContextMenu);
         accessoriesTable.setItems(data);
