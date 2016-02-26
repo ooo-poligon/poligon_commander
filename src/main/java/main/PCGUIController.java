@@ -3,11 +3,10 @@ package main;
 import javafx.beans.property.*;
 import javafx.scene.web.HTMLEditor;
 import javafx.util.StringConverter;
+import javafx.util.converter.IntegerStringConverter;
 import modalwindows.SetRatesWindow;
-import settings.LocalDBSettings;
-import settings.PriceCalcSettings;
-import settings.SiteDBSettings;
-import settings.SystemConfig;
+import org.hibernate.engine.HibernateIterator;
+import settings.*;
 import utils.DBConnection;
 import entities.*;
 import entities.Properties;
@@ -83,6 +82,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -90,6 +90,8 @@ import java.util.logging.Logger;
  */
 
 public class PCGUIController implements Initializable {
+    public static ArrayList<Products> allProductsList = new ArrayList<>();
+    private ObservableList<String> allProductsTitles = FXCollections.observableArrayList();
 
     // Panes
     @FXML private AnchorPane anchorPane;
@@ -133,6 +135,7 @@ public class PCGUIController implements Initializable {
     @ FXML private ContextMenu newsItemsListContextMenu;
     @ FXML private ContextMenu articlesListContextMenu;
     @ FXML private ContextMenu contentsListContextMenu;
+    @ FXML private ContextMenu categoriesListContextMenu;
 
     // TableViews & TableColumns
     @FXML private TableView<ProductsTableView>            productsTable;
@@ -149,8 +152,8 @@ public class PCGUIController implements Initializable {
     @FXML private TableColumn<QuantityTableView, String>  quantityStock;
     @FXML private TableColumn<QuantityTableView, String>  quantityReserved;
     @FXML private TableColumn<QuantityTableView, String>  quantityOrdered;
-    @FXML private TableColumn<QuantityTableView, String>  quantityMinimum;
-    @FXML private TableColumn<QuantityTableView, String>  quantityPiecesPerPack;
+    @FXML private TableColumn<QuantityTableView, Integer> quantityMinimum;
+    @FXML private TableColumn<QuantityTableView, Integer> quantityPiecesPerPack;
 
     @FXML private TableView<AnalogsTableView>             analogsTable;
     @FXML private TableColumn<AnalogsTableView, String>   analogTitle;
@@ -195,6 +198,7 @@ public class PCGUIController implements Initializable {
     // Buttons
     @FXML private Button startImportXLSButton;
     @FXML private Button loadSavedSettingsButton;
+    @FXML Button testButton = new Button();
 
     // Labels
     @FXML private Label productTabTitle;
@@ -219,9 +223,8 @@ public class PCGUIController implements Initializable {
     @FXML private ListView<String> productKindsList;
     @FXML private ListView<String> newsListView;
     @FXML private ListView<String> articlesListView;
+    @FXML private ListView<String> categoriesListView;
     @FXML private ListView<String> contentsListView;
-
-
 
     // ComboBoxes
     @FXML private ComboBox<String> searchComboBox;
@@ -243,7 +246,7 @@ public class PCGUIController implements Initializable {
     @FXML private TextField titleLocalDB;
     @FXML private TextField userLocalDB;
     @FXML private PasswordField passwordLocalDB;
-
+    @FXML private TextField siteUrlTextField;
     @FXML private TextField addCBRTextField;
 
     // CheckBoxes
@@ -258,10 +261,9 @@ public class PCGUIController implements Initializable {
     ArrayList<ArrayList<String>> allCompareDetails = new ArrayList<>();
     ObservableList<CategoriesTreeView> subCategoriesTreeViewList;
     ObservableList<PropertiesTreeView> subPropertiesTreeViewList;
-    ObservableList<String> allProducts = FXCollections.observableArrayList();
+
     ObservableList<ImportFields> importFields = FXCollections.observableArrayList();
     ObservableList<String> comparedPairs = FXCollections.observableArrayList();
-    // ObservableList<PropertiesTableView> data;
 
     // Maps
     Map<String, Double> allPrices = new HashMap<>();
@@ -307,12 +309,12 @@ public class PCGUIController implements Initializable {
     @Override
     // Выполняется при запуске программы
     public void initialize(URL url, ResourceBundle rb) {
+        //getAllProductsList();
 
-        SystemConfig.getSettingsDialog();
+        //SystemConfig.getSettingsDialog();
 
         loadSavedSettings();
         populateContentSiteLists();
-
         try {
             addCBR = Double.parseDouble(addCBRTextField.getText());
             CurrencyCourse euro = new CurrencyCourse("EUR");
@@ -321,22 +323,14 @@ public class PCGUIController implements Initializable {
             courseDateLabel.setText(((String) euro.getValueFromCBR().get(1)).replace('/', '.'));
             addCBRTextField.setText(addCBR.toString());
             course = course + ((course / 100) * addCBR);
-        } catch (IOException ioe) {
-            Alert alert = new Alert(AlertType.WARNING);
-            alert.setTitle("Внимание!");
-            alert.setHeaderText("Нет связи с сервером \"CBR\"!");
-            alert.setContentText("Актуальные данные курсов валют, а следовательно,\n" +
-                    "все цены могут быть неверны!");
-            alert.showAndWait();
-        }
+        } catch (IOException ioe) { alertNoRbcServerConnection (); }
         buildCategoryTree();
         populateComboBox ();
         getAllPrices();
         loadImportFields();
         buildVendorsTable();
         buildProductKindsList();
-        WebEngine webEngine = tabBrowserWebView.getEngine();
-        webEngine.load("http://localhost:3000");
+        loadSiteInBrowser();
         productsTable.getSelectionModel().setSelectionMode(javafx.scene.control.SelectionMode.MULTIPLE);
         productsTable.setOnDragDetected((MouseEvent event) -> {
             Dragboard db = productsTable.startDragAndDrop(TransferMode.ANY);
@@ -444,6 +438,13 @@ public class PCGUIController implements Initializable {
         SiteDBSettings siteDBSettings = new SiteDBSettings();
         LocalDBSettings localDBSettings = new LocalDBSettings();
         PriceCalcSettings priceCalcSettings = new PriceCalcSettings();
+        SiteUrlSettings siteUrlSettings = new SiteUrlSettings();
+        try {
+            siteUrlTextField.setText(siteUrlSettings.loadSetting());
+        } catch (NullPointerException ne) {
+            siteUrlTextField.setText("");
+        }
+
         addCBRTextField.setText(priceCalcSettings.loadSetting("addCBR"));
 
         addressSiteDB.setText(siteDBSettings.loadSetting("addressSiteDB"));
@@ -460,6 +461,16 @@ public class PCGUIController implements Initializable {
     }
 
     // Утилиты разные
+    private void getAllProductsList() {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List result = session.createQuery("from Products").list();
+        for (Iterator iterator = result.iterator(); iterator.hasNext();) {
+            Products product = (Products) iterator.next();
+            allProductsList.add(product);
+            allProductsTitles.add(product.getTitle());
+        }
+        session.close();
+    }
     private Integer getCategoryIdFromTitle (String title) {
         Integer id = 0;
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -554,14 +565,16 @@ public class PCGUIController implements Initializable {
             course = course + ((course / 100) * addCBR);
             getAllPrices();
             buildPricesTable(selectedProduct);
-        } catch (IOException ioe) {
-            Alert alert = new Alert(AlertType.WARNING);
-            alert.setTitle("Внимание!");
-            alert.setHeaderText("Нет связи с сервером \"CBR\"!");
-            alert.setContentText("Актуальные данные курсов валют, а следовательно,\n" +
-                    "все цены могут быть неверны!");
-            alert.showAndWait();
-        }
+        } catch (IOException ioe) { alertNoRbcServerConnection (); }
+    }
+
+    private void alertNoRbcServerConnection () {
+        Alert alert = new Alert(AlertType.WARNING);
+        alert.setTitle("Внимание!");
+        alert.setHeaderText("Нет связи с сервером \"CBR\"!");
+        alert.setContentText("Актуальные данные курсов валют, а следовательно,\n" +
+                "все цены могут быть неверны!");
+        alert.showAndWait();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -854,7 +867,40 @@ public class PCGUIController implements Initializable {
         quantityReserved.setCellValueFactory(new PropertyValueFactory<>("reserved"));
         quantityOrdered.setCellValueFactory(new PropertyValueFactory<>("ordered"));
         quantityMinimum.setCellValueFactory(new PropertyValueFactory<>("minimum"));
+        quantityMinimum.setCellFactory(TextFieldTableCell.<QuantityTableView, Integer>forTableColumn(new IntegerStringConverter()));
+        quantityMinimum.setOnEditCommit(
+                new EventHandler<CellEditEvent<QuantityTableView, Integer>>() {
+                    @Override
+                    public void handle(CellEditEvent<QuantityTableView, Integer> t) {
+                        ((QuantityTableView) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())
+                        ).setPiecesPerPack(t.getNewValue());
+                        setNewQuantityValue("minimum", t.getNewValue(),
+                                getProductIdFromTitle(productsTable.getFocusModel().getFocusedItem().getTitle()));
+                        buildQuantityTable(selectedProduct);
+                    }
+                }
+        );
         quantityPiecesPerPack.setCellValueFactory(new PropertyValueFactory<>("pieces_per_pack"));
+        quantityPiecesPerPack.setCellFactory(TextFieldTableCell.<QuantityTableView, Integer>forTableColumn(new IntegerStringConverter()));
+        quantityPiecesPerPack.setOnEditCommit(
+                new EventHandler<CellEditEvent<QuantityTableView, Integer>>() {
+                    @Override
+                    public void handle(CellEditEvent<QuantityTableView, Integer> t) {
+                        ((QuantityTableView) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())
+                        ).setPiecesPerPack(t.getNewValue());
+                        setNewQuantityValue("pieces_per_pack", t.getNewValue(),
+                                getProductIdFromTitle(productsTable.getFocusModel().getFocusedItem().getTitle()));
+                        buildQuantityTable(selectedProduct);
+                    }
+                }
+        );
+
+
+
+
+
         quantitiesTable.setItems(quantities);
     }
     private void buildAnalogsTable(String selectedProduct) {
@@ -1192,7 +1238,7 @@ public class PCGUIController implements Initializable {
     }
 
     // Вспомогательные методы, для смены id категории, к которой принадлежит товар.
-    // Две версии для разных вхзодных типов данных
+    // Две версии для разных входных типов данных
     // Позже можно будет решить более красиво, но пока так...
     private void updateCategoryId(String value, String productTitle) {
         if (!(value.equals("") || value.equals(null))) {
@@ -1282,6 +1328,16 @@ public class PCGUIController implements Initializable {
         session.close();
     }
 
+    private void setNewQuantityValue(String fieldName, Integer newValue, Integer productId) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = session.beginTransaction();
+        Query query = session.createQuery("UPDATE Quantity set " + fieldName + "= :newValue where productId =" + productId);
+        query.setParameter("newValue", newValue);
+        query.executeUpdate();
+        tx.commit();
+        session.close();
+    }
+
     // Перерисовывает таблицу товаров в зависимости от выбранного пункта в дереве категорий.
     private void refreshProductsTable() {
         try {
@@ -1318,39 +1374,34 @@ public class PCGUIController implements Initializable {
         Integer categoryId = 0;
         ObservableList<ProductsTableView> data = FXCollections.observableArrayList();
         Session session = HibernateUtil.getSessionFactory().openSession();
-        try {
-            List response = session.createQuery("From Products where title= \'" + normalize(selectedProduct) + "\'").list();
-            for (Iterator iterator = response.iterator(); iterator.hasNext();) {
-                Products product = (Products) iterator.next();
-                selectedProductsTableViewItem = new ProductsTableView(
-                        product.getArticle(),
-                        product.getTitle(),
-                        product.getDescription(),
-                        product.getDeliveryTime()
-                );
-                categoryId = product.getCategoryId().getId();
-            }
-        } catch (HibernateException e) {
-        } finally {
-            session.close();
+        Query q = session.createQuery("from Products where title = :title");
+        q.setParameter("title", selectedProduct);
+        List res = q.list();
+        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+            Products product = (Products) iterator.next();
+            selectedProductsTableViewItem = new ProductsTableView(
+                    product.getArticle(),
+                    product.getTitle(),
+                    product.getDescription(),
+                    product.getDeliveryTime()
+            );
+            categoryId = product.getCategoryId().getId();
         }
+        session.close();
+        System.out.println(categoryId);
         Session session1 = HibernateUtil.getSessionFactory().openSession();
-        try {
-            List response1 = session1.createQuery("From Products where categoryId= " + categoryId).list();
-            for (Iterator iterator1 = response1.iterator(); iterator1.hasNext();) {
-                Products product1 = (Products) iterator1.next();
-                data.add(new ProductsTableView(
-                                product1.getArticle(),
-                                product1.getTitle(),
-                                product1.getDescription(),
-                                product1.getDeliveryTime()
-                        )
-                );
-            }
-        } catch (HibernateException e1) {
-        } finally {
-            session1.close();
+        List res1 = session1.createQuery("from Products where categoryId = " + categoryId).list();
+        for (Iterator iterator = res1.iterator(); iterator.hasNext();) {
+            Products product = (Products) iterator.next();
+            data.add(new ProductsTableView(
+                    product.getArticle(),
+                    product.getTitle(),
+                    product.getDescription(),
+                    product.getDeliveryTime())
+            );
         }
+        session1.close();
+
         buildProductsTable(data);
 
         for (int i = 0; i < productsTable.getItems().size(); i++) {
@@ -1783,7 +1834,7 @@ public class PCGUIController implements Initializable {
     private void setVendorSelected(String selectedProduct) {
         Vendors vendor = new Vendors();
         Session session = HibernateUtil.getSessionFactory().openSession();
-        Query query = session.createQuery("From Products where title = :title");
+        Query query = session.createQuery("from Products where title = :title");
         query.setParameter("title", selectedProduct);
         List list = query.list();
         for (Iterator iterator = list.iterator(); iterator.hasNext();) {
@@ -1938,7 +1989,9 @@ public class PCGUIController implements Initializable {
         ObservableList<ProductsTableView> data = FXCollections.observableArrayList();
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
-            List response = session.createQuery("From Products where title= \'" + normalize(searchComboBox.getValue()) + "\'").list();
+            Query q = session.createQuery("from Products where title = :title");
+            q.setParameter("title", searchComboBox.getValue());
+            List response = q.list();
             for (Iterator iterator = response.iterator(); iterator.hasNext();) {
                 Products product = (Products) iterator.next();
                 data.add(new ProductsTableView(
@@ -2240,7 +2293,7 @@ public class PCGUIController implements Initializable {
         for (Integer id: paIds) {
             Session session1 = HibernateUtil.getSessionFactory().openSession();
             try {
-                List response1 = session1.createQuery("From Products where id=" + id).list();
+                List response1 = session1.createQuery("from Products where id=" + id).list();
                 for (Iterator iterator = response1.iterator(); iterator.hasNext();) {
                     Products pr = (Products) iterator.next();
                     aProducts.add(pr);
@@ -2508,6 +2561,24 @@ public class PCGUIController implements Initializable {
     // Таб "Контент сайта" ///////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    @FXML private TextField categorySearch;
+    @FXML private TextField pageTitleTextField;
+    @FXML private TextField directoryTitleTextField;
+    @FXML private TextField contentTitleTextField;
+    @FXML private TitledPane categoriesTitledPane;
+    @FXML private void handleCategorySearch() {
+        String searchRequest = categorySearch.getText();
+        ObservableList<String> categoryTitles = categoriesListView.getItems();
+        for(String cat: categoryTitles) {
+            if (cat.equals(searchRequest)) {
+                categoriesTitledPane.setExpanded(true);
+                categoriesListView.scrollTo(cat);
+                categoriesListView.getSelectionModel().select(cat);
+                editSelectedCategory();
+            }
+        }
+    }
+
     private ObservableList<String> getListItems(String itemsType) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         ObservableList<String> items = FXCollections.observableArrayList();
@@ -2529,7 +2600,14 @@ public class PCGUIController implements Initializable {
                 StaticContents staticContent = (StaticContents) iterator.next();
                 items.add(new String(staticContent.getTitle()));
             }
+        } else if (itemsType.equals("categories")) {
+            List res = session.createQuery("from Categories").list();
+            for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+                Categories categories = (Categories) iterator.next();
+                items.add(new String(categories.getTitle()));
+            }
         }
+
         session.close();
         return items;
     }
@@ -2570,6 +2648,8 @@ public class PCGUIController implements Initializable {
         articlesListView.setItems(getListItems("articles"));
         contentsListView.setContextMenu(contentsListContextMenu);
         contentsListView.setItems(getListItems("contents"));
+        //categoriesListView.setContextMenu(categoriesListContextMenu);
+        categoriesListView.setItems(getListItems("categories"));
     }
     @FXML private void editSelectedNewsItem() {
         NewsItems newsItem = new NewsItems();
@@ -2584,6 +2664,9 @@ public class PCGUIController implements Initializable {
         htmlEditor.setHtmlText("");
         htmlEditor.setHtmlText(newsItem.getContent());
         htmlCode.setText(cleanHtml(htmlEditor.getHtmlText()));
+        contentTitleTextField.setText(newsItem.getTitle());
+        pageTitleTextField.setDisable(true);
+        directoryTitleTextField.setDisable(true);
     }
     @FXML private void editSelectedArticle() {
         Articles article = new Articles();
@@ -2598,20 +2681,44 @@ public class PCGUIController implements Initializable {
         htmlEditor.setHtmlText("");
         htmlEditor.setHtmlText(article.getContent());
         htmlCode.setText(cleanHtml(htmlEditor.getHtmlText()));
+        contentTitleTextField.setText(article.getTitle());
+        pageTitleTextField.setDisable(true);
+        directoryTitleTextField.setDisable(true);
     }
     @FXML private void editSelectedContent() {
         StaticContents staticContent = new StaticContents();
-        String selectedStaticContent = (String)contentsListView.getSelectionModel().getSelectedItem();
+        String selectedStaticContent = (String) contentsListView.getSelectionModel().getSelectedItem();
 
         Session session2 = HibernateUtil.getSessionFactory().openSession();
         List res2 = session2.createQuery("from StaticContents where title =\'" + selectedStaticContent + "\'").list();
-        for (Iterator iterator = res2.iterator(); iterator.hasNext();) {
+        for (Iterator iterator = res2.iterator(); iterator.hasNext(); ) {
             staticContent = (StaticContents) iterator.next();
         }
         session2.close();
         htmlEditor.setHtmlText("");
         htmlEditor.setHtmlText(staticContent.getContent());
         htmlCode.setText(cleanHtml(htmlEditor.getHtmlText()));
+        contentTitleTextField.setText(staticContent.getTitle());
+        pageTitleTextField.setText(staticContent.getPage());
+        directoryTitleTextField.setText(staticContent.getDirectory());
+    }
+    @FXML private void editSelectedCategory() {
+        Categories category = new Categories();
+        String selectedCategory = (String)categoriesListView.getSelectionModel().getSelectedItem();
+
+        Session session2 = HibernateUtil.getSessionFactory().openSession();
+        List res2 = session2.createQuery("from Categories where title =\'" + selectedCategory + "\'").list();
+        for (Iterator iterator = res2.iterator(); iterator.hasNext();) {
+            category = (Categories) iterator.next();
+        }
+        session2.close();
+        htmlEditor.setHtmlText("");
+        htmlEditor.setHtmlText(category.getDescription());
+        htmlCode.setText(cleanHtml(htmlEditor.getHtmlText()));
+        contentTitleTextField.setText(category.getTitle());
+        pageTitleTextField.setDisable(true);
+        directoryTitleTextField.setDisable(true);
+
     }
     @FXML private void saveContent () {
         if (!newsListView.getSelectionModel().getSelectedItems().isEmpty()) {
@@ -2623,6 +2730,7 @@ public class PCGUIController implements Initializable {
                 newsItem = (NewsItems) iterator.next();
             }
             Transaction tx = session.beginTransaction();
+            newsItem.setTitle(contentTitleTextField.getText());
             newsItem.setContent(cleanHtml(htmlEditor.getHtmlText()));
             newsItem.setUpdatedAt(new Date());
             session.save(newsItem);
@@ -2637,6 +2745,7 @@ public class PCGUIController implements Initializable {
                 article = (Articles) iterator.next();
             }
             Transaction tx = session.beginTransaction();
+            article.setTitle(contentTitleTextField.getText());
             article.setContent(cleanHtml(htmlEditor.getHtmlText()));
             article.setUpdatedAt(new Date());
             session.save(article);
@@ -2651,12 +2760,30 @@ public class PCGUIController implements Initializable {
                 staticContent = (StaticContents) iterator.next();
             }
             Transaction tx = session.beginTransaction();
+            staticContent.setTitle(contentTitleTextField.getText());
+            staticContent.setPage(pageTitleTextField.getText());
+            staticContent.setDirectory(directoryTitleTextField.getText());
             staticContent.setContent(cleanHtml(htmlEditor.getHtmlText()));
             staticContent.setUpdatedAt(new Date());
             session.save(staticContent);
             tx.commit();
             session.close();
+        } else if (!categoriesListView.getSelectionModel().getSelectedItems().isEmpty()) {
+            Categories category = new Categories();
+            Session session = HibernateUtil.getSessionFactory().openSession();
+            List res = session.createQuery(
+                    "from Categories where title=\'" + categoriesListView.getSelectionModel().getSelectedItem() + "\'").list();
+            for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+                category = (Categories) iterator.next();
+            }
+            Transaction tx = session.beginTransaction();
+            category.setTitle(contentTitleTextField.getText());
+            category.setDescription(cleanHtml(htmlEditor.getHtmlText()));
+            session.save(category);
+            tx.commit();
+            session.close();
         }
+        populateContentSiteLists();
     }
     private String cleanHtml(String rawHtml) {
         String cleanHtml = new String();
@@ -2669,6 +2796,7 @@ public class PCGUIController implements Initializable {
 
     @FXML private void refreshHtml() {
         htmlEditor.setHtmlText(htmlCode.getText());
+
     }
 
     ///////////////////
@@ -2699,14 +2827,8 @@ public class PCGUIController implements Initializable {
     // Получает из БД список всех названий продуктов и прикрепляет его к Combobox поиска по названию
     // Также вызывает экземпляр класса автодополнения при поиске
     private void populateComboBox () {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        List res = session.createQuery("From Products").list();
-        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
-            Products p = (Products) iterator.next();
-            allProducts.add(p.getTitle());
-        }
         searchComboBox.getItems().clear();
-        searchComboBox.getItems().addAll(allProducts);
+        searchComboBox.getItems().addAll(allProductsTitles);
         AutoCompleteComboBoxListener autoCompleteComboBoxListener = new AutoCompleteComboBoxListener(searchComboBox);
     }
 
@@ -2779,7 +2901,7 @@ public class PCGUIController implements Initializable {
     // Запускается при нажатии кнопки startImportXLSButton
     @FXML private void startImportFromXLSToDB() {
         XLSToDBImport importer = new XLSToDBImport(allCompareDetails);
-        importer.startImport(allImportXLSContent, importFields, allProducts);
+        importer.startImport(allImportXLSContent, importFields, allProductsTitles);
     }
 
     private void buildProductKindsList() {
@@ -3083,7 +3205,7 @@ public class PCGUIController implements Initializable {
         return childTreeItems;
     }
 
-    @FXML Button testButton = new Button();
+
     @FXML private void writeToSite() {
         DBConnection siteConnection = new DBConnection();
         try {
@@ -3135,4 +3257,13 @@ public class PCGUIController implements Initializable {
         password.saveSetting("passwordLocalDB", passwordLocalDB.getText());
     }
 
+    @FXML private void saveSiteUrlToDb() {
+        SiteUrlSettings siteUrlSettings = new SiteUrlSettings();
+        siteUrlSettings.saveSetting(siteUrlTextField.getText());
+        loadSiteInBrowser();
+    }
+    private void loadSiteInBrowser() {
+        WebEngine webEngine = tabBrowserWebView.getEngine();
+        webEngine.load(siteUrlTextField.getText());
+    }
 }

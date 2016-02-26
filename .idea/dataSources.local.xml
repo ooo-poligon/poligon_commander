@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="dataSourceStorageLocal">
+    <data-source name="MySQL - poligon_commander@localhost" uuid="df60a9aa-9f22-4239-8697-f4cd6bfabaff">
+      <secret-storage>master_key</secret-storage>
+      <user-name>root</user-name>
+      <schema-pattern>poligon_commander.*</schema-pattern>
+      <default-schemas>poligon_commander.*</default-schemas>
+    </data-source>
+  </component>
+</project>

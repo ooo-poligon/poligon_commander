@@ -5,11 +5,11 @@
 <hibernate-configuration>
  <session-factory>
   
-    <!--
-    <property name="connection.url">jdbc:mysql://localhost:3306/poligon_commander</property>
-    <property name="connection.username">root</property>
-    <property name="connection.password">poligon</property>
-    -->
+
+    <property name="connection.url">jdbc:mysql://server03.poligon.corp:3306/trade</property>
+    <property name="connection.username">trade</property>
+    <property name="connection.password">GuOjBoslen</property>
+
     <property name="connection.driver_class">com.mysql.jdbc.Driver</property>
     <property name="dialect">org.hibernate.dialect.MySQLDialect</property>
   
