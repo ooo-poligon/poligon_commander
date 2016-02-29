@@ -90,7 +90,7 @@ import java.util.stream.Collectors;
  */
 
 public class PCGUIController implements Initializable {
-    public static ArrayList<Products> allProductsList = new ArrayList<>();
+    public static ArrayList<Products> allProductsList = new ArrayList<>(22000);
     private ObservableList<String> allProductsTitles = FXCollections.observableArrayList();
 
     // Panes
@@ -257,16 +257,15 @@ public class PCGUIController implements Initializable {
     final   FileChooser fileChooser = new FileChooser();
 
     // Lists
-    ArrayList<ArrayList<String>> allImportXLSContent = new ArrayList<>();
-    ArrayList<ArrayList<String>> allCompareDetails = new ArrayList<>();
-    ObservableList<CategoriesTreeView> subCategoriesTreeViewList;
-    ObservableList<PropertiesTreeView> subPropertiesTreeViewList;
-
+    ArrayList<ArrayList<String>> allImportXLSContent = new ArrayList<>(120);
+    ArrayList<ArrayList<String>> allCompareDetails = new ArrayList<>(20);
+    ObservableList<CategoriesTreeView> subCategoriesTreeViewList = FXCollections.observableArrayList();
+    ObservableList<PropertiesTreeView> subPropertiesTreeViewList = FXCollections.observableArrayList();
     ObservableList<ImportFields> importFields = FXCollections.observableArrayList();
     ObservableList<String> comparedPairs = FXCollections.observableArrayList();
 
     // Maps
-    Map<String, Double> allPrices = new HashMap<>();
+    Map<String, Double> allPrices = new HashMap<>(22000);
 
     // Numbers
     private Integer headersRowNumber = 0;
@@ -309,7 +308,7 @@ public class PCGUIController implements Initializable {
     @Override
     // Выполняется при запуске программы
     public void initialize(URL url, ResourceBundle rb) {
-        //getAllProductsList();
+        getAllProductsList();
 
         //SystemConfig.getSettingsDialog();
 
@@ -374,25 +373,27 @@ public class PCGUIController implements Initializable {
             }
             event.consume();
         });
+
         productsTable.getSelectionModel().selectedItemProperty().addListener(
-                new ChangeListener<ProductsTableView>() {
-                    @Override
-                    public void changed(ObservableValue<? extends ProductsTableView> observable, ProductsTableView oldValue, ProductsTableView newValue) {
-                        try {
-                            selectedProduct = newValue.getTitle();
-                            buildPricesTable(selectedProduct);
-                            buildQuantityTable(selectedProduct);
-                            buildDeliveryTimeTable(selectedProduct);
-                            buildAnalogsTable(selectedProduct);
-                            buildDatasheetFileTable(selectedProduct);
-                            buildImageView(selectedProduct);
-                            datasheetFileTable.refresh();
-                        } catch (NullPointerException ex) {}
-                        productsTable.setContextMenu(productTableContextMenu);
-                        fillProductTab(selectedProduct);
-                    }
+            new ChangeListener<ProductsTableView>() {
+                @Override
+                public void changed(ObservableValue<? extends ProductsTableView> observable, ProductsTableView oldValue, ProductsTableView newValue) {
+                    try {
+                        selectedProduct = newValue.getTitle();
+                        buildPricesTable(selectedProduct);
+                        buildQuantityTable(selectedProduct);
+                        buildDeliveryTimeTable(selectedProduct);
+                        buildAnalogsTable(selectedProduct);
+                        buildDatasheetFileTable(selectedProduct);
+                        buildImageView(selectedProduct);
+                        datasheetFileTable.refresh();
+                    } catch (NullPointerException ex) {}
+                    productsTable.setContextMenu(productTableContextMenu);
+                    fillProductTab(selectedProduct);
                 }
+            }
         );
+
         tabPane.getSelectionModel().selectedItemProperty().addListener(
                 new ChangeListener<Tab>() {
                     @Override
@@ -585,6 +586,7 @@ public class PCGUIController implements Initializable {
     // В виде аргумента использует id родительской категории
     private ObservableList<ProductsTableView> getProductList(Integer selectedNodeID) {
         ObservableList<ProductsTableView> data = FXCollections.observableArrayList();
+
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
             //tx = session.beginTransaction();
@@ -603,6 +605,7 @@ public class PCGUIController implements Initializable {
         } finally {
             session.close();
         }
+
         return data;
     }
 
@@ -746,7 +749,7 @@ public class PCGUIController implements Initializable {
         // Создаём обработчик событий от мыши
         EventHandler<MouseEvent> mouseEventHandle1 = (MouseEvent event1) -> {
             // Вызываем метод, возврщающий нам ...
-            handleProductTableMousePressed(event1);
+            //handleProductTableMousePressed(event1);
         };
         // Добавляем обработчик событий от мыши к нашей таблице
 
@@ -985,7 +988,7 @@ public class PCGUIController implements Initializable {
         } finally {
             session.close();
         }
-        ArrayList<CategoriesTreeView> categories = new ArrayList();
+        ArrayList<CategoriesTreeView> categories = new ArrayList(700);
         sections.stream().forEach((section) -> {
             categories.add(section);
         });
@@ -1027,7 +1030,6 @@ public class PCGUIController implements Initializable {
         });
     }
     private void subCategoriesList(String selectedNode) {
-        subCategoriesTreeViewList = FXCollections.observableArrayList();
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
             List subCategories = session.createSQLQuery("SELECT title FROM categories t1, (SELECT id FROM categories WHERE title=" + "\"" + normalize(selectedNode) + "\") t2 WHERE t2.id = t1.parent").list();
@@ -1043,7 +1045,7 @@ public class PCGUIController implements Initializable {
     ////////////////////////////////////
     private void includeLowerItems(ObservableList<ProductsTableView> data, String selectedNode) {
         recursiveItems(data, getCategoryIdFromTitle(selectedNode));
-        getProductList(selectedNode).stream().forEach((product) -> {
+        getProductList(getCategoryIdFromTitle(selectedNode)).stream().forEach((product) -> {
             excludeLowerItems(data, selectedNode);
         });
     }
@@ -1065,7 +1067,7 @@ public class PCGUIController implements Initializable {
         });
     }
     private ArrayList<Integer> arrayChilds(Integer parent) {
-        ArrayList<Integer> childs = new ArrayList<>();
+        ArrayList<Integer> childs = new ArrayList<>(10);
         Session session = HibernateUtil.getSessionFactory().openSession();
         List res = session.createQuery("From Categories where parent=" + parent).list();
         for (Iterator iterator = res.iterator(); iterator.hasNext();) {
@@ -1111,7 +1113,7 @@ public class PCGUIController implements Initializable {
         propertiesStackPane.getChildren().clear();
         //Получаем вид продукта для товара, преданного в параметре
         ProductKinds kind = new ProductKinds();
-        ArrayList<KindsTypes> types = new ArrayList<>();
+        ArrayList<KindsTypes> types = new ArrayList<>(50);
         ObservableList<PropertiesTreeView> data = FXCollections.observableArrayList();
         Session session = HibernateUtil.getSessionFactory().openSession();
         List list = session.createQuery("From Products where id =" + getProductIdFromTitle(selectedProduct)).list();
@@ -1137,7 +1139,7 @@ public class PCGUIController implements Initializable {
             }
             session1.close();
         });
-        ArrayList<PropertiesTreeView> properties = new ArrayList();
+        ArrayList<PropertiesTreeView> properties = new ArrayList(50);
         data.stream().forEach((section) -> {
             properties.add(section);
         });
@@ -1176,7 +1178,7 @@ public class PCGUIController implements Initializable {
         } finally {
             session.close();
         }
-        ArrayList<CategoriesTreeView> categories = new ArrayList();
+        ArrayList<CategoriesTreeView> categories = new ArrayList(700);
         sections.stream().forEach((section) -> {
             categories.add(section);
         });
@@ -1649,7 +1651,7 @@ public class PCGUIController implements Initializable {
         return parentId;
     }
     private void replaceProductsUp(Integer catId, Integer parentCatId) {
-        ArrayList<Products> productsUp = new ArrayList<>();
+        ArrayList<Products> productsUp = new ArrayList<>(100);
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
             List response = session.createQuery("From Products where categoryId=" + catId).list();
@@ -1668,6 +1670,7 @@ public class PCGUIController implements Initializable {
     private void onFocusedProductTableItem() {
         try {
             selectedProduct = (String) (productsTable.getFocusModel().getFocusedItem()).getTitle();
+
             buildPricesTable(selectedProduct);
             buildQuantityTable(selectedProduct);
             buildDeliveryTimeTable(selectedProduct);
@@ -1681,6 +1684,7 @@ public class PCGUIController implements Initializable {
             buildFunctionsTable1(selectedProduct);
             setSelectFunction();
             buildAccessoriesTable(selectedProduct);
+
         } catch (NullPointerException ex) {
         }
     }
@@ -1789,7 +1793,6 @@ public class PCGUIController implements Initializable {
         }
     }
     private void subPropertiesList(String selectedNode) {
-        subPropertiesTreeViewList = FXCollections.observableArrayList();
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
             List subProperties = session.createSQLQuery(
@@ -1833,6 +1836,12 @@ public class PCGUIController implements Initializable {
     }
     private void setVendorSelected(String selectedProduct) {
         Vendors vendor = new Vendors();
+        for (Products product : allProductsList) {
+            if(product.getTitle().equals(selectedProduct)) {
+                vendor = product.getVendor();
+            }
+        }
+        /*
         Session session = HibernateUtil.getSessionFactory().openSession();
         Query query = session.createQuery("from Products where title = :title");
         query.setParameter("title", selectedProduct);
@@ -1843,6 +1852,7 @@ public class PCGUIController implements Initializable {
                 vendor = p.getVendor();
             }
         }
+        */
         for (int i = 0; i < vendorsTable.getItems().size(); i++) {
             if (vendorsTable.getItems().get(i).getTitle().equals(vendor.getTitle())) {
                 vendorsTable.getSelectionModel().clearAndSelect(i);
@@ -1951,6 +1961,11 @@ public class PCGUIController implements Initializable {
                         tabPane.getSelectionModel().select(pdfTab);
                         loadPdfFile(productsTable.getSelectionModel().getSelectedItem().getTitle());
                     }).build(),
+                    MenuItemBuilder.create().text("Изменить производителя устройства").onAction((ActionEvent arg0) -> {
+                        ContextBuilder.changeProductVendor(productsTable);
+                        productsTable.refresh();
+                        vendorsTable.refresh();
+                    }).build(),
                     MenuItemBuilder.create().text("Переместить в категорию...").onAction((ActionEvent arg0) -> {
                         changeProductCategoryDialog();
                     }).build(),
@@ -1977,6 +1992,11 @@ public class PCGUIController implements Initializable {
                     MenuItemBuilder.create().text("Удалить выбранные элементы").onAction((ActionEvent arg0) -> {
                         deleteProductDialog();}).build(),
                     SeparatorMenuItemBuilder.create().build(),
+                    MenuItemBuilder.create().text("Изменить производителя устройства").onAction((ActionEvent arg0) -> {
+                        ContextBuilder.changeProductVendor(productsTable);
+                        productsTable.refresh();
+                        vendorsTable.refresh();
+                    }).build(),
                     MenuItemBuilder.create().text("Добавить аксессуар к выбранным устройствам").onAction((ActionEvent arg0) -> {
                         Accessory.addToSelectedOn(productsTable);
                     }).build()
@@ -1987,6 +2007,18 @@ public class PCGUIController implements Initializable {
     }
     @FXML private void handleSearchComboBox() {
         ObservableList<ProductsTableView> data = FXCollections.observableArrayList();
+        for (Products product : allProductsList) {
+            if(product.getTitle().equals(searchComboBox.getValue())) {
+                data.add(new ProductsTableView(
+                                product.getArticle(),
+                                product.getTitle(),
+                                product.getDescription(),
+                                product.getDeliveryTime()
+                        )
+                );
+            }
+        }
+        /*
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
             Query q = session.createQuery("from Products where title = :title");
@@ -2006,6 +2038,7 @@ public class PCGUIController implements Initializable {
         } finally {
             session.close();
         }
+        */
         buildProductsTable(data);
         productsTable.getSelectionModel().select(0);
         setVendorSelected(productsTable.getSelectionModel().getSelectedItem().getTitle());
@@ -2055,9 +2088,9 @@ public class PCGUIController implements Initializable {
         session.close();
     }
     private void buildPropertiesTable(String selectedPropertyType, String selectedProduct) {
-        ArrayList<Integer> propertyIds = new ArrayList<>();
-        ArrayList<PropertyValues> propertyValuesList = new ArrayList<>();
-        ArrayList<PropertiesTreeTableView> propertyValues = new ArrayList<>();
+        ArrayList<Integer> propertyIds = new ArrayList<>(10);
+        ArrayList<PropertyValues> propertyValuesList = new ArrayList<>(10);
+        ArrayList<PropertiesTreeTableView> propertyValues = new ArrayList<>(10);
 
         Session session = HibernateUtil.getSessionFactory().openSession();
         List res = session.createQuery("from Properties where propertyTypeId =" + getPropertyTypeIdFromTitle(selectedPropertyType)).list();
@@ -2148,7 +2181,7 @@ public class PCGUIController implements Initializable {
                 propertyMeasureColumn);
     }
     private void buildFunctionsTable1(String selectedProduct) {
-        ArrayList<Functions> functions = new ArrayList<>();
+        ArrayList<Functions> functions = new ArrayList<>(10);
         Session session = HibernateUtil.getSessionFactory().openSession();
         List res = session.createQuery("from ProductsFunctions where productId =" + getProductIdFromTitle(selectedProduct)).list();
         for (Iterator iterator = res.iterator(); iterator.hasNext();) {
@@ -2240,6 +2273,12 @@ public class PCGUIController implements Initializable {
     private String getProductKindTitle(String selectedProductTitle) {
         Integer selectedProductKindID = 0;
         String productTabKindText = "";
+        for (Products product : allProductsList) {
+            if(product.getTitle().equals(selectedProductTitle)) {
+                selectedProductKindID = product.getProductKindId().getId();
+            }
+        }
+        /*
         Session session = HibernateUtil.getSessionFactory().openSession();
         List res = session.createQuery("from Products where title = \'" + selectedProductTitle + "\'").list();
         for (Iterator iterator = res.iterator(); iterator.hasNext();) {
@@ -2247,7 +2286,7 @@ public class PCGUIController implements Initializable {
             selectedProductKindID = product.getProductKindId().getId();
         }
         session.close();
-
+        */
         Session session1 = HibernateUtil.getSessionFactory().openSession();
         List res1 = session1.createQuery("from ProductKinds where id = " + selectedProductKindID).list();
         for (Iterator iterator = res1.iterator(); iterator.hasNext();) {
@@ -2275,8 +2314,8 @@ public class PCGUIController implements Initializable {
             }
         });
 
-        ArrayList<Integer> paIds = new ArrayList<>();
-        ArrayList<Products> aProducts = new ArrayList<>();
+        ArrayList<Integer> paIds = new ArrayList<>(10);
+        ArrayList<Products> aProducts = new ArrayList<>(10);
         ObservableList<AccessoriesTableView> data = FXCollections.observableArrayList();
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
@@ -2291,6 +2330,12 @@ public class PCGUIController implements Initializable {
         }
 
         for (Integer id: paIds) {
+            for (Products product : allProductsList) {
+                if (product.getId().equals(id)) {
+                    aProducts.add(product);
+                }
+            }
+            /*
             Session session1 = HibernateUtil.getSessionFactory().openSession();
             try {
                 List response1 = session1.createQuery("from Products where id=" + id).list();
@@ -2302,6 +2347,7 @@ public class PCGUIController implements Initializable {
             } finally {
                 session1.close();
             }
+            */
         }
 
         for(Products p: aProducts) {
@@ -2939,8 +2985,8 @@ public class PCGUIController implements Initializable {
         productKindsList.setItems(items);
     }
     private void buildPropertiesTreeTable(String selectedPropertiesKind) {
-        ArrayList<Integer> typesIds = new ArrayList<>();
-        ArrayList<PropertiesTreeTableView> properties = new ArrayList<>();
+        ArrayList<Integer> typesIds = new ArrayList<>(10);
+        ArrayList<PropertiesTreeTableView> properties = new ArrayList<>(10);
         Session session = HibernateUtil.getSessionFactory().openSession();
         List res = session.createQuery("from KindsTypes where productKindId =" + getPropertyKindIdFromTitle(selectedPropertiesKind)).list();
         for (Iterator iterator = res.iterator(); iterator.hasNext();) {
@@ -3019,7 +3065,7 @@ public class PCGUIController implements Initializable {
         propertiesTreeTableTitleColumn.setCellValueFactory(new TreeItemPropertyValueFactory("title"));
     }
     private void buildFunctionsTable(String selectedPropertiesKind) {
-        ArrayList<Functions> functions = new ArrayList<>();
+        ArrayList<Functions> functions = new ArrayList<>(10);
         Session session = HibernateUtil.getSessionFactory().openSession();
         List res = session.createQuery("from Functions where productKindId =" + getPropertyKindIdFromTitle(selectedPropertiesKind)).list();
         for (Iterator iterator = res.iterator(); iterator.hasNext();) {
@@ -3068,7 +3114,7 @@ public class PCGUIController implements Initializable {
         alert.showAndWait();
     }
     private void compareFieldsMechanics() throws IOException {
-        ArrayList<String> compareDetails = new ArrayList<>();
+        ArrayList<String> compareDetails = new ArrayList<>(20);
         String selectedHeader = sHeader();
         String selectedDBField = sField();
         if (allImportXLSContent.isEmpty()) {
@@ -3194,7 +3240,7 @@ public class PCGUIController implements Initializable {
     }
     private ArrayList<TreeItem> treeItemChildren(TreeItem<PropertiesTreeTableView> item) {
         String itemTitle = item.getValue().getTitle();
-        ArrayList<TreeItem> childTreeItems = new ArrayList<>();
+        ArrayList<TreeItem> childTreeItems = new ArrayList<>(10);
         Session session = HibernateUtil.getSessionFactory().openSession();
         List res = session.createQuery("from Properties where propertyTypeId=" + getPropertyTypeIdFromTitle(itemTitle)).list();
         for (Iterator iterator = res.iterator(); iterator.hasNext();) {

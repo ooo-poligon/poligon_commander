@@ -12,6 +12,7 @@ import java.util.List;
 /**
  * Created by Igor Klekotnev on 15.01.2016.
  */
+
 public class SiteDBSettings {
     private String addressSiteDB;
     private String portSiteDB;

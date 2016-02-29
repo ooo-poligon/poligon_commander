@@ -12,6 +12,7 @@ import java.util.List;
 /**
  * Created by Igor Klekotnev on 26.02.2016.
  */
+
 public class SiteUrlSettings {
     private final String settingsTitle = "siteUrl";
     private final String settingsKind = "ProgramSettings";

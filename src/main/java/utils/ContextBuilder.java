@@ -6,6 +6,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.control.*;
+import javafx.scene.control.TableView;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
@@ -15,8 +16,11 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import tableviews.FunctionsTableView;
 import javafx.event.ActionEvent;
+import tableviews.ProductsTableView;
+import tableviews.VendorsTableView;
 import treetableviews.PropertiesTreeTableView;
 
+import javax.swing.text.*;
 import java.io.File;
 import java.util.*;
 
@@ -35,6 +39,7 @@ public class ContextBuilder {
     private static Integer selectedFunctionID = 0;
     private static Integer selectedProductsFunctionsID = 0;
     private static String selectedFunctionTitle = "";
+    private static Vendors selectedVendor = new Vendors();
 
     public static void createNewPropertyValue(Label productTabTitle, TreeView<String> propertiesTree) {
         String selectedProduct = productTabTitle.getText();
@@ -1566,5 +1571,71 @@ public class ContextBuilder {
             tx.commit();
             session1.close();
         }
+    }
+    public static void changeProductVendor(TableView<ProductsTableView> productsTable) {
+        ObservableList<ProductsTableView> selectedProducts = productsTable.getSelectionModel().getSelectedItems();
+        ObservableList<Vendors> vendorsList = FXCollections.observableArrayList();
+        ComboBox<String> vendorsComboBox = new ComboBox<>();
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List res = session.createQuery("from Vendors").list();
+        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+            Vendors vendor = (Vendors) iterator.next();
+            vendorsList.add(vendor);
+        }
+        session.close();
+        ObservableList<String> vendorsTitles = FXCollections.observableArrayList();
+        vendorsList.stream().forEach((vendors) -> {
+            vendorsTitles.add(vendors.getTitle());
+        });
+        vendorsComboBox.setItems(vendorsTitles);
+        vendorsComboBox.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                for (Vendors vendor : vendorsList) {
+                    if (vendor.getTitle().equals(vendorsComboBox.getValue())) {
+                        selectedVendor = vendor;
+                    }
+                }
+            }
+        });
+
+        Dialog<VendorsTableView> dialog = new Dialog<>();
+        dialog.setTitle("Изменить производителя устройства");
+        dialog.setHeaderText("");
+        dialog.setResizable(false);
+
+        Label label1 = new Label("Выберите производителя из списка:");
+        Label br = new Label("");
+
+        GridPane grid = new GridPane();
+        grid.add(label1, 1, 1);;
+        grid.add(br, 2, 1);
+        grid.add(vendorsComboBox, 3, 1);
+        dialog.getDialogPane().setContent(grid);
+
+        ButtonType buttonTypeOk = new ButtonType("Установить", ButtonBar.ButtonData.OK_DONE);
+        ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
+
+        dialog.setResultConverter((ButtonType b) -> {
+            if (b == buttonTypeOk) {
+                VendorsTableView selectedVendorsTableView = new VendorsTableView(
+                        selectedVendor.getTitle(), selectedVendor.getAddress(), selectedVendor.getRate());
+                return selectedVendorsTableView;
+            }
+            return null;
+        });
+        Optional<VendorsTableView> result = dialog.showAndWait();
+        Session session1 = HibernateUtil.getSessionFactory().openSession();
+        for (ProductsTableView selectedProduct : selectedProducts) {
+            Transaction tx = session1.beginTransaction();
+            Query query = session1.createQuery("update Products set vendor = :vendor where title = :title");
+            query.setParameter("vendor", selectedVendor);
+            query.setParameter("title", selectedProduct.getTitle());
+            query.executeUpdate();
+            tx.commit();
+        }
+        session1.close();
     }
 }

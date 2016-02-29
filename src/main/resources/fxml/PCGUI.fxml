@@ -378,7 +378,7 @@
                                                                      <children>
                                                                         <TreeView fx:id="propertiesTree" onMouseClicked="#handlePropertiesTreeMouseClicked">
                                                                            <contextMenu>
-                                                                              <ContextMenu fx:id="propertiesTreeContextMenu" />
+                                                                              <ContextMenu />
                                                                            </contextMenu></TreeView>
                                                                      </children>
                                                                   </StackPane>

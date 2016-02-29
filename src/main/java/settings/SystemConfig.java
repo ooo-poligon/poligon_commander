@@ -10,6 +10,7 @@ import java.util.Optional;
 /**
  * Created by Igor Klekotnev on 02.02.2016.
  */
+
 public class SystemConfig {
     public static String URL;
     public static String USERNAME;
