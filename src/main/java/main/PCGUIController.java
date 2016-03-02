@@ -90,8 +90,8 @@ import java.util.stream.Collectors;
  */
 
 public class PCGUIController implements Initializable {
-    public static ArrayList<Products> allProductsList = new ArrayList<>(22000);
-    private ObservableList<String> allProductsTitles = FXCollections.observableArrayList();
+    //public static ArrayList<Products> allProductsList = new ArrayList<>(22000);
+    public static ObservableList<String> allProductsTitles = FXCollections.observableArrayList();
 
     // Panes
     @FXML private AnchorPane anchorPane;
@@ -308,12 +308,12 @@ public class PCGUIController implements Initializable {
     @Override
     // Выполняется при запуске программы
     public void initialize(URL url, ResourceBundle rb) {
-        getAllProductsList();
-
+        //getAllProductsList();
         //SystemConfig.getSettingsDialog();
 
         loadSavedSettings();
         populateContentSiteLists();
+
         try {
             addCBR = Double.parseDouble(addCBRTextField.getText());
             CurrencyCourse euro = new CurrencyCourse("EUR");
@@ -323,6 +323,7 @@ public class PCGUIController implements Initializable {
             addCBRTextField.setText(addCBR.toString());
             course = course + ((course / 100) * addCBR);
         } catch (IOException ioe) { alertNoRbcServerConnection (); }
+
         buildCategoryTree();
         populateComboBox ();
         getAllPrices();
@@ -331,6 +332,8 @@ public class PCGUIController implements Initializable {
         buildProductKindsList();
         loadSiteInBrowser();
         productsTable.getSelectionModel().setSelectionMode(javafx.scene.control.SelectionMode.MULTIPLE);
+
+        /*
         productsTable.setOnDragDetected((MouseEvent event) -> {
             Dragboard db = productsTable.startDragAndDrop(TransferMode.ANY);
             ClipboardContent content = new ClipboardContent();
@@ -339,7 +342,7 @@ public class PCGUIController implements Initializable {
             productsTable.getItems().stream().forEach((item) -> {
             content.putString(item.getTitle());
             });
-            */
+            *//*
             db.setContent(content);
             event.consume();
         });
@@ -373,13 +376,15 @@ public class PCGUIController implements Initializable {
             }
             event.consume();
         });
-
+        */
         productsTable.getSelectionModel().selectedItemProperty().addListener(
             new ChangeListener<ProductsTableView>() {
                 @Override
                 public void changed(ObservableValue<? extends ProductsTableView> observable, ProductsTableView oldValue, ProductsTableView newValue) {
+                    //selectedProduct = newValue.getTitle();
+                    productsTable.getSelectionModel().select(newValue);
+                    /*
                     try {
-                        selectedProduct = newValue.getTitle();
                         buildPricesTable(selectedProduct);
                         buildQuantityTable(selectedProduct);
                         buildDeliveryTimeTable(selectedProduct);
@@ -388,6 +393,7 @@ public class PCGUIController implements Initializable {
                         buildImageView(selectedProduct);
                         datasheetFileTable.refresh();
                     } catch (NullPointerException ex) {}
+                    */
                     productsTable.setContextMenu(productTableContextMenu);
                     fillProductTab(selectedProduct);
                 }
@@ -435,7 +441,8 @@ public class PCGUIController implements Initializable {
 
     // Загружает в память настройки программы, сохранённые в БД
     // Пока не реализовано полностью.
-    @FXML private void loadSavedSettings() {
+    @FXML
+    public void loadSavedSettings() {
         SiteDBSettings siteDBSettings = new SiteDBSettings();
         LocalDBSettings localDBSettings = new LocalDBSettings();
         PriceCalcSettings priceCalcSettings = new PriceCalcSettings();
@@ -462,12 +469,14 @@ public class PCGUIController implements Initializable {
     }
 
     // Утилиты разные
-    private void getAllProductsList() {
+    public static void getAllProductsList() {
+
+
         Session session = HibernateUtil.getSessionFactory().openSession();
         List result = session.createQuery("from Products").list();
         for (Iterator iterator = result.iterator(); iterator.hasNext();) {
             Products product = (Products) iterator.next();
-            allProductsList.add(product);
+            //allProductsList.add(product);
             allProductsTitles.add(product.getTitle());
         }
         session.close();
@@ -747,15 +756,15 @@ public class PCGUIController implements Initializable {
                 }
         );
         // Создаём обработчик событий от мыши
-        EventHandler<MouseEvent> mouseEventHandle1 = (MouseEvent event1) -> {
+        //EventHandler<MouseEvent> mouseEventHandle1 = (MouseEvent event1) -> {
             // Вызываем метод, возврщающий нам ...
             //handleProductTableMousePressed(event1);
-        };
+        //};
         // Добавляем обработчик событий от мыши к нашей таблице
 
-        productsTable.addEventHandler(MouseEvent.MOUSE_PRESSED, mouseEventHandle1);
+        //productsTable.addEventHandler(MouseEvent.MOUSE_PRESSED, mouseEventHandle1);
         productsTable.setItems(data);
-        productsTable.removeEventHandler(MouseEvent.MOUSE_PRESSED, mouseEventHandle1);
+        //productsTable.removeEventHandler(MouseEvent.MOUSE_PRESSED, mouseEventHandle1);
     }
     private void buildDeliveryTimeTable(String selectedProduct) {
         ObservableList<ProductsTableView> data = FXCollections.observableArrayList();
@@ -1667,6 +1676,7 @@ public class PCGUIController implements Initializable {
             updateCategoryId(parentCatId, product.getTitle());
         }
     }
+
     private void onFocusedProductTableItem() {
         try {
             selectedProduct = (String) (productsTable.getFocusModel().getFocusedItem()).getTitle();
@@ -1688,6 +1698,7 @@ public class PCGUIController implements Initializable {
         } catch (NullPointerException ex) {
         }
     }
+
     private void addVendorDialog() {
         ObservableList<String> currencies = FXCollections.observableArrayList();
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -1835,13 +1846,15 @@ public class PCGUIController implements Initializable {
         }
     }
     private void setVendorSelected(String selectedProduct) {
+
         Vendors vendor = new Vendors();
+        /*
         for (Products product : allProductsList) {
             if(product.getTitle().equals(selectedProduct)) {
                 vendor = product.getVendor();
             }
         }
-        /*
+        */
         Session session = HibernateUtil.getSessionFactory().openSession();
         Query query = session.createQuery("from Products where title = :title");
         query.setParameter("title", selectedProduct);
@@ -1852,7 +1865,7 @@ public class PCGUIController implements Initializable {
                 vendor = p.getVendor();
             }
         }
-        */
+
         for (int i = 0; i < vendorsTable.getItems().size(); i++) {
             if (vendorsTable.getItems().get(i).getTitle().equals(vendor.getTitle())) {
                 vendorsTable.getSelectionModel().clearAndSelect(i);
@@ -1908,8 +1921,9 @@ public class PCGUIController implements Initializable {
     }
     @FXML public  void startProgressBar(MouseEvent event) {
         Task task = createTask(event);
-        progressBar.progressProperty().bind(task.progressProperty());
+        //progressBar.progressProperty().bind(task.progressProperty());
         Platform.runLater(task);
+        Alert alert = new Alert(AlertType.NONE);
         /*
         thread  = new Thread(task);
         thread.start();
@@ -1931,54 +1945,54 @@ public class PCGUIController implements Initializable {
         onFocusedProductTableItem();
         if (productsTable.getSelectionModel().getSelectedItems().size() == 1) {
             productTableContextMenu = ContextMenuBuilder.create().items(
-                    MenuItemBuilder.create().text("Установить коэффициенты цен").onAction((ActionEvent arg0) -> {
-                        Integer selectedProductID = getProductIdFromTitle(selectedProduct);
-                        SetRatesWindow ratesWindow = new SetRatesWindow(null, selectedProductID);
-                        ratesWindow.showModalWindow();
-                    }).build(),
-                    MenuItemBuilder.create().text("Открыть вкладку обзора свойств устройства").onAction((ActionEvent arg0) -> {
-                        openProductTab();
-                    }).build(),
-                    MenuItemBuilder.create().text("Открыть просмотр PDF-файла").onAction((ActionEvent arg0) -> {
-                        createAndConfigureImageLoadService();
-                        currentFile = new SimpleObjectProperty<>();
-                        currentImage = new SimpleObjectProperty<>();
-                        scroller.contentProperty().bind(currentImage);
-                        zoom = new SimpleDoubleProperty(1);
-                        // To implement zooming, we just get a new image from the PDFFile each time.
-                        // This seems to perform well in some basic tests but may need to be improved
-                        // E.g. load a larger image and scale in the ImageView, loading a new image only
-                        // when required.
-                        zoom.addListener(new ChangeListener<Number>() {
-                            @Override
-                            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                                updateImage(pagination.getCurrentPageIndex());
-                            }
-                        });
-                        currentZoomLabel.textProperty().bind(Bindings.format("%.0f %%", zoom.multiply(100)));
-                        bindPaginationToCurrentFile();
-                        createPaginationPageFactory();
-                        tabPane.getSelectionModel().select(pdfTab);
-                        loadPdfFile(productsTable.getSelectionModel().getSelectedItem().getTitle());
-                    }).build(),
-                    MenuItemBuilder.create().text("Изменить производителя устройства").onAction((ActionEvent arg0) -> {
-                        ContextBuilder.changeProductVendor(productsTable);
-                        productsTable.refresh();
-                        vendorsTable.refresh();
-                    }).build(),
-                    MenuItemBuilder.create().text("Переместить в категорию...").onAction((ActionEvent arg0) -> {
-                        changeProductCategoryDialog();
-                    }).build(),
-                    MenuItemBuilder.create().text("Добавить элемент...").onAction((ActionEvent arg0) -> {
-                        addProductDialog();
-                    }).build(),
-                    MenuItemBuilder.create().text("Удалить элемент...").onAction((ActionEvent arg0) -> {
-                        deleteProductDialog();
-                    }).build(),
-                    SeparatorMenuItemBuilder.create().build(),
-                    MenuItemBuilder.create().text("Добавить аксессуар к выбранному устройству").onAction((ActionEvent arg0) -> {
-                        Accessory.addToSelectedOn(productsTable);
-                    }).build()
+                MenuItemBuilder.create().text("Установить коэффициенты цен").onAction((ActionEvent arg0) -> {
+                    Integer selectedProductID = getProductIdFromTitle(selectedProduct);
+                    SetRatesWindow ratesWindow = new SetRatesWindow(null, selectedProductID);
+                    ratesWindow.showModalWindow();
+                }).build(),
+                MenuItemBuilder.create().text("Открыть вкладку обзора свойств устройства").onAction((ActionEvent arg0) -> {
+                    openProductTab();
+                }).build(),
+                MenuItemBuilder.create().text("Открыть просмотр PDF-файла").onAction((ActionEvent arg0) -> {
+                    createAndConfigureImageLoadService();
+                    currentFile = new SimpleObjectProperty<>();
+                    currentImage = new SimpleObjectProperty<>();
+                    scroller.contentProperty().bind(currentImage);
+                    zoom = new SimpleDoubleProperty(1);
+                    // To implement zooming, we just get a new image from the PDFFile each time.
+                    // This seems to perform well in some basic tests but may need to be improved
+                    // E.g. load a larger image and scale in the ImageView, loading a new image only
+                    // when required.
+                    zoom.addListener(new ChangeListener<Number>() {
+                        @Override
+                        public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                            updateImage(pagination.getCurrentPageIndex());
+                        }
+                    });
+                    currentZoomLabel.textProperty().bind(Bindings.format("%.0f %%", zoom.multiply(100)));
+                    bindPaginationToCurrentFile();
+                    createPaginationPageFactory();
+                    tabPane.getSelectionModel().select(pdfTab);
+                    loadPdfFile(productsTable.getSelectionModel().getSelectedItem().getTitle());
+                }).build(),
+                MenuItemBuilder.create().text("Изменить производителя устройства").onAction((ActionEvent arg0) -> {
+                    ContextBuilder.changeProductVendor(productsTable);
+                    productsTable.refresh();
+                    vendorsTable.refresh();
+                }).build(),
+                MenuItemBuilder.create().text("Переместить в категорию...").onAction((ActionEvent arg0) -> {
+                    changeProductCategoryDialog();
+                }).build(),
+                MenuItemBuilder.create().text("Добавить элемент...").onAction((ActionEvent arg0) -> {
+                    addProductDialog();
+                }).build(),
+                MenuItemBuilder.create().text("Удалить элемент...").onAction((ActionEvent arg0) -> {
+                    deleteProductDialog();
+                }).build(),
+                SeparatorMenuItemBuilder.create().build(),
+                MenuItemBuilder.create().text("Добавить аксессуар к выбранному устройству").onAction((ActionEvent arg0) -> {
+                    Accessory.addToSelectedOn(productsTable);
+                }).build()
             ).build();
         } else if(productsTable.getSelectionModel().getSelectedItems().size() == 0) {
             productTableContextMenu = ContextMenuBuilder.create().items(
@@ -2007,6 +2021,7 @@ public class PCGUIController implements Initializable {
     }
     @FXML private void handleSearchComboBox() {
         ObservableList<ProductsTableView> data = FXCollections.observableArrayList();
+        /*
         for (Products product : allProductsList) {
             if(product.getTitle().equals(searchComboBox.getValue())) {
                 data.add(new ProductsTableView(
@@ -2018,7 +2033,7 @@ public class PCGUIController implements Initializable {
                 );
             }
         }
-        /*
+        */
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
             Query q = session.createQuery("from Products where title = :title");
@@ -2038,7 +2053,7 @@ public class PCGUIController implements Initializable {
         } finally {
             session.close();
         }
-        */
+
         buildProductsTable(data);
         productsTable.getSelectionModel().select(0);
         setVendorSelected(productsTable.getSelectionModel().getSelectedItem().getTitle());
@@ -2273,12 +2288,13 @@ public class PCGUIController implements Initializable {
     private String getProductKindTitle(String selectedProductTitle) {
         Integer selectedProductKindID = 0;
         String productTabKindText = "";
+        /*
         for (Products product : allProductsList) {
             if(product.getTitle().equals(selectedProductTitle)) {
                 selectedProductKindID = product.getProductKindId().getId();
             }
         }
-        /*
+        */
         Session session = HibernateUtil.getSessionFactory().openSession();
         List res = session.createQuery("from Products where title = \'" + selectedProductTitle + "\'").list();
         for (Iterator iterator = res.iterator(); iterator.hasNext();) {
@@ -2286,7 +2302,7 @@ public class PCGUIController implements Initializable {
             selectedProductKindID = product.getProductKindId().getId();
         }
         session.close();
-        */
+
         Session session1 = HibernateUtil.getSessionFactory().openSession();
         List res1 = session1.createQuery("from ProductKinds where id = " + selectedProductKindID).list();
         for (Iterator iterator = res1.iterator(); iterator.hasNext();) {
@@ -2330,12 +2346,13 @@ public class PCGUIController implements Initializable {
         }
 
         for (Integer id: paIds) {
+            /*
             for (Products product : allProductsList) {
                 if (product.getId().equals(id)) {
                     aProducts.add(product);
                 }
             }
-            /*
+            */
             Session session1 = HibernateUtil.getSessionFactory().openSession();
             try {
                 List response1 = session1.createQuery("from Products where id=" + id).list();
@@ -2347,7 +2364,7 @@ public class PCGUIController implements Initializable {
             } finally {
                 session1.close();
             }
-            */
+
         }
 
         for(Products p: aProducts) {
