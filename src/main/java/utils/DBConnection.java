@@ -5,6 +5,7 @@
 package utils;
 
 import entities.Settings;
+import settings.LocalDBSettings;
 import settings.SiteDBSettings;
 
 import java.sql.Connection;
@@ -23,16 +24,29 @@ public class DBConnection {
     private String user;
     private String password;
     
-    public DBConnection() {
-        SiteDBSettings siteDBSettings = new SiteDBSettings();
-        String addressDB = siteDBSettings.loadSetting("addressSiteDB");
-        String portDB = siteDBSettings.loadSetting("portSiteDB");
-        String titleDB = siteDBSettings.loadSetting("titleSiteDB");
-        String userDB = siteDBSettings.loadSetting("userSiteDB");
-        String passwordDB = siteDBSettings.loadSetting("passwordSiteDB");
-        this.dbUrl = "jdbc:mysql://" + addressDB + ":" + portDB + "/" + titleDB;
-        this.user = userDB;
-        this.password = passwordDB;
+    public DBConnection(String dbLocation) {
+        if (dbLocation.equals("site")) {
+            SiteDBSettings siteDBSettings = new SiteDBSettings();
+            String addressDB = siteDBSettings.loadSetting("addressSiteDB");
+            String portDB = siteDBSettings.loadSetting("portSiteDB");
+            String titleDB = siteDBSettings.loadSetting("titleSiteDB");
+            String userDB = siteDBSettings.loadSetting("userSiteDB");
+            String passwordDB = siteDBSettings.loadSetting("passwordSiteDB");
+            this.dbUrl = "jdbc:mysql://" + addressDB + ":" + portDB + "/" + titleDB;
+            this.user = userDB;
+            this.password = passwordDB;
+        } else if (dbLocation.equals("local")) {
+            LocalDBSettings localDBSettings = new LocalDBSettings();
+            String addressDB = localDBSettings.loadSetting("addressLocalDB");
+            String portDB = localDBSettings.loadSetting("portLocalDB");
+            String titleDB = localDBSettings.loadSetting("titleLocalDB");
+            String userDB = localDBSettings.loadSetting("userLocalDB");
+            String passwordDB = localDBSettings.loadSetting("passwordLocalDB");
+            this.dbUrl = "jdbc:mysql://" + addressDB + ":" + portDB + "/" + titleDB;
+            this.user = userDB;
+            this.password = passwordDB;
+        }
+
     }
     
     public DBConnection(String dbUrl, String user, String password) {

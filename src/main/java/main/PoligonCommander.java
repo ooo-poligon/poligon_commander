@@ -20,6 +20,7 @@ import javafx.util.Duration;
 import utils.CurrencyCourse;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 public class PoligonCommander extends Application {
     public static final String SPLASH_IMAGE = "/images/splash.png";
@@ -51,12 +52,14 @@ public class PoligonCommander extends Application {
     public void start(final Stage initStage) throws Exception {
         final Task<Void> friendTask = new Task<Void>() {
             @Override
-            protected Void call() throws IOException, InterruptedException {
+            protected Void call() throws IOException, InterruptedException, SQLException {
+
                 updateMessage("Инициализация базы данных . . .");
                 PCGUIController.getAllProductsList();
+
                 int count = 0;
                 for (int i = 0; i < PCGUIController.allProductsTitles.size(); i++) {
-                    Thread.sleep(0,01);
+                    Thread.sleep(0,001);
                     updateProgress(i + 1, PCGUIController.allProductsTitles.size());
                     String nextFriend = PCGUIController.allProductsTitles.get(i);
                     updateMessage("Загружаются товары . . .  " + nextFriend);
@@ -65,7 +68,6 @@ public class PoligonCommander extends Application {
 
                 updateMessage("Загружено " + count + " товаров. Идёт подготовка к запуску . . .");
                 Thread.sleep(500);
-
 
                 return null;
             }
