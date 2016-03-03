@@ -333,58 +333,13 @@ public class PCGUIController implements Initializable {
         loadSiteInBrowser();
         productsTable.getSelectionModel().setSelectionMode(javafx.scene.control.SelectionMode.MULTIPLE);
 
-        /*
-        productsTable.setOnDragDetected((MouseEvent event) -> {
-            Dragboard db = productsTable.startDragAndDrop(TransferMode.ANY);
-            ClipboardContent content = new ClipboardContent();
-            content.putString(productsTable.getSelectionModel().getSelectedItem().getTitle());
-            /*
-            productsTable.getItems().stream().forEach((item) -> {
-            content.putString(item.getTitle());
-            });
-            *//*
-            db.setContent(content);
-            event.consume();
-        });
-        categoriesTree.setOnDragOver((DragEvent event) -> {
-            final Dragboard db = event.getDragboard();
-            if (event.getGestureSource() != categoriesTree && event.getDragboard().hasString()) {
-                event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-            }
-            event.consume();
-        });
-        categoriesTree.setOnDragEntered((DragEvent event) -> {
-            if (event.getGestureSource() != categoriesTree && event.getDragboard().hasString()) {
-                //TreeItem selTreeItem = categoriesTree.getFocusModel().getFocusedItem();
-                //selTreeItem.setGraphic(new ImageView(new Image("/images/greenTreePlus.gif")));
-            }
-            event.consume();
-        });
-        categoriesTree.setOnDragDropped((DragEvent event) -> {
-            Dragboard db = event.getDragboard();
-            boolean success = false;
-            if (db.hasString()) {
-                success = true;
-            }
-            event.setDropCompleted(success);
-            event.consume();
-        });
-        categoriesTree.setOnDragExited((DragEvent event) -> {
-            if (event.getGestureSource() != categoriesTree && event.getDragboard().hasString()) {
-                //TreeItem selTreeItem = categoriesTree.getFocusModel().getFocusedItem();
-                //selTreeItem.setGraphic(new ImageView());
-            }
-            event.consume();
-        });
-        */
         productsTable.getSelectionModel().selectedItemProperty().addListener(
             new ChangeListener<ProductsTableView>() {
                 @Override
                 public void changed(ObservableValue<? extends ProductsTableView> observable, ProductsTableView oldValue, ProductsTableView newValue) {
-                    //selectedProduct = newValue.getTitle();
-                    productsTable.getSelectionModel().select(newValue);
-                    /*
                     try {
+                        selectedProduct = newValue.getTitle();
+                        productsTable.getSelectionModel().select(newValue);
                         buildPricesTable(selectedProduct);
                         buildQuantityTable(selectedProduct);
                         buildDeliveryTimeTable(selectedProduct);
@@ -393,7 +348,7 @@ public class PCGUIController implements Initializable {
                         buildImageView(selectedProduct);
                         datasheetFileTable.refresh();
                     } catch (NullPointerException ex) {}
-                    */
+
                     productsTable.setContextMenu(productTableContextMenu);
                     fillProductTab(selectedProduct);
                 }
