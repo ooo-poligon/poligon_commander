@@ -5,6 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f612a4c3-3105-493b-a126-bc6d4a7e3a08" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/main/PCGUIController.java" afterPath="$PROJECT_DIR$/src/main/java/main/PCGUIController.java" />
     </list>
     <ignored path="PoligonCommanderJ.iws" />
@@ -45,19 +46,16 @@
       <file leaf-file-name="PCGUIController.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/main/PCGUIController.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.2837838">
-              <caret line="338" column="150" selection-start-line="338" selection-start-column="150" selection-end-line="338" selection-end-column="150" />
+            <state vertical-scroll-proportion="0.39033458">
+              <caret line="3189" column="25" selection-start-line="3189" selection-start-column="17" selection-end-line="3189" selection-end-column="25" />
               <folding>
                 <element signature="docComment;class#PCGUIController#0" expanded="false" />
                 <element signature="method#setDatasheetFile#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#expandParents#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#handlePropertiesTreeMouseClicked#0;class#PCGUIController#0" expanded="false" />
-                <element signature="e#91068#91144#0" expanded="false" />
-                <element signature="class#91423:91732" expanded="false" />
-                <element signature="method#changed#0;class#91423:91732" expanded="false" />
-                <element signature="e#138931#138979#0" expanded="false" />
-                <element signature="class#139515:139898" expanded="false" />
-                <element signature="method#call#0;class#139515:139898" expanded="false" />
+                <element signature="e#90935#91011#0" expanded="false" />
+                <element signature="class#91290:91599" expanded="false" />
+                <element signature="method#changed#0;class#91290:91599" expanded="false" />
                 <element signature="method#getSelectedDBKey#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#compareFields#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#startImportFromXLSToDB#0;class#PCGUIController#0" expanded="false" />
@@ -69,7 +67,6 @@
                 <element signature="method#cancelSetImportDetails#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#setChooseXLSButtonPress#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#getHeadersRowNumber#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#startImportProgressBar#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#handlePropertiesKindSelected#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#treeItemChildren#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#writeToSite#0;class#PCGUIController#0" expanded="false" />
@@ -84,16 +81,16 @@
                 <element signature="method#saveUserLocalDB#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#savePasswordLocalDB#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#saveSiteUrlToDb#0;class#PCGUIController#0" expanded="false" />
-                <marker date="1456992496137" expanded="true" signature="18642:18697" placeholder="select id fr... categories" />
-                <marker date="1456992496137" expanded="true" signature="19222:19281" placeholder="select id fr... property_types" />
-                <marker date="1456992496137" expanded="true" signature="19801:19854" placeholder="select id fr... products" />
-                <marker date="1456992496137" expanded="true" signature="46579:46719" placeholder="SELECT title... categories" />
-                <marker date="1456992496137" expanded="true" signature="46613:46691" placeholder="SELECT id FR... categories" />
-                <marker date="1456992496137" expanded="true" signature="58132:58192" placeholder="select id fr... products" />
-                <marker date="1456992496137" expanded="true" signature="59607:59667" placeholder="select id fr... products" />
-                <marker date="1456992496137" expanded="true" signature="82590:82648" placeholder="select id fr... vendors" />
-                <marker date="1456992496137" expanded="true" signature="83475:83651" placeholder="SELECT title... property_types" />
-                <marker date="1456992496137" expanded="true" signature="83513:83623" placeholder="SELECT id FR... property_types" />
+                <marker date="1456993742447" expanded="true" signature="18642:18697" placeholder="select id fr... categories" />
+                <marker date="1456993742447" expanded="true" signature="19222:19281" placeholder="select id fr... property_types" />
+                <marker date="1456993742447" expanded="true" signature="19801:19854" placeholder="select id fr... products" />
+                <marker date="1456993742447" expanded="true" signature="46579:46719" placeholder="SELECT title... categories" />
+                <marker date="1456993742447" expanded="true" signature="46613:46691" placeholder="SELECT id FR... categories" />
+                <marker date="1456993742447" expanded="true" signature="58132:58192" placeholder="select id fr... products" />
+                <marker date="1456993742447" expanded="true" signature="59607:59667" placeholder="select id fr... products" />
+                <marker date="1456993742447" expanded="true" signature="82590:82648" placeholder="select id fr... vendors" />
+                <marker date="1456993742447" expanded="true" signature="83475:83651" placeholder="SELECT title... property_types" />
+                <marker date="1456993742447" expanded="true" signature="83513:83623" placeholder="SELECT id FR... property_types" />
               </folding>
             </state>
           </provider>
@@ -117,7 +114,19 @@
             <state vertical-scroll-proportion="0.0">
               <caret line="25" column="19" selection-start-line="25" selection-start-column="19" selection-end-line="25" selection-end-column="19" />
               <folding>
-                <element signature="imports" expanded="true" />
+                <element signature="e#0#2212#0" expanded="false" />
+                <element signature="e#1241#1242#0" expanded="false" />
+                <element signature="e#1269#1270#0" expanded="false" />
+                <element signature="e#1315#1316#0" expanded="false" />
+                <element signature="e#1349#1350#0" expanded="false" />
+                <element signature="e#1384#1385#0" expanded="false" />
+                <element signature="e#1411#1412#0" expanded="false" />
+                <element signature="e#1455#1456#0" expanded="false" />
+                <element signature="e#1487#1488#0" expanded="false" />
+                <element signature="e#1530#1531#0" expanded="false" />
+                <element signature="e#1561#1562#0" expanded="false" />
+                <element signature="e#1613#1614#0" expanded="false" />
+                <element signature="e#1653#1654#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -129,7 +138,7 @@
             <state vertical-scroll-proportion="0.0">
               <caret line="27" column="36" selection-start-line="27" selection-start-column="36" selection-end-line="27" selection-end-column="36" />
               <folding>
-                <marker date="1456990697696" expanded="true" signature="1054:1247" placeholder="insert into settings... " />
+                <marker date="1456993252452" expanded="true" signature="1054:1247" placeholder="insert into settings... " />
               </folding>
             </state>
           </provider>
@@ -1160,7 +1169,7 @@
       <workItem from="1456813693956" duration="6011000" />
       <workItem from="1456820282561" duration="21227000" />
       <workItem from="1456900464503" duration="3053000" />
-      <workItem from="1456991293164" duration="1206000" />
+      <workItem from="1456991293164" duration="2677000" />
     </task>
     <task id="LOCAL-00001" summary="test commit">
       <created>1450683270438</created>
@@ -1298,7 +1307,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="683260000" />
+    <option name="totallyTimeSpent" value="684731000" />
   </component>
   <component name="TodoView" selected-index="1">
     <todo-panel id="selected-file">
@@ -1311,7 +1320,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="54" y="-8" width="1874" height="1096" extended-state="6" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3291536" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -1321,8 +1330,8 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32079414" sideWeight="0.5022075" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25055188" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.45245558" sideWeight="0.49784714" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.50261235" sideWeight="0.49668875" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2570533" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.5047022" sideWeight="0.49668875" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.36990595" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Persistence" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.21633554" sideWeight="0.38825214" order="3" side_tool="true" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2334437" sideWeight="0.61174786" order="0" side_tool="false" content_ui="combo" />
@@ -1774,7 +1783,19 @@
         <state vertical-scroll-proportion="0.0">
           <caret line="25" column="19" selection-start-line="25" selection-start-column="19" selection-end-line="25" selection-end-column="19" />
           <folding>
-            <element signature="imports" expanded="true" />
+            <element signature="e#0#2212#0" expanded="false" />
+            <element signature="e#1241#1242#0" expanded="false" />
+            <element signature="e#1269#1270#0" expanded="false" />
+            <element signature="e#1315#1316#0" expanded="false" />
+            <element signature="e#1349#1350#0" expanded="false" />
+            <element signature="e#1384#1385#0" expanded="false" />
+            <element signature="e#1411#1412#0" expanded="false" />
+            <element signature="e#1455#1456#0" expanded="false" />
+            <element signature="e#1487#1488#0" expanded="false" />
+            <element signature="e#1530#1531#0" expanded="false" />
+            <element signature="e#1561#1562#0" expanded="false" />
+            <element signature="e#1613#1614#0" expanded="false" />
+            <element signature="e#1653#1654#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1794,26 +1815,23 @@
         <state vertical-scroll-proportion="0.0">
           <caret line="27" column="36" selection-start-line="27" selection-start-column="36" selection-end-line="27" selection-end-column="36" />
           <folding>
-            <marker date="1456990697696" expanded="true" signature="1054:1247" placeholder="insert into settings... " />
+            <marker date="1456993252452" expanded="true" signature="1054:1247" placeholder="insert into settings... " />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/main/PCGUIController.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.2837838">
-          <caret line="338" column="150" selection-start-line="338" selection-start-column="150" selection-end-line="338" selection-end-column="150" />
+        <state vertical-scroll-proportion="0.39033458">
+          <caret line="3189" column="25" selection-start-line="3189" selection-start-column="17" selection-end-line="3189" selection-end-column="25" />
           <folding>
             <element signature="docComment;class#PCGUIController#0" expanded="false" />
             <element signature="method#setDatasheetFile#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#expandParents#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#handlePropertiesTreeMouseClicked#0;class#PCGUIController#0" expanded="false" />
-            <element signature="e#91068#91144#0" expanded="false" />
-            <element signature="class#91423:91732" expanded="false" />
-            <element signature="method#changed#0;class#91423:91732" expanded="false" />
-            <element signature="e#138931#138979#0" expanded="false" />
-            <element signature="class#139515:139898" expanded="false" />
-            <element signature="method#call#0;class#139515:139898" expanded="false" />
+            <element signature="e#90935#91011#0" expanded="false" />
+            <element signature="class#91290:91599" expanded="false" />
+            <element signature="method#changed#0;class#91290:91599" expanded="false" />
             <element signature="method#getSelectedDBKey#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#compareFields#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#startImportFromXLSToDB#0;class#PCGUIController#0" expanded="false" />
@@ -1825,7 +1843,6 @@
             <element signature="method#cancelSetImportDetails#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#setChooseXLSButtonPress#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#getHeadersRowNumber#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#startImportProgressBar#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#handlePropertiesKindSelected#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#treeItemChildren#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#writeToSite#0;class#PCGUIController#0" expanded="false" />
@@ -1840,16 +1857,16 @@
             <element signature="method#saveUserLocalDB#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#savePasswordLocalDB#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#saveSiteUrlToDb#0;class#PCGUIController#0" expanded="false" />
-            <marker date="1456992496137" expanded="true" signature="18642:18697" placeholder="select id fr... categories" />
-            <marker date="1456992496137" expanded="true" signature="19222:19281" placeholder="select id fr... property_types" />
-            <marker date="1456992496137" expanded="true" signature="19801:19854" placeholder="select id fr... products" />
-            <marker date="1456992496137" expanded="true" signature="46579:46719" placeholder="SELECT title... categories" />
-            <marker date="1456992496137" expanded="true" signature="46613:46691" placeholder="SELECT id FR... categories" />
-            <marker date="1456992496137" expanded="true" signature="58132:58192" placeholder="select id fr... products" />
-            <marker date="1456992496137" expanded="true" signature="59607:59667" placeholder="select id fr... products" />
-            <marker date="1456992496137" expanded="true" signature="82590:82648" placeholder="select id fr... vendors" />
-            <marker date="1456992496137" expanded="true" signature="83475:83651" placeholder="SELECT title... property_types" />
-            <marker date="1456992496137" expanded="true" signature="83513:83623" placeholder="SELECT id FR... property_types" />
+            <marker date="1456993742447" expanded="true" signature="18642:18697" placeholder="select id fr... categories" />
+            <marker date="1456993742447" expanded="true" signature="19222:19281" placeholder="select id fr... property_types" />
+            <marker date="1456993742447" expanded="true" signature="19801:19854" placeholder="select id fr... products" />
+            <marker date="1456993742447" expanded="true" signature="46579:46719" placeholder="SELECT title... categories" />
+            <marker date="1456993742447" expanded="true" signature="46613:46691" placeholder="SELECT id FR... categories" />
+            <marker date="1456993742447" expanded="true" signature="58132:58192" placeholder="select id fr... products" />
+            <marker date="1456993742447" expanded="true" signature="59607:59667" placeholder="select id fr... products" />
+            <marker date="1456993742447" expanded="true" signature="82590:82648" placeholder="select id fr... vendors" />
+            <marker date="1456993742447" expanded="true" signature="83475:83651" placeholder="SELECT title... property_types" />
+            <marker date="1456993742447" expanded="true" signature="83513:83623" placeholder="SELECT id FR... property_types" />
           </folding>
         </state>
       </provider>

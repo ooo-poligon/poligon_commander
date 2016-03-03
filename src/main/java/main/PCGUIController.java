@@ -1876,13 +1876,8 @@ public class PCGUIController implements Initializable {
     }
     @FXML public  void startProgressBar(MouseEvent event) {
         Task task = createTask(event);
-        //progressBar.progressProperty().bind(task.progressProperty());
+        progressBar.progressProperty().bind(task.progressProperty());
         Platform.runLater(task);
-        Alert alert = new Alert(AlertType.NONE);
-        /*
-        thread  = new Thread(task);
-        thread.start();
-        */
     }
     @FXML private void handlePropertiesTreeMouseClicked(MouseEvent event) {
         ObservableList<PropertiesTreeTableView> data = FXCollections.observableArrayList();
@@ -2855,10 +2850,6 @@ public class PCGUIController implements Initializable {
         Task task = createImportXLSTask();
         progressBarImportXLS.progressProperty().bind(task.progressProperty());
         Platform.runLater(task);
-        /*
-        thread  = new Thread(task);
-        thread.start();
-        */
     }
     private Task<Void> createImportXLSTask() {
         return new Task<Void>() {
@@ -2870,9 +2861,6 @@ public class PCGUIController implements Initializable {
                     Logger.getLogger(PCGUIController.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 Platform.runLater(() -> {
-                    //progressIndicator.progressProperty().unbind();
-                    //progressIndicator.setVisible(false);
-                    //progressIndicator.setProgress(0.0);
                     progressBarImportXLS.progressProperty().unbind();
                     progressBarImportXLS.setProgress(0.0);
                 });
@@ -3200,10 +3188,6 @@ public class PCGUIController implements Initializable {
         Task task = createImportTask();
         progressBarImportXLS.progressProperty().bind(task.progressProperty());
         Platform.runLater(task);
-        /*
-        thread  = new Thread(task);
-        thread.start();
-        */
     }
     @FXML private void handlePropertiesKindSelected() {
         String selectedPropertiesKind = productKindsList.getSelectionModel().getSelectedItem();
