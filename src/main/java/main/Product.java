@@ -25,7 +25,10 @@ public class Product {
     private double discount2;
     private double discount3;
 
-    public Product(int id, int categoryId, String title, String description, String anons, String article, int available, String deliveryTime, String ean, int outdated, double price, String serie, int productKindId, String vendor, int pluginOwnerId, int accessoryOwnerId, double rate, double discount1, double discount2, double discount3) {
+    public Product(int id, int categoryId, String title, String description, String anons,
+                   String article, int available, String deliveryTime, String ean, int outdated, double price,
+                   String serie, int productKindId, String vendor, int pluginOwnerId, int accessoryOwnerId,
+                   double rate, double discount1, double discount2, double discount3) {
         this.id = id;
         this.categoryId = categoryId;
         this.title = title;

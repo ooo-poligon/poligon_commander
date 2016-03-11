@@ -45,6 +45,9 @@
     <mapping class="entities.ProductsAccessories" />
     <mapping class="entities.NewsItems" />
     <mapping class="entities.Articles" />
+    <mapping class="entities.Videos" />
+    <mapping class="entities.Reviews" />
+    <mapping class="entities.Additions" />
     <mapping class="entities.StaticContents" />
  
  <!-- <mapping resource="com/mkyong/user/DBUser.hbm.xml"></mapping> -->
