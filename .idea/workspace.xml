@@ -10,33 +10,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f612a4c3-3105-493b-a126-bc6d4a7e3a08" name="Default" comment="new features added">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/entities/Additions.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/entities/Reviews.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/entities/Videos.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/main/FileOfProgram.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/modalwindows/AlertWindow.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/utils/NewAddition.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/utils/NewReview.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/utils/NewVideo.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/utils/UtilPack.java" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/artifacts/PoligonCommanderJ_war.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/artifacts/PoligonCommanderJ_war_exploded.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/manifest.mf" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/dataSources.ids" afterPath="$PROJECT_DIR$/.idea/dataSources.ids" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/dataSources.xml" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/PoligonCommanderJ.iml" afterPath="$PROJECT_DIR$/PoligonCommanderJ.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pom.xml" afterPath="$PROJECT_DIR$/pom.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/META-INF/persistence.xml" afterPath="$PROJECT_DIR$/src/main/java/META-INF/persistence.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/entities/Articles.java" afterPath="$PROJECT_DIR$/src/main/java/entities/Articles.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/main/PCGUIController.java" afterPath="$PROJECT_DIR$/src/main/java/main/PCGUIController.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/main/PoligonCommander.java" afterPath="$PROJECT_DIR$/src/main/java/main/PoligonCommander.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/main/Product.java" afterPath="$PROJECT_DIR$/src/main/java/main/Product.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/utils/ContextBuilder.java" afterPath="$PROJECT_DIR$/src/main/java/utils/ContextBuilder.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/utils/DBConnection.java" afterPath="$PROJECT_DIR$/src/main/java/utils/DBConnection.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/modalwindows/AlertWindow.java" afterPath="$PROJECT_DIR$/src/main/java/modalwindows/AlertWindow.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/resources/fxml/PCGUI.fxml" afterPath="$PROJECT_DIR$/src/main/resources/fxml/PCGUI.fxml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/resources/hibernate.cfg.xml" afterPath="$PROJECT_DIR$/src/main/resources/hibernate.cfg.xml" />
     </list>
     <ignored path="PoligonCommanderJ.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -76,8 +52,8 @@
       <file leaf-file-name="PCGUIController.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/main/PCGUIController.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.7331933">
-              <caret line="1574" column="12" selection-start-line="1574" selection-start-column="12" selection-end-line="1574" selection-end-column="12" />
+            <state vertical-scroll-proportion="0.33230293">
+              <caret line="1386" column="9" selection-start-line="1386" selection-start-column="9" selection-end-line="1386" selection-end-column="9" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="docComment;class#PCGUIController#0" expanded="false" />
@@ -107,17 +83,12 @@
                 <element signature="method#buildAnalogsTable#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#buildDatasheetFileTable#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#buildVendorsTable#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#handleVendorsTableMousePressed#0;class#PCGUIController#0" expanded="false" />
-                <element signature="e#31717#31801#0" expanded="false" />
                 <element signature="method#buildImageView#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#subCategoriesList#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#includeLowerItems#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#recursiveItems#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#excludeLowerItems#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#arrayChildren#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#createTask#0;class#PCGUIController#0" expanded="false" />
-                <element signature="class#39295:40880" expanded="false" />
-                <element signature="method#call#0;class#39295:40880" expanded="false" />
                 <element signature="method#buildPropertiesTree#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#buildPropertiesTreeNode#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#isCategoryLowest#0;class#PCGUIController#0" expanded="false" />
@@ -128,9 +99,9 @@
                 <element signature="method#setNewQuantityValue#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#refreshProductsTable#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#addProductDialog#0;class#PCGUIController#0" expanded="false" />
-                <element signature="e#54260#54342#0" expanded="false" />
+                <element signature="e#54076#54158#0" expanded="false" />
                 <element signature="method#deleteProductDialog#0;class#PCGUIController#0" expanded="false" />
-                <element signature="e#54597#54679#0" expanded="false" />
+                <element signature="e#54413#54495#0" expanded="false" />
                 <element signature="method#openProductTab#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#createNewCategory#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#editCategory#0;class#PCGUIController#0" expanded="false" />
@@ -142,13 +113,17 @@
                 <element signature="method#createNewVendor#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#setCurrency#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#subPropertiesList#0;class#PCGUIController#0" expanded="false" />
+                <element signature="method#setCategorySelected#0;class#PCGUIController#0" expanded="false" />
+                <element signature="method#recursiveTreeCall#0;class#PCGUIController#0" expanded="false" />
+                <element signature="method#expandParents#0;class#PCGUIController#0" expanded="false" />
+                <element signature="method#setVendorSelected#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#setDatasheetFile#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#startProgressBar#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#handlePropertiesTreeMouseClicked#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#handleProductTableMousePressed#0;class#PCGUIController#0" expanded="false" />
-                <element signature="e#83086#83162#0" expanded="false" />
-                <element signature="class#83441:83750" expanded="false" />
-                <element signature="method#changed#0;class#83441:83750" expanded="false" />
+                <element signature="e#82597#82673#0" expanded="false" />
+                <element signature="class#82952:83261" expanded="false" />
+                <element signature="method#changed#0;class#82952:83261" expanded="false" />
+                <element signature="method#handleSearchComboBox#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#fillProductTab#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#changePicDescription#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#buildPropertiesTable#0;class#PCGUIController#0" expanded="false" />
@@ -161,39 +136,39 @@
                 <element signature="method#showFunctionDescription#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#handleFunctionsTable1MouseClicked#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#buildAccessoriesTable#0;class#PCGUIController#0" expanded="false" />
-                <element signature="class#103541:105062" expanded="false" />
-                <element signature="method#handle#0;class#103541:105062" expanded="false" />
+                <element signature="class#102972:104493" expanded="false" />
+                <element signature="method#handle#0;class#102972:104493" expanded="false" />
                 <element signature="method#createAndConfigureImageLoadService#0;class#PCGUIController#0" expanded="false" />
-                <element signature="class#107957:108188" expanded="false" />
-                <element signature="method#newThread#0;class#107957:108188" expanded="false" />
+                <element signature="class#107388:107619" expanded="false" />
+                <element signature="method#newThread#0;class#107388:107619" expanded="false" />
                 <element signature="method#bindPaginationToCurrentFile#0;class#PCGUIController#0" expanded="false" />
-                <element signature="class#108282:108582" expanded="false" />
-                <element signature="method#changed#0;class#108282:108582" expanded="false" />
-                <element signature="class#108633:108896" expanded="false" />
-                <element signature="initializer##0;class#108633:108896" expanded="false" />
+                <element signature="class#107713:108013" expanded="false" />
+                <element signature="method#changed#0;class#107713:108013" expanded="false" />
+                <element signature="class#108064:108327" expanded="false" />
+                <element signature="initializer##0;class#108064:108327" expanded="false" />
                 <element signature="method#createPaginationPageFactory#0;class#PCGUIController#0" expanded="false" />
-                <element signature="class#109083:109657" expanded="false" />
-                <element signature="method#call#0;class#109083:109657" expanded="false" />
+                <element signature="class#108514:109088" expanded="false" />
+                <element signature="method#call#0;class#108514:109088" expanded="false" />
                 <element signature="method#loadPdfFile#0;class#PCGUIController#0" expanded="false" />
-                <element signature="class#110639:111156" expanded="false" />
-                <element signature="method#call#0;class#110639:111156" expanded="false" />
-                <element signature="class#111202:111541" expanded="false" />
-                <element signature="method#handle#0;class#111202:111541" expanded="false" />
-                <element signature="class#111585:111917" expanded="false" />
-                <element signature="method#handle#0;class#111585:111917" expanded="false" />
+                <element signature="class#110070:110587" expanded="false" />
+                <element signature="method#call#0;class#110070:110587" expanded="false" />
+                <element signature="class#110633:110972" expanded="false" />
+                <element signature="method#handle#0;class#110633:110972" expanded="false" />
+                <element signature="class#111016:111348" expanded="false" />
+                <element signature="method#handle#0;class#111016:111348" expanded="false" />
                 <element signature="method#zoomFit#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#updateImage#0;class#PCGUIController#0" expanded="false" />
-                <element signature="class#112860:114364" expanded="false" />
-                <element signature="method#call#0;class#112860:114364" expanded="false" />
-                <element signature="e#113589#113616#0" expanded="false" />
-                <element signature="class#114410:114676" expanded="false" />
-                <element signature="method#handle#0;class#114410:114676" expanded="false" />
-                <element signature="class#114720:114991" expanded="false" />
-                <element signature="method#handle#0;class#114720:114991" expanded="false" />
+                <element signature="class#112291:113795" expanded="false" />
+                <element signature="method#call#0;class#112291:113795" expanded="false" />
+                <element signature="e#113020#113047#0" expanded="false" />
+                <element signature="class#113841:114107" expanded="false" />
+                <element signature="method#handle#0;class#113841:114107" expanded="false" />
+                <element signature="class#114151:114422" expanded="false" />
+                <element signature="method#handle#0;class#114151:114422" expanded="false" />
                 <element signature="method#showErrorMessage#0;class#PCGUIController#0" expanded="false" />
-                <element signature="class#115940:116098" expanded="false" />
-                <element signature="class#116535:117019" expanded="false" />
-                <element signature="method#changed#0;class#116535:117019" expanded="false" />
+                <element signature="class#115371:115529" expanded="false" />
+                <element signature="class#115966:116450" expanded="false" />
+                <element signature="method#changed#0;class#115966:116450" expanded="false" />
                 <element signature="class#PageDimensions#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#PageDimensions#0;class#PageDimensions#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#handleCategorySearch#0;class#PCGUIController#0" expanded="false" />
@@ -213,12 +188,12 @@
                 <element signature="method#populateComboBox#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#startProgressBarImportXLS#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#createImportXLSTask#0;class#PCGUIController#0" expanded="false" />
-                <element signature="class#143251:144050" expanded="false" />
-                <element signature="method#call#0;class#143251:144050" expanded="false" />
-                <element signature="e#143683#143731#0" expanded="false" />
+                <element signature="class#142682:143481" expanded="false" />
+                <element signature="method#call#0;class#142682:143481" expanded="false" />
+                <element signature="e#143114#143162#0" expanded="false" />
                 <element signature="method#createImportTask#0;class#PCGUIController#0" expanded="false" />
-                <element signature="class#144266:144649" expanded="false" />
-                <element signature="method#call#0;class#144266:144649" expanded="false" />
+                <element signature="class#143697:144080" expanded="false" />
+                <element signature="method#call#0;class#143697:144080" expanded="false" />
                 <element signature="method#getSelectedDBKey#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#compareFields#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#startImportFromXLSToDB#0;class#PCGUIController#0" expanded="false" />
@@ -229,7 +204,6 @@
                 <element signature="method#setChooseXLSButtonPress#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#startImportProgressBar#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#handlePropertiesKindSelected#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#treeItemChildren#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#writeToSite#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#saveAddressSiteDB#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#savePortSiteDB#0;class#PCGUIController#0" expanded="false" />
@@ -243,13 +217,13 @@
                 <element signature="method#savePasswordLocalDB#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#saveSiteUrlToDb#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#loadSiteInBrowser#0;class#PCGUIController#0" expanded="false" />
-                <marker date="1457691939494" expanded="false" signature="36715:36920" placeholder="SELECT title... categories" />
-                <marker date="1457691939494" expanded="false" signature="36749:36892" placeholder="SELECT id FR... categories" />
-                <marker date="1457691939494" expanded="false" signature="49453:49513" placeholder="select id fr... products" />
-                <marker date="1457691939494" expanded="false" signature="51194:51254" placeholder="select id fr... products" />
-                <marker date="1457691939494" expanded="false" signature="74389:74447" placeholder="select id fr... vendors" />
-                <marker date="1457691939494" expanded="false" signature="75274:75459" placeholder="SELECT title... property_types" />
-                <marker date="1457691939494" expanded="false" signature="75312:75431" placeholder="SELECT id FR... property_types" />
+                <marker date="1457693621048" expanded="false" signature="36531:36736" placeholder="SELECT title... categories" />
+                <marker date="1457693621048" expanded="false" signature="36565:36708" placeholder="SELECT id FR... categories" />
+                <marker date="1457693621048" expanded="false" signature="49269:49329" placeholder="select id fr... products" />
+                <marker date="1457693621048" expanded="false" signature="51010:51070" placeholder="select id fr... products" />
+                <marker date="1457693621048" expanded="false" signature="74211:74269" placeholder="select id fr... vendors" />
+                <marker date="1457693621048" expanded="false" signature="75096:75281" placeholder="SELECT title... property_types" />
+                <marker date="1457693621048" expanded="false" signature="75134:75253" placeholder="SELECT id FR... property_types" />
               </folding>
             </state>
           </provider>
@@ -259,7 +233,7 @@
         <entry file="file://$PROJECT_DIR$/src/main/java/modalwindows/AlertWindow.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="57" column="36" selection-start-line="57" selection-start-column="22" selection-end-line="57" selection-end-column="36" />
+              <caret line="75" column="104" selection-start-line="75" selection-start-column="104" selection-end-line="75" selection-end-column="104" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -361,8 +335,8 @@
         <option value="$PROJECT_DIR$/src/main/java/utils/ContextBuilder.java" />
         <option value="$PROJECT_DIR$/src/main/java/entities/Reviews.java" />
         <option value="$PROJECT_DIR$/src/main/java/modalwindows/ModalCategoriesWindow.java" />
-        <option value="$PROJECT_DIR$/src/main/java/modalwindows/AlertWindow.java" />
         <option value="$PROJECT_DIR$/src/main/java/utils/UtilPack.java" />
+        <option value="$PROJECT_DIR$/src/main/java/modalwindows/AlertWindow.java" />
         <option value="$PROJECT_DIR$/src/main/java/main/PCGUIController.java" />
       </list>
     </option>
@@ -1388,7 +1362,7 @@
       <workItem from="1457513833853" duration="8156000" />
       <workItem from="1457592000572" duration="3958000" />
       <workItem from="1457596215963" duration="6704000" />
-      <workItem from="1457678309235" duration="13545000" />
+      <workItem from="1457678309235" duration="15519000" />
     </task>
     <task id="LOCAL-00001" summary="test commit">
       <created>1450683270438</created>
@@ -1532,7 +1506,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="783016000" />
+    <option name="totallyTimeSpent" value="784990000" />
   </component>
   <component name="TodoView" selected-index="1">
     <todo-panel id="selected-file">
@@ -1555,8 +1529,8 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32079414" sideWeight="0.5022075" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.19205298" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.45245558" sideWeight="0.49784714" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.43469176" sideWeight="0.49668875" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.448062" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25600836" sideWeight="0.49668875" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.44723094" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Persistence" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.23324251" sideWeight="0.4926959" order="3" side_tool="true" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.20695364" sideWeight="0.50730413" order="0" side_tool="false" content_ui="combo" />
@@ -1648,7 +1622,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="37" />
+      <option name="time" value="38" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -2086,16 +2060,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/modalwindows/AlertWindow.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="57" column="36" selection-start-line="57" selection-start-column="22" selection-end-line="57" selection-end-column="36" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/utils/UtilPack.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -2110,10 +2074,20 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/modalwindows/AlertWindow.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="75" column="104" selection-start-line="75" selection-start-column="104" selection-end-line="75" selection-end-column="104" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/main/PCGUIController.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.7331933">
-          <caret line="1574" column="12" selection-start-line="1574" selection-start-column="12" selection-end-line="1574" selection-end-column="12" />
+        <state vertical-scroll-proportion="0.33230293">
+          <caret line="1386" column="9" selection-start-line="1386" selection-start-column="9" selection-end-line="1386" selection-end-column="9" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="docComment;class#PCGUIController#0" expanded="false" />
@@ -2143,17 +2117,12 @@
             <element signature="method#buildAnalogsTable#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#buildDatasheetFileTable#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#buildVendorsTable#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#handleVendorsTableMousePressed#0;class#PCGUIController#0" expanded="false" />
-            <element signature="e#31717#31801#0" expanded="false" />
             <element signature="method#buildImageView#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#subCategoriesList#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#includeLowerItems#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#recursiveItems#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#excludeLowerItems#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#arrayChildren#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#createTask#0;class#PCGUIController#0" expanded="false" />
-            <element signature="class#39295:40880" expanded="false" />
-            <element signature="method#call#0;class#39295:40880" expanded="false" />
             <element signature="method#buildPropertiesTree#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#buildPropertiesTreeNode#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#isCategoryLowest#0;class#PCGUIController#0" expanded="false" />
@@ -2164,9 +2133,9 @@
             <element signature="method#setNewQuantityValue#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#refreshProductsTable#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#addProductDialog#0;class#PCGUIController#0" expanded="false" />
-            <element signature="e#54260#54342#0" expanded="false" />
+            <element signature="e#54076#54158#0" expanded="false" />
             <element signature="method#deleteProductDialog#0;class#PCGUIController#0" expanded="false" />
-            <element signature="e#54597#54679#0" expanded="false" />
+            <element signature="e#54413#54495#0" expanded="false" />
             <element signature="method#openProductTab#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#createNewCategory#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#editCategory#0;class#PCGUIController#0" expanded="false" />
@@ -2178,13 +2147,17 @@
             <element signature="method#createNewVendor#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#setCurrency#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#subPropertiesList#0;class#PCGUIController#0" expanded="false" />
+            <element signature="method#setCategorySelected#0;class#PCGUIController#0" expanded="false" />
+            <element signature="method#recursiveTreeCall#0;class#PCGUIController#0" expanded="false" />
+            <element signature="method#expandParents#0;class#PCGUIController#0" expanded="false" />
+            <element signature="method#setVendorSelected#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#setDatasheetFile#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#startProgressBar#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#handlePropertiesTreeMouseClicked#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#handleProductTableMousePressed#0;class#PCGUIController#0" expanded="false" />
-            <element signature="e#83086#83162#0" expanded="false" />
-            <element signature="class#83441:83750" expanded="false" />
-            <element signature="method#changed#0;class#83441:83750" expanded="false" />
+            <element signature="e#82597#82673#0" expanded="false" />
+            <element signature="class#82952:83261" expanded="false" />
+            <element signature="method#changed#0;class#82952:83261" expanded="false" />
+            <element signature="method#handleSearchComboBox#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#fillProductTab#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#changePicDescription#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#buildPropertiesTable#0;class#PCGUIController#0" expanded="false" />
@@ -2197,39 +2170,39 @@
             <element signature="method#showFunctionDescription#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#handleFunctionsTable1MouseClicked#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#buildAccessoriesTable#0;class#PCGUIController#0" expanded="false" />
-            <element signature="class#103541:105062" expanded="false" />
-            <element signature="method#handle#0;class#103541:105062" expanded="false" />
+            <element signature="class#102972:104493" expanded="false" />
+            <element signature="method#handle#0;class#102972:104493" expanded="false" />
             <element signature="method#createAndConfigureImageLoadService#0;class#PCGUIController#0" expanded="false" />
-            <element signature="class#107957:108188" expanded="false" />
-            <element signature="method#newThread#0;class#107957:108188" expanded="false" />
+            <element signature="class#107388:107619" expanded="false" />
+            <element signature="method#newThread#0;class#107388:107619" expanded="false" />
             <element signature="method#bindPaginationToCurrentFile#0;class#PCGUIController#0" expanded="false" />
-            <element signature="class#108282:108582" expanded="false" />
-            <element signature="method#changed#0;class#108282:108582" expanded="false" />
-            <element signature="class#108633:108896" expanded="false" />
-            <element signature="initializer##0;class#108633:108896" expanded="false" />
+            <element signature="class#107713:108013" expanded="false" />
+            <element signature="method#changed#0;class#107713:108013" expanded="false" />
+            <element signature="class#108064:108327" expanded="false" />
+            <element signature="initializer##0;class#108064:108327" expanded="false" />
             <element signature="method#createPaginationPageFactory#0;class#PCGUIController#0" expanded="false" />
-            <element signature="class#109083:109657" expanded="false" />
-            <element signature="method#call#0;class#109083:109657" expanded="false" />
+            <element signature="class#108514:109088" expanded="false" />
+            <element signature="method#call#0;class#108514:109088" expanded="false" />
             <element signature="method#loadPdfFile#0;class#PCGUIController#0" expanded="false" />
-            <element signature="class#110639:111156" expanded="false" />
-            <element signature="method#call#0;class#110639:111156" expanded="false" />
-            <element signature="class#111202:111541" expanded="false" />
-            <element signature="method#handle#0;class#111202:111541" expanded="false" />
-            <element signature="class#111585:111917" expanded="false" />
-            <element signature="method#handle#0;class#111585:111917" expanded="false" />
+            <element signature="class#110070:110587" expanded="false" />
+            <element signature="method#call#0;class#110070:110587" expanded="false" />
+            <element signature="class#110633:110972" expanded="false" />
+            <element signature="method#handle#0;class#110633:110972" expanded="false" />
+            <element signature="class#111016:111348" expanded="false" />
+            <element signature="method#handle#0;class#111016:111348" expanded="false" />
             <element signature="method#zoomFit#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#updateImage#0;class#PCGUIController#0" expanded="false" />
-            <element signature="class#112860:114364" expanded="false" />
-            <element signature="method#call#0;class#112860:114364" expanded="false" />
-            <element signature="e#113589#113616#0" expanded="false" />
-            <element signature="class#114410:114676" expanded="false" />
-            <element signature="method#handle#0;class#114410:114676" expanded="false" />
-            <element signature="class#114720:114991" expanded="false" />
-            <element signature="method#handle#0;class#114720:114991" expanded="false" />
+            <element signature="class#112291:113795" expanded="false" />
+            <element signature="method#call#0;class#112291:113795" expanded="false" />
+            <element signature="e#113020#113047#0" expanded="false" />
+            <element signature="class#113841:114107" expanded="false" />
+            <element signature="method#handle#0;class#113841:114107" expanded="false" />
+            <element signature="class#114151:114422" expanded="false" />
+            <element signature="method#handle#0;class#114151:114422" expanded="false" />
             <element signature="method#showErrorMessage#0;class#PCGUIController#0" expanded="false" />
-            <element signature="class#115940:116098" expanded="false" />
-            <element signature="class#116535:117019" expanded="false" />
-            <element signature="method#changed#0;class#116535:117019" expanded="false" />
+            <element signature="class#115371:115529" expanded="false" />
+            <element signature="class#115966:116450" expanded="false" />
+            <element signature="method#changed#0;class#115966:116450" expanded="false" />
             <element signature="class#PageDimensions#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#PageDimensions#0;class#PageDimensions#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#handleCategorySearch#0;class#PCGUIController#0" expanded="false" />
@@ -2249,12 +2222,12 @@
             <element signature="method#populateComboBox#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#startProgressBarImportXLS#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#createImportXLSTask#0;class#PCGUIController#0" expanded="false" />
-            <element signature="class#143251:144050" expanded="false" />
-            <element signature="method#call#0;class#143251:144050" expanded="false" />
-            <element signature="e#143683#143731#0" expanded="false" />
+            <element signature="class#142682:143481" expanded="false" />
+            <element signature="method#call#0;class#142682:143481" expanded="false" />
+            <element signature="e#143114#143162#0" expanded="false" />
             <element signature="method#createImportTask#0;class#PCGUIController#0" expanded="false" />
-            <element signature="class#144266:144649" expanded="false" />
-            <element signature="method#call#0;class#144266:144649" expanded="false" />
+            <element signature="class#143697:144080" expanded="false" />
+            <element signature="method#call#0;class#143697:144080" expanded="false" />
             <element signature="method#getSelectedDBKey#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#compareFields#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#startImportFromXLSToDB#0;class#PCGUIController#0" expanded="false" />
@@ -2265,7 +2238,6 @@
             <element signature="method#setChooseXLSButtonPress#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#startImportProgressBar#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#handlePropertiesKindSelected#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#treeItemChildren#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#writeToSite#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#saveAddressSiteDB#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#savePortSiteDB#0;class#PCGUIController#0" expanded="false" />
@@ -2279,13 +2251,13 @@
             <element signature="method#savePasswordLocalDB#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#saveSiteUrlToDb#0;class#PCGUIController#0" expanded="false" />
             <element signature="method#loadSiteInBrowser#0;class#PCGUIController#0" expanded="false" />
-            <marker date="1457691939494" expanded="false" signature="36715:36920" placeholder="SELECT title... categories" />
-            <marker date="1457691939494" expanded="false" signature="36749:36892" placeholder="SELECT id FR... categories" />
-            <marker date="1457691939494" expanded="false" signature="49453:49513" placeholder="select id fr... products" />
-            <marker date="1457691939494" expanded="false" signature="51194:51254" placeholder="select id fr... products" />
-            <marker date="1457691939494" expanded="false" signature="74389:74447" placeholder="select id fr... vendors" />
-            <marker date="1457691939494" expanded="false" signature="75274:75459" placeholder="SELECT title... property_types" />
-            <marker date="1457691939494" expanded="false" signature="75312:75431" placeholder="SELECT id FR... property_types" />
+            <marker date="1457693621048" expanded="false" signature="36531:36736" placeholder="SELECT title... categories" />
+            <marker date="1457693621048" expanded="false" signature="36565:36708" placeholder="SELECT id FR... categories" />
+            <marker date="1457693621048" expanded="false" signature="49269:49329" placeholder="select id fr... products" />
+            <marker date="1457693621048" expanded="false" signature="51010:51070" placeholder="select id fr... products" />
+            <marker date="1457693621048" expanded="false" signature="74211:74269" placeholder="select id fr... vendors" />
+            <marker date="1457693621048" expanded="false" signature="75096:75281" placeholder="SELECT title... property_types" />
+            <marker date="1457693621048" expanded="false" signature="75134:75253" placeholder="SELECT id FR... property_types" />
           </folding>
         </state>
       </provider>

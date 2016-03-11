@@ -73,6 +73,7 @@ public class AlertWindow {
     }
     public static void showError() {
         Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setContentText("Ошибка соединения с базой данных.\nРекомендуется перезапустить приложение.");
         alert.show();
     }
 

@@ -643,8 +643,6 @@ public class PCGUIController implements Initializable {
         });
         buildProductsTable(data);
         productsTable.getSelectionModel().select(0);
-        //setVendorSelected(productsTable.getSelectionModel().getSelectedItem().getTitle());
-        //focusedProduct = productsTable.getSelectionModel().getSelectedItem().getTitle();
         onFocusedProductTableItem();
     }
     private void buildImageView(String selectedProduct) throws SQLException {
@@ -1386,7 +1384,7 @@ public class PCGUIController implements Initializable {
             updateCategoryId(parentCatId, product);
         }
     }
-    private void onFocusedProductTableItem() throws SQLException {
+    @FXML private void onFocusedProductTableItem() throws SQLException {
         try {
             selectedProduct = (String) (productsTable.getFocusModel().getFocusedItem()).getTitle();
 
@@ -1723,29 +1721,29 @@ public class PCGUIController implements Initializable {
             ).build();
         } else if(productsTable.getSelectionModel().getSelectedItems().size() == 0) {
             productTableContextMenu = ContextMenuBuilder.create().items(
-                    MenuItemBuilder.create().text("Импортировать элементы...").onAction((ActionEvent arg0) -> {
-                        tabPane.getSelectionModel().select(settingsTab);}).build()
+                MenuItemBuilder.create().text("Импортировать элементы...").onAction((ActionEvent arg0) -> {
+                    tabPane.getSelectionModel().select(settingsTab);}).build()
             ).build();
         } else {
             productTableContextMenu = ContextMenuBuilder.create().items(
-                    MenuItemBuilder.create().text("Переместить в категорию...").onAction((ActionEvent arg0) -> {
-                        try {
-                            changeProductCategoryDialog();
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
-                    }).build(),
-                    MenuItemBuilder.create().text("Удалить выбранные элементы").onAction((ActionEvent arg0) -> {
-                        deleteProductDialog();}).build(),
-                    SeparatorMenuItemBuilder.create().build(),
-                    MenuItemBuilder.create().text("Изменить производителя устройства").onAction((ActionEvent arg0) -> {
-                        ContextBuilder.changeProductVendor(productsTable);
-                        productsTable.refresh();
-                        vendorsTable.refresh();
-                    }).build(),
-                    MenuItemBuilder.create().text("Добавить аксессуар к выбранным устройствам").onAction((ActionEvent arg0) -> {
-                        Accessory.addToSelectedOn(productsTable);
-                    }).build()
+                MenuItemBuilder.create().text("Переместить в категорию...").onAction((ActionEvent arg0) -> {
+                    try {
+                        changeProductCategoryDialog();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }).build(),
+                MenuItemBuilder.create().text("Удалить выбранные элементы").onAction((ActionEvent arg0) -> {
+                    deleteProductDialog();}).build(),
+                SeparatorMenuItemBuilder.create().build(),
+                MenuItemBuilder.create().text("Изменить производителя устройства").onAction((ActionEvent arg0) -> {
+                    ContextBuilder.changeProductVendor(productsTable);
+                    productsTable.refresh();
+                    vendorsTable.refresh();
+                }).build(),
+                MenuItemBuilder.create().text("Добавить аксессуар к выбранным устройствам").onAction((ActionEvent arg0) -> {
+                    Accessory.addToSelectedOn(productsTable);
+                }).build()
             ).build();
         }
         productsTable.setContextMenu(productTableContextMenu);

@@ -32,7 +32,7 @@
                                   <RowConstraints maxHeight="172.0" minHeight="50.0" percentHeight="39.0" prefHeight="172.0" vgrow="ALWAYS" />
                                 </rowConstraints>
                                  <children>
-                                    <TableView fx:id="productsTable" editable="true" onMousePressed="#handleProductTableMousePressed" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.hgrow="ALWAYS" GridPane.valignment="TOP" GridPane.vgrow="ALWAYS">
+                                    <TableView fx:id="productsTable" editable="true" onKeyPressed="#onFocusedProductTableItem" onMousePressed="#handleProductTableMousePressed" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.hgrow="ALWAYS" GridPane.valignment="TOP" GridPane.vgrow="ALWAYS">
                                       <columns>
                                           <TableColumn maxWidth="20.0" minWidth="20.0" prefWidth="20.0" resizable="false" text="..." visible="false" />
                                           <TableColumn fx:id="productArticle" maxWidth="-1.0" minWidth="100.0" prefWidth="200.0" text="Артикул" />
@@ -393,10 +393,7 @@
                                                                <children>
                                                                   <StackPane fx:id="propertiesStackPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                                                                      <children>
-                                                                        <TreeView fx:id="propertiesTree" onMouseClicked="#handlePropertiesTreeMouseClicked">
-                                                                           <contextMenu>
-                                                                              <ContextMenu />
-                                                                           </contextMenu></TreeView>
+                                                                        <TreeView fx:id="propertiesTree" onMouseClicked="#handlePropertiesTreeMouseClicked" />
                                                                      </children>
                                                                   </StackPane>
                                                                </children>
@@ -853,11 +850,7 @@
                                                               <content>
                                                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                                                      <children>
-                                                                        <ListView fx:id="categoriesListView" onMousePressed="#editSelectedCategory" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                                           <contextMenu>
-                                                                              <ContextMenu fx:id="categoriesListContextMenu" />
-                                                                           </contextMenu>
-                                                                        </ListView>
+                                                                        <ListView fx:id="categoriesListView" onMousePressed="#editSelectedCategory" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                                                      </children>
                                                                   </AnchorPane>
                                                               </content>
