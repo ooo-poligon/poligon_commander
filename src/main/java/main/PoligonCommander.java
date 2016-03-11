@@ -20,6 +20,7 @@ import javafx.util.Duration;
 import utils.CurrencyCourse;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 public class PoligonCommander extends Application {
     public static final String SPLASH_IMAGE = "/images/splash.png";
@@ -38,12 +39,13 @@ public class PoligonCommander extends Application {
     @Override
     public void init() {
         ImageView splash = new ImageView(new Image(SPLASH_IMAGE));
-        loadProgress = new ProgressBar();
-        loadProgress.setPrefWidth(SPLASH_WIDTH);
-        progressText = new Label("Загрузка данных . . .");
+        //loadProgress = new ProgressBar();
+        //loadProgress.setPrefWidth(SPLASH_WIDTH);
+        //progressText = new Label("Загрузка данных . . .");
         splashLayout = new VBox();
-        splashLayout.getChildren().addAll(splash, loadProgress, progressText);
-        progressText.setAlignment(Pos.CENTER);
+        splashLayout.getChildren().addAll(splash);
+        //splashLayout.getChildren().addAll(splash, loadProgress, progressText);
+        //progressText.setAlignment(Pos.CENTER);
         splashLayout.setEffect(new DropShadow());
     }
 
@@ -51,12 +53,15 @@ public class PoligonCommander extends Application {
     public void start(final Stage initStage) throws Exception {
         final Task<Void> friendTask = new Task<Void>() {
             @Override
-            protected Void call() throws IOException, InterruptedException {
+            protected Void call() throws IOException, InterruptedException, SQLException {
+
                 updateMessage("Инициализация базы данных . . .");
                 PCGUIController.getAllProductsList();
+                PCGUIController.getAllFilesOfProgramList();
+                /*
                 int count = 0;
                 for (int i = 0; i < PCGUIController.allProductsTitles.size(); i++) {
-                    Thread.sleep(0,01);
+                    Thread.sleep(0,001);
                     updateProgress(i + 1, PCGUIController.allProductsTitles.size());
                     String nextFriend = PCGUIController.allProductsTitles.get(i);
                     updateMessage("Загружаются товары . . .  " + nextFriend);
@@ -65,8 +70,7 @@ public class PoligonCommander extends Application {
 
                 updateMessage("Загружено " + count + " товаров. Идёт подготовка к запуску . . .");
                 Thread.sleep(500);
-
-
+                */
                 return null;
             }
         };
@@ -83,7 +87,7 @@ public class PoligonCommander extends Application {
         Parent root = FXMLLoader.load(getClass().getResource("/fxml/PCGUI.fxml"));
         Scene scene = new Scene(root);
         mainStage.setScene(scene);
-        mainStage.setTitle("\"Poligon Commander\" (version 0.1)");
+        mainStage.setTitle("\"Poligon Commander\" (version 1.0)");
         mainStage.show();
         mainStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
@@ -99,12 +103,12 @@ public class PoligonCommander extends Application {
             Task<?> task,
             InitCompletionHandler initCompletionHandler
     ) {
-        progressText.textProperty().bind(task.messageProperty());
-        loadProgress.progressProperty().bind(task.progressProperty());
+        //progressText.textProperty().bind(task.messageProperty());
+        //loadProgress.progressProperty().bind(task.progressProperty());
         task.stateProperty().addListener((observableValue, oldState, newState) -> {
             if (newState == Worker.State.SUCCEEDED) {
-                loadProgress.progressProperty().unbind();
-                loadProgress.setProgress(1);
+                //loadProgress.progressProperty().unbind();
+                //loadProgress.setProgress(1);
                 initStage.toFront();
                 FadeTransition fadeSplash = new FadeTransition(Duration.seconds(1.2), splashLayout);
                 fadeSplash.setFromValue(1.0);

@@ -21,6 +21,9 @@
     <class>entities.KindsTypes</class>
 
     <class>entities.Articles</class>
+    <class>entities.Videos</class>
+    <class>entities.Reviews</class>
+    <class>entities.Additions</class>
     <class>entities.Measures</class>
     <class>entities.NewsItems</class>
     <class>entities.ProductsAccessories</class>
@@ -28,10 +31,10 @@
     <class>entities.StaticContents</class>
 
     <properties>
-      <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/poligon_commander?zeroDateTimeBehavior=convertToNull"/>
-      <property name="javax.persistence.jdbc.user" value="root"/>
+      <property name="javax.persistence.jdbc.url" value="jdbc:mysql://server03.poligon.corp:3306/trade?zeroDateTimeBehavior=convertToNull"/>
+      <property name="javax.persistence.jdbc.user" value="trade"/>
       <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
-      <property name="javax.persistence.jdbc.password" value="poligon"/>
+      <property name="javax.persistence.jdbc.password" value="GuOjBoslen"/>
 
 
     </properties>

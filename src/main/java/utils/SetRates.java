@@ -1,11 +1,15 @@
 package utils;
 
 import entities.Products;
+import main.PCGUIController;
+import main.Product;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -89,8 +93,31 @@ public class SetRates {
         session.close();
     }
 
-    public static SetRates getRatesPack(String selectedProduct) {
+    public static SetRates getRatesPack(String selectedProduct) throws SQLException {
         SetRates ratesPack = new SetRates();
+        for (Product product : PCGUIController.allProductsList) {
+            if (product.getTitle().equals(selectedProduct)) {
+                ratesPack = new SetRates(
+                    product.getRate(),
+                    product.getDiscount1(),
+                    product.getDiscount2(),
+                    product.getDiscount3()
+                );
+            }
+        }
+        /*
+        DBConnection connection1 = new DBConnection("local");
+        ResultSet resultSet = connection1.getResult("select rate, discount1, discount2, discount3 from products where title='" + selectedProduct + "\'");
+        while (resultSet.next()) {
+            ratesPack = new SetRates(
+                resultSet.getDouble("rate"),
+                resultSet.getDouble("discount1"),
+                resultSet.getDouble("discount2"),
+                resultSet.getDouble("discount3")
+            );
+        }
+        */
+        /*
         Session session = HibernateUtil.getSessionFactory().openSession();
         List res = session.createQuery("from Products where title=\'" + selectedProduct + "\'").list();
         for(Iterator iterator = res.iterator(); iterator.hasNext();) {
@@ -98,6 +125,7 @@ public class SetRates {
             ratesPack = new SetRates(p.getRate(), p.getDiscount1(), p.getDiscount2(), p.getDiscount3());
         }
         session.close();
+        */
         return ratesPack;
     }
 }

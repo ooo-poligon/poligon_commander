@@ -8,36 +8,36 @@ package entities;
  *
  */
 
-        import java.io.Serializable;
-        import java.util.Date;
-        import javax.persistence.Basic;
-        import javax.persistence.Column;
-        import javax.persistence.Entity;
-        import javax.persistence.GeneratedValue;
-        import javax.persistence.GenerationType;
-        import javax.persistence.Id;
-        import javax.persistence.Lob;
-        import javax.persistence.NamedQueries;
-        import javax.persistence.NamedQuery;
-        import javax.persistence.Table;
-        import javax.persistence.Temporal;
-        import javax.persistence.TemporalType;
-        import javax.xml.bind.annotation.XmlRootElement;
+import java.io.Serializable;
+import java.util.Date;
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
  * @author Igor Klekotnev
  */
 @Entity
-@Table(name = "articles")
+@Table(name = "videos")
 @XmlRootElement
 @NamedQueries({
-        @NamedQuery(name = "Articles.findAll", query = "SELECT a FROM Articles a"),
-        @NamedQuery(name = "Articles.findById", query = "SELECT a FROM Articles a WHERE a.id = :id"),
-        @NamedQuery(name = "Articles.findByCreatedAt", query = "SELECT a FROM Articles a WHERE a.createdAt = :createdAt"),
-        @NamedQuery(name = "Articles.findByUpdatedAt", query = "SELECT a FROM Articles a WHERE a.updatedAt = :updatedAt"),
-        @NamedQuery(name = "Articles.findByTitle", query = "SELECT a FROM Articles a WHERE a.title = :title")})
-public class Articles implements Serializable {
+        @NamedQuery(name = "Videos.findAll", query = "SELECT v FROM Videos v"),
+        @NamedQuery(name = "Videos.findById", query = "SELECT v FROM Videos v WHERE v.id = :id"),
+        @NamedQuery(name = "Videos.findByCreatedAt", query = "SELECT v FROM Videos v WHERE v.createdAt = :createdAt"),
+        @NamedQuery(name = "Videos.findByUpdatedAt", query = "SELECT v FROM Videos v WHERE v.updatedAt = :updatedAt"),
+        @NamedQuery(name = "Videos.findByTitle", query = "SELECT v FROM Videos v WHERE v.title = :title")})
+public class Videos implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -58,14 +58,14 @@ public class Articles implements Serializable {
     @Column(name = "content")
     private String content;
 
-    public Articles() {
+    public Videos() {
     }
 
-    public Articles(Integer id) {
+    public Videos(Integer id) {
         this.id = id;
     }
 
-    public Articles(Integer id, Date createdAt, Date updatedAt) {
+    public Videos(Integer id, Date createdAt, Date updatedAt) {
         this.id = id;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -121,10 +121,10 @@ public class Articles implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Articles)) {
+        if (!(object instanceof Videos)) {
             return false;
         }
-        Articles other = (Articles) object;
+        Videos other = (Videos) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
@@ -133,8 +133,9 @@ public class Articles implements Serializable {
 
     @Override
     public String toString() {
-        return "entities.Articles[ id=" + id + " ]";
+        return "entities.Videos[ id=" + id + " ]";
     }
 
 }
+
 

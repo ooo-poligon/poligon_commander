@@ -14,9 +14,9 @@
 
 <AnchorPane id="AnchorPane" fx:id="anchorPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.PCGUIController">
    <children>
-      <BorderPane maxWidth="1.7976931348623157E308" prefHeight="768.0" prefWidth="1024.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <BorderPane prefHeight="1024.0" prefWidth="1280.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <center>
-            <TabPane fx:id="tabPane" prefHeight="760.0" prefWidth="940.0" tabClosingPolicy="UNAVAILABLE" tabMinWidth="200.0" BorderPane.alignment="CENTER">
+            <TabPane fx:id="tabPane" prefWidth="940.0" tabClosingPolicy="UNAVAILABLE" tabMinWidth="200.0" BorderPane.alignment="CENTER">
               <tabs>
                 <Tab fx:id="mainTab" text="Номенклатура">
                   <content>
@@ -32,7 +32,7 @@
                                   <RowConstraints maxHeight="172.0" minHeight="50.0" percentHeight="39.0" prefHeight="172.0" vgrow="ALWAYS" />
                                 </rowConstraints>
                                  <children>
-                                    <TableView fx:id="productsTable" editable="true" onMousePressed="#handleProductTableMousePressed" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.hgrow="ALWAYS" GridPane.valignment="TOP" GridPane.vgrow="ALWAYS">
+                                    <TableView fx:id="productsTable" editable="true" onKeyPressed="#onFocusedProductTableItem" onMousePressed="#handleProductTableMousePressed" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.hgrow="ALWAYS" GridPane.valignment="TOP" GridPane.vgrow="ALWAYS">
                                       <columns>
                                           <TableColumn maxWidth="20.0" minWidth="20.0" prefWidth="20.0" resizable="false" text="..." visible="false" />
                                           <TableColumn fx:id="productArticle" maxWidth="-1.0" minWidth="100.0" prefWidth="200.0" text="Артикул" />
@@ -74,7 +74,7 @@
                                                 </AnchorPane>
                                                 <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1">
                                                    <children>
-                                                      <GridPane alignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+                                                      <GridPane alignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="10.0">
                                                         <columnConstraints>
                                                             <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="145.0" />
                                                         </columnConstraints>
@@ -82,9 +82,26 @@
                                                           <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
                                                         </rowConstraints>
                                                          <children>
-                                                            <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS">
+                                                            <AnchorPane GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS">
                                                                <children>
-                                                                  <ProgressBar fx:id="progressBar" minHeight="-Infinity" prefHeight="20.0" progress="0.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
+                                                                  <HBox AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+                                                                     <children>
+                                                                        <AnchorPane>
+                                                                           <children>
+                                                                              <Button fx:id="resetButton" disable="true" mnemonicParsing="false" onAction="#resetProgram" text="Сброс" textFill="RED" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+                                                                                 <font>
+                                                                                    <Font name="System Bold" size="12.0" />
+                                                                                 </font>
+                                                                              </Button>
+                                                                           </children>
+                                                                        </AnchorPane>
+                                                                        <AnchorPane HBox.hgrow="ALWAYS">
+                                                                           <children>
+                                                                              <ProgressBar fx:id="progressBar" progress="0.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
+                                                                           </children>
+                                                                        </AnchorPane>
+                                                                     </children>
+                                                                  </HBox>
                                                                </children>
                                                             </AnchorPane>
                                                          </children>
@@ -272,7 +289,7 @@
                                                 </AnchorPane>
                                                 <AnchorPane>
                                                    <children>
-                                                      <TableView fx:id="vendorsTable" prefHeight="300.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                      <TableView fx:id="vendorsTable" onMousePressed="#handleVendorsTableMousePressed" prefHeight="300.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                         <columns>
                                                           <TableColumn fx:id="vendorsTitleColumn" maxWidth="1.7976931348623157E308" minWidth="150.0" prefWidth="150.0" text="Производитель" />
                                                           <TableColumn fx:id="vendorsAddressColumn" minWidth="70.0" text="Страна" />
@@ -376,10 +393,7 @@
                                                                <children>
                                                                   <StackPane fx:id="propertiesStackPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                                                                      <children>
-                                                                        <TreeView fx:id="propertiesTree" onMouseClicked="#handlePropertiesTreeMouseClicked">
-                                                                           <contextMenu>
-                                                                              <ContextMenu />
-                                                                           </contextMenu></TreeView>
+                                                                        <TreeView fx:id="propertiesTree" onMouseClicked="#handlePropertiesTreeMouseClicked" />
                                                                      </children>
                                                                   </StackPane>
                                                                </children>
@@ -768,6 +782,54 @@
                                                                   <Font name="System Bold" size="16.0" />
                                                                </font>
                                                           </TitledPane>
+                                                            <TitledPane animated="false" text="Видео">
+                                                              <content>
+                                                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                                     <children>
+                                                                        <ListView fx:id="videosListView" onMousePressed="#editSelectedVideo" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                           <contextMenu>
+                                                                              <ContextMenu fx:id="videosListContextMenu" />
+                                                                           </contextMenu>
+                                                                        </ListView>
+                                                                     </children>
+                                                                  </AnchorPane>
+                                                              </content>
+                                                               <font>
+                                                                  <Font name="System Bold" size="16.0" />
+                                                               </font>
+                                                            </TitledPane>
+                                                            <TitledPane animated="false" text="Обзоры">
+                                                              <content>
+                                                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                                     <children>
+                                                                        <ListView fx:id="reviewsListView" onMousePressed="#editSelectedReview" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                           <contextMenu>
+                                                                              <ContextMenu fx:id="reviewsListContextMenu" />
+                                                                           </contextMenu>
+                                                                        </ListView>
+                                                                     </children>
+                                                                  </AnchorPane>
+                                                              </content>
+                                                               <font>
+                                                                  <Font name="System Bold" size="16.0" />
+                                                               </font>
+                                                            </TitledPane>
+                                                            <TitledPane animated="false" text="Дополнения">
+                                                              <content>
+                                                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                                     <children>
+                                                                        <ListView fx:id="additionsListView" onMousePressed="#editSelectedAddition" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                           <contextMenu>
+                                                                              <ContextMenu fx:id="additionsListContextMenu" />
+                                                                           </contextMenu>
+                                                                        </ListView>
+                                                                     </children>
+                                                                  </AnchorPane>
+                                                              </content>
+                                                               <font>
+                                                                  <Font name="System Bold" size="16.0" />
+                                                               </font>
+                                                            </TitledPane>
                                                           <TitledPane animated="false" text="Контент">
                                                             <content>
                                                               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
@@ -788,11 +850,7 @@
                                                               <content>
                                                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                                                      <children>
-                                                                        <ListView fx:id="categoriesListView" onMousePressed="#editSelectedCategory" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                                           <contextMenu>
-                                                                              <ContextMenu fx:id="categoriesListContextMenu" />
-                                                                           </contextMenu>
-                                                                        </ListView>
+                                                                        <ListView fx:id="categoriesListView" onMousePressed="#editSelectedCategory" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                                                      </children>
                                                                   </AnchorPane>
                                                               </content>
@@ -916,7 +974,7 @@
                                 </columnConstraints>
                                 <rowConstraints>
                                   <RowConstraints maxHeight="392.0" minHeight="10.0" percentHeight="35.0" prefHeight="392.0" vgrow="SOMETIMES" />
-                                  <RowConstraints maxHeight="300.0" minHeight="10.0" percentHeight="45.0" prefHeight="101.0" vgrow="SOMETIMES" />
+                                  <RowConstraints maxHeight="300.0" minHeight="10.0" percentHeight="30.0" prefHeight="101.0" vgrow="SOMETIMES" />
                                   <RowConstraints minHeight="10.0" percentHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                 </rowConstraints>
                                  <children>
@@ -1202,7 +1260,7 @@
                                     </AnchorPane>
                                     <AnchorPane GridPane.rowIndex="1">
                                        <children>
-                                          <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                          <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="20.0">
                                              <children>
                                                 <AnchorPane VBox.vgrow="ALWAYS">
                                                    <children>
@@ -1210,7 +1268,7 @@
                                                         <tabs>
                                                           <Tab text="Локальная БД">
                                                             <content>
-                                                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                              <AnchorPane minHeight="0.0" minWidth="0.0" prefWidth="200.0">
                                                                      <children>
                                                                         <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                            <children>
@@ -1292,7 +1350,6 @@
                                                                                     </GridPane>
                                                                                  </children>
                                                                               </AnchorPane>
-                                                                              <AnchorPane VBox.vgrow="ALWAYS" />
                                                                            </children>
                                                                         </VBox>
                                                                      </children>
@@ -1396,9 +1453,9 @@
                                                 </AnchorPane>
                                                 <AnchorPane>
                                                    <children>
-                                                      <Label text="После каждого ввода нажимайте &lt;ENTER&gt;" textFill="RED" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                      <Label text="После каждого ввода нажимайте &lt;ENTER&gt;" textFill="RED" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                          <font>
-                                                            <Font name="System Bold" size="12.0" />
+                                                            <Font name="System Bold" size="11.0" />
                                                          </font>
                                                       </Label>
                                                    </children>
