@@ -10,12 +10,14 @@ import javafx.scene.control.TableView;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
+import main.PCGUIController;
 import modalwindows.SetRatesWindow;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import tableviews.FunctionsTableView;
 import javafx.event.ActionEvent;
+import tableviews.KindsTableView;
 import tableviews.ProductsTableView;
 import tableviews.VendorsTableView;
 import treetableviews.PropertiesTreeTableView;
@@ -40,6 +42,7 @@ public class ContextBuilder {
     private static Integer selectedProductsFunctionsID = 0;
     private static String selectedFunctionTitle = "";
     private static Vendors selectedVendor = new Vendors();
+    private static ProductKinds selectedKind = new ProductKinds();
 
     public static void createNewPropertyValue(Label productTabTitle, TreeView<String> propertiesTree) {
         String selectedProduct = productTabTitle.getText();
@@ -1887,6 +1890,72 @@ public class ContextBuilder {
             Transaction tx = session1.beginTransaction();
             Query query = session1.createQuery("update Products set vendor = :vendor where title = :title");
             query.setParameter("vendor", selectedVendor);
+            query.setParameter("title", selectedProduct.getTitle());
+            query.executeUpdate();
+            tx.commit();
+        }
+        session1.close();
+    }
+    public static void changeProductKind(TableView<ProductsTableView> productsTable) {
+        ObservableList<ProductsTableView> selectedProducts = productsTable.getSelectionModel().getSelectedItems();
+        ObservableList<ProductKinds> kindsList = FXCollections.observableArrayList();
+        ComboBox<String> kindsComboBox = new ComboBox<>();
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List res = session.createQuery("from ProductKinds").list();
+        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+            ProductKinds kind = (ProductKinds) iterator.next();
+            kindsList.add(kind);
+        }
+        session.close();
+        ObservableList<String> kindsTitles = FXCollections.observableArrayList();
+        kindsList.stream().forEach((kinds) -> {
+            kindsTitles.add(kinds.getTitle());
+        });
+        kindsComboBox.setItems(kindsTitles);
+        kindsComboBox.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                for (ProductKinds kind : kindsList) {
+                    if (kind.getTitle().equals(kindsComboBox.getValue())) {
+                        selectedKind = kind;
+                    }
+                }
+            }
+        });
+
+        Dialog<KindsTableView> dialog = new Dialog<>();
+        dialog.setTitle("Изменить производителя устройства");
+        dialog.setHeaderText("");
+        dialog.setResizable(false);
+
+        Label label1 = new Label("Выберите производителя из списка:");
+        Label br = new Label("");
+
+        GridPane grid = new GridPane();
+        grid.add(label1, 1, 1);;
+        grid.add(br, 2, 1);
+        grid.add(kindsComboBox, 3, 1);
+        dialog.getDialogPane().setContent(grid);
+
+        ButtonType buttonTypeOk = new ButtonType("Установить", ButtonBar.ButtonData.OK_DONE);
+        ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
+
+        dialog.setResultConverter((ButtonType b) -> {
+            if (b == buttonTypeOk) {
+                KindsTableView selectedKindsTableView = new KindsTableView(
+                        selectedKind.getId(), selectedKind.getTitle());
+                return selectedKindsTableView;
+            }
+            return null;
+        });
+        Optional<KindsTableView> result = dialog.showAndWait();
+        Session session1 = HibernateUtil.getSessionFactory().openSession();
+        for (ProductsTableView selectedProduct : selectedProducts) {
+            Transaction tx = session1.beginTransaction();
+            Query query = session1.createQuery("update Products set productKindId = :productKindId where title = :title");
+            query.setParameter("productKindId", selectedKind);
             query.setParameter("title", selectedProduct.getTitle());
             query.executeUpdate();
             tx.commit();

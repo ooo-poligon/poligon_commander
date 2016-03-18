@@ -58,6 +58,7 @@ public class PoligonCommander extends Application {
                 updateMessage("Инициализация базы данных . . .");
                 PCGUIController.getAllProductsList();
                 PCGUIController.getAllFilesOfProgramList();
+                PCGUIController.getAllQuantitiesList();
                 /*
                 int count = 0;
                 for (int i = 0; i < PCGUIController.allProductsTitles.size(); i++) {

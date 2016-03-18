@@ -34,15 +34,12 @@ public class ProductImage {
         try {
             String localUrl = file.toURI().toURL().toString();
             imageView.setImage(new Image(localUrl));
-            //imageView.setFitWidth(gridPane.getWidth());
             imageView.setFitHeight(250);
             imageView.setPreserveRatio(true);
             imageView.setSmooth(true);
             imageView.setCache(true);
             gridPane.getChildren().add(imageView);
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(ProductImage.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        } catch (MalformedURLException ex) {}
     }
     public static void save(File file, String selectedProduct) {
         Integer ownerId = 0;
@@ -72,7 +69,6 @@ public class ProductImage {
     }
 
     public static void save(String picPath, String selectedProduct) {
-        ArrayList<String> exceptionProducts = new ArrayList<>();
         Products product = new Products();
         Session sess = HibernateUtil.getSessionFactory().openSession();
         Query query = sess.createQuery("from Products where title = :title");
@@ -105,12 +101,7 @@ public class ProductImage {
             }
             tx.commit();
             session.close();
-        } catch (TransientObjectException e) {
-            exceptionProducts.add(product.getTitle());
-        }
-        exceptionProducts.stream().forEach((p) -> {
-            System.out.println(p);
-        });
+        } catch (TransientObjectException e) {}
     }
 
     private static String picName(String picPath) {

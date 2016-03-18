@@ -18,38 +18,38 @@ import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
-@Table(name = "products_accessories")
+@Table(name = "products_analogs")
 @XmlRootElement
 @NamedQueries({
-        @NamedQuery(name = "ProductsAccessories.findAll", query = "SELECT p FROM ProductsAccessories p"),
-        @NamedQuery(name = "ProductsAccessories.findById", query = "SELECT p FROM ProductsAccessories p WHERE p.id = :id"),
-        @NamedQuery(name = "ProductsAccessories.findByProductId", query = "SELECT p FROM ProductsAccessories p WHERE p.productId = :productId"),
-        @NamedQuery(name = "ProductsAccessories.findByAccessoryId", query = "SELECT p FROM ProductsAccessories p WHERE p.accessoryId = :accessoryId")})
-public class ProductsAccessories implements Serializable {
+        @NamedQuery(name = "ProductsAnalogs.findAll", query = "SELECT p FROM ProductsAnalogs p"),
+        @NamedQuery(name = "ProductsAnalogs.findById", query = "SELECT p FROM ProductsAnalogs p WHERE p.id = :id"),
+        @NamedQuery(name = "ProductsAnalogs.findByProductId", query = "SELECT p FROM ProductsAnalogs p WHERE p.productId = :productId"),
+        @NamedQuery(name = "ProductsAnalogs.findByAnalogsId", query = "SELECT p FROM ProductsAnalogs p WHERE p.analogId = :analogId")})
+public class ProductsAnalogs implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "id")
-    Integer id;
+    private Integer id;
     @Basic(optional = false)
     @Column(name = "product_id")
     private int productId;
     @Basic(optional = false)
-    @Column(name = "accessory_id")
-    private int accessoryId;
+    @Column(name = "analog_id")
+    private int analogId;
 
-    public ProductsAccessories() {
+    public ProductsAnalogs() {
     }
 
-    public ProductsAccessories(Integer id) {
+    public ProductsAnalogs(Integer id) {
         this.id = id;
     }
 
-    public ProductsAccessories(Integer id, int productId, int accessoryId) {
+    public ProductsAnalogs(Integer id, int productId, int analogId) {
         this.id = id;
         this.productId = productId;
-        this.accessoryId = accessoryId;
+        this.analogId = analogId;
     }
 
     public Integer getId() {
@@ -68,12 +68,12 @@ public class ProductsAccessories implements Serializable {
         this.productId = productId;
     }
 
-    public int getAccessoryId() {
-        return accessoryId;
+    public int getAnalogId() {
+        return analogId;
     }
 
-    public void setAccessoryId(int accessoryId) {
-        this.accessoryId = accessoryId;
+    public void setAnalogId(int analogId) {
+        this.analogId = analogId;
     }
 
     @Override
@@ -86,10 +86,10 @@ public class ProductsAccessories implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof ProductsAccessories)) {
+        if (!(object instanceof ProductsAnalogs)) {
             return false;
         }
-        ProductsAccessories other = (ProductsAccessories) object;
+        ProductsAnalogs other = (ProductsAnalogs) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
@@ -97,9 +97,7 @@ public class ProductsAccessories implements Serializable {
     }
 
     @Override
-    public String toString() {
-        return "entities.ProductsAccessories[ id=" + id + " ]";
-    }
-
+    public String toString() { return "entities.ProductsAnalogs[ id=" + id + " ]"; }
 }
+
 
