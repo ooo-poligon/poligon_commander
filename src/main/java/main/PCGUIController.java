@@ -22,30 +22,25 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.*;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.scene.web.HTMLEditor;
-import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javafx.util.converter.IntegerStringConverter;
@@ -68,7 +63,9 @@ import utils.*;
 
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
@@ -92,11 +89,7 @@ public class PCGUIController implements Initializable {
     private static int loadProgramCounter = 0;
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        try {
-            resetProgram();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        try { resetProgram(); } catch (SQLException e) {}
     }
     // Загружает в память настройки программы, сохранённые в БД
     @FXML public void loadSavedSettings() {
@@ -122,6 +115,8 @@ public class PCGUIController implements Initializable {
         if (loadProgramCounter != 0) {
             getAllProductsList();
             getAllFilesOfProgramList();
+            getAllQuantitiesList();
+            getAllQuantitiesList();
         }
         loadProgramCounter ++;
         loadSavedSettings();
@@ -139,8 +134,9 @@ public class PCGUIController implements Initializable {
         populateComboBox ();
         loadImportFields();
         buildVendorsTable();
+        buildSeriesTable();
         buildProductKindsList();
-        loadSiteInBrowser();
+        tabBrowserWebView.getEngine().load(siteUrlTextField.getText());
         productsTable.getSelectionModel().setSelectionMode(javafx.scene.control.SelectionMode.MULTIPLE);
         productsTable.getSelectionModel().selectedItemProperty().addListener(
             (observable, oldValue, newValue) -> {
@@ -154,11 +150,9 @@ public class PCGUIController implements Initializable {
                     buildDatasheetFileTable(selectedProduct);
                     buildImageView(selectedProduct);
                     datasheetFileTable.refresh();
-                } catch (NullPointerException ex) {
-                } catch (SQLException e) {}
+                } catch (NullPointerException ex) {}
                 productsTable.setContextMenu(productTableContextMenu);
-                try { fillProductTab(selectedProduct);
-                } catch (SQLException e) {}
+                fillProductTab(selectedProduct);
             }
         );
         tabPane.getSelectionModel().selectedItemProperty().addListener(
@@ -189,17 +183,16 @@ public class PCGUIController implements Initializable {
                     } catch (NullPointerException ne) {}
                 } else if (t1.equals(mainTab)) {
                     try {
-                        try {
-                            fillMainTab(productTabTitle.getText());
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
+                        try {fillMainTab(productTabTitle.getText());} catch (SQLException e) {}
                     } catch (NullPointerException ne) {}
                 } else if (t1.equals(editorTab)) {
                     ExtendHtmlEditor.addPictureFunction(htmlEditor, editorAnchorPane);
                 }
             }
         );
+        vendorsTable.getSelectionModel().select(0);
+        handleVendorsTableMousePressed();
+        try {fillMainTab(productTabTitle.getText());} catch (SQLException e) {}
     }
     @FXML private void saveAddCBRToDB() throws SQLException {
         PriceCalcSettings priceCalcSettings = new PriceCalcSettings();
@@ -217,6 +210,29 @@ public class PCGUIController implements Initializable {
         } catch (IOException ioe) { AlertWindow.alertNoRbcServerConnection(); }
     }
     // Утилиты разные
+    @FXML private void productsMoveUpDownByKeyboard(KeyEvent keyEvent) {
+        if(keyEvent.getCode() == KeyCode.DOWN) {
+            onFocusedProductTableItem(selectedProduct);
+        } else if(keyEvent.getCode() == KeyCode.UP) {
+            onFocusedProductTableItem(selectedProduct);
+        }
+    }
+    /*
+    @FXML private void vendorsMoveUpDownByKeyboard(KeyEvent keyEvent1) {
+        if(keyEvent1.getCode() == KeyCode.DOWN) {
+            handleVendorsTableMousePressed();
+        } else if(keyEvent1.getCode() == KeyCode.UP) {
+            handleVendorsTableMousePressed();
+        }
+    }
+    @FXML private void seriesMoveUpDownByKeyboard(KeyEvent keyEvent2) {
+        if(keyEvent2.getCode() == KeyCode.DOWN) {
+            handleSeriesTableMousePressed();
+        } else if(keyEvent2.getCode() == KeyCode.UP) {
+            handleSeriesTableMousePressed();
+        }
+    }
+    */
     public static void getAllProductsList() throws SQLException {
         ResultSet resultSet = connection.getResult("select * from products");
         while (resultSet.next()) {
@@ -258,6 +274,22 @@ public class PCGUIController implements Initializable {
             ));
         }
     }
+    public static void getAllQuantitiesList() throws SQLException {
+        ResultSet resultSet = connection.getResult("select * from quantity");
+        while (resultSet.next()) {
+            allQuantitiesList.add(new QuantityOfProduct(
+                resultSet.getInt("id"),
+                resultSet.getInt("stock"),
+                resultSet.getInt("reserved"),
+                resultSet.getInt("ordered"),
+                resultSet.getInt("minimum"),
+                resultSet.getInt("pieces_per_pack"),
+                resultSet.getInt("product_id"),
+                UtilPack.getProductTitleFromId(resultSet.getInt("product_id"), allProductsList)
+                )
+            );
+        }
+    }
     private ObservableList<CategoriesTreeView> getAllCategoriesList() {
         ObservableList<CategoriesTreeView> sections = FXCollections.observableArrayList();
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -277,7 +309,7 @@ public class PCGUIController implements Initializable {
     // Таб "Номенклатура" //////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Получает все продукты из БД для отображения в таблице
-    private ObservableList<ProductsTableView> getProductList(Integer selectedNodeID) throws SQLException {
+    private ObservableList<ProductsTableView> getProductList(Integer selectedNodeID) {
         ObservableList<ProductsTableView> data = FXCollections.observableArrayList();
         allProductsList.stream().forEach(product -> {
             if(product.getCategoryId() == selectedNodeID) {
@@ -291,7 +323,7 @@ public class PCGUIController implements Initializable {
         });
         return data;
     }
-    private ObservableList<ProductsTableView> getProductList(String selectedNode) throws SQLException {
+    private ObservableList<ProductsTableView> getProductList(String selectedNode) {
         int selectedNodeID = UtilPack.getCategoryIdFromTitle(selectedNode);
         ObservableList<ProductsTableView> data = FXCollections.observableArrayList();
         allProductsList.stream().forEach(product -> {
@@ -308,37 +340,30 @@ public class PCGUIController implements Initializable {
     }
     // Получает данные о количестве продукта из БД
     // В виде аргумента принимает название продукта
-    private ObservableList<QuantityTableView> getQuantities(String productName) throws SQLException {
+    private ObservableList<QuantityTableView> getQuantities(String productName) {
         ObservableList<QuantityTableView> data = FXCollections.observableArrayList();
-
-        ResultSet resultSet = connection.getResult(
-                "select stock, reserved, ordered, minimum, pieces_per_pack from quantity where product_id=" +
-                        UtilPack.getProductIdFromTitle(productName, allProductsList
-        ));
-        while (resultSet.next()) {
-            data.add(new QuantityTableView(
-                resultSet.getInt("stock"),
-                resultSet.getInt("reserved"),
-                resultSet.getInt("ordered"),
-                resultSet.getInt("minimum"),
-                resultSet.getInt("pieces_per_pack")
-                )
-            );
-        }
+        allQuantitiesList.stream().forEach(q -> {
+            //int product_id = UtilPack.getProductIdFromTitle(productName, allProductsList);
+            if (q.getProduct_title().equals(productName)) {
+                data.add(new QuantityTableView(
+                    q.getStock(),
+                    q.getReserved(),
+                    q.getOrdered(),
+                    q.getMinimum(),
+                    q.getPieces_per_pack()
+                ));
+            }
+        });
         return data;
     }
-    // Получает данные об аналогах для продукта из БД
-    // В виде аргумента принимает название продукта
-    private ObservableList<AnalogsTableView> getAnalogs(String productName) throws SQLException {
+    private ObservableList<QuantityTableView> getNullQuantities() {
+        ObservableList<QuantityTableView> data = FXCollections.observableArrayList();
+        data.add(new QuantityTableView(0,0,0,0,0));
+        return data;
+    }
+    private ObservableList<AnalogsTableView> getNullAnalogs() {
         ObservableList<AnalogsTableView> data = FXCollections.observableArrayList();
-        ResultSet resultSet = connection.getResult("select title, vendor from analogs where prototype_id=" + UtilPack.getProductIdFromTitle(productName, allProductsList));
-        while (resultSet.next()) {
-            data.add(new AnalogsTableView(
-                    resultSet.getString("title"),
-                    resultSet.getNString("vendor")
-                )
-            );
-        }
+        data.add(new AnalogsTableView("аналог не указан", ""));
         return data;
     }
     // Построение таблиц с данными полученными из БД
@@ -346,54 +371,45 @@ public class PCGUIController implements Initializable {
         productArticle.setCellValueFactory(new PropertyValueFactory<>("article"));
         productArticle.setCellFactory(TextFieldTableCell.forTableColumn());
         productArticle.setOnEditCommit(
-                new EventHandler<CellEditEvent<ProductsTableView, String>>() {
-                    @Override
-                    public void handle(CellEditEvent<ProductsTableView, String> t) {
-                        ((ProductsTableView) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())
-                        ).setArticle(t.getNewValue());
-                        setNewCellValue("article", t.getNewValue(), productsTable.getFocusModel().getFocusedItem().getTitle());
-                    }
+            new EventHandler<CellEditEvent<ProductsTableView, String>>() {
+                @Override
+                public void handle(CellEditEvent<ProductsTableView, String> t) {
+                    ((ProductsTableView) t.getTableView().getItems().get(
+                            t.getTablePosition().getRow())
+                    ).setArticle(t.getNewValue());
+                    setNewCellValue("article", t.getNewValue(), productsTable.getFocusModel().getFocusedItem().getTitle());
                 }
+            }
         );
         productTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
         productTitle.setCellFactory(TextFieldTableCell.forTableColumn());
         productTitle.setOnEditCommit(
-                new EventHandler<CellEditEvent<ProductsTableView, String>>() {
-                    @Override
-                    public void handle(CellEditEvent<ProductsTableView, String> t) {
-                        ((ProductsTableView) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())
-                        ).setTitle(t.getNewValue());
-                        setNewCellValue("title", t.getNewValue(), productsTable.getFocusModel().getFocusedItem().getTitle());
-                    }
+            new EventHandler<CellEditEvent<ProductsTableView, String>>() {
+                @Override
+                public void handle(CellEditEvent<ProductsTableView, String> t) {
+                    ((ProductsTableView) t.getTableView().getItems().get(
+                            t.getTablePosition().getRow())
+                    ).setTitle(t.getNewValue());
+                    setNewCellValue("title", t.getNewValue(), productsTable.getFocusModel().getFocusedItem().getTitle());
                 }
+            }
         );
         productDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
         productDescription.setCellFactory(TextFieldTableCell.forTableColumn());
         productDescription.setOnEditCommit(
-                new EventHandler<CellEditEvent<ProductsTableView, String>>() {
-                    @Override
-                    public void handle(CellEditEvent<ProductsTableView, String> t) {
-                        ((ProductsTableView) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())
-                        ).setDescription(t.getNewValue());
-                        setNewCellValue("description", t.getNewValue(), productsTable.getFocusModel().getFocusedItem().getTitle());
-                    }
+            new EventHandler<CellEditEvent<ProductsTableView, String>>() {
+                @Override
+                public void handle(CellEditEvent<ProductsTableView, String> t) {
+                    ((ProductsTableView) t.getTableView().getItems().get(
+                            t.getTablePosition().getRow())
+                    ).setDescription(t.getNewValue());
+                    setNewCellValue("description", t.getNewValue(), productsTable.getFocusModel().getFocusedItem().getTitle());
                 }
+            }
         );
-        // Создаём обработчик событий от мыши
-        //EventHandler<MouseEvent> mouseEventHandle1 = (MouseEvent event1) -> {
-            // Вызываем метод, возврщающий нам ...
-            //handleProductTableMousePressed(event1);
-        //};
-        // Добавляем обработчик событий от мыши к нашей таблице
-
-        //productsTable.addEventHandler(MouseEvent.MOUSE_PRESSED, mouseEventHandle1);
         productsTable.setItems(data);
-        //productsTable.removeEventHandler(MouseEvent.MOUSE_PRESSED, mouseEventHandle1);
     }
-    private void buildDeliveryTimeTable(String selectedProduct) throws SQLException {
+    private void buildDeliveryTimeTable(String selectedProduct) {
         ObservableList<ProductsTableView> data = FXCollections.observableArrayList();
         int id = UtilPack.getProductIdFromTitle(selectedProduct, allProductsList);
         allProductsList.stream().forEach(product -> {
@@ -402,9 +418,21 @@ public class PCGUIController implements Initializable {
             }
         });
         deliveryTime.setCellValueFactory(new PropertyValueFactory<>("delivery_time"));
+        deliveryTime.setCellFactory(TextFieldTableCell.forTableColumn());
+        deliveryTime.setOnEditCommit(
+            new EventHandler<CellEditEvent<ProductsTableView, String>>() {
+                @Override
+                public void handle(CellEditEvent<ProductsTableView, String> t) {
+                    ((ProductsTableView) t.getTableView().getItems().get(
+                            t.getTablePosition().getRow())
+                    ).setDeliveryTime(t.getNewValue());
+                    setNewCellValue("delivery_time", t.getNewValue(), productsTable.getFocusModel().getFocusedItem().getTitle());
+                }
+            }
+        );
         deliveryTable.setItems(data);
     }
-    private void buildPricesTable(String selectedProduct) throws SQLException {
+    private void buildPricesTable(String selectedProduct) {
         SetRates ratesPack = SetRates.getRatesPack(selectedProduct);
         allProductsList.stream().forEach((product) -> {
             if (product.getTitle().equals(selectedProduct)) basePrice = product.getPrice();
@@ -469,135 +497,166 @@ public class PCGUIController implements Initializable {
                 public void handle(CellEditEvent<PricesTableView, Double> t) {
                     if (t.getRowValue().getType().equals("Закупочная цена")) {
                         ((PricesTableView) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())
+                            t.getTablePosition().getRow())
                         ).setPrice(t.getNewValue());
                         setNewPriceValue("price", t.getNewValue(), productsTable.getFocusModel().getFocusedItem().getTitle());
                         try {
                             getAllProductsList();
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            buildPricesTable(selectedProduct);
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
+                        } catch (SQLException e) {}
+                        buildPricesTable(selectedProduct);
                     } else {
                         AlertWindow.illegalAction();
-                        try {
-                            buildPricesTable(selectedProduct);
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
+                        buildPricesTable(selectedProduct);
                     }
-
                 }
             }
         );
         priceValueRub.setCellValueFactory(new PropertyValueFactory<>("priceR"));
         pricesTable.setItems(data);
     }
-    private void buildQuantityTable(String selectedProduct) throws SQLException {
-        ObservableList<QuantityTableView> quantities = getQuantities(selectedProduct);
+    private void buildQuantityTable(String selectedProduct) {
+        ObservableList<QuantityTableView> quantities = FXCollections.emptyObservableList();
+        ArrayList<String> existingProductsTitles = new ArrayList<>();
+        allQuantitiesList.stream().forEach(q -> {
+            existingProductsTitles.add(q.getProduct_title());
+        });
+        if (existingProductsTitles.contains(selectedProduct)) {
+            quantities = getQuantities(selectedProduct);
+        } else {
+            quantities = getNullQuantities();
+        }
         quantityStock.setCellValueFactory(new PropertyValueFactory<>("stock"));
         quantityReserved.setCellValueFactory(new PropertyValueFactory<>("reserved"));
         quantityOrdered.setCellValueFactory(new PropertyValueFactory<>("ordered"));
         quantityMinimum.setCellValueFactory(new PropertyValueFactory<>("minimum"));
+        quantityPiecesPerPack.setCellValueFactory(new PropertyValueFactory<>("pieces_per_pack"));
+
         quantityMinimum.setCellFactory(TextFieldTableCell.<QuantityTableView, Integer>forTableColumn(new IntegerStringConverter()));
         quantityMinimum.setOnEditCommit(
                 new EventHandler<CellEditEvent<QuantityTableView, Integer>>() {
                     @Override
                     public void handle(CellEditEvent<QuantityTableView, Integer> t) {
-                        ((QuantityTableView) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())
+                        ((QuantityTableView) t.getTableView().getItems().get(t.getTablePosition().getRow())
                         ).setPiecesPerPack(t.getNewValue());
+                        setNewQuantityValue("minimum", t.getNewValue(),
+                                UtilPack.getProductIdFromTitle(productsTable.getFocusModel().getFocusedItem().getTitle(), allProductsList));
                         try {
-                            setNewQuantityValue("minimum", t.getNewValue(),
-                                    UtilPack.getProductIdFromTitle(productsTable.getFocusModel().getFocusedItem().getTitle(), allProductsList));
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            buildQuantityTable(selectedProduct);
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
+                            allQuantitiesList.clear();
+                            getAllQuantitiesList();
+                        } catch (SQLException e) {}
+                        buildQuantityTable(selectedProduct);
                     }
                 }
         );
-        quantityPiecesPerPack.setCellValueFactory(new PropertyValueFactory<>("pieces_per_pack"));
         quantityPiecesPerPack.setCellFactory(TextFieldTableCell.<QuantityTableView, Integer>forTableColumn(new IntegerStringConverter()));
         quantityPiecesPerPack.setOnEditCommit(
                 new EventHandler<CellEditEvent<QuantityTableView, Integer>>() {
                     @Override
                     public void handle(CellEditEvent<QuantityTableView, Integer> t) {
-                        ((QuantityTableView) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())
-                        ).setPiecesPerPack(t.getNewValue());
+                        ((QuantityTableView) t.getTableView().getItems().get(t.getTablePosition().getRow())).setPiecesPerPack(t.getNewValue());
+                        setNewQuantityValue("pieces_per_pack", t.getNewValue(),
+                                UtilPack.getProductIdFromTitle(productsTable.getFocusModel().getFocusedItem().getTitle(),
+                                        allProductsList)
+                        );
                         try {
-                            setNewQuantityValue("pieces_per_pack", t.getNewValue(),
-                                    UtilPack.getProductIdFromTitle(productsTable.getFocusModel().getFocusedItem().getTitle(), allProductsList));
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            buildQuantityTable(selectedProduct);
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
+                            allQuantitiesList.clear();
+                            getAllQuantitiesList();
+                        } catch (SQLException e) {}
+                        buildQuantityTable(selectedProduct);
                     }
                 }
         );
-
-
-
-
-
         quantitiesTable.setItems(quantities);
     }
-    private void buildAnalogsTable(String selectedProduct) throws SQLException {
-        ObservableList<AnalogsTableView> analogs = getAnalogs(selectedProduct);
-        analogTitle.setCellValueFactory(new PropertyValueFactory<>("analog_title"));
-        analogVendor.setCellValueFactory(new PropertyValueFactory<>("analog_vendor"));
-        analogsTable.setItems(analogs);
-    }
-    private void buildDatasheetFileTable(String selectedProduct) throws SQLException {
-        ObservableList<DatasheetTableView> data = FXCollections.observableArrayList();
-        int selectedProductId = UtilPack.getProductIdFromTitle(selectedProduct, allProductsList);
-
-        allFilesOfProgramList.stream().forEach(fileOfProgram -> {
-            if((fileOfProgram.getOwner_id() == selectedProductId) && (fileOfProgram.getFile_type_id() == 2)) {
-                data.add(new DatasheetTableView(fileOfProgram.getName()));
-            }
-        });
-        /*
-        ResultSet resultSet = connection.getResult("select name from files where owner_id=" + selectedProductId + " and file_type_id=" + 2);
-        while (resultSet.next()) {
-            data.add(new DatasheetTableView(resultSet.getString("name")));
-        }
-        */
-        /*
+    private void buildAnalogsTable(String selectedProduct) {
+        ObservableList<AnalogsTableView> analogs = FXCollections.observableArrayList();
+        ArrayList<Integer> paIds = new ArrayList<>(10);
+        ArrayList<Product> aProducts = new ArrayList<>(10);
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
-            List response = session.createQuery("From Files where ownerId=" + getProductIdFromTitle(selectedProduct) + " and fileTypeId=" + 2).list();
+            List response = session.createQuery(
+                    "From ProductsAnalogs where productId=" +
+                            UtilPack.getProductIdFromTitle(selectedProduct, allProductsList)).list();
             for (Iterator iterator = response.iterator(); iterator.hasNext();) {
-                Files f = (Files) iterator.next();
-                data.add(new DatasheetTableView(f.getName()));
+                ProductsAnalogs pa = (ProductsAnalogs) iterator.next();
+                paIds.add(pa.getAnalogId());
             }
         } catch (HibernateException e) {
         } finally {
             session.close();
         }
-        */
+        for (Integer id: paIds) {
+            allProductsList.stream().forEach(product -> {
+                if (product.getId() == id) {
+                    aProducts.add(product);
+                }
+            });
+        }
+
+        if (aProducts.size() == 0) {
+            analogs = getNullAnalogs();
+        } else {
+            for (int i = 0; i < aProducts.size(); i++) {
+                analogs.add(i, new AnalogsTableView(aProducts.get(i).getTitle(), aProducts.get(i).getVendor()));
+            }
+        }
+
+        analogTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
+        analogVendor.setCellValueFactory(new PropertyValueFactory<>("vendor"));
+        analogsTable.setItems(analogs);
+        analogsTable.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                if(mouseEvent.getButton().equals(MouseButton.PRIMARY)){
+                    if(mouseEvent.getClickCount() == 2){
+                        try {
+                            fillMainTab(analogsTable.getSelectionModel().getSelectedItem().getTitle());
+                        } catch (SQLException e) {}
+                        fillProductTab(analogsTable.getSelectionModel().getSelectedItem().getTitle());
+                    }
+                }
+            }
+        });
+    }
+    @FXML private void handleAnalogTableMousePressed(MouseEvent mouseEvent) {
+        if (analogsTable.getSelectionModel().getSelectedItems().size() == 0) {
+            analogsTableContextMenu = ContextMenuBuilder.create().items(
+                    MenuItemBuilder.create().text("Добавить аналог для выбранного продукта").onAction((ActionEvent arg0) -> {
+                        Analog.addToSelectedOn(productsTable);
+                        buildAnalogsTable(selectedProduct);
+                    }).build()
+            ).build();
+        } else if (analogsTable.getSelectionModel().getSelectedItems().size() == 1) {
+            analogsTableContextMenu = ContextMenuBuilder.create().items(
+                    MenuItemBuilder.create().text("Добавить аналог для выбранного продукта").onAction((ActionEvent arg0) -> {
+                        Analog.addToSelectedOn(productsTable);
+                        buildAnalogsTable(selectedProduct);
+                    }).build(),
+                    MenuItemBuilder.create().text("Удалить выбранный аналог").onAction((ActionEvent arg0) -> {
+                        Analog.removeAnalogFrom(analogsTable, selectedProduct);
+                        buildAnalogsTable(selectedProduct);
+                    }).build()
+            ).build();
+        }
+        analogsTable.setContextMenu(analogsTableContextMenu);
+    }
+    private void buildDatasheetFileTable(String selectedProduct) {
+        ObservableList<DatasheetTableView> data = FXCollections.observableArrayList();
+        int selectedProductId = UtilPack.getProductIdFromTitle(selectedProduct, allProductsList);
+        allFilesOfProgramList.stream().forEach(fileOfProgram -> {
+            if((fileOfProgram.getOwner_id() == selectedProductId) && (fileOfProgram.getFile_type_id() == 2)) {
+                data.add(new DatasheetTableView(fileOfProgram.getName()));
+            }
+        });
         datasheetFileName.setCellValueFactory(new PropertyValueFactory<>("name"));
         datasheetTableContextMenu = ContextMenuBuilder.create().items(
-                MenuItemBuilder.create().text("Изменить даташит pdf-файл").onAction((ActionEvent arg0) -> {
-                    try {
-                        setDatasheetFile();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }).build()
+            MenuItemBuilder.create().text("Изменить даташит pdf-файл").onAction((ActionEvent arg0) -> {
+                try {
+                    setDatasheetFile();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }).build()
         ).build();
         datasheetFileTable.setContextMenu(datasheetTableContextMenu);
         datasheetFileTable.setItems(data);
@@ -620,65 +679,98 @@ public class PCGUIController implements Initializable {
         vendorsRateColumn.setCellValueFactory(new PropertyValueFactory<>("rate"));
         vendorsTableContextMenu = ContextMenuBuilder.create().items(
                 MenuItemBuilder.create().text("Добавить нового производителя").onAction((ActionEvent arg0) -> {
-                    addVendorDialog();}).build()
+                    addVendorDialog();
+                }).build()
         ).build();
         vendorsTable.setContextMenu(vendorsTableContextMenu);
         vendorsTable.setItems(data);
     }
-    @FXML private void handleVendorsTableMousePressed() throws SQLException {
-        String selectedVendor = vendorsTable.getSelectionModel().getSelectedItem().getTitle();
+    private void buildSeriesTable() {
+        ObservableList<SeriesTableView> data = FXCollections.observableArrayList();
+        UtilPack.getAllSeries().stream().forEach(serie -> {
+            data.add(new SeriesTableView(serie.getTitle(), serie.getVendorId().getTitle()));
+        });
+        serieTableColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
+        serieVendorTableColumn.setCellValueFactory(new PropertyValueFactory<>("vendor"));
+        seriesTableContextMenu = ContextMenuBuilder.create().items(
+                MenuItemBuilder.create().text("Добавить новую серию").onAction((ActionEvent arg0) -> {
+                    addSerieDialog();
+                }).build(),
+                MenuItemBuilder.create().text("Редактировать выбранную серию").onAction((ActionEvent arg0) -> {
+                    editSerieDialog(selectedSerie);
+                }).build(),
+                MenuItemBuilder.create().text("Удалить выбранную серию").onAction((ActionEvent arg0) -> {
+                    deleteSerieDialog(selectedSerie);
+                }).build()
+        ).build();
+        seriesTable.setContextMenu(seriesTableContextMenu);
+        seriesTable.setItems(data);
+    }
+    @FXML private void handleVendorsTableMousePressed() {
+        selectedVendor = vendorsTable.getSelectionModel().getSelectedItem().getTitle();
         ObservableList<ProductsTableView> data = FXCollections.observableArrayList();
-
-        allProductsList.stream().forEach(product -> {
-            try {
+        try {
+            allProductsList.stream().forEach(product -> {
                 if(product.getVendor().equals(selectedVendor)) {
                     data.add(new ProductsTableView(
-                            product.getArticle(),
-                            product.getTitle(),
-                            product.getDescription(),
-                            product.getDeliveryTime())
+                        product.getArticle(),
+                        product.getTitle(),
+                        product.getDescription(),
+                        product.getDeliveryTime())
                     );
                 }
-            } catch (NullPointerException ne) {}
-        });
+            });
+        } catch (NullPointerException ne) {}
         buildProductsTable(data);
         productsTable.getSelectionModel().select(0);
-        onFocusedProductTableItem();
+        onFocusedProductTableItem(selectedProduct);
+        fillProductTab(selectedProduct);
     }
-    private void buildImageView(String selectedProduct) throws SQLException {
+    @FXML private void handleSeriesTableMousePressed() {
+        selectedSerie = seriesTable.getSelectionModel().getSelectedItem().getTitle();
+        ObservableList<ProductsTableView> data = FXCollections.observableArrayList();
+        try {
+            allProductsList.stream().forEach(product -> {
+                if(product.getSerie().equals(selectedSerie)) {
+                    data.add(new ProductsTableView(
+                        product.getArticle(),
+                        product.getTitle(),
+                        product.getDescription(),
+                        product.getDeliveryTime())
+                    );
+                }
+            });
+        } catch (NullPointerException ne) {}
+        buildProductsTable(data);
+        productsTable.getSelectionModel().select(0);
+        onFocusedProductTableItem(selectedProduct);
+        fillProductTab(selectedProduct);
+    }
+    private void buildImageView(String selectedProduct) {
         if (selectedProduct == null) {
             selectedProduct = focusedProduct;
         }
         int selectedProductId = UtilPack.getProductIdFromTitle(selectedProduct, allProductsList);
-
+        ArrayList<Integer> allOwners = new ArrayList<>();
         allFilesOfProgramList.stream().forEach(fileOfProgram -> {
-            if((fileOfProgram.getOwner_id() == selectedProductId) && (fileOfProgram.getFile_type_id() == 1)) {
-                File picFile = new File(fileOfProgram.getPath());
-                ProductImage.open(picFile, gridPane, imageView);
-            }
+            allOwners.add(fileOfProgram.getOwner_id());
         });
-        /*
-        ResultSet resultSet = connection.getResult("select path from files where owner_id=" + selectedProductId + " and file_type_id=" + 1);
-        ProductImage.open(new File(noImageFile), gridPane, imageView);
-        while (resultSet.next()) {
-            File picFile = new File(resultSet.getString("path"));
+        if (allOwners.contains(selectedProductId)) {
+            allFilesOfProgramList.stream().forEach(fileOfProgram -> {
+                if((fileOfProgram.getOwner_id() == selectedProductId) && (fileOfProgram.getFile_type_id() == 1)) {
+                    if (fileOfProgram.getPath().equals("c:\\poligon_images\\")) {
+                        File picFile = new File(noImageFile);
+                        ProductImage.open(picFile, gridPane, imageView);
+                    } else {
+                        File picFile = new File(fileOfProgram.getPath());
+                        ProductImage.open(picFile, gridPane, imageView);
+                    }
+                }
+            });
+        } else {
+            File picFile = new File(noImageFile);
             ProductImage.open(picFile, gridPane, imageView);
         }
-        */
-        /*
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        List pics = session.createQuery("from Files where ownerId=" + getProductIdFromTitle(selectedProduct) + " and fileTypeId=" + 1).list();
-        if (pics.size()==0) {
-            ProductImage.open(new File(noImageFile), gridPane, imageView);
-        } else {
-            for (Iterator iterator = pics.iterator(); iterator.hasNext();) {
-                Files pic = (Files) iterator.next();
-                File picFile = new File(pic.getPath());
-                ProductImage.open(picFile, gridPane, imageView);
-            }
-        }
-        session.close();
-        */
     }
     // Построение дерева категорий каталога
     private void buildCategoryTree() {
@@ -694,11 +786,7 @@ public class PCGUIController implements Initializable {
             MenuItemBuilder.create().text("Установить коэффициенты цен").onAction((ActionEvent arg0) -> {
                 String selectedNode = (String)((TreeItem)categoriesTree.getSelectionModel().getSelectedItem()).getValue();
                 Integer selectedNodeID = null;
-                try {
-                    selectedNodeID = UtilPack.getCategoryIdFromTitle(selectedNode);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+                selectedNodeID = UtilPack.getCategoryIdFromTitle(selectedNode);
                 SetRatesWindow ratesWindow = new SetRatesWindow(selectedNodeID, null);
                 ratesWindow.showModalWindow();
             }).build(),
@@ -755,22 +843,14 @@ public class PCGUIController implements Initializable {
     private void includeLowerItems(ObservableList<ProductsTableView> data, String selectedNode) throws SQLException {
         recursiveItems(data, UtilPack.getCategoryIdFromTitle(selectedNode));
         getProductList(UtilPack.getCategoryIdFromTitle(selectedNode)).stream().forEach((product) -> {
-            try {
-                excludeLowerItems(data, selectedNode);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            excludeLowerItems(data, selectedNode);
         });
     }
-    private void recursiveItems(ObservableList<ProductsTableView> data, Integer selectedNode) throws SQLException {
+    private void recursiveItems(ObservableList<ProductsTableView> data, Integer selectedNode) {
         ArrayList<Integer> children = arrayChildren(selectedNode);
         if(!children.isEmpty()) {
             children.stream().forEach((ch) -> {
-                try {
-                    recursiveItems(data, ch);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+                recursiveItems(data, ch);
             });
         } else {
             getProductList(selectedNode).stream().forEach((product) -> {
@@ -778,7 +858,7 @@ public class PCGUIController implements Initializable {
             });
         }
     }
-    private void excludeLowerItems(ObservableList<ProductsTableView> data, String selectedNode) throws SQLException {
+    private void excludeLowerItems(ObservableList<ProductsTableView> data, String selectedNode) {
         getProductList(selectedNode).stream().forEach((product) -> {
             data.add(product);
         });
@@ -815,7 +895,7 @@ public class PCGUIController implements Initializable {
                     productsTable.getSelectionModel().select(0);
                     setVendorSelected(productsTable.getSelectionModel().getSelectedItem().getTitle());
                     focusedProduct = productsTable.getSelectionModel().getSelectedItem().getTitle();
-                    onFocusedProductTableItem();
+                    onFocusedProductTableItem(selectedProduct);
                 }
                 Platform.runLater(() -> {
                     progressBar.progressProperty().unbind();
@@ -825,7 +905,7 @@ public class PCGUIController implements Initializable {
             }
         };
     }
-    private void buildPropertiesTree(String selectedProduct) throws SQLException {
+    private void buildPropertiesTree(String selectedProduct) {
         propertiesStackPane.getChildren().clear();
         //Получаем вид продукта для товара, преданного в параметре
         ProductKinds kind = new ProductKinds();
@@ -867,11 +947,7 @@ public class PCGUIController implements Initializable {
         rootItem.setExpanded(true);
         propertiesTree.setShowRoot(false);
         EventHandler<MouseEvent> mouseEventHandle = (MouseEvent event) -> {
-            try {
-                handlePropertiesTreeMouseClicked(event);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            try { handlePropertiesTreeMouseClicked(event); } catch (SQLException e) {}
         };
         propertiesTree.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseEventHandle);
         propertiesStackPane.getChildren().add(propertiesTree);
@@ -884,8 +960,7 @@ public class PCGUIController implements Initializable {
         });
     }
     // Создаёт модальное окно с деревом категорий товаров для диалога переноса товаров в другую категорию.
-    private void buildModalCategoryTree(StackPane stackPane) {
-
+    public TreeView<String> buildModalCategoryTree(StackPane stackPane, TreeView treeView) {
         CategoriesTreeView catalogRoot = new CategoriesTreeView(0, catalogHeader, 0);
         TreeItem<String> rootItem = new TreeItem<> (catalogRoot.getTitle());
         rootItem.setExpanded(true);
@@ -918,16 +993,17 @@ public class PCGUIController implements Initializable {
         stackPane.getChildren().add(treeView);
         treeView.setPrefWidth(350.0);
         treeView.setPrefHeight(400.0);
+        return treeView;
     }
     // Вызывает диалог переноса товавра или нескольких товаров в новую категорию.
     private void changeProductCategoryDialog() throws SQLException {
         ObservableList<ProductsTableView> selectedItems = productsTable.getSelectionModel().getSelectedItems();
         ButtonType buttonTypeOk = new ButtonType("Переместить", ButtonBar.ButtonData.OK_DONE);
         ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonBar.ButtonData.CANCEL_CLOSE);
-        buildModalCategoryTree(stackPaneModal);
+        TreeView<String> modalTreeView = buildModalCategoryTree(stackPaneModal, treeView);
         Optional<ButtonType> result = AlertWindow.changeProductCategoryDialog(stackPaneModal, buttonTypeOk, buttonTypeCancel);
         if ((result.isPresent()) && (result.get() == buttonTypeOk)) {
-            selectedCategory = treeView.getSelectionModel().getSelectedItem().getValue();
+            selectedCategory = modalTreeView.getSelectionModel().getSelectedItem().getValue();
             for(ProductsTableView product: selectedItems) {
                 try {
                     if(isCategoryLowest(selectedCategory)) {
@@ -1067,15 +1143,32 @@ public class PCGUIController implements Initializable {
     }
     private void setNewQuantityValue(String fieldName, Integer newValue, Integer productId) {
         Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = session.beginTransaction();
-        Query query = session.createQuery("UPDATE Quantity set " + fieldName + "= :newValue where productId =" + productId);
-        query.setParameter("newValue", newValue);
-        query.executeUpdate();
-        tx.commit();
-        session.close();
+        Query q = session.createQuery("from Quantity where productId=" + productId);
+        List res = q.list();
+        if (res.size() > 0) {
+            Transaction tx = session.beginTransaction();
+            Query query = session.createQuery("UPDATE Quantity set " + fieldName + "= :newValue where productId =" + productId);
+            query.setParameter("newValue", newValue);
+            query.executeUpdate();
+            tx.commit();
+            session.close();
+        } else {
+            Transaction tx = session.beginTransaction();
+            Quantity quantity = new Quantity();
+            quantity.setProductId(new Products(productId));
+            quantity.setStock(0);
+            quantity.setOrdered(0);
+            quantity.setReserved(0);
+            quantity.setMinimum(0);
+            quantity.setPiecesPerPack(0);
+            session.saveOrUpdate(quantity);
+            tx.commit();
+            session.close();
+            setNewQuantityValue(fieldName, newValue, productId);
+        }
     }
     // Перерисовывает таблицу товаров в зависимости от выбранного пункта в дереве категорий.
-    private void refreshProductsTable() throws SQLException {
+    private void refreshProductsTable() {
         try {
             Integer selectedTreeId = UtilPack.getCategoryIdFromTitle(categoriesTree.getSelectionModel().getSelectedItem().getValue());
             buildProductsTable(getProductList(selectedTreeId));
@@ -1087,14 +1180,36 @@ public class PCGUIController implements Initializable {
     // Вызывает диалог добавления нового товара из контектстного меню таблицы товаров.
     // Пока не реализован.
     private void addProductDialog() {
-        //ProductsTableView product = productsTable.getSelectionModel().getSelectedItem();
-        //tabPane.getSelectionModel().select(productTab);
+        Optional<Product> result = AlertWindow.newProductDialog();
+        if (result.isPresent()) {
+            System.out.println("new product is " + "\n" +
+                result.get().getCategoryId() + "\n" +
+                result.get().getTitle() + "\n" +
+                result.get().getDescription() + "\n" +
+                result.get().getAnons() + "\n" +
+                result.get().getArticle() + "\n" +
+                result.get().getAvailable() + "\n" +
+                result.get().getDeliveryTime() + "\n" +
+                result.get().getEan() + "\n" +
+                result.get().getOutdated() + "\n" +
+                result.get().getPrice() + "\n" +
+                result.get().getSerie() + "\n" +
+                result.get().getProductKindId() + "\n" +
+                result.get().getVendor() + "\n" +
+                result.get().getRate() + "\n" +
+                result.get().getDiscount1() + "\n" +
+                result.get().getDiscount2() + "\n" +
+                result.get().getDiscount3()
+            );
+        }
     }
+
     // Вызывает диалог удаления выбранного товара (или нескольких товаров) из контектстного меню таблицы товаров.
     // Пока не реализован.
     private void deleteProductDialog() {
         //ProductsTableView product = productsTable.getSelectionModel().getSelectedItem();
         //tabPane.getSelectionModel().select(productTab);
+        AlertWindow.functionNotReady();
     }
     // Переводит программу на отображение вкладки со свойствами выбранного товара.
     private void openProductTab() throws SQLException {
@@ -1133,40 +1248,12 @@ public class PCGUIController implements Initializable {
                 productsTable.scrollTo(productsTable.getSelectionModel().getSelectedItem());
             }
         }
-
         productsTable.getSelectionModel().select(selectedProductsTableViewItem[0]);
         setVendorSelected(productsTable.getSelectionModel().getSelectedItem().getTitle());
         setCategorySelected(productsTable.getSelectionModel().getSelectedItem().getTitle());
     }
     private void newCategoryDialog(String whatTree) throws SQLException {
-        Dialog<NewCategory> dialog = new Dialog<>();
-        dialog.setTitle("Создание новой категории");
-        dialog.setHeaderText("Введите название новой категории. Она будет размещена внутри выбранной категории.");
-        dialog.setResizable(false);
-
-        Label label1 = new Label("Введите название:  ");
-        Label label2 = new Label("Описание (необязательно):  ");
-        TextField text1 = new TextField();
-        TextArea text2 = new TextArea();
-
-        GridPane grid = new GridPane();
-        grid.add(label1, 1, 1);
-        grid.add(text1, 2, 1);
-        grid.add(label2, 1, 2);
-        grid.add(text2, 2, 2);
-        dialog.getDialogPane().setContent(grid);
-
-        ButtonType buttonTypeOk = new ButtonType("Создать", ButtonData.OK_DONE);
-        ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonData.CANCEL_CLOSE);
-        dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
-        dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
-        dialog.setResultConverter((ButtonType b) -> {
-            if (b == buttonTypeOk) {
-                return new NewCategory(text1.getText(), text2.getText());
-            }
-            return null;
-        });
-        Optional<NewCategory> result = dialog.showAndWait();
+        Optional<NewCategory> result = AlertWindow.newCategoryDialog();
         if (result.isPresent()) {
             newCatTitle = result.get().getTitle();
             newCatDescription = result.get().getDescription();
@@ -1175,43 +1262,14 @@ public class PCGUIController implements Initializable {
                 buildCategoryTree();
             } else if (whatTree.equals("modal")) {
                 buildCategoryTree();
-                buildModalCategoryTree(stackPaneModal);
+                buildModalCategoryTree(stackPaneModal, treeView);
             }
         }
     }
     private void editCategoryDialog(String whatTree) throws SQLException {
         if (whatTree.equals("main")) {
             ArrayList<String> details = getCategoryDetails(categoriesTree.getSelectionModel().getSelectedItem().getValue());
-            Dialog<NewCategory> dialog = new Dialog<>();
-            dialog.setTitle("Редактирование категории");
-            dialog.setHeaderText("Здесь Вы можете отредактировать название и/или описание выбранной категории.");
-            dialog.setResizable(false);
-
-            Label label1 = new Label("Введите название:  ");
-            Label label2 = new Label("Описание (необязательно):  ");
-            TextField text1 = new TextField();
-            TextArea text2 = new TextArea();
-            text1.setText(details.get(0));
-            text2.setText(details.get(1));
-
-            GridPane grid = new GridPane();
-            grid.add(label1, 1, 1);
-            grid.add(text1, 2, 1);
-            grid.add(label2, 1, 2);
-            grid.add(text2, 2, 2);
-            dialog.getDialogPane().setContent(grid);
-
-            ButtonType buttonTypeOk = new ButtonType("Сохранить", ButtonData.OK_DONE);
-            ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonData.CANCEL_CLOSE);
-            dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
-            dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
-            dialog.setResultConverter((ButtonType b) -> {
-                if (b == buttonTypeOk) {
-                    return new NewCategory(text1.getText(), text2.getText());
-                }
-                return null;
-            });
-            Optional<NewCategory> result = dialog.showAndWait();
+            Optional<NewCategory> result = AlertWindow.editCategoryDialog(details);
             if (result.isPresent()) {
                 newCatTitle = result.get().getTitle();
                 newCatDescription = result.get().getDescription();
@@ -1220,42 +1278,13 @@ public class PCGUIController implements Initializable {
             }
         } else if (whatTree.equals("modal")) {
             ArrayList<String> details = getCategoryDetails(treeView.getSelectionModel().getSelectedItem().getValue());
-            Dialog<NewCategory> dialog = new Dialog<>();
-            dialog.setTitle("Редактирование категории");
-            dialog.setHeaderText("Здесь Вы можете отредактировать название и/или описание выбранной категории.");
-            dialog.setResizable(false);
-
-            Label label1 = new Label("Введите название:  ");
-            Label label2 = new Label("Описание (необязательно):  ");
-            TextField text1 = new TextField();
-            TextArea text2 = new TextArea();
-            text1.setText(details.get(0));
-            text2.setText(details.get(1));
-
-            GridPane grid = new GridPane();
-            grid.add(label1, 1, 1);
-            grid.add(text1, 2, 1);
-            grid.add(label2, 1, 2);
-            grid.add(text2, 2, 2);
-            dialog.getDialogPane().setContent(grid);
-
-            ButtonType buttonTypeOk = new ButtonType("Сохранить", ButtonData.OK_DONE);
-            ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonData.CANCEL_CLOSE);
-            dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
-            dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
-            dialog.setResultConverter((ButtonType b) -> {
-                if (b == buttonTypeOk) {
-                    return new NewCategory(text1.getText(), text2.getText());
-                }
-                return null;
-            });
-            Optional<NewCategory> result = dialog.showAndWait();
+            Optional<NewCategory> result = AlertWindow.editCategoryDialog(details);
             if (result.isPresent()) {
                 newCatTitle = result.get().getTitle();
                 newCatDescription = result.get().getDescription();
                 editCategory(treeView.getSelectionModel().getSelectedItem().getValue(), newCatTitle, newCatDescription);
                 buildCategoryTree();
-                buildModalCategoryTree(stackPaneModal);
+                buildModalCategoryTree(stackPaneModal, treeView);
             }
         }
     }
@@ -1281,7 +1310,7 @@ public class PCGUIController implements Initializable {
                 replaceProductsUp(catId, parentCatId);
                 deleteCategory(catTitle);
                 buildCategoryTree();
-                buildModalCategoryTree(stackPaneModal);
+                buildModalCategoryTree(stackPaneModal, treeView);
                 ObservableList<ProductsTableView> data = FXCollections.observableArrayList();
                 productsTable.setItems(data);
             }
@@ -1384,46 +1413,25 @@ public class PCGUIController implements Initializable {
             updateCategoryId(parentCatId, product);
         }
     }
-    @FXML private void onFocusedProductTableItem() throws SQLException {
+    @FXML private void onFocusedProductTableItem(String selectedProduct) {
         try {
-            selectedProduct = (String) (productsTable.getFocusModel().getFocusedItem()).getTitle();
-
             buildPricesTable(selectedProduct);
             buildQuantityTable(selectedProduct);
             buildDeliveryTimeTable(selectedProduct);
             buildAnalogsTable(selectedProduct);
             buildDatasheetFileTable(selectedProduct);
             buildImageView(selectedProduct);
-            setVendorSelected(selectedProduct);
             setCategorySelected(selectedProduct);
-            buildPropertiesTree(selectedProduct);
-            datasheetFileTable.refresh();
-            setSelectProperty(selectedProduct);
-            buildFunctionsTable1(selectedProduct);
-            setSelectFunction();
-            buildAccessoriesTable(selectedProduct);
-
-        } catch (NullPointerException ex) {
-        }
-    }
-    private void onFocusedProductTableItem(String selectedProduct) throws SQLException {
-        try {
-            buildPricesTable(selectedProduct);
-            buildQuantityTable(selectedProduct);
-            buildDeliveryTimeTable(selectedProduct);
-            buildAnalogsTable(selectedProduct);
-            buildDatasheetFileTable(selectedProduct);
-            buildImageView(selectedProduct);
             setVendorSelected(selectedProduct);
+            setSerieSelected(selectedProduct);
             buildPropertiesTree(selectedProduct);
             datasheetFileTable.refresh();
             setSelectProperty(selectedProduct);
             buildFunctionsTable1(selectedProduct);
             setSelectFunction();
             buildAccessoriesTable(selectedProduct);
-
         } catch (NullPointerException ex) {
-        }
+        } catch (SQLException e) {}
     }
     private void addVendorDialog() {
         ObservableList<String> currencies = FXCollections.observableArrayList();
@@ -1434,49 +1442,7 @@ public class PCGUIController implements Initializable {
             currencies.add(c.getTitle());
         }
         session.close();
-
-        Dialog<NewVendor> dialog = new Dialog<>();
-        dialog.setTitle("Создание нового производителя");
-        dialog.setHeaderText("Введите данные нового производителя.");
-        dialog.setResizable(false);
-
-        Label label1 = new Label("Введите название:  ");
-        Label label2 = new Label("Описание (необязательно):  ");
-        Label label3 = new Label("Страна происхождения:  ");
-        Label label4 = new Label("Валюта расчёта с этим производителем:  ");
-        Label label5 = new Label("Наценка на продукцию этого производителя:  ");
-        TextField text1 = new TextField();
-        TextArea text2 = new TextArea();
-        TextField text3 = new TextField();
-        ChoiceBox<String> currency = new ChoiceBox<>();
-        currency.setItems(currencies);
-        TextField text5 = new TextField();
-
-        GridPane grid = new GridPane();
-        grid.add(label1, 1, 1);
-        grid.add(text1, 2, 1);
-        grid.add(label2, 1, 2);
-        grid.add(text2, 2, 2);
-        grid.add(label3, 1, 3);
-        grid.add(text3, 2, 3);
-        grid.add(label4, 1, 4);
-        grid.add(currency, 2, 4);
-        grid.add(label5, 1, 5);
-        grid.add(text5, 2, 5);
-
-        dialog.getDialogPane().setContent(grid);
-
-        ButtonType buttonTypeOk = new ButtonType("Создать", ButtonData.OK_DONE);
-        ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonData.CANCEL_CLOSE);
-        dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
-        dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
-        dialog.setResultConverter((ButtonType b) -> {
-            if (b == buttonTypeOk) {
-                return new NewVendor(text1.getText(), text2.getText(), currency.getValue(), text3.getText(), Double.parseDouble(text5.getText()));
-            }
-            return null;
-        });
-        Optional<NewVendor> result = dialog.showAndWait();
+        Optional<NewVendor> result = AlertWindow.newVendorDialog(currencies);
         if (result.isPresent()) {
             newVendorTitle = result.get().getTitle();
             newVendorDescription = result.get().getDescription();
@@ -1499,6 +1465,64 @@ public class PCGUIController implements Initializable {
         tx.commit();
         session.close();
         setCurrency(newVendorCurrency, newVendorTitle);
+    }
+    private void addSerieDialog() {
+        Optional<NewSerie> result = AlertWindow.newSerieDialog();
+        if (result.isPresent()) {
+            Vendors vendor = new Vendors();
+            Session session = HibernateUtil.getSessionFactory().openSession();
+            Query q = session.createQuery("from Vendors where title = :title");
+            q.setParameter("title", result.get().getVendor());
+            List res = q.list();
+            for(Iterator iterator = res.iterator(); iterator.hasNext();) {
+                vendor = (Vendors) iterator.next();
+            }
+            Session session1 = HibernateUtil.getSessionFactory().openSession();
+            Transaction tx = session1.beginTransaction();
+            Series serie = new Series();
+            serie.setTitle(result.get().getTitle());
+            serie.setDescription(result.get().getDescription());
+            serie.setVendorId(vendor);
+            session1.save(serie);
+            tx.commit();
+            session1.close();
+            buildSeriesTable();
+        }
+    }
+    private void editSerieDialog(String selectedSerie) {
+        Optional<NewSerie> result = AlertWindow.editSerieDialog(selectedSerie);
+        if (result.isPresent()) {
+            Series serie = new Series();
+            Session session0 = HibernateUtil.getSessionFactory().openSession();
+            Query q0 = session0.createQuery("from Series where title = :title");
+            q0.setParameter("title", result.get().getTitle());
+            List res0 = q0.list();
+            for(Iterator iterator = res0.iterator(); iterator.hasNext();) {
+                serie = (Series) iterator.next();
+            }
+            session0.close();
+            Vendors vendor = new Vendors();
+            Session session = HibernateUtil.getSessionFactory().openSession();
+            Query q = session.createQuery("from Vendors where title = :title");
+            q.setParameter("title", result.get().getVendor());
+            List res = q.list();
+            for(Iterator iterator = res.iterator(); iterator.hasNext();) {
+                vendor = (Vendors) iterator.next();
+            }
+            session.close();
+            Session session1 = HibernateUtil.getSessionFactory().openSession();
+            Transaction tx = session1.beginTransaction();
+            serie.setTitle(result.get().getTitle());
+            serie.setDescription(result.get().getDescription());
+            serie.setVendorId(vendor);
+            session1.saveOrUpdate(serie);
+            tx.commit();
+            session1.close();
+            buildSeriesTable();
+        }
+    }
+    private void deleteSerieDialog(String selectedSerie) {
+
     }
     private void setCurrency(String value, String vendorTitle) {
         if (!(value.equals("") || value.equals(null))) {
@@ -1595,6 +1619,20 @@ public class PCGUIController implements Initializable {
             }
         }
     }
+    private void setSerieSelected(String selectedProduct) {
+        final String[] serie = {""};
+        allProductsList.stream().forEach(product -> {
+            if(product.getTitle().equals(selectedProduct)) {
+                serie[0] = product.getSerie();
+            }
+        });
+        for (int i = 0; i < seriesTable.getItems().size(); i++) {
+            if (seriesTable.getItems().get(i).getTitle().equals(serie[0])) {
+                seriesTable.getSelectionModel().clearAndSelect(i);
+                seriesTable.scrollTo(seriesTable.getSelectionModel().getSelectedItem());
+            }
+        }
+    }
     private void setDatasheetFile() throws SQLException {
         File file = fileChooser.showOpenDialog(anchorPane.getScene().getWindow());
         if (file != null) {
@@ -1649,17 +1687,13 @@ public class PCGUIController implements Initializable {
             propertiesTable.getSelectionModel().select(0);
         }
     }
-    @FXML private void handleProductTableMousePressed(MouseEvent event1) throws SQLException {
-        onFocusedProductTableItem();
+    @FXML private void handleProductTableMousePressed(MouseEvent event1) {
+        onFocusedProductTableItem(selectedProduct);
         if (productsTable.getSelectionModel().getSelectedItems().size() == 1) {
             productTableContextMenu = ContextMenuBuilder.create().items(
                 MenuItemBuilder.create().text("Установить коэффициенты цен").onAction((ActionEvent arg0) -> {
                     Integer selectedProductID = null;
-                    try {
-                        selectedProductID = UtilPack.getProductIdFromTitle(selectedProduct, allProductsList);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
+                    selectedProductID = UtilPack.getProductIdFromTitle(selectedProduct, allProductsList);
                     SetRatesWindow ratesWindow = new SetRatesWindow(null, selectedProductID);
                     ratesWindow.showModalWindow();
                 }).build(),
@@ -1692,21 +1726,24 @@ public class PCGUIController implements Initializable {
                     tabPane.getSelectionModel().select(pdfTab);
                     try {
                         loadPdfFile(productsTable.getSelectionModel().getSelectedItem().getTitle());
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
+                    } catch (SQLException e) {}
                 }).build(),
                 MenuItemBuilder.create().text("Изменить производителя устройства").onAction((ActionEvent arg0) -> {
                     ContextBuilder.changeProductVendor(productsTable);
-                    productsTable.refresh();
-                    vendorsTable.refresh();
+                    try {
+                        getAllProductsList();
+                        fillMainTab(selectedProduct);
+                    } catch (SQLException e) {}
+                }).build(),
+                MenuItemBuilder.create().text("Изменить тип устройства").onAction((ActionEvent arg0) -> {
+                    ContextBuilder.changeProductKind(productsTable);
+                    try {
+                        getAllProductsList();
+                        fillMainTab(selectedProduct);
+                    } catch (SQLException e) {}
                 }).build(),
                 MenuItemBuilder.create().text("Переместить в категорию...").onAction((ActionEvent arg0) -> {
-                    try {
-                        changeProductCategoryDialog();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
+                    try {changeProductCategoryDialog();} catch (SQLException e) {}
                 }).build(),
                 MenuItemBuilder.create().text("Добавить элемент...").onAction((ActionEvent arg0) -> {
                     addProductDialog();
@@ -1717,6 +1754,7 @@ public class PCGUIController implements Initializable {
                 SeparatorMenuItemBuilder.create().build(),
                 MenuItemBuilder.create().text("Добавить аксессуар к выбранному устройству").onAction((ActionEvent arg0) -> {
                     Accessory.addToSelectedOn(productsTable);
+                    fillProductTab(selectedProduct);
                 }).build()
             ).build();
         } else if(productsTable.getSelectionModel().getSelectedItems().size() == 0) {
@@ -1738,8 +1776,17 @@ public class PCGUIController implements Initializable {
                 SeparatorMenuItemBuilder.create().build(),
                 MenuItemBuilder.create().text("Изменить производителя устройства").onAction((ActionEvent arg0) -> {
                     ContextBuilder.changeProductVendor(productsTable);
-                    productsTable.refresh();
-                    vendorsTable.refresh();
+                    try {
+                        getAllProductsList();
+                        fillMainTab(selectedProduct);
+                    } catch (SQLException e) {}
+                }).build(),
+                MenuItemBuilder.create().text("Изменить тип устройства").onAction((ActionEvent arg0) -> {
+                    ContextBuilder.changeProductKind(productsTable);
+                    try {
+                        getAllProductsList();
+                        fillMainTab(selectedProduct);
+                    } catch (SQLException e) {}
                 }).build(),
                 MenuItemBuilder.create().text("Добавить аксессуар к выбранным устройствам").onAction((ActionEvent arg0) -> {
                     Accessory.addToSelectedOn(productsTable);
@@ -1773,22 +1820,13 @@ public class PCGUIController implements Initializable {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Заполняет заголовок вкладки свойств товара названием текущего выбранного товара,
     // а также отображает картинку товара, еасли она определена.
-    private void fillProductTab(String selectedProduct) throws SQLException {
+    private void fillProductTab(String selectedProduct) {
         try {
             productTabTitle.setText(selectedProduct);
             productTabKind.setText(getProductKindTitle(selectedProduct));
-
             int selectedProductId = UtilPack.getProductIdFromTitle(selectedProduct, allProductsList);
-            //ResultSet resultSet = connection.getResult("select path, description from files where owner_id=" + selectedProductId + " and file_type_id=" + 1);
             ProductImage.open(new File(noImageFile), productTabGridPaneImageView, productTabImageView);
             picDescriptionTextArea.setText("");
-            /*
-            while (resultSet.next()) {
-                File picFile = new File(resultSet.getString("path"));
-                ProductImage.open(picFile, productTabGridPaneImageView, productTabImageView);
-                picDescriptionTextArea.setText(resultSet.getString("description"));
-            }
-            */
             Session session = HibernateUtil.getSessionFactory().openSession();
             List pics = session.createQuery("from Files where ownerId=" + UtilPack.getProductIdFromTitle(selectedProduct, allProductsList) + " and fileTypeId=" + 1).list();
             if (pics.size()==0) {
@@ -1819,11 +1857,10 @@ public class PCGUIController implements Initializable {
         tx.commit();
         session.close();
     }
-    private void buildPropertiesTable(String selectedPropertyType, String selectedProduct) throws SQLException {
+    private void buildPropertiesTable(String selectedPropertyType, String selectedProduct) {
         ArrayList<Integer> propertyIds = new ArrayList<>(10);
         ArrayList<PropertyValues> propertyValuesList = new ArrayList<>(10);
         ArrayList<PropertiesTreeTableView> propertyValues = new ArrayList<>(10);
-
         Session session = HibernateUtil.getSessionFactory().openSession();
         List res = session.createQuery("from Properties where propertyTypeId =" +
                 UtilPack.getPropertyTypeIdFromTitle(selectedPropertyType)).list();
@@ -1832,7 +1869,6 @@ public class PCGUIController implements Initializable {
             propertyIds.add(pr.getId());
         }
         session.close();
-
         Session session1 = HibernateUtil.getSessionFactory().openSession();
         List res1 = session1.createQuery("from PropertyValues where productId=" +
                 UtilPack.getProductIdFromTitle(selectedProduct, allProductsList)).list();
@@ -1843,44 +1879,36 @@ public class PCGUIController implements Initializable {
             }
         }
         session1.close();
-
         String currentTitle = "";
         for (int i = 0; i < propertyValuesList.size(); i++) {
             if (!currentTitle.equals(propertyValuesList.get(i).getPropertyId().getTitle())) {
                 propertyValues.add(new PropertiesTreeTableView(
-                        propertyValuesList.get(i).getPropertyId().getTitle(),
-                        propertyValuesList.get(i).getCond(),
-                        propertyValuesList.get(i).getValue() + " " + propertyValuesList.get(i).getMeasureId().getSymbolRu(),
-                        propertyValuesList.get(i).getMeasureId().getTitle(),
-                        propertyValuesList.get(i).getId()
+                    propertyValuesList.get(i).getPropertyId().getTitle(),
+                    propertyValuesList.get(i).getCond(),
+                    propertyValuesList.get(i).getValue() + " " + propertyValuesList.get(i).getMeasureId().getSymbolRu(),
+                    propertyValuesList.get(i).getMeasureId().getTitle(),
+                    propertyValuesList.get(i).getId()
                 ));
                 currentTitle = propertyValuesList.get(i).getPropertyId().getTitle();
             } else {
                 propertyValues.add(new PropertiesTreeTableView(
-                        "",
-                        propertyValuesList.get(i).getCond(),
-                        propertyValuesList.get(i).getValue() + " " + propertyValuesList.get(i).getMeasureId().getSymbolRu(),
-                        propertyValuesList.get(i).getMeasureId().getTitle(),
-                        propertyValuesList.get(i).getId()
+                    "",
+                    propertyValuesList.get(i).getCond(),
+                    propertyValuesList.get(i).getValue() + " " + propertyValuesList.get(i).getMeasureId().getSymbolRu(),
+                    propertyValuesList.get(i).getMeasureId().getTitle(),
+                    propertyValuesList.get(i).getId()
                 ));
             }
         }
-
         ObservableList<TreeItem<PropertiesTreeTableView>> treeItems = FXCollections.observableArrayList();
         propertyValues.stream().forEach((prop) -> {
             treeItems.add(new TreeItem<PropertiesTreeTableView>(prop));
         });
-
         TreeItem<PropertiesTreeTableView> root = new TreeItem<>(new PropertiesTreeTableView("Все свойства"));
         root.setExpanded(true);
-
         treeItems.stream().forEach((item) -> {
             ArrayList<TreeItem> children = null;
-            try {
-                children = treeItemChildren(item);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            children = UtilPack.treeItemChildren(item);
             if (children.size() > 0) {
                 children.stream().forEach((child) -> {
                     item.getChildren().add(child);
@@ -1888,50 +1916,36 @@ public class PCGUIController implements Initializable {
             }
             root.getChildren().add(item);
         });
-
         propertyTitleColumn.setCellValueFactory(new TreeItemPropertyValueFactory("title"));
         propertyConditionColumn.setCellValueFactory(new TreeItemPropertyValueFactory("cond"));
         propertyValueColumn.setCellValueFactory(new TreeItemPropertyValueFactory("value"));
         propertyMeasureColumn.setCellValueFactory(new TreeItemPropertyValueFactory("measure"));
-
         propertiesTableContextMenu = ContextMenuBuilder.create().items(
-                MenuItemBuilder.create().text("Добавить новое свойство").onAction((ActionEvent ae1) -> {
-                    ContextBuilder.createNewPropertyValue(productTabTitle, propertiesTree);
-                    try {
-                        buildPropertiesTable(selectedPropertyType, selectedProduct);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                    propertiesTable.getSelectionModel().select(0);
-                }).build(),
-                MenuItemBuilder.create().text("Редактировать выбранное свойство").onAction((ActionEvent ae2) -> {
-                    ContextBuilder.updateThePropertyValue(productTabTitle, propertiesTree, propertiesTable);
-                    try {
-                        buildPropertiesTable(selectedPropertyType, selectedProduct);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                    propertiesTable.getSelectionModel().select(0);
-                }).build(),
-                MenuItemBuilder.create().text("Удалить выбранное свойство").onAction((ActionEvent ae3) -> {
-                    ContextBuilder.deleteThePropertyValue(productTabTitle, propertiesTree, propertiesTable);
-                    try {
-                        buildPropertiesTable(selectedPropertyType, selectedProduct);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                    propertiesTable.getSelectionModel().select(0);
-                }).build()
+            MenuItemBuilder.create().text("Добавить новое свойство").onAction((ActionEvent ae1) -> {
+                ContextBuilder.createNewPropertyValue(productTabTitle, propertiesTree);
+                buildPropertiesTable(selectedPropertyType, selectedProduct);
+                propertiesTable.getSelectionModel().select(0);
+            }).build(),
+            MenuItemBuilder.create().text("Редактировать выбранное свойство").onAction((ActionEvent ae2) -> {
+                ContextBuilder.updateThePropertyValue(productTabTitle, propertiesTree, propertiesTable);
+                buildPropertiesTable(selectedPropertyType, selectedProduct);
+                propertiesTable.getSelectionModel().select(0);
+            }).build(),
+            MenuItemBuilder.create().text("Удалить выбранное свойство").onAction((ActionEvent ae3) -> {
+                ContextBuilder.deleteThePropertyValue(productTabTitle, propertiesTree, propertiesTable);
+                buildPropertiesTable(selectedPropertyType, selectedProduct);
+                propertiesTable.getSelectionModel().select(0);
+            }).build()
         ).build();
         propertiesTable.setContextMenu(propertiesTableContextMenu);
         propertiesTable.setRoot(root);
         propertiesTable.setShowRoot(false);
         propertiesTable.getColumns().setAll(propertyTitleColumn,
-                propertyConditionColumn,
-                propertyValueColumn,
-                propertyMeasureColumn);
+            propertyConditionColumn,
+            propertyValueColumn,
+            propertyMeasureColumn);
     }
-    private void buildFunctionsTable1(String selectedProduct) throws SQLException {
+    private void buildFunctionsTable1(String selectedProduct) {
         ArrayList<Functions> functions = new ArrayList<>(10);
         Session session = HibernateUtil.getSessionFactory().openSession();
         List res = session.createQuery("from ProductsFunctions where productId =" +
@@ -1941,34 +1955,23 @@ public class PCGUIController implements Initializable {
             functions.add(func.getFunctionId());
         }
         session.close();
-
         ObservableList<FunctionsTableView> list = FXCollections.observableArrayList();
-        functions.stream().forEach((f) -> {
-            list.add(new FunctionsTableView(f.getTitle(), f.getSymbol(), f.getId()));
-        });
+        functions.stream().forEach((f) -> { list.add(new FunctionsTableView(f.getTitle(), f.getSymbol(), f.getId())); });
         functionsTableTitleColumn1.setCellValueFactory(new PropertyValueFactory<>("title"));
         functionsTableSymbolColumn1.setCellValueFactory(new PropertyValueFactory<>("symbol"));
         functionsTable1ContextMenu = ContextMenuBuilder.create().items(
-                MenuItemBuilder.create().text("Добавить новую функцию").onAction((ActionEvent ae1) -> {
-                    String selFunction = ContextBuilder.addFunctionToProduct(functionsTable1, productTabTitle, productTabKind);
-                    try {
-                        buildFunctionsTable1(selectedProduct);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                    setFunctionDescriptionAndPicture(selFunction);
-                }).build(),
-                MenuItemBuilder.create().text("Редактировать выбранную функцию").onAction((ActionEvent ae2) -> {
-                    ContextBuilder.editFunctionOfProduct();
-                }).build(),
-                MenuItemBuilder.create().text("Удалить выбранную функцию").onAction((ActionEvent ae3) -> {
-                    ContextBuilder.removeFunctionFromProduct(functionsTable1, productTabTitle);
-                    try {
-                        buildFunctionsTable1(selectedProduct);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }).build()
+            MenuItemBuilder.create().text("Добавить новую функцию").onAction((ActionEvent ae1) -> {
+                String selFunction = ContextBuilder.addFunctionToProduct(functionsTable1, productTabTitle, productTabKind);
+                buildFunctionsTable1(selectedProduct);
+                setFunctionDescriptionAndPicture(selFunction);
+            }).build(),
+            MenuItemBuilder.create().text("Редактировать выбранную функцию").onAction((ActionEvent ae2) -> {
+                ContextBuilder.editFunctionOfProduct();
+            }).build(),
+            MenuItemBuilder.create().text("Удалить выбранную функцию").onAction((ActionEvent ae3) -> {
+                ContextBuilder.removeFunctionFromProduct(functionsTable1, productTabTitle);
+                buildFunctionsTable1(selectedProduct);
+            }).build()
         ).build();
         functionsTable1.setContextMenu(functionsTable1ContextMenu);
         functionsTable1.setItems(list);
@@ -1977,7 +1980,7 @@ public class PCGUIController implements Initializable {
         File picFile = new File(functionPicturePath);
         ProductImage.open(picFile, functionGridPaneImageView, functionImageView);
     }
-    private void setSelectProperty(String selectedProduct) throws SQLException {
+    private void setSelectProperty(String selectedProduct) {
         ObservableList<PropertiesTreeTableView> data = FXCollections.observableArrayList();
         propertiesTree.getSelectionModel().select(0);
         String selectedPropertyTitle = propertiesTree.getSelectionModel().getSelectedItem().getValue();
@@ -1998,6 +2001,8 @@ public class PCGUIController implements Initializable {
             ProductImage.open(file, productTabGridPaneImageView, productTabImageView);
             ProductImage.save(file, selectedProduct);
         }
+        try { getAllFilesOfProgramList(); } catch (SQLException e) {}
+        fillProductTab(selectedProduct);
     }
     private void setFunctionDescriptionAndPicture(String selectedFunction) {
         String functionDescription = "";
@@ -2051,35 +2056,19 @@ public class PCGUIController implements Initializable {
         session1.close();
         return productTabKindText;
     }
-    private void buildAccessoriesTable(String selectedProduct) throws SQLException {
+    private void buildAccessoriesTable(String selectedProduct) {
         accessoriesTable.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
                 if(mouseEvent.getButton().equals(MouseButton.PRIMARY)){
                     if(mouseEvent.getClickCount() == 2){
-                        try {
-                            buildPropertiesTree(accessoriesTable.getSelectionModel().getSelectedItem().getTitle());
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            setSelectProperty(accessoriesTable.getSelectionModel().getSelectedItem().getTitle());
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            buildFunctionsTable1(accessoriesTable.getSelectionModel().getSelectedItem().getTitle());
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
+                        buildPropertiesTree(accessoriesTable.getSelectionModel().getSelectedItem().getTitle());
+                        setSelectProperty(accessoriesTable.getSelectionModel().getSelectedItem().getTitle());
+                        buildFunctionsTable1(accessoriesTable.getSelectionModel().getSelectedItem().getTitle());
                         try {
                             setSelectFunction();
                         } catch (NullPointerException ne) {}
-                        try {
-                            fillProductTab(accessoriesTable.getSelectionModel().getSelectedItem().getTitle());
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
+                        fillProductTab(accessoriesTable.getSelectionModel().getSelectedItem().getTitle());
                     }
                 }
             }
@@ -2105,22 +2094,14 @@ public class PCGUIController implements Initializable {
         accessoriesTableTitleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
         accessoriesTableDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
         accessoriesTableContextMenu = ContextMenuBuilder.create().items(
-                MenuItemBuilder.create().text("Добавить новый аксессуар").onAction((ActionEvent arg0) -> {
-                    Accessory.addToSelectedOn(selectedProduct);
-                    try {
-                        buildAccessoriesTable(selectedProduct);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }).build(),
-                MenuItemBuilder.create().text("Удалить выбранный аксессуар").onAction((ActionEvent arg0) -> {
-                    Accessory.removeAccessoryFrom(accessoriesTable, selectedProduct);
-                    try {
-                        buildAccessoriesTable(selectedProduct);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }).build()
+            MenuItemBuilder.create().text("Добавить новый аксессуар").onAction((ActionEvent arg0) -> {
+                Accessory.addToSelectedOn(selectedProduct);
+                buildAccessoriesTable(selectedProduct);
+            }).build(),
+            MenuItemBuilder.create().text("Удалить выбранный аксессуар").onAction((ActionEvent arg0) -> {
+                Accessory.removeAccessoryFrom(accessoriesTable, selectedProduct);
+                buildAccessoriesTable(selectedProduct);
+            }).build()
         ).build();
         accessoriesTable.setContextMenu(accessoriesTableContextMenu);
         accessoriesTable.setItems(data);
@@ -2220,7 +2201,6 @@ public class PCGUIController implements Initializable {
                 @Override
                 public void handle(WorkerStateEvent event) {
                     pagination.getScene().getRoot().setDisable(false);
-                    //showErrorMessage("Could not load file "+file.getName(), loadFileTask.getException());
                 }
             });
             pagination.getScene().getRoot().setDisable(true);
@@ -2290,55 +2270,6 @@ public class PCGUIController implements Initializable {
 
         pagination.getScene().getRoot().setDisable(true);
         imageLoadService.submit(updateImageTask);
-    }
-    private void showErrorMessage(String message, Throwable exception) {
-        // TODO: move to fxml (or better, use ControlsFX)
-        final Stage dialog = new Stage();
-        dialog.initOwner(pagination.getScene().getWindow());
-        dialog.initStyle(StageStyle.UNDECORATED);
-        final VBox root = new VBox(10);
-        root.setPadding(new Insets(10));
-        StringWriter errorMessage = new StringWriter();
-        exception.printStackTrace(new PrintWriter(errorMessage));
-        final Label detailsLabel = new Label(errorMessage.toString());
-        TitledPane details = new TitledPane();
-        details.setText("Details:");
-        Label briefMessageLabel = new Label(message);
-        final HBox detailsLabelHolder =new HBox();
-
-        Button closeButton = new Button("OK");
-        closeButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                dialog.hide();
-            }
-        });
-        HBox closeButtonHolder = new HBox();
-        closeButtonHolder.getChildren().add(closeButton);
-        closeButtonHolder.setAlignment(Pos.CENTER);
-        closeButtonHolder.setPadding(new Insets(5));
-        root.getChildren().addAll(briefMessageLabel, details, detailsLabelHolder, closeButtonHolder);
-        details.setExpanded(false);
-        details.setAnimated(false);
-
-        details.expandedProperty().addListener(new ChangeListener<Boolean>() {
-
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observable,
-                                Boolean oldValue, Boolean newValue) {
-                if (newValue) {
-                    detailsLabelHolder.getChildren().add(detailsLabel);
-                } else {
-                    detailsLabelHolder.getChildren().remove(detailsLabel);
-                }
-                dialog.sizeToScene();
-            }
-
-        });
-        final Scene scene = new Scene(root);
-
-        dialog.setScene(scene);
-        dialog.show();
     }
     private class PageDimensions {
         private double width ;
@@ -2563,7 +2494,7 @@ public class PCGUIController implements Initializable {
             session2.close();
             htmlEditor.setHtmlText("");
             htmlEditor.setHtmlText(newsItem.getContent());
-            htmlCode.setText(cleanHtml(htmlEditor.getHtmlText()));
+            htmlCode.setText(UtilPack.cleanHtml(htmlEditor.getHtmlText()));
             contentTitleTextField.setText(newsItem.getTitle());
             pageTitleTextField.setDisable(true);
             directoryTitleTextField.setDisable(true);
@@ -2583,7 +2514,7 @@ public class PCGUIController implements Initializable {
             session2.close();
             htmlEditor.setHtmlText("");
             htmlEditor.setHtmlText(article.getContent());
-            htmlCode.setText(cleanHtml(htmlEditor.getHtmlText()));
+            htmlCode.setText(UtilPack.cleanHtml(htmlEditor.getHtmlText()));
             contentTitleTextField.setText(article.getTitle());
             pageTitleTextField.setDisable(true);
             directoryTitleTextField.setDisable(true);
@@ -2604,7 +2535,7 @@ public class PCGUIController implements Initializable {
             session2.close();
             htmlEditor.setHtmlText("");
             htmlEditor.setHtmlText(video.getContent());
-            htmlCode.setText(cleanHtml(htmlEditor.getHtmlText()));
+            htmlCode.setText(UtilPack.cleanHtml(htmlEditor.getHtmlText()));
             contentTitleTextField.setText(video.getTitle());
             pageTitleTextField.setDisable(true);
             directoryTitleTextField.setDisable(true);
@@ -2625,7 +2556,7 @@ public class PCGUIController implements Initializable {
             session2.close();
             htmlEditor.setHtmlText("");
             htmlEditor.setHtmlText(review.getContent());
-            htmlCode.setText(cleanHtml(htmlEditor.getHtmlText()));
+            htmlCode.setText(UtilPack.cleanHtml(htmlEditor.getHtmlText()));
             contentTitleTextField.setText(review.getTitle());
             pageTitleTextField.setDisable(true);
             directoryTitleTextField.setDisable(true);
@@ -2646,7 +2577,7 @@ public class PCGUIController implements Initializable {
             session2.close();
             htmlEditor.setHtmlText("");
             htmlEditor.setHtmlText(addition.getContent());
-            htmlCode.setText(cleanHtml(htmlEditor.getHtmlText()));
+            htmlCode.setText(UtilPack.cleanHtml(htmlEditor.getHtmlText()));
             contentTitleTextField.setText(addition.getTitle());
             pageTitleTextField.setDisable(true);
             directoryTitleTextField.setDisable(true);
@@ -2667,7 +2598,7 @@ public class PCGUIController implements Initializable {
             session2.close();
             htmlEditor.setHtmlText("");
             htmlEditor.setHtmlText(staticContent.getContent());
-            htmlCode.setText(cleanHtml(htmlEditor.getHtmlText()));
+            htmlCode.setText(UtilPack.cleanHtml(htmlEditor.getHtmlText()));
             contentTitleTextField.setText(staticContent.getTitle());
             pageTitleTextField.setText(staticContent.getPage());
             directoryTitleTextField.setText(staticContent.getDirectory());
@@ -2688,7 +2619,7 @@ public class PCGUIController implements Initializable {
             session2.close();
             htmlEditor.setHtmlText("");
             htmlEditor.setHtmlText(category.getDescription());
-            htmlCode.setText(cleanHtml(htmlEditor.getHtmlText()));
+            htmlCode.setText(UtilPack.cleanHtml(htmlEditor.getHtmlText()));
             contentTitleTextField.setText(category.getTitle());
             pageTitleTextField.setDisable(true);
             directoryTitleTextField.setDisable(true);
@@ -2707,7 +2638,7 @@ public class PCGUIController implements Initializable {
             }
             Transaction tx = session.beginTransaction();
             newsItem.setTitle(contentTitleTextField.getText());
-            newsItem.setContent(cleanHtml(htmlEditor.getHtmlText()));
+            newsItem.setContent(UtilPack.cleanHtml(htmlEditor.getHtmlText()));
             newsItem.setUpdatedAt(new Date());
             session.save(newsItem);
             tx.commit();
@@ -2722,7 +2653,7 @@ public class PCGUIController implements Initializable {
             }
             Transaction tx = session.beginTransaction();
             article.setTitle(contentTitleTextField.getText());
-            article.setContent(cleanHtml(htmlEditor.getHtmlText()));
+            article.setContent(UtilPack.cleanHtml(htmlEditor.getHtmlText()));
             article.setUpdatedAt(new Date());
             session.save(article);
             tx.commit();
@@ -2737,7 +2668,7 @@ public class PCGUIController implements Initializable {
             }
             Transaction tx = session.beginTransaction();
             video.setTitle(contentTitleTextField.getText());
-            video.setContent(cleanHtml(htmlEditor.getHtmlText()));
+            video.setContent(UtilPack.cleanHtml(htmlEditor.getHtmlText()));
             video.setUpdatedAt(new Date());
             session.save(video);
             tx.commit();
@@ -2752,7 +2683,7 @@ public class PCGUIController implements Initializable {
             }
             Transaction tx = session.beginTransaction();
             review.setTitle(contentTitleTextField.getText());
-            review.setContent(cleanHtml(htmlEditor.getHtmlText()));
+            review.setContent(UtilPack.cleanHtml(htmlEditor.getHtmlText()));
             review.setUpdatedAt(new Date());
             session.save(review);
             tx.commit();
@@ -2767,7 +2698,7 @@ public class PCGUIController implements Initializable {
             }
             Transaction tx = session.beginTransaction();
             addition.setTitle(contentTitleTextField.getText());
-            addition.setContent(cleanHtml(htmlEditor.getHtmlText()));
+            addition.setContent(UtilPack.cleanHtml(htmlEditor.getHtmlText()));
             addition.setUpdatedAt(new Date());
             session.save(addition);
             tx.commit();
@@ -2784,7 +2715,7 @@ public class PCGUIController implements Initializable {
             staticContent.setTitle(contentTitleTextField.getText());
             staticContent.setPage(pageTitleTextField.getText());
             staticContent.setDirectory(directoryTitleTextField.getText());
-            staticContent.setContent(cleanHtml(htmlEditor.getHtmlText()));
+            staticContent.setContent(UtilPack.cleanHtml(htmlEditor.getHtmlText()));
             staticContent.setUpdatedAt(new Date());
             session.save(staticContent);
             tx.commit();
@@ -2799,24 +2730,15 @@ public class PCGUIController implements Initializable {
             }
             Transaction tx = session.beginTransaction();
             category.setTitle(contentTitleTextField.getText());
-            category.setDescription(cleanHtml(htmlEditor.getHtmlText()));
+            category.setDescription(UtilPack.cleanHtml(htmlEditor.getHtmlText()));
             session.save(category);
             tx.commit();
             session.close();
         }
         populateContentSiteLists();
     }
-    private String cleanHtml(String rawHtml) {
-        String cleanHtml = new String();
-        String cutString1 = "<html dir=\"ltr\"><head></head><body contenteditable=\"true\">";
-        String cutString2 = "</body></html>";
-        cleanHtml = rawHtml.replace(cutString1, "");
-        cleanHtml = cleanHtml.replace(cutString2, "");
-        return cleanHtml;
-    }
     @FXML private void refreshHtml() {
         htmlEditor.setHtmlText(htmlCode.getText());
-
     }
     ///////////////////
     // Таб "Браузер" //
@@ -2893,236 +2815,6 @@ public class PCGUIController implements Initializable {
             }
         };
     }
-    // Запускается при выборе значения в importFieldsComboBox
-    @FXML private void getSelectedDBField() {
-        sField();
-    }
-    private String sField() {
-        return importFieldsComboBox.getValue();
-    }
-    // Запускается при выборе значения в importKeysComboBox
-    @FXML private void getSelectedDBKey() {
-        selectedDBKey = "Наименование продукта";
-        startImportXLSButton.setDisable(false);
-    }
-    // Запускается при нажатии кнопки compareXLSToDBButton
-    @FXML private void compareFields() throws IOException {
-        compareFieldsMechanics();
-    }
-    // Запускается при нажатии кнопки startImportXLSButton
-    @FXML private void startImportFromXLSToDB() {
-        XLSToDBImport importer = new XLSToDBImport(allCompareDetails);
-        importer.startImport(allImportXLSContent, importFields, allProductsTitles);
-    }
-    private void buildProductKindsList() {
-        String selectedPropertiesKind = productKindsList.getSelectionModel().getSelectedItem();
-        ObservableList<String> items = FXCollections.observableArrayList();
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        List res = session.createQuery("from ProductKinds").list();
-        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
-            ProductKinds pKind = (ProductKinds) iterator.next();
-            String item = new String(pKind.getTitle());
-            items.add(item);
-        }
-        session.close();
-        productKindsListContextMenu = ContextMenuBuilder.create().items(
-                MenuItemBuilder.create().text("Создать новый тип устройств").onAction((ActionEvent ae1) -> {
-                    ContextBuilder.createNewProductKind();
-                    buildProductKindsList();
-                    propertiesTreeTable.refresh();
-                    functionsTable.refresh();
-                }).build(),
-                MenuItemBuilder.create().text("Редактировать выбранный тип").onAction((ActionEvent ae2) -> {
-                    ContextBuilder.updateTheProductKind(productKindsList);
-                    buildProductKindsList();
-                    propertiesTreeTable.refresh();
-                    functionsTable.refresh();
-                }).build(),
-                MenuItemBuilder.create().text("Удалить выбранный тип устройств").onAction((ActionEvent ae3) -> {
-                    ContextBuilder.deleteTheProductKind(productKindsList);
-                    buildProductKindsList();
-                    propertiesTreeTable.refresh();
-                    functionsTable.refresh();
-                }).build()
-        ).build();
-        productKindsList.setContextMenu(productKindsListContextMenu);
-        productKindsList.setItems(items);
-    }
-    private void buildPropertiesTreeTable(String selectedPropertiesKind) throws SQLException {
-        ArrayList<Integer> typesIds = new ArrayList<>(10);
-        ArrayList<PropertiesTreeTableView> properties = new ArrayList<>(10);
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        List res = session.createQuery("from KindsTypes where productKindId =" + UtilPack.getPropertyKindIdFromTitle(selectedPropertiesKind)).list();
-        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
-            KindsTypes kt = (KindsTypes) iterator.next();
-            typesIds.add(kt.getPropertyTypeId().getId());
-        }
-        session.close();
-        Session session1 = HibernateUtil.getSessionFactory().openSession();
-        List res1 = session1.createQuery("from PropertyTypes").list();
-        for(Iterator iterator =  res1.iterator(); iterator.hasNext();) {
-            PropertyTypes pt = (PropertyTypes) iterator.next();
-            if(typesIds.contains(pt.getId())) {
-                properties.add(new PropertiesTreeTableView(pt.getTitle()));
-            }
-        }
-        session1.close();
-
-        ObservableList<TreeItem<PropertiesTreeTableView>> treeItems = FXCollections.observableArrayList();
-        properties.stream().forEach((prop) -> {
-            treeItems.add(new TreeItem<PropertiesTreeTableView>(prop));
-        });
-        TreeItem<PropertiesTreeTableView> root = new TreeItem<>(new PropertiesTreeTableView("Все характеристики"));
-        root.setExpanded(true);
-        treeItems.stream().forEach((item) -> {
-            ArrayList<TreeItem> children = null;
-            try {
-                children = treeItemChildren(item);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            if (children.size() > 0) {
-                children.stream().forEach((child) -> {
-                    item.getChildren().add(child);
-                });
-            }
-            root.getChildren().add(item);
-        });
-
-        propertiesTreeTableContextMenu = ContextMenuBuilder.create().items(
-                MenuItemBuilder.create().text("Добавить новую характеристику").onAction((ActionEvent ae1) -> {
-                    ContextBuilder.createNewProperty();
-                    try {
-                        buildPropertiesTreeTable(selectedPropertiesKind);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        buildFunctionsTable(selectedPropertiesKind);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                    propertiesTreeTable.refresh();
-                    functionsTable.refresh();
-                }).build(),
-                MenuItemBuilder.create().text("Редактировать выбранную характеристику").onAction((ActionEvent ae2) -> {
-                    ContextBuilder.updateTheProperty(propertiesTreeTable);
-                    try {
-                        buildPropertiesTreeTable(selectedPropertiesKind);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        buildFunctionsTable(selectedPropertiesKind);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                    propertiesTreeTable.refresh();
-                    functionsTable.refresh();
-                }).build(),
-                MenuItemBuilder.create().text("Удалить выбранную характеристику").onAction((ActionEvent ae3) -> {
-                    ContextBuilder.deleteTheProperty(propertiesTreeTable);
-                    try {
-                        buildPropertiesTreeTable(selectedPropertiesKind);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        buildFunctionsTable(selectedPropertiesKind);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                    propertiesTreeTable.refresh();
-                    functionsTable.refresh();
-                }).build(),
-                SeparatorMenuItemBuilder.create().build(),
-                MenuItemBuilder.create().text("Добавить набор характеристик").onAction((ActionEvent ae3) -> {
-                    ContextBuilder.addPropertyType(productKindsList);
-                    try {
-                        buildPropertiesTreeTable(selectedPropertiesKind);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                    buildProductKindsList();
-                    propertiesTreeTable.refresh();
-                    functionsTable.refresh();
-                }).build(),
-                MenuItemBuilder.create().text("Удалить набор характеристик").onAction((ActionEvent ae3) -> {
-                    ContextBuilder.removePropertyType(productKindsList, propertiesTreeTable);
-                    try {
-                        buildPropertiesTreeTable(selectedPropertiesKind);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                    buildProductKindsList();
-                    propertiesTreeTable.refresh();
-                    functionsTable.refresh();
-                }).build()
-        ).build();
-        propertiesTreeTable.setContextMenu(propertiesTreeTableContextMenu);
-        propertiesTreeTable.setRoot(root);
-        propertiesTreeTable.setShowRoot(false);
-        propertiesTreeTable.getColumns().setAll(propertiesTreeTableTitleColumn);
-        propertiesTreeTableTitleColumn.setCellValueFactory(new TreeItemPropertyValueFactory("title"));
-    }
-    private void buildFunctionsTable(String selectedPropertiesKind) throws SQLException {
-        ArrayList<Functions> functions = new ArrayList<>(10);
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        List res = session.createQuery("from Functions where productKindId =" + UtilPack.getPropertyKindIdFromTitle(selectedPropertiesKind)).list();
-        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
-            Functions func = (Functions) iterator.next();
-            functions.add(func);
-        }
-        session.close();
-        ObservableList<FunctionsTableView> list = FXCollections.observableArrayList();
-        functions.stream().forEach((f) -> {
-            list.add(new FunctionsTableView(f.getTitle(), f.getSymbol(), f.getId()));
-        });
-        functionsTableTitleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
-        functionsTableSymbolColumn.setCellValueFactory(new PropertyValueFactory<>("symbol"));
-        functionsTableContextMenu = ContextMenuBuilder.create().items(
-                MenuItemBuilder.create().text("Добавить новую функцию").onAction((ActionEvent ae1) -> {
-                    try {
-                        ContextBuilder.createNewFunction(UtilPack.getPropertyKindIdFromTitle(selectedPropertiesKind));
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        buildFunctionsTable(selectedPropertiesKind);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }).build(),
-                MenuItemBuilder.create().text("Редактировать выбранную функцию").onAction((ActionEvent ae2) -> {
-                    try {
-                        ContextBuilder.updateTheFunction(UtilPack.getPropertyKindIdFromTitle(selectedPropertiesKind), functionsTable);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }).build(),
-                MenuItemBuilder.create().text("Удалить выбранную функцию").onAction((ActionEvent ae3) -> {
-                    ContextBuilder.deleteTheFunction(functionsTable);
-                    try {
-                        buildFunctionsTable(selectedPropertiesKind);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }).build()
-        ).build();
-        functionsTable.setContextMenu(functionsTableContextMenu);
-        functionsTable.setItems(list);
-    };
-    @FXML private void getSelectedHeader() {
-        sHeader();
-    }
-    private String sHeader() {
-        String sh = new String();
-        try {
-            sh = headersXLS.getSelectionModel().getSelectedItem();
-        } catch (NullPointerException ne) {}
-        return sh;
-    }
-
     private void compareFieldsMechanics() throws IOException {
         ArrayList<String> compareDetails = new ArrayList<>(20);
         String selectedHeader = sHeader();
@@ -3169,8 +2861,178 @@ public class PCGUIController implements Initializable {
             }
         }
     }
+    private void buildProductKindsList() {
+        String selectedPropertiesKind = productKindsList.getSelectionModel().getSelectedItem();
+        ObservableList<String> items = FXCollections.observableArrayList();
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List res = session.createQuery("from ProductKinds").list();
+        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+            ProductKinds pKind = (ProductKinds) iterator.next();
+            String item = new String(pKind.getTitle());
+            items.add(item);
+        }
+        session.close();
+        productKindsListContextMenu = ContextMenuBuilder.create().items(
+                MenuItemBuilder.create().text("Создать новый тип устройств").onAction((ActionEvent ae1) -> {
+                    ContextBuilder.createNewProductKind();
+                    buildProductKindsList();
+                    propertiesTreeTable.refresh();
+                    functionsTable.refresh();
+                }).build(),
+                MenuItemBuilder.create().text("Редактировать выбранный тип").onAction((ActionEvent ae2) -> {
+                    ContextBuilder.updateTheProductKind(productKindsList);
+                    buildProductKindsList();
+                    propertiesTreeTable.refresh();
+                    functionsTable.refresh();
+                }).build(),
+                MenuItemBuilder.create().text("Удалить выбранный тип устройств").onAction((ActionEvent ae3) -> {
+                    ContextBuilder.deleteTheProductKind(productKindsList);
+                    buildProductKindsList();
+                    propertiesTreeTable.refresh();
+                    functionsTable.refresh();
+                }).build()
+        ).build();
+        productKindsList.setContextMenu(productKindsListContextMenu);
+        productKindsList.setItems(items);
+    }
+    private void buildPropertiesTreeTable(String selectedPropertiesKind) {
+        ArrayList<Integer> typesIds = new ArrayList<>(10);
+        ArrayList<PropertiesTreeTableView> properties = new ArrayList<>(10);
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List res = session.createQuery("from KindsTypes where productKindId =" + UtilPack.getPropertyKindIdFromTitle(selectedPropertiesKind)).list();
+        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+            KindsTypes kt = (KindsTypes) iterator.next();
+            typesIds.add(kt.getPropertyTypeId().getId());
+        }
+        session.close();
+        Session session1 = HibernateUtil.getSessionFactory().openSession();
+        List res1 = session1.createQuery("from PropertyTypes").list();
+        for(Iterator iterator =  res1.iterator(); iterator.hasNext();) {
+            PropertyTypes pt = (PropertyTypes) iterator.next();
+            if(typesIds.contains(pt.getId())) {
+                properties.add(new PropertiesTreeTableView(pt.getTitle()));
+            }
+        }
+        session1.close();
+        ObservableList<TreeItem<PropertiesTreeTableView>> treeItems = FXCollections.observableArrayList();
+        properties.stream().forEach((prop) -> {
+            treeItems.add(new TreeItem<PropertiesTreeTableView>(prop));
+        });
+        TreeItem<PropertiesTreeTableView> root = new TreeItem<>(new PropertiesTreeTableView("Все характеристики"));
+        root.setExpanded(true);
+        treeItems.stream().forEach((item) -> {
+            ArrayList<TreeItem> children = null;
+            children = UtilPack.treeItemChildren(item);
+            if (children.size() > 0) {
+                children.stream().forEach((child) -> {
+                    item.getChildren().add(child);
+                });
+            }
+            root.getChildren().add(item);
+        });
+        propertiesTreeTableContextMenu = ContextMenuBuilder.create().items(
+            MenuItemBuilder.create().text("Добавить новую характеристику").onAction((ActionEvent ae1) -> {
+                ContextBuilder.createNewProperty();
+                buildPropertiesTreeTable(selectedPropertiesKind);
+                buildFunctionsTable(selectedPropertiesKind);
+                propertiesTreeTable.refresh();
+                functionsTable.refresh();
+            }).build(),
+            MenuItemBuilder.create().text("Редактировать выбранную характеристику").onAction((ActionEvent ae2) -> {
+                ContextBuilder.updateTheProperty(propertiesTreeTable);
+                buildPropertiesTreeTable(selectedPropertiesKind);
+                buildFunctionsTable(selectedPropertiesKind);
+                propertiesTreeTable.refresh();
+                functionsTable.refresh();
+            }).build(),
+            MenuItemBuilder.create().text("Удалить выбранную характеристику").onAction((ActionEvent ae3) -> {
+                ContextBuilder.deleteTheProperty(propertiesTreeTable);
+                buildPropertiesTreeTable(selectedPropertiesKind);
+                buildFunctionsTable(selectedPropertiesKind);
+                propertiesTreeTable.refresh();
+                functionsTable.refresh();
+            }).build(),
+            SeparatorMenuItemBuilder.create().build(),
+            MenuItemBuilder.create().text("Добавить набор характеристик").onAction((ActionEvent ae3) -> {
+                ContextBuilder.addPropertyType(productKindsList);
+                buildPropertiesTreeTable(selectedPropertiesKind);
+                buildProductKindsList();
+                propertiesTreeTable.refresh();
+                functionsTable.refresh();
+            }).build(),
+            MenuItemBuilder.create().text("Удалить набор характеристик").onAction((ActionEvent ae3) -> {
+                ContextBuilder.removePropertyType(productKindsList, propertiesTreeTable);
+                buildPropertiesTreeTable(selectedPropertiesKind);
+                buildProductKindsList();
+                propertiesTreeTable.refresh();
+                functionsTable.refresh();
+            }).build()
+        ).build();
+        propertiesTreeTable.setContextMenu(propertiesTreeTableContextMenu);
+        propertiesTreeTable.setRoot(root);
+        propertiesTreeTable.setShowRoot(false);
+        propertiesTreeTable.getColumns().setAll(propertiesTreeTableTitleColumn);
+        propertiesTreeTableTitleColumn.setCellValueFactory(new TreeItemPropertyValueFactory("title"));
+    }
+    private void buildFunctionsTable(String selectedPropertiesKind) {
+        ArrayList<Functions> functions = new ArrayList<>(10);
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List res = session.createQuery("from Functions where productKindId =" + UtilPack.getPropertyKindIdFromTitle(selectedPropertiesKind)).list();
+        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+            Functions func = (Functions) iterator.next();
+            functions.add(func);
+        }
+        session.close();
+        ObservableList<FunctionsTableView> list = FXCollections.observableArrayList();
+        functions.stream().forEach((f) -> {
+            list.add(new FunctionsTableView(f.getTitle(), f.getSymbol(), f.getId()));
+        });
+        functionsTableTitleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
+        functionsTableSymbolColumn.setCellValueFactory(new PropertyValueFactory<>("symbol"));
+        functionsTableContextMenu = ContextMenuBuilder.create().items(
+            MenuItemBuilder.create().text("Добавить новую функцию").onAction((ActionEvent ae1) -> {
+                ContextBuilder.createNewFunction(UtilPack.getPropertyKindIdFromTitle(selectedPropertiesKind));
+                buildFunctionsTable(selectedPropertiesKind);
+            }).build(),
+            MenuItemBuilder.create().text("Редактировать выбранную функцию").onAction((ActionEvent ae2) -> {
+                ContextBuilder.updateTheFunction(UtilPack.getPropertyKindIdFromTitle(selectedPropertiesKind), functionsTable);
+            }).build(),
+            MenuItemBuilder.create().text("Удалить выбранную функцию").onAction((ActionEvent ae3) -> {
+                ContextBuilder.deleteTheFunction(functionsTable);
+                buildFunctionsTable(selectedPropertiesKind);
+            }).build()
+        ).build();
+        functionsTable.setContextMenu(functionsTableContextMenu);
+        functionsTable.setItems(list);
+    };
+    private String sField() {
+        return importFieldsComboBox.getValue();
+    }
+    private String sHeader() {
+        String sh = new String();
+        try {
+            sh = headersXLS.getSelectionModel().getSelectedItem();
+        } catch (NullPointerException ne) {}
+        return sh;
+    }
+    @FXML private void getSelectedDBField() {
+        sField();
+    }
+    @FXML private void getSelectedHeader() {
+        sHeader();
+    }
+    @FXML private void getSelectedDBKey() {
+        selectedDBKey = "Наименование продукта";
+        startImportXLSButton.setDisable(false);
+    }
+    @FXML private void compareFields() throws IOException {
+        compareFieldsMechanics();
+    }
+    @FXML private void startImportFromXLSToDB() {
+        XLSToDBImport importer = new XLSToDBImport(allCompareDetails);
+        importer.startImport(allImportXLSContent, importFields, allProductsTitles);
+    }
     @FXML private void cancelSetImportDetails() {
-
         ObservableList<String> data = FXCollections.observableArrayList();
         headersRowNumber = 0;
         try {
@@ -3203,8 +3065,7 @@ public class PCGUIController implements Initializable {
         }
     }
     @FXML private void getHeadersRowNumber(KeyEvent e) {
-        if(e.getCode().toString().equals("ENTER"))
-        {
+        if(e.getCode().toString().equals("ENTER")) {
             ObservableList<String> data = FXCollections.observableArrayList();
             if (allImportXLSContent.isEmpty()) {
                 AlertWindow.showWarning("Сначала необходимо выбрать xls-файл, содержащий данные для импорта.");
@@ -3252,26 +3113,6 @@ public class PCGUIController implements Initializable {
         buildPropertiesTreeTable(selectedPropertiesKind);
         buildFunctionsTable(selectedPropertiesKind);
     }
-    private ArrayList<TreeItem> treeItemChildren(TreeItem<PropertiesTreeTableView> item) throws SQLException {
-        String itemTitle = item.getValue().getTitle();
-        ArrayList<TreeItem> childTreeItems = new ArrayList<>(10);
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        List res = session.createQuery("from Properties where propertyTypeId=" + UtilPack.getPropertyTypeIdFromTitle(itemTitle)).list();
-        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
-            Properties property = (Properties) iterator.next();
-            childTreeItems.add(new TreeItem(new PropertiesTreeTableView(property.getTitle())));
-        }
-        session.close();
-        return childTreeItems;
-    }
-    @FXML private void writeToSite() {
-        DBConnection siteConnection = new DBConnection("site");
-        try {
-            siteConnection.getUpdateResult("CREATE TABLE test1(id int, title varchar(50), PRIMARY KEY(id));");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
     @FXML private void saveAddressSiteDB() {
         SiteDBSettings address = new SiteDBSettings();
         address.saveSetting("addressSiteDB", addressSiteDB.getText());
@@ -3315,14 +3156,8 @@ public class PCGUIController implements Initializable {
     @FXML private void saveSiteUrlToDb() {
         SiteUrlSettings siteUrlSettings = new SiteUrlSettings();
         siteUrlSettings.saveSetting(siteUrlTextField.getText());
-        loadSiteInBrowser();
+        tabBrowserWebView.getEngine().load(siteUrlTextField.getText());
     }
-    private void loadSiteInBrowser() {
-        WebEngine webEngine = tabBrowserWebView.getEngine();
-        webEngine.load(siteUrlTextField.getText());
-    }
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Panes
     @FXML private AnchorPane anchorPane;
@@ -3368,6 +3203,8 @@ public class PCGUIController implements Initializable {
     @ FXML private ContextMenu reviewsListContextMenu;
     @ FXML private ContextMenu additionsListContextMenu;
     @ FXML private ContextMenu contentsListContextMenu;
+    @ FXML private ContextMenu analogsTableContextMenu;
+    @ FXML private ContextMenu seriesTableContextMenu;
 
     // TableViews & TableColumns
     @FXML private TableView<ProductsTableView>            productsTable;
@@ -3419,6 +3256,10 @@ public class PCGUIController implements Initializable {
     @FXML private TableView<AccessoriesTableView>           accessoriesTable;
     @FXML private TableColumn<AccessoriesTableView, String> accessoriesTableTitleColumn;
     @FXML private TableColumn<AccessoriesTableView, String> accessoriesTableDescriptionColumn;
+
+    @FXML private TableView<SeriesTableView>                seriesTable;
+    @FXML private TableColumn<SeriesTableView, String>      serieTableColumn;
+    @FXML private TableColumn<SeriesTableView, String>      serieVendorTableColumn;
 
     //TreeTableViews
     @FXML private TreeTableView<PropertiesTreeTableView>  propertiesTreeTable;
@@ -3515,6 +3356,8 @@ public class PCGUIController implements Initializable {
 
     // Strings
     String selectedProduct;
+    String selectedVendor;
+    String selectedSerie;
     String newCatTitle = "";
     String newCatDescription;
     String selectedDBKey = "Наименование продукта";
@@ -3543,5 +3386,6 @@ public class PCGUIController implements Initializable {
     public static DBConnection connection = new DBConnection("local");
     public static ArrayList<Product> allProductsList = new ArrayList<>(22000);
     public static ArrayList<FileOfProgram> allFilesOfProgramList = new ArrayList<>(22000);
+    public static ArrayList<QuantityOfProduct> allQuantitiesList = new ArrayList<>();
     public static ObservableList<String> allProductsTitles = FXCollections.observableArrayList();
 }

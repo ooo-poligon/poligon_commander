@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="DataSourceManagerImpl" format="xml" hash="1192427602">
+  <component name="DataSourceManagerImpl" format="xml" hash="1197966109">
     <data-source source="LOCAL" name="MySQL - trade@server03.poligon.corp" uuid="df60a9aa-9f22-4239-8697-f4cd6bfabaff">
       <driver-ref>mysql</driver-ref>
       <synchronize>true</synchronize>

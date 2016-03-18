@@ -93,7 +93,7 @@ public class SetRates {
         session.close();
     }
 
-    public static SetRates getRatesPack(String selectedProduct) throws SQLException {
+    public static SetRates getRatesPack(String selectedProduct) {
         SetRates ratesPack = new SetRates();
         for (Product product : PCGUIController.allProductsList) {
             if (product.getTitle().equals(selectedProduct)) {

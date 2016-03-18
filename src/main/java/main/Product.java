@@ -4,7 +4,7 @@ package main;
  * Created by Igor Klekotnev on 02.03.2016.
  */
 public class Product {
-    private int id;
+    private Integer id;
     private int categoryId;
     private String title;
     private String description;
@@ -25,7 +25,38 @@ public class Product {
     private double discount2;
     private double discount3;
 
-    public Product(int id, int categoryId, String title, String description, String anons,
+    public Product(String title) {
+        this.title = title;
+    }
+
+    public Product(int categoryId, String title, String description, String anons,
+                   String article, int available, String deliveryTime, String ean,
+                   int outdated, double price, String serie, int productKindId,
+                   String vendor, double rate, double discount1, double discount2,
+                   double discount3) {
+        this.id = null;
+        this.categoryId = categoryId;
+        this.title = title;
+        this.description = description;
+        this.anons = anons;
+        this.article = article;
+        this.available = available;
+        this.deliveryTime = deliveryTime;
+        this.ean = ean;
+        this.outdated = outdated;
+        this.price = price;
+        this.serie = serie;
+        this.productKindId = productKindId;
+        this.vendor = vendor;
+        this.pluginOwnerId = 0;
+        this.accessoryOwnerId = 0;
+        this.rate = rate;
+        this.discount1 = discount1;
+        this.discount2 = discount2;
+        this.discount3 = discount3;
+    }
+
+    public Product(Integer id, int categoryId, String title, String description, String anons,
                    String article, int available, String deliveryTime, String ean, int outdated, double price,
                    String serie, int productKindId, String vendor, int pluginOwnerId, int accessoryOwnerId,
                    double rate, double discount1, double discount2, double discount3) {
@@ -51,11 +82,11 @@ public class Product {
         this.discount3 = discount3;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

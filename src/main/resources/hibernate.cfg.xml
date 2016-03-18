@@ -42,6 +42,7 @@
     <mapping class="entities.KindsTypes" />
     <mapping class="entities.ProductsFunctions" />
     <mapping class="entities.Measures" />
+    <mapping class="entities.ProductsAnalogs" />
     <mapping class="entities.ProductsAccessories" />
     <mapping class="entities.NewsItems" />
     <mapping class="entities.Articles" />
