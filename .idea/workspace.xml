@@ -4,7 +4,6 @@
     <list default="true" id="f612a4c3-3105-493b-a126-bc6d4a7e3a08" name="Default" comment="new features added">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/main/PCGUIController.java" afterPath="$PROJECT_DIR$/src/main/java/main/PCGUIController.java" />
     </list>
     <ignored path="PoligonCommanderJ.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -60,7 +59,7 @@
         <entry file="file://$PROJECT_DIR$/.gitignore">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="0" column="5" selection-start-line="0" selection-start-column="5" selection-end-line="0" selection-end-column="5" />
+              <caret line="0" column="1" selection-start-line="0" selection-start-column="1" selection-end-line="0" selection-end-column="1" />
               <folding />
             </state>
           </provider>
@@ -1236,7 +1235,7 @@
       <workItem from="1458282667177" duration="18326000" />
       <workItem from="1458301593786" duration="680000" />
       <workItem from="1458541921844" duration="47000" />
-      <workItem from="1458542415252" duration="879000" />
+      <workItem from="1458542415252" duration="1439000" />
     </task>
     <task id="LOCAL-00001" summary="test commit">
       <created>1450683270438</created>
@@ -1380,7 +1379,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="890381000" />
+    <option name="totallyTimeSpent" value="890941000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="54" y="-8" width="1874" height="1096" extended-state="6" />
@@ -1963,7 +1962,7 @@
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="5" selection-start-line="0" selection-start-column="5" selection-end-line="0" selection-end-column="5" />
+          <caret line="0" column="1" selection-start-line="0" selection-start-column="1" selection-end-line="0" selection-end-column="1" />
           <folding />
         </state>
       </provider>
