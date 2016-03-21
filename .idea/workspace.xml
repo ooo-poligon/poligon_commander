@@ -1,43 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-<<<<<<< HEAD
-    <list default="true" id="f612a4c3-3105-493b-a126-bc6d4a7e3a08" name="Default" comment="">
+    <list default="true" id="f612a4c3-3105-493b-a126-bc6d4a7e3a08" name="Default" comment="new features added">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/main/PCGUIController.java" afterPath="$PROJECT_DIR$/src/main/java/main/PCGUIController.java" />
-=======
-    <list default="true" id="f612a4c3-3105-493b-a126-bc6d4a7e3a08" name="Default" comment="new features added">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/entities/ProductsAnalogs.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/main/AnalogOfProduct.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/main/QuantityOfProduct.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/tableviews/KindsTableView.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/tableviews/SeriesTableView.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/utils/Analog.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/utils/NewAnalog.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/utils/NewProductsAnalogs.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/utils/NewSerie.java" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/deprecated/Serie.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/tableviews/DeliveryTimeTableView.java" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/dataSources.ids" afterPath="$PROJECT_DIR$/.idea/dataSources.ids" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/dataSources.xml" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/entities/ProductsAccessories.java" afterPath="$PROJECT_DIR$/src/main/java/entities/ProductsAccessories.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/main/PCGUIController.java" afterPath="$PROJECT_DIR$/src/main/java/main/PCGUIController.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/main/PoligonCommander.java" afterPath="$PROJECT_DIR$/src/main/java/main/PoligonCommander.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/main/Product.java" afterPath="$PROJECT_DIR$/src/main/java/main/Product.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/modalwindows/AlertWindow.java" afterPath="$PROJECT_DIR$/src/main/java/modalwindows/AlertWindow.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/tableviews/AnalogsTableView.java" afterPath="$PROJECT_DIR$/src/main/java/tableviews/AnalogsTableView.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/utils/Accessory.java" afterPath="$PROJECT_DIR$/src/main/java/utils/Accessory.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/utils/ContextBuilder.java" afterPath="$PROJECT_DIR$/src/main/java/utils/ContextBuilder.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/utils/ProductImage.java" afterPath="$PROJECT_DIR$/src/main/java/utils/ProductImage.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/utils/SetRates.java" afterPath="$PROJECT_DIR$/src/main/java/utils/SetRates.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/utils/UtilPack.java" afterPath="$PROJECT_DIR$/src/main/java/utils/UtilPack.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/resources/fxml/PCGUI.fxml" afterPath="$PROJECT_DIR$/src/main/resources/fxml/PCGUI.fxml" />
-<<<<<<< HEAD
->>>>>>> temp
-=======
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/resources/hibernate.cfg.xml" afterPath="$PROJECT_DIR$/src/main/resources/hibernate.cfg.xml" />
->>>>>>> temp
     </list>
     <ignored path="PoligonCommanderJ.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -61,260 +28,40 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="PCGUIController.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="PCGUIController.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/main/PCGUIController.java">
           <provider selected="true" editor-type-id="text-editor">
-<<<<<<< HEAD
-<<<<<<< HEAD
-            <state vertical-scroll-proportion="0.39033458">
-              <caret line="3189" column="25" selection-start-line="3189" selection-start-column="17" selection-end-line="3189" selection-end-column="25" />
-=======
-            <state vertical-scroll-proportion="0.33230293">
-              <caret line="1386" column="9" selection-start-line="1386" selection-start-column="9" selection-end-line="1386" selection-end-column="9" />
->>>>>>> temp
-=======
-            <state vertical-scroll-proportion="0.7083926">
-              <caret line="1433" column="34" selection-start-line="1433" selection-start-column="34" selection-end-line="1433" selection-end-column="34" />
->>>>>>> temp
+            <state vertical-scroll-proportion="0.0">
+              <caret line="3366" column="10" selection-start-line="3366" selection-start-column="10" selection-end-line="3366" selection-end-column="10" />
               <folding>
                 <element signature="docComment;class#PCGUIController#0" expanded="false" />
-<<<<<<< HEAD
-<<<<<<< HEAD
-                <element signature="method#setDatasheetFile#0;class#PCGUIController#0" expanded="false" />
-=======
-                <element signature="method#initialize#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#loadSavedSettings#0;class#PCGUIController#0" expanded="false" />
-                <element signature="e#7236#7312#0" expanded="false" />
-                <element signature="method#getAllFilesOfProgramList#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#getProductList#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#getProductList#1;class#PCGUIController#0" expanded="false" />
-                <element signature="method#getQuantities#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#getAnalogs#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#buildProductsTable#0;class#PCGUIController#0" expanded="false" />
-                <element signature="class#15990:16527" expanded="false" />
-                <element signature="method#handle#0;class#15990:16527" expanded="false" />
-                <element signature="class#16750:17283" expanded="false" />
-                <element signature="method#handle#0;class#16750:17283" expanded="false" />
-                <element signature="class#17530:18075" expanded="false" />
-                <element signature="method#handle#0;class#17530:18075" expanded="false" />
-                <element signature="e#18095#18132#0" expanded="false" />
-                <element signature="method#buildDeliveryTimeTable#0;class#PCGUIController#0" expanded="false" />
-                <element signature="class#22272:22581" expanded="false" />
-                <element signature="method#buildQuantityTable#0;class#PCGUIController#0" expanded="false" />
-                <element signature="class#24809:25824" expanded="false" />
-                <element signature="method#handle#0;class#24809:25824" expanded="false" />
-                <element signature="class#26140:27163" expanded="false" />
-                <element signature="method#handle#0;class#26140:27163" expanded="false" />
-                <element signature="method#buildAnalogsTable#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#buildDatasheetFileTable#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#buildVendorsTable#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#buildImageView#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#subCategoriesList#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#includeLowerItems#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#recursiveItems#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#excludeLowerItems#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#arrayChildren#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#buildPropertiesTree#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#buildPropertiesTreeNode#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#isCategoryLowest#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#updateCategoryId#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#updateCategoryId#1;class#PCGUIController#0" expanded="false" />
-                <element signature="method#setNewCellValue#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#setNewPriceValue#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#setNewQuantityValue#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#refreshProductsTable#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#addProductDialog#0;class#PCGUIController#0" expanded="false" />
-                <element signature="e#54076#54158#0" expanded="false" />
-                <element signature="method#deleteProductDialog#0;class#PCGUIController#0" expanded="false" />
-                <element signature="e#54413#54495#0" expanded="false" />
-                <element signature="method#openProductTab#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#createNewCategory#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#editCategory#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#deleteCategory#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#getCategoryDetails#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#getParentCatId#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#replaceProductsUp#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#addVendorDialog#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#createNewVendor#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#setCurrency#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#subPropertiesList#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#setCategorySelected#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#recursiveTreeCall#0;class#PCGUIController#0" expanded="false" />
->>>>>>> temp
-                <element signature="method#expandParents#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#setVendorSelected#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#setDatasheetFile#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#startProgressBar#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#handlePropertiesTreeMouseClicked#0;class#PCGUIController#0" expanded="false" />
-<<<<<<< HEAD
-                <element signature="e#90935#91011#0" expanded="false" />
-                <element signature="class#91290:91599" expanded="false" />
-                <element signature="method#changed#0;class#91290:91599" expanded="false" />
-=======
-                <element signature="e#82597#82673#0" expanded="false" />
-                <element signature="class#82952:83261" expanded="false" />
-                <element signature="method#changed#0;class#82952:83261" expanded="false" />
-                <element signature="method#handleSearchComboBox#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#fillProductTab#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#changePicDescription#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#buildPropertiesTable#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#buildFunctionsTable1#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#setFunctionPicture#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#setSelectProperty#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#setSelectFunction#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#setPictureButtonPress#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#setFunctionDescriptionAndPicture#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#showFunctionDescription#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#handleFunctionsTable1MouseClicked#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#buildAccessoriesTable#0;class#PCGUIController#0" expanded="false" />
-                <element signature="class#102972:104493" expanded="false" />
-                <element signature="method#handle#0;class#102972:104493" expanded="false" />
-                <element signature="method#createAndConfigureImageLoadService#0;class#PCGUIController#0" expanded="false" />
-                <element signature="class#107388:107619" expanded="false" />
-                <element signature="method#newThread#0;class#107388:107619" expanded="false" />
-                <element signature="method#bindPaginationToCurrentFile#0;class#PCGUIController#0" expanded="false" />
-                <element signature="class#107713:108013" expanded="false" />
-                <element signature="method#changed#0;class#107713:108013" expanded="false" />
-                <element signature="class#108064:108327" expanded="false" />
-                <element signature="initializer##0;class#108064:108327" expanded="false" />
-                <element signature="method#createPaginationPageFactory#0;class#PCGUIController#0" expanded="false" />
-                <element signature="class#108514:109088" expanded="false" />
-                <element signature="method#call#0;class#108514:109088" expanded="false" />
-                <element signature="method#loadPdfFile#0;class#PCGUIController#0" expanded="false" />
-                <element signature="class#110070:110587" expanded="false" />
-                <element signature="method#call#0;class#110070:110587" expanded="false" />
-                <element signature="class#110633:110972" expanded="false" />
-                <element signature="method#handle#0;class#110633:110972" expanded="false" />
-                <element signature="class#111016:111348" expanded="false" />
-                <element signature="method#handle#0;class#111016:111348" expanded="false" />
-                <element signature="method#zoomFit#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#updateImage#0;class#PCGUIController#0" expanded="false" />
-                <element signature="class#112291:113795" expanded="false" />
-                <element signature="method#call#0;class#112291:113795" expanded="false" />
-                <element signature="e#113020#113047#0" expanded="false" />
-                <element signature="class#113841:114107" expanded="false" />
-                <element signature="method#handle#0;class#113841:114107" expanded="false" />
-                <element signature="class#114151:114422" expanded="false" />
-                <element signature="method#handle#0;class#114151:114422" expanded="false" />
-                <element signature="method#showErrorMessage#0;class#PCGUIController#0" expanded="false" />
-                <element signature="class#115371:115529" expanded="false" />
-                <element signature="class#115966:116450" expanded="false" />
-                <element signature="method#changed#0;class#115966:116450" expanded="false" />
+                <element signature="e#7228#7304#0" expanded="false" />
                 <element signature="class#PageDimensions#0;class#PCGUIController#0" expanded="false" />
                 <element signature="method#PageDimensions#0;class#PageDimensions#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#handleCategorySearch#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#getListItems#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#setEmptyHtmlEditor#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#editSelectedNewsItem#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#editSelectedArticle#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#editSelectedVideo#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#editSelectedReview#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#editSelectedAddition#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#editSelectedContent#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#editSelectedCategory#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#saveContent#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#cleanHtml#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#refreshHtml#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#loadImportFields#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#populateComboBox#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#startProgressBarImportXLS#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#createImportXLSTask#0;class#PCGUIController#0" expanded="false" />
-                <element signature="class#142682:143481" expanded="false" />
-                <element signature="method#call#0;class#142682:143481" expanded="false" />
-                <element signature="e#143114#143162#0" expanded="false" />
-                <element signature="method#createImportTask#0;class#PCGUIController#0" expanded="false" />
-                <element signature="class#143697:144080" expanded="false" />
-                <element signature="method#call#0;class#143697:144080" expanded="false" />
->>>>>>> temp
-                <element signature="method#getSelectedDBKey#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#compareFields#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#startImportFromXLSToDB#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#buildProductKindsList#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#buildPropertiesTreeTable#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#buildFunctionsTable#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#sHeader#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#setChooseXLSButtonPress#0;class#PCGUIController#0" expanded="false" />
-<<<<<<< HEAD
-                <element signature="method#getHeadersRowNumber#0;class#PCGUIController#0" expanded="false" />
-=======
-                <element signature="method#startImportProgressBar#0;class#PCGUIController#0" expanded="false" />
->>>>>>> temp
-                <element signature="method#handlePropertiesKindSelected#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#writeToSite#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#saveAddressSiteDB#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#savePortSiteDB#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#saveTitleSiteDB#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#saveUserSiteDB#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#savePasswordSiteDB#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#saveAddressLocalDB#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#savePortLocalDB#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#saveTitleLocalDB#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#saveUserLocalDB#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#savePasswordLocalDB#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#saveSiteUrlToDb#0;class#PCGUIController#0" expanded="false" />
-<<<<<<< HEAD
-                <marker date="1456993742447" expanded="true" signature="18642:18697" placeholder="select id fr... categories" />
-                <marker date="1456993742447" expanded="true" signature="19222:19281" placeholder="select id fr... property_types" />
-                <marker date="1456993742447" expanded="true" signature="19801:19854" placeholder="select id fr... products" />
-                <marker date="1456993742447" expanded="true" signature="46579:46719" placeholder="SELECT title... categories" />
-                <marker date="1456993742447" expanded="true" signature="46613:46691" placeholder="SELECT id FR... categories" />
-                <marker date="1456993742447" expanded="true" signature="58132:58192" placeholder="select id fr... products" />
-                <marker date="1456993742447" expanded="true" signature="59607:59667" placeholder="select id fr... products" />
-                <marker date="1456993742447" expanded="true" signature="82590:82648" placeholder="select id fr... vendors" />
-                <marker date="1456993742447" expanded="true" signature="83475:83651" placeholder="SELECT title... property_types" />
-                <marker date="1456993742447" expanded="true" signature="83513:83623" placeholder="SELECT id FR... property_types" />
-=======
-                <element signature="method#loadSiteInBrowser#0;class#PCGUIController#0" expanded="false" />
-                <marker date="1457693621048" expanded="false" signature="36531:36736" placeholder="SELECT title... categories" />
-                <marker date="1457693621048" expanded="false" signature="36565:36708" placeholder="SELECT id FR... categories" />
-                <marker date="1457693621048" expanded="false" signature="49269:49329" placeholder="select id fr... products" />
-                <marker date="1457693621048" expanded="false" signature="51010:51070" placeholder="select id fr... products" />
-                <marker date="1457693621048" expanded="false" signature="74211:74269" placeholder="select id fr... vendors" />
-                <marker date="1457693621048" expanded="false" signature="75096:75281" placeholder="SELECT title... property_types" />
-                <marker date="1457693621048" expanded="false" signature="75134:75253" placeholder="SELECT id FR... property_types" />
->>>>>>> temp
-=======
-                <element signature="e#3075#3076#0" expanded="true" />
-                <element signature="e#3139#3140#0" expanded="true" />
-                <element signature="method#loadSavedSettings#0;class#PCGUIController#0" expanded="false" />
-                <element signature="e#7132#7208#0" expanded="false" />
-                <element signature="e#23502#23503#0" expanded="true" />
-                <element signature="e#23558#23559#0" expanded="true" />
-                <element signature="e#23635#23636#0" expanded="true" />
-                <element signature="e#23700#23701#0" expanded="true" />
-                <element signature="e#25876#25904#0" expanded="true" />
-                <element signature="e#26935#26963#0" expanded="true" />
-                <element signature="e#82699#82700#0" expanded="true" />
-                <element signature="e#82738#82739#0" expanded="true" />
-                <element signature="e#109235#109236#0" expanded="true" />
-                <element signature="e#109336#109337#0" expanded="true" />
-                <element signature="e#112156#112157#0" expanded="true" />
-                <element signature="e#112245#112246#0" expanded="true" />
-                <element signature="e#112424#112425#0" expanded="true" />
-                <element signature="e#112471#112472#0" expanded="true" />
-                <element signature="e#112506#112507#0" expanded="true" />
-                <element signature="e#112553#112554#0" expanded="true" />
-                <element signature="e#112950#112951#0" expanded="true" />
-                <element signature="e#113031#113032#0" expanded="true" />
-                <element signature="class#PageDimensions#0;class#PCGUIController#0" expanded="false" />
-                <element signature="method#PageDimensions#0;class#PageDimensions#0;class#PCGUIController#0" expanded="false" />
-                <element signature="class#141331:142130" expanded="false" />
-                <element signature="method#call#0;class#141331:142130" expanded="false" />
-                <element signature="e#141763#141811#0" expanded="false" />
-                <element signature="class#142346:142729" expanded="false" />
-                <element signature="method#call#0;class#142346:142729" expanded="false" />
-                <element signature="e#153706#153707#0" expanded="true" />
-                <element signature="e#153760#153761#0" expanded="true" />
-                <element signature="e#154022#154023#0" expanded="true" />
-                <element signature="e#154046#154047#0" expanded="true" />
-                <element signature="e#154091#154092#0" expanded="true" />
-                <element signature="e#154116#154117#0" expanded="true" />
-                <marker date="1458301017905" expanded="false" signature="41228:41433" placeholder="SELECT title... categories" />
-                <marker date="1458301017905" expanded="false" signature="41262:41405" placeholder="SELECT id FR... categories" />
-                <marker date="1458301017905" expanded="false" signature="76420:76478" placeholder="select id fr... vendors" />
-                <marker date="1458301017905" expanded="false" signature="77305:77490" placeholder="SELECT title... property_types" />
-                <marker date="1458301017905" expanded="false" signature="77343:77462" placeholder="SELECT id FR... property_types" />
+                <element signature="class#142959:143758" expanded="false" />
+                <element signature="method#call#0;class#142959:143758" expanded="false" />
+                <element signature="e#143391#143439#0" expanded="false" />
+                <element signature="class#143974:144357" expanded="false" />
+                <element signature="method#call#0;class#143974:144357" expanded="false" />
+                <element signature="e#155522#155523#0" expanded="true" />
+                <element signature="e#155576#155577#0" expanded="true" />
+                <marker date="1458542675114" expanded="true" signature="42088:42293" placeholder="SELECT title... categories" />
+                <marker date="1458542675114" expanded="true" signature="42122:42265" placeholder="SELECT id FR... categories" />
+                <marker date="1458542675114" expanded="true" signature="77464:77522" placeholder="select id fr... vendors" />
+                <marker date="1458542675114" expanded="true" signature="78349:78534" placeholder="SELECT title... property_types" />
+                <marker date="1458542675114" expanded="true" signature="78387:78506" placeholder="SELECT id FR... property_types" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name=".gitignore" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/.gitignore">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="0" column="5" selection-start-line="0" selection-start-column="5" selection-end-line="0" selection-end-column="5" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -427,7 +174,6 @@
               <caret line="16" column="8" selection-start-line="16" selection-start-column="8" selection-end-line="16" selection-end-column="53" />
               <folding>
                 <element signature="imports" expanded="true" />
->>>>>>> temp
               </folding>
             </state>
           </provider>
@@ -463,20 +209,7 @@
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
               <caret line="40" column="0" selection-start-line="40" selection-start-column="0" selection-end-line="40" selection-end-column="0" />
-              <folding>
-                <element signature="e#383#384#0" expanded="true" />
-                <element signature="e#411#412#0" expanded="true" />
-                <element signature="e#453#454#0" expanded="true" />
-                <element signature="e#487#488#0" expanded="true" />
-                <element signature="e#525#526#0" expanded="true" />
-                <element signature="e#559#560#0" expanded="true" />
-                <element signature="e#613#614#0" expanded="true" />
-                <element signature="e#659#660#0" expanded="true" />
-                <element signature="e#692#693#0" expanded="true" />
-                <element signature="e#721#722#0" expanded="true" />
-                <element signature="e#765#766#0" expanded="true" />
-                <element signature="e#801#802#0" expanded="true" />
-              </folding>
+              <folding />
             </state>
           </provider>
         </entry>
@@ -487,33 +220,6 @@
             <state vertical-scroll-proportion="0.0">
               <caret line="138" column="42" selection-start-line="138" selection-start-column="42" selection-end-line="138" selection-end-column="42" />
               <folding>
-<<<<<<< HEAD
-                <element signature="e#0#2212#0" expanded="false" />
-                <element signature="e#1241#1242#0" expanded="false" />
-                <element signature="e#1269#1270#0" expanded="false" />
-                <element signature="e#1315#1316#0" expanded="false" />
-                <element signature="e#1349#1350#0" expanded="false" />
-                <element signature="e#1384#1385#0" expanded="false" />
-                <element signature="e#1411#1412#0" expanded="false" />
-                <element signature="e#1455#1456#0" expanded="false" />
-                <element signature="e#1487#1488#0" expanded="false" />
-                <element signature="e#1530#1531#0" expanded="false" />
-                <element signature="e#1561#1562#0" expanded="false" />
-                <element signature="e#1613#1614#0" expanded="false" />
-                <element signature="e#1653#1654#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="SiteUrlSettings.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/settings/SiteUrlSettings.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="27" column="36" selection-start-line="27" selection-start-column="36" selection-end-line="27" selection-end-column="36" />
-              <folding>
-                <marker date="1456993252452" expanded="true" signature="1054:1247" placeholder="insert into settings... " />
-=======
                 <element signature="docComment;class#UtilPack#0" expanded="false" />
                 <element signature="method#getCategoryIdFromTitle#0;class#UtilPack#0" expanded="false" />
                 <element signature="method#getCategoryTitleFromId#0;class#UtilPack#0" expanded="false" />
@@ -523,21 +229,25 @@
                 <element signature="method#getProductTitleFromId#0;class#UtilPack#0" expanded="false" />
                 <element signature="method#getProductKindIdFromTitle#0;class#UtilPack#0" expanded="false" />
                 <element signature="method#normalize#0;class#UtilPack#0" expanded="false" />
-<<<<<<< HEAD
->>>>>>> temp
-=======
                 <element signature="method#getAllProductTypes#0;class#UtilPack#0" expanded="false" />
                 <element signature="method#getAllVendors#0;class#UtilPack#0" expanded="false" />
                 <element signature="method#getAllSeries#0;class#UtilPack#0" expanded="false" />
                 <element signature="method#treeItemChildren#0;class#UtilPack#0" expanded="false" />
                 <element signature="method#cleanHtml#0;class#UtilPack#0" expanded="false" />
->>>>>>> temp
               </folding>
             </state>
           </provider>
         </entry>
       </file>
     </leaf>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GradleLocalSettings">
+    <option name="externalProjectsViewState">
+      <projects_view />
+    </option>
   </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
@@ -547,7 +257,6 @@
         <option value="$PROJECT_DIR$/src/main/resources/log4j.xml" />
         <option value="$PROJECT_DIR$/src/main/java/tableviews/PricesTableView.java" />
         <option value="$PROJECT_DIR$/src/main/java/utils/HibernateUtil.java" />
-        <option value="$PROJECT_DIR$/.gitignore" />
         <option value="$PROJECT_DIR$/src/main/java/settings/siteUrlSettings.java" />
         <option value="$PROJECT_DIR$/src/main/java/settings/siteDBSettings.java" />
         <option value="$PROJECT_DIR$/src/main/java/settings/SystemConfig.java" />
@@ -593,6 +302,7 @@
         <option value="$PROJECT_DIR$/src/main/java/utils/NewSerie.java" />
         <option value="$PROJECT_DIR$/src/main/java/modalwindows/AlertWindow.java" />
         <option value="$PROJECT_DIR$/src/main/java/main/PCGUIController.java" />
+        <option value="$PROJECT_DIR$/.gitignore" />
       </list>
     </option>
   </component>
@@ -728,6 +438,34 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="PackagesPane">
+        <subPane>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="PoligonCommanderJ" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageViewProjectNode" />
+            </PATH_ELEMENT>
+          </PATH>
+        </subPane>
+      </pane>
+      <pane id="Scratches">
+        <subPane>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" />
+              <option name="myItemType" value="com.intellij.ide.scratch.ScratchProjectViewPane$MyProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="DB Consoles" />
+              <option name="myItemType" value="com.intellij.ide.scratch.ScratchProjectViewPane$MyRootNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="df60a9aa-9f22-4239-8697-f4cd6bfabaff" />
+              <option name="myItemType" value="com.intellij.ide.scratch.ScratchProjectViewPane$MyPsiNode" />
+            </PATH_ELEMENT>
+          </PATH>
+        </subPane>
+      </pane>
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -844,43 +582,11 @@
           </PATH>
           <PATH>
             <PATH_ELEMENT>
-<<<<<<< HEAD
-<<<<<<< HEAD
-              <option name="myItemId" value="settings" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-=======
->>>>>>> temp
               <option name="myItemId" value="PoligonCommanderJ" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="PoligonCommanderJ" />
-<<<<<<< HEAD
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="main" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="java" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="META-INF" />
-=======
-              <option name="myItemId" value="modalwindows" />
->>>>>>> temp
-=======
->>>>>>> temp
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -978,32 +684,18 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
-        </subPane>
-      </pane>
-      <pane id="PackagesPane">
-        <subPane>
           <PATH>
             <PATH_ELEMENT>
               <option name="myItemId" value="PoligonCommanderJ" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageViewProjectNode" />
-            </PATH_ELEMENT>
-          </PATH>
-        </subPane>
-      </pane>
-      <pane id="Scratches">
-        <subPane>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" />
-              <option name="myItemType" value="com.intellij.ide.scratch.ScratchProjectViewPane$MyProjectNode" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="DB Consoles" />
-              <option name="myItemType" value="com.intellij.ide.scratch.ScratchProjectViewPane$MyRootNode" />
+              <option name="myItemId" value="PoligonCommanderJ" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="df60a9aa-9f22-4239-8697-f4cd6bfabaff" />
-              <option name="myItemType" value="com.intellij.ide.scratch.ScratchProjectViewPane$MyPsiNode" />
+              <option name="myItemId" value=".idea" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
         </subPane>
@@ -1012,6 +704,8 @@
   </component>
   <component name="PropertiesComponent">
     <property name="js-jscs-nodeInterpreter" value="C:\Program Files\nodejs\node.exe" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
   </component>
   <component name="RunManager" selected="Application.PoligonCommander">
     <configuration default="false" name="PoligonCommander" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
@@ -1425,6 +1119,11 @@
       <method />
     </configuration>
     <configuration default="true" type="js.build_tools.gulp" factoryName="Gulp.js">
+      <node-options />
+      <gulpfile />
+      <tasks />
+      <arguments />
+      <envs />
       <method />
     </configuration>
     <configuration default="true" type="js.build_tools.npm" factoryName="npm">
@@ -1514,10 +1213,6 @@
       <workItem from="1456727820718" duration="26316000" />
       <workItem from="1456813693956" duration="6011000" />
       <workItem from="1456820282561" duration="21227000" />
-<<<<<<< HEAD
-      <workItem from="1456900464503" duration="3053000" />
-      <workItem from="1456991293164" duration="2677000" />
-=======
       <workItem from="1456900464503" duration="25027000" />
       <workItem from="1456996586736" duration="20930000" />
       <workItem from="1457073807383" duration="17571000" />
@@ -1527,9 +1222,6 @@
       <workItem from="1457592000572" duration="3958000" />
       <workItem from="1457596215963" duration="6704000" />
       <workItem from="1457678309235" duration="15519000" />
-<<<<<<< HEAD
->>>>>>> temp
-=======
       <workItem from="1457695523084" duration="3413000" />
       <workItem from="1457700633248" duration="26000" />
       <workItem from="1457700996402" duration="4179000" />
@@ -1542,7 +1234,9 @@
       <workItem from="1458209143787" duration="10476000" />
       <workItem from="1458221407356" duration="5930000" />
       <workItem from="1458282667177" duration="18326000" />
->>>>>>> temp
+      <workItem from="1458301593786" duration="680000" />
+      <workItem from="1458541921844" duration="47000" />
+      <workItem from="1458542415252" duration="879000" />
     </task>
     <task id="LOCAL-00001" summary="test commit">
       <created>1450683270438</created>
@@ -1686,24 +1380,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-<<<<<<< HEAD
-<<<<<<< HEAD
-    <option name="totallyTimeSpent" value="684731000" />
-=======
-    <option name="totallyTimeSpent" value="784990000" />
->>>>>>> temp
-  </component>
-  <component name="TodoView" selected-index="1">
-    <todo-panel id="selected-file">
-      <is-autoscroll-to-source value="true" />
-    </todo-panel>
-    <todo-panel id="all">
-      <are-packages-shown value="true" />
-      <is-autoscroll-to-source value="true" />
-    </todo-panel>
-=======
-    <option name="totallyTimeSpent" value="888775000" />
->>>>>>> temp
+    <option name="totallyTimeSpent" value="890381000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="54" y="-8" width="1874" height="1096" extended-state="6" />
@@ -1717,25 +1394,13 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32079414" sideWeight="0.5022075" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.19205298" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.45245558" sideWeight="0.49784714" order="9" side_tool="false" content_ui="tabs" />
-<<<<<<< HEAD
-<<<<<<< HEAD
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.5047022" sideWeight="0.49668875" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.36990595" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
-      <window_info id="Persistence" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.21633554" sideWeight="0.38825214" order="3" side_tool="true" content_ui="tabs" />
-=======
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25600836" sideWeight="0.49668875" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.44723094" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
-=======
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19749217" sideWeight="0.49668875" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.20585161" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
->>>>>>> temp
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.19749217" sideWeight="0.49668875" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.33333334" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Persistence" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.23324251" sideWeight="0.4926959" order="3" side_tool="true" content_ui="tabs" />
->>>>>>> temp
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21578367" sideWeight="0.4986911" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Web" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.21578367" sideWeight="0.50196594" order="6" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3294702" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3291536" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24972437" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -1748,6 +1413,7 @@
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Database Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.22257054" sideWeight="0.5" order="12" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3291536" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
     <layout-to-restore>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -1779,6 +1445,9 @@
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3291536" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="true" content_ui="tabs" />
     </layout-to-restore>
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="test commit" />
@@ -1819,20 +1488,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/main/java/utils/NewAddition.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.11891892">
-          <caret line="5" column="24" selection-start-line="5" selection-start-column="24" selection-end-line="5" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/utils/NewReview.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.11891892">
-          <caret line="5" column="22" selection-start-line="5" selection-start-column="22" selection-end-line="5" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/utils/NewVideo.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.11891892">
@@ -1926,9 +1581,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="15" column="2" selection-start-line="15" selection-start-column="2" selection-end-line="15" selection-end-column="2" />
-          <folding>
-            <marker date="1457694368909" expanded="true" signature="2123:2315" placeholder="insert into settings... " />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -2072,36 +1724,14 @@
         </state>
       </provider>
     </entry>
-<<<<<<< HEAD
-<<<<<<< HEAD
-    <entry file="file://$PROJECT_DIR$/src/main/java/utils/NewVendor.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.06303725">
-          <caret line="11" column="13" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
-          <folding />
-        </state>
-=======
-    <entry file="file://$APPLICATION_CONFIG_DIR$/consoles/db/df60a9aa-9f22-4239-8697-f4cd6bfabaff/console.sql">
-=======
     <entry file="file://$PROJECT_DIR$/src/main/java/tableviews/AnalogsTableView.java">
->>>>>>> temp
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="19" column="55" selection-start-line="19" selection-start-column="55" selection-end-line="19" selection-end-column="55" />
         </state>
       </provider>
     </entry>
-<<<<<<< HEAD
-    <entry file="file://$PROJECT_DIR$/folder.png">
-      <provider selected="true" editor-type-id="images">
-        <state />
->>>>>>> temp
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/pom.xml">
-=======
     <entry file="file://$PROJECT_DIR$/src/main/java/utils/Analog.java">
->>>>>>> temp
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.023783784">
           <caret line="179" column="42" selection-start-line="179" selection-start-column="42" selection-end-line="179" selection-end-column="42" />
@@ -2113,9 +1743,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="16" column="0" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -2148,24 +1775,13 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.31181103">
           <caret line="18" column="13" selection-start-line="18" selection-start-column="13" selection-end-line="18" selection-end-column="13" />
-          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/main/PoligonCommander.java">
       <provider selected="true" editor-type-id="text-editor">
-<<<<<<< HEAD
-<<<<<<< HEAD
-        <state vertical-scroll-proportion="0.036666665">
-          <caret line="14" column="0" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
-=======
-        <state vertical-scroll-proportion="1.5234216">
-          <caret line="57" column="22" selection-start-line="57" selection-start-column="22" selection-end-line="57" selection-end-column="22" />
->>>>>>> temp
-=======
         <state vertical-scroll-proportion="0.0">
           <caret line="87" column="0" selection-start-line="87" selection-start-column="0" selection-end-line="87" selection-end-column="0" />
->>>>>>> temp
           <folding />
         </state>
       </provider>
@@ -2174,7 +1790,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.26993865">
           <caret line="11" column="13" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -2182,20 +1797,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="40" column="0" selection-start-line="40" selection-start-column="0" selection-end-line="40" selection-end-column="0" />
-          <folding>
-            <element signature="e#383#384#0" expanded="true" />
-            <element signature="e#411#412#0" expanded="true" />
-            <element signature="e#453#454#0" expanded="true" />
-            <element signature="e#487#488#0" expanded="true" />
-            <element signature="e#525#526#0" expanded="true" />
-            <element signature="e#559#560#0" expanded="true" />
-            <element signature="e#613#614#0" expanded="true" />
-            <element signature="e#659#660#0" expanded="true" />
-            <element signature="e#692#693#0" expanded="true" />
-            <element signature="e#721#722#0" expanded="true" />
-            <element signature="e#765#766#0" expanded="true" />
-            <element signature="e#801#802#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -2204,21 +1806,6 @@
         <state vertical-scroll-proportion="0.0">
           <caret line="138" column="42" selection-start-line="138" selection-start-column="42" selection-end-line="138" selection-end-column="42" />
           <folding>
-<<<<<<< HEAD
-            <element signature="e#0#2212#0" expanded="false" />
-            <element signature="e#1241#1242#0" expanded="false" />
-            <element signature="e#1269#1270#0" expanded="false" />
-            <element signature="e#1315#1316#0" expanded="false" />
-            <element signature="e#1349#1350#0" expanded="false" />
-            <element signature="e#1384#1385#0" expanded="false" />
-            <element signature="e#1411#1412#0" expanded="false" />
-            <element signature="e#1455#1456#0" expanded="false" />
-            <element signature="e#1487#1488#0" expanded="false" />
-            <element signature="e#1530#1531#0" expanded="false" />
-            <element signature="e#1561#1562#0" expanded="false" />
-            <element signature="e#1613#1614#0" expanded="false" />
-            <element signature="e#1653#1654#0" expanded="false" />
-=======
             <element signature="docComment;class#UtilPack#0" expanded="false" />
             <element signature="method#getCategoryIdFromTitle#0;class#UtilPack#0" expanded="false" />
             <element signature="method#getCategoryTitleFromId#0;class#UtilPack#0" expanded="false" />
@@ -2228,15 +1815,11 @@
             <element signature="method#getProductTitleFromId#0;class#UtilPack#0" expanded="false" />
             <element signature="method#getProductKindIdFromTitle#0;class#UtilPack#0" expanded="false" />
             <element signature="method#normalize#0;class#UtilPack#0" expanded="false" />
-<<<<<<< HEAD
->>>>>>> temp
-=======
             <element signature="method#getAllProductTypes#0;class#UtilPack#0" expanded="false" />
             <element signature="method#getAllVendors#0;class#UtilPack#0" expanded="false" />
             <element signature="method#getAllSeries#0;class#UtilPack#0" expanded="false" />
             <element signature="method#treeItemChildren#0;class#UtilPack#0" expanded="false" />
             <element signature="method#cleanHtml#0;class#UtilPack#0" expanded="false" />
->>>>>>> temp
           </folding>
         </state>
       </provider>
@@ -2351,270 +1934,37 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/settings/SiteUrlSettings.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/main/PCGUIController.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="27" column="36" selection-start-line="27" selection-start-column="36" selection-end-line="27" selection-end-column="36" />
+          <caret line="3366" column="10" selection-start-line="3366" selection-start-column="10" selection-end-line="3366" selection-end-column="10" />
           <folding>
-            <marker date="1456993252452" expanded="true" signature="1054:1247" placeholder="insert into settings... " />
+            <element signature="docComment;class#PCGUIController#0" expanded="false" />
+            <element signature="method#loadSavedSettings#0;class#PCGUIController#0" expanded="false" />
+            <element signature="e#7228#7304#0" expanded="false" />
+            <element signature="class#PageDimensions#0;class#PCGUIController#0" expanded="false" />
+            <element signature="method#PageDimensions#0;class#PageDimensions#0;class#PCGUIController#0" expanded="false" />
+            <element signature="class#142959:143758" expanded="false" />
+            <element signature="method#call#0;class#142959:143758" expanded="false" />
+            <element signature="e#143391#143439#0" expanded="false" />
+            <element signature="class#143974:144357" expanded="false" />
+            <element signature="method#call#0;class#143974:144357" expanded="false" />
+            <element signature="e#155522#155523#0" expanded="true" />
+            <element signature="e#155576#155577#0" expanded="true" />
+            <marker date="1458542675114" expanded="true" signature="42088:42293" placeholder="SELECT title... categories" />
+            <marker date="1458542675114" expanded="true" signature="42122:42265" placeholder="SELECT id FR... categories" />
+            <marker date="1458542675114" expanded="true" signature="77464:77522" placeholder="select id fr... vendors" />
+            <marker date="1458542675114" expanded="true" signature="78349:78534" placeholder="SELECT title... property_types" />
+            <marker date="1458542675114" expanded="true" signature="78387:78506" placeholder="SELECT id FR... property_types" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/main/PCGUIController.java">
+    <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
-<<<<<<< HEAD
-<<<<<<< HEAD
-        <state vertical-scroll-proportion="0.39033458">
-          <caret line="3189" column="25" selection-start-line="3189" selection-start-column="17" selection-end-line="3189" selection-end-column="25" />
-=======
-        <state vertical-scroll-proportion="0.33230293">
-          <caret line="1386" column="9" selection-start-line="1386" selection-start-column="9" selection-end-line="1386" selection-end-column="9" />
->>>>>>> temp
-=======
-        <state vertical-scroll-proportion="0.7083926">
-          <caret line="1433" column="34" selection-start-line="1433" selection-start-column="34" selection-end-line="1433" selection-end-column="34" />
->>>>>>> temp
-          <folding>
-            <element signature="docComment;class#PCGUIController#0" expanded="false" />
-<<<<<<< HEAD
-<<<<<<< HEAD
-            <element signature="method#setDatasheetFile#0;class#PCGUIController#0" expanded="false" />
-=======
-            <element signature="method#initialize#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#loadSavedSettings#0;class#PCGUIController#0" expanded="false" />
-            <element signature="e#7236#7312#0" expanded="false" />
-            <element signature="method#getAllFilesOfProgramList#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#getProductList#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#getProductList#1;class#PCGUIController#0" expanded="false" />
-            <element signature="method#getQuantities#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#getAnalogs#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#buildProductsTable#0;class#PCGUIController#0" expanded="false" />
-            <element signature="class#15990:16527" expanded="false" />
-            <element signature="method#handle#0;class#15990:16527" expanded="false" />
-            <element signature="class#16750:17283" expanded="false" />
-            <element signature="method#handle#0;class#16750:17283" expanded="false" />
-            <element signature="class#17530:18075" expanded="false" />
-            <element signature="method#handle#0;class#17530:18075" expanded="false" />
-            <element signature="e#18095#18132#0" expanded="false" />
-            <element signature="method#buildDeliveryTimeTable#0;class#PCGUIController#0" expanded="false" />
-            <element signature="class#22272:22581" expanded="false" />
-            <element signature="method#buildQuantityTable#0;class#PCGUIController#0" expanded="false" />
-            <element signature="class#24809:25824" expanded="false" />
-            <element signature="method#handle#0;class#24809:25824" expanded="false" />
-            <element signature="class#26140:27163" expanded="false" />
-            <element signature="method#handle#0;class#26140:27163" expanded="false" />
-            <element signature="method#buildAnalogsTable#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#buildDatasheetFileTable#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#buildVendorsTable#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#buildImageView#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#subCategoriesList#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#includeLowerItems#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#recursiveItems#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#excludeLowerItems#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#arrayChildren#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#buildPropertiesTree#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#buildPropertiesTreeNode#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#isCategoryLowest#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#updateCategoryId#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#updateCategoryId#1;class#PCGUIController#0" expanded="false" />
-            <element signature="method#setNewCellValue#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#setNewPriceValue#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#setNewQuantityValue#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#refreshProductsTable#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#addProductDialog#0;class#PCGUIController#0" expanded="false" />
-            <element signature="e#54076#54158#0" expanded="false" />
-            <element signature="method#deleteProductDialog#0;class#PCGUIController#0" expanded="false" />
-            <element signature="e#54413#54495#0" expanded="false" />
-            <element signature="method#openProductTab#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#createNewCategory#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#editCategory#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#deleteCategory#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#getCategoryDetails#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#getParentCatId#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#replaceProductsUp#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#addVendorDialog#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#createNewVendor#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#setCurrency#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#subPropertiesList#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#setCategorySelected#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#recursiveTreeCall#0;class#PCGUIController#0" expanded="false" />
->>>>>>> temp
-            <element signature="method#expandParents#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#setVendorSelected#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#setDatasheetFile#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#startProgressBar#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#handlePropertiesTreeMouseClicked#0;class#PCGUIController#0" expanded="false" />
-<<<<<<< HEAD
-            <element signature="e#90935#91011#0" expanded="false" />
-            <element signature="class#91290:91599" expanded="false" />
-            <element signature="method#changed#0;class#91290:91599" expanded="false" />
-=======
-            <element signature="e#82597#82673#0" expanded="false" />
-            <element signature="class#82952:83261" expanded="false" />
-            <element signature="method#changed#0;class#82952:83261" expanded="false" />
-            <element signature="method#handleSearchComboBox#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#fillProductTab#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#changePicDescription#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#buildPropertiesTable#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#buildFunctionsTable1#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#setFunctionPicture#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#setSelectProperty#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#setSelectFunction#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#setPictureButtonPress#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#setFunctionDescriptionAndPicture#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#showFunctionDescription#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#handleFunctionsTable1MouseClicked#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#buildAccessoriesTable#0;class#PCGUIController#0" expanded="false" />
-            <element signature="class#102972:104493" expanded="false" />
-            <element signature="method#handle#0;class#102972:104493" expanded="false" />
-            <element signature="method#createAndConfigureImageLoadService#0;class#PCGUIController#0" expanded="false" />
-            <element signature="class#107388:107619" expanded="false" />
-            <element signature="method#newThread#0;class#107388:107619" expanded="false" />
-            <element signature="method#bindPaginationToCurrentFile#0;class#PCGUIController#0" expanded="false" />
-            <element signature="class#107713:108013" expanded="false" />
-            <element signature="method#changed#0;class#107713:108013" expanded="false" />
-            <element signature="class#108064:108327" expanded="false" />
-            <element signature="initializer##0;class#108064:108327" expanded="false" />
-            <element signature="method#createPaginationPageFactory#0;class#PCGUIController#0" expanded="false" />
-            <element signature="class#108514:109088" expanded="false" />
-            <element signature="method#call#0;class#108514:109088" expanded="false" />
-            <element signature="method#loadPdfFile#0;class#PCGUIController#0" expanded="false" />
-            <element signature="class#110070:110587" expanded="false" />
-            <element signature="method#call#0;class#110070:110587" expanded="false" />
-            <element signature="class#110633:110972" expanded="false" />
-            <element signature="method#handle#0;class#110633:110972" expanded="false" />
-            <element signature="class#111016:111348" expanded="false" />
-            <element signature="method#handle#0;class#111016:111348" expanded="false" />
-            <element signature="method#zoomFit#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#updateImage#0;class#PCGUIController#0" expanded="false" />
-            <element signature="class#112291:113795" expanded="false" />
-            <element signature="method#call#0;class#112291:113795" expanded="false" />
-            <element signature="e#113020#113047#0" expanded="false" />
-            <element signature="class#113841:114107" expanded="false" />
-            <element signature="method#handle#0;class#113841:114107" expanded="false" />
-            <element signature="class#114151:114422" expanded="false" />
-            <element signature="method#handle#0;class#114151:114422" expanded="false" />
-            <element signature="method#showErrorMessage#0;class#PCGUIController#0" expanded="false" />
-            <element signature="class#115371:115529" expanded="false" />
-            <element signature="class#115966:116450" expanded="false" />
-            <element signature="method#changed#0;class#115966:116450" expanded="false" />
-            <element signature="class#PageDimensions#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#PageDimensions#0;class#PageDimensions#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#handleCategorySearch#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#getListItems#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#setEmptyHtmlEditor#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#editSelectedNewsItem#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#editSelectedArticle#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#editSelectedVideo#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#editSelectedReview#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#editSelectedAddition#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#editSelectedContent#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#editSelectedCategory#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#saveContent#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#cleanHtml#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#refreshHtml#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#loadImportFields#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#populateComboBox#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#startProgressBarImportXLS#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#createImportXLSTask#0;class#PCGUIController#0" expanded="false" />
-            <element signature="class#142682:143481" expanded="false" />
-            <element signature="method#call#0;class#142682:143481" expanded="false" />
-            <element signature="e#143114#143162#0" expanded="false" />
-            <element signature="method#createImportTask#0;class#PCGUIController#0" expanded="false" />
-            <element signature="class#143697:144080" expanded="false" />
-            <element signature="method#call#0;class#143697:144080" expanded="false" />
->>>>>>> temp
-            <element signature="method#getSelectedDBKey#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#compareFields#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#startImportFromXLSToDB#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#buildProductKindsList#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#buildPropertiesTreeTable#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#buildFunctionsTable#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#sHeader#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#setChooseXLSButtonPress#0;class#PCGUIController#0" expanded="false" />
-<<<<<<< HEAD
-            <element signature="method#getHeadersRowNumber#0;class#PCGUIController#0" expanded="false" />
-=======
-            <element signature="method#startImportProgressBar#0;class#PCGUIController#0" expanded="false" />
->>>>>>> temp
-            <element signature="method#handlePropertiesKindSelected#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#writeToSite#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#saveAddressSiteDB#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#savePortSiteDB#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#saveTitleSiteDB#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#saveUserSiteDB#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#savePasswordSiteDB#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#saveAddressLocalDB#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#savePortLocalDB#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#saveTitleLocalDB#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#saveUserLocalDB#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#savePasswordLocalDB#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#saveSiteUrlToDb#0;class#PCGUIController#0" expanded="false" />
-<<<<<<< HEAD
-            <marker date="1456993742447" expanded="true" signature="18642:18697" placeholder="select id fr... categories" />
-            <marker date="1456993742447" expanded="true" signature="19222:19281" placeholder="select id fr... property_types" />
-            <marker date="1456993742447" expanded="true" signature="19801:19854" placeholder="select id fr... products" />
-            <marker date="1456993742447" expanded="true" signature="46579:46719" placeholder="SELECT title... categories" />
-            <marker date="1456993742447" expanded="true" signature="46613:46691" placeholder="SELECT id FR... categories" />
-            <marker date="1456993742447" expanded="true" signature="58132:58192" placeholder="select id fr... products" />
-            <marker date="1456993742447" expanded="true" signature="59607:59667" placeholder="select id fr... products" />
-            <marker date="1456993742447" expanded="true" signature="82590:82648" placeholder="select id fr... vendors" />
-            <marker date="1456993742447" expanded="true" signature="83475:83651" placeholder="SELECT title... property_types" />
-            <marker date="1456993742447" expanded="true" signature="83513:83623" placeholder="SELECT id FR... property_types" />
-=======
-            <element signature="method#loadSiteInBrowser#0;class#PCGUIController#0" expanded="false" />
-            <marker date="1457693621048" expanded="false" signature="36531:36736" placeholder="SELECT title... categories" />
-            <marker date="1457693621048" expanded="false" signature="36565:36708" placeholder="SELECT id FR... categories" />
-            <marker date="1457693621048" expanded="false" signature="49269:49329" placeholder="select id fr... products" />
-            <marker date="1457693621048" expanded="false" signature="51010:51070" placeholder="select id fr... products" />
-            <marker date="1457693621048" expanded="false" signature="74211:74269" placeholder="select id fr... vendors" />
-            <marker date="1457693621048" expanded="false" signature="75096:75281" placeholder="SELECT title... property_types" />
-            <marker date="1457693621048" expanded="false" signature="75134:75253" placeholder="SELECT id FR... property_types" />
->>>>>>> temp
-=======
-            <element signature="e#3075#3076#0" expanded="true" />
-            <element signature="e#3139#3140#0" expanded="true" />
-            <element signature="method#loadSavedSettings#0;class#PCGUIController#0" expanded="false" />
-            <element signature="e#7132#7208#0" expanded="false" />
-            <element signature="e#23502#23503#0" expanded="true" />
-            <element signature="e#23558#23559#0" expanded="true" />
-            <element signature="e#23635#23636#0" expanded="true" />
-            <element signature="e#23700#23701#0" expanded="true" />
-            <element signature="e#25876#25904#0" expanded="true" />
-            <element signature="e#26935#26963#0" expanded="true" />
-            <element signature="e#82699#82700#0" expanded="true" />
-            <element signature="e#82738#82739#0" expanded="true" />
-            <element signature="e#109235#109236#0" expanded="true" />
-            <element signature="e#109336#109337#0" expanded="true" />
-            <element signature="e#112156#112157#0" expanded="true" />
-            <element signature="e#112245#112246#0" expanded="true" />
-            <element signature="e#112424#112425#0" expanded="true" />
-            <element signature="e#112471#112472#0" expanded="true" />
-            <element signature="e#112506#112507#0" expanded="true" />
-            <element signature="e#112553#112554#0" expanded="true" />
-            <element signature="e#112950#112951#0" expanded="true" />
-            <element signature="e#113031#113032#0" expanded="true" />
-            <element signature="class#PageDimensions#0;class#PCGUIController#0" expanded="false" />
-            <element signature="method#PageDimensions#0;class#PageDimensions#0;class#PCGUIController#0" expanded="false" />
-            <element signature="class#141331:142130" expanded="false" />
-            <element signature="method#call#0;class#141331:142130" expanded="false" />
-            <element signature="e#141763#141811#0" expanded="false" />
-            <element signature="class#142346:142729" expanded="false" />
-            <element signature="method#call#0;class#142346:142729" expanded="false" />
-            <element signature="e#153706#153707#0" expanded="true" />
-            <element signature="e#153760#153761#0" expanded="true" />
-            <element signature="e#154022#154023#0" expanded="true" />
-            <element signature="e#154046#154047#0" expanded="true" />
-            <element signature="e#154091#154092#0" expanded="true" />
-            <element signature="e#154116#154117#0" expanded="true" />
-            <marker date="1458301017905" expanded="false" signature="41228:41433" placeholder="SELECT title... categories" />
-            <marker date="1458301017905" expanded="false" signature="41262:41405" placeholder="SELECT id FR... categories" />
-            <marker date="1458301017905" expanded="false" signature="76420:76478" placeholder="select id fr... vendors" />
-            <marker date="1458301017905" expanded="false" signature="77305:77490" placeholder="SELECT title... property_types" />
-            <marker date="1458301017905" expanded="false" signature="77343:77462" placeholder="SELECT id FR... property_types" />
->>>>>>> temp
-          </folding>
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="5" selection-start-line="0" selection-start-column="5" selection-end-line="0" selection-end-column="5" />
+          <folding />
         </state>
       </provider>
     </entry>

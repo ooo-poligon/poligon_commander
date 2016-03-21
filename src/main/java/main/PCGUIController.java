@@ -138,12 +138,8 @@ public class PCGUIController implements Initializable {
         buildProductKindsList();
         tabBrowserWebView.getEngine().load(siteUrlTextField.getText());
         productsTable.getSelectionModel().setSelectionMode(javafx.scene.control.SelectionMode.MULTIPLE);
-<<<<<<< HEAD
-
         productsTable.getSelectionModel().selectedItemProperty().addListener(
-            new ChangeListener<ProductsTableView>() {
-                @Override
-                public void changed(ObservableValue<? extends ProductsTableView> observable, ProductsTableView oldValue, ProductsTableView newValue) {
+                (observable, oldValue, newValue) -> {
                     try {
                         selectedProduct = newValue.getTitle();
                         productsTable.getSelectionModel().select(newValue);
@@ -155,68 +151,44 @@ public class PCGUIController implements Initializable {
                         buildImageView(selectedProduct);
                         datasheetFileTable.refresh();
                     } catch (NullPointerException ex) {}
-
                     productsTable.setContextMenu(productTableContextMenu);
                     fillProductTab(selectedProduct);
                 }
-=======
-        productsTable.getSelectionModel().selectedItemProperty().addListener(
-            (observable, oldValue, newValue) -> {
-                try {
-                    selectedProduct = newValue.getTitle();
-                    productsTable.getSelectionModel().select(newValue);
-                    buildPricesTable(selectedProduct);
-                    buildQuantityTable(selectedProduct);
-                    buildDeliveryTimeTable(selectedProduct);
-                    buildAnalogsTable(selectedProduct);
-                    buildDatasheetFileTable(selectedProduct);
-                    buildImageView(selectedProduct);
-                    datasheetFileTable.refresh();
-                } catch (NullPointerException ex) {}
-                productsTable.setContextMenu(productTableContextMenu);
-<<<<<<< HEAD
-                try { fillProductTab(selectedProduct);
-                } catch (SQLException e) {}
->>>>>>> temp
-=======
-                fillProductTab(selectedProduct);
->>>>>>> temp
-            }
         );
         tabPane.getSelectionModel().selectedItemProperty().addListener(
-            (ov, t, t1) -> {
-                if (t1.equals(pdfTab)) {
-                    try {
-                        createAndConfigureImageLoadService();
-                        currentFile = new SimpleObjectProperty<>();
-                        currentImage = new SimpleObjectProperty<>();
-                        scroller.contentProperty().bind(currentImage);
-                        zoom = new SimpleDoubleProperty(1);
-                        // To implement zooming, we just get a new image from the PDFFile each time.
-                        // This seems to perform well in some basic tests but may need to be improved
-                        // E.g. load a larger image and scale in the ImageView, loading a new image only
-                        // when required.
-                        zoom.addListener((observable, oldValue, newValue) -> {
-                            updateImage(pagination.getCurrentPageIndex());
-                        });
-                        currentZoomLabel.textProperty().bind(Bindings.format("%.0f %%", zoom.multiply(100)));
-                        bindPaginationToCurrentFile();
-                        createPaginationPageFactory();
-                        String product = productTabTitle.getText();
+                (ov, t, t1) -> {
+                    if (t1.equals(pdfTab)) {
                         try {
-                            loadPdfFile(product);
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
-                    } catch (NullPointerException ne) {}
-                } else if (t1.equals(mainTab)) {
-                    try {
-                        try {fillMainTab(productTabTitle.getText());} catch (SQLException e) {}
-                    } catch (NullPointerException ne) {}
-                } else if (t1.equals(editorTab)) {
-                    ExtendHtmlEditor.addPictureFunction(htmlEditor, editorAnchorPane);
+                            createAndConfigureImageLoadService();
+                            currentFile = new SimpleObjectProperty<>();
+                            currentImage = new SimpleObjectProperty<>();
+                            scroller.contentProperty().bind(currentImage);
+                            zoom = new SimpleDoubleProperty(1);
+                            // To implement zooming, we just get a new image from the PDFFile each time.
+                            // This seems to perform well in some basic tests but may need to be improved
+                            // E.g. load a larger image and scale in the ImageView, loading a new image only
+                            // when required.
+                            zoom.addListener((observable, oldValue, newValue) -> {
+                                updateImage(pagination.getCurrentPageIndex());
+                            });
+                            currentZoomLabel.textProperty().bind(Bindings.format("%.0f %%", zoom.multiply(100)));
+                            bindPaginationToCurrentFile();
+                            createPaginationPageFactory();
+                            String product = productTabTitle.getText();
+                            try {
+                                loadPdfFile(product);
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                            }
+                        } catch (NullPointerException ne) {}
+                    } else if (t1.equals(mainTab)) {
+                        try {
+                            try {fillMainTab(productTabTitle.getText());} catch (SQLException e) {}
+                        } catch (NullPointerException ne) {}
+                    } else if (t1.equals(editorTab)) {
+                        ExtendHtmlEditor.addPictureFunction(htmlEditor, editorAnchorPane);
+                    }
                 }
-            }
         );
         vendorsTable.getSelectionModel().select(0);
         handleVendorsTableMousePressed();
@@ -266,26 +238,26 @@ public class PCGUIController implements Initializable {
         while (resultSet.next()) {
             allProductsTitles.add(resultSet.getString("title"));
             allProductsList.add(new Product(
-                resultSet.getInt   ("id"),
-                resultSet.getInt   ("category_id"),
-                resultSet.getString("title"),
-                resultSet.getString("description"),
-                resultSet.getString("anons"),
-                resultSet.getString("article"),
-                resultSet.getInt   ("available"),
-                resultSet.getString("delivery_time"),
-                resultSet.getString("ean"),
-                resultSet.getInt   ("outdated"),
-                resultSet.getDouble("price"),
-                resultSet.getString("serie"),
-                resultSet.getInt   ("product_kind_id"),
-                resultSet.getString("vendor"),
-                resultSet.getInt   ("plugin_owner_id"),
-                resultSet.getInt   ("accessory_owner_id"),
-                resultSet.getDouble("rate"),
-                resultSet.getDouble("discount1"),
-                resultSet.getDouble("discount2"),
-                resultSet.getDouble("discount3")
+                    resultSet.getInt   ("id"),
+                    resultSet.getInt   ("category_id"),
+                    resultSet.getString("title"),
+                    resultSet.getString("description"),
+                    resultSet.getString("anons"),
+                    resultSet.getString("article"),
+                    resultSet.getInt   ("available"),
+                    resultSet.getString("delivery_time"),
+                    resultSet.getString("ean"),
+                    resultSet.getInt   ("outdated"),
+                    resultSet.getDouble("price"),
+                    resultSet.getString("serie"),
+                    resultSet.getInt   ("product_kind_id"),
+                    resultSet.getString("vendor"),
+                    resultSet.getInt   ("plugin_owner_id"),
+                    resultSet.getInt   ("accessory_owner_id"),
+                    resultSet.getDouble("rate"),
+                    resultSet.getDouble("discount1"),
+                    resultSet.getDouble("discount2"),
+                    resultSet.getDouble("discount3")
             ));
         }
     }
@@ -293,12 +265,12 @@ public class PCGUIController implements Initializable {
         ResultSet resultSet = connection.getResult("select * from files");
         while (resultSet.next()) {
             allFilesOfProgramList.add(new FileOfProgram (
-                resultSet.getInt("id"),
-                resultSet.getString("name"),
-                resultSet.getString("path"),
-                resultSet.getString("description"),
-                resultSet.getInt("file_type_id"),
-                resultSet.getInt("owner_id")
+                    resultSet.getInt("id"),
+                    resultSet.getString("name"),
+                    resultSet.getString("path"),
+                    resultSet.getString("description"),
+                    resultSet.getInt("file_type_id"),
+                    resultSet.getInt("owner_id")
             ));
         }
     }
@@ -306,15 +278,15 @@ public class PCGUIController implements Initializable {
         ResultSet resultSet = connection.getResult("select * from quantity");
         while (resultSet.next()) {
             allQuantitiesList.add(new QuantityOfProduct(
-                resultSet.getInt("id"),
-                resultSet.getInt("stock"),
-                resultSet.getInt("reserved"),
-                resultSet.getInt("ordered"),
-                resultSet.getInt("minimum"),
-                resultSet.getInt("pieces_per_pack"),
-                resultSet.getInt("product_id"),
-                UtilPack.getProductTitleFromId(resultSet.getInt("product_id"), allProductsList)
-                )
+                            resultSet.getInt("id"),
+                            resultSet.getInt("stock"),
+                            resultSet.getInt("reserved"),
+                            resultSet.getInt("ordered"),
+                            resultSet.getInt("minimum"),
+                            resultSet.getInt("pieces_per_pack"),
+                            resultSet.getInt("product_id"),
+                            UtilPack.getProductTitleFromId(resultSet.getInt("product_id"), allProductsList)
+                    )
             );
         }
     }
@@ -342,10 +314,10 @@ public class PCGUIController implements Initializable {
         allProductsList.stream().forEach(product -> {
             if(product.getCategoryId() == selectedNodeID) {
                 data.add(new ProductsTableView(
-                    product.getArticle(),
-                    product.getTitle(),
-                    product.getDescription(),
-                    product.getDeliveryTime())
+                        product.getArticle(),
+                        product.getTitle(),
+                        product.getDescription(),
+                        product.getDeliveryTime())
                 );
             }
         });
@@ -357,10 +329,10 @@ public class PCGUIController implements Initializable {
         allProductsList.stream().forEach(product -> {
             if(product.getCategoryId() == selectedNodeID) {
                 data.add(new ProductsTableView(
-                    product.getArticle(),
-                    product.getTitle(),
-                    product.getDescription(),
-                    product.getDeliveryTime())
+                        product.getArticle(),
+                        product.getTitle(),
+                        product.getDescription(),
+                        product.getDeliveryTime())
                 );
             }
         });
@@ -374,11 +346,11 @@ public class PCGUIController implements Initializable {
             //int product_id = UtilPack.getProductIdFromTitle(productName, allProductsList);
             if (q.getProduct_title().equals(productName)) {
                 data.add(new QuantityTableView(
-                    q.getStock(),
-                    q.getReserved(),
-                    q.getOrdered(),
-                    q.getMinimum(),
-                    q.getPieces_per_pack()
+                        q.getStock(),
+                        q.getReserved(),
+                        q.getOrdered(),
+                        q.getMinimum(),
+                        q.getPieces_per_pack()
                 ));
             }
         });
@@ -399,41 +371,41 @@ public class PCGUIController implements Initializable {
         productArticle.setCellValueFactory(new PropertyValueFactory<>("article"));
         productArticle.setCellFactory(TextFieldTableCell.forTableColumn());
         productArticle.setOnEditCommit(
-            new EventHandler<CellEditEvent<ProductsTableView, String>>() {
-                @Override
-                public void handle(CellEditEvent<ProductsTableView, String> t) {
-                    ((ProductsTableView) t.getTableView().getItems().get(
-                            t.getTablePosition().getRow())
-                    ).setArticle(t.getNewValue());
-                    setNewCellValue("article", t.getNewValue(), productsTable.getFocusModel().getFocusedItem().getTitle());
+                new EventHandler<CellEditEvent<ProductsTableView, String>>() {
+                    @Override
+                    public void handle(CellEditEvent<ProductsTableView, String> t) {
+                        ((ProductsTableView) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())
+                        ).setArticle(t.getNewValue());
+                        setNewCellValue("article", t.getNewValue(), productsTable.getFocusModel().getFocusedItem().getTitle());
+                    }
                 }
-            }
         );
         productTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
         productTitle.setCellFactory(TextFieldTableCell.forTableColumn());
         productTitle.setOnEditCommit(
-            new EventHandler<CellEditEvent<ProductsTableView, String>>() {
-                @Override
-                public void handle(CellEditEvent<ProductsTableView, String> t) {
-                    ((ProductsTableView) t.getTableView().getItems().get(
-                            t.getTablePosition().getRow())
-                    ).setTitle(t.getNewValue());
-                    setNewCellValue("title", t.getNewValue(), productsTable.getFocusModel().getFocusedItem().getTitle());
+                new EventHandler<CellEditEvent<ProductsTableView, String>>() {
+                    @Override
+                    public void handle(CellEditEvent<ProductsTableView, String> t) {
+                        ((ProductsTableView) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())
+                        ).setTitle(t.getNewValue());
+                        setNewCellValue("title", t.getNewValue(), productsTable.getFocusModel().getFocusedItem().getTitle());
+                    }
                 }
-            }
         );
         productDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
         productDescription.setCellFactory(TextFieldTableCell.forTableColumn());
         productDescription.setOnEditCommit(
-            new EventHandler<CellEditEvent<ProductsTableView, String>>() {
-                @Override
-                public void handle(CellEditEvent<ProductsTableView, String> t) {
-                    ((ProductsTableView) t.getTableView().getItems().get(
-                            t.getTablePosition().getRow())
-                    ).setDescription(t.getNewValue());
-                    setNewCellValue("description", t.getNewValue(), productsTable.getFocusModel().getFocusedItem().getTitle());
+                new EventHandler<CellEditEvent<ProductsTableView, String>>() {
+                    @Override
+                    public void handle(CellEditEvent<ProductsTableView, String> t) {
+                        ((ProductsTableView) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())
+                        ).setDescription(t.getNewValue());
+                        setNewCellValue("description", t.getNewValue(), productsTable.getFocusModel().getFocusedItem().getTitle());
+                    }
                 }
-            }
         );
         productsTable.setItems(data);
     }
@@ -448,15 +420,15 @@ public class PCGUIController implements Initializable {
         deliveryTime.setCellValueFactory(new PropertyValueFactory<>("delivery_time"));
         deliveryTime.setCellFactory(TextFieldTableCell.forTableColumn());
         deliveryTime.setOnEditCommit(
-            new EventHandler<CellEditEvent<ProductsTableView, String>>() {
-                @Override
-                public void handle(CellEditEvent<ProductsTableView, String> t) {
-                    ((ProductsTableView) t.getTableView().getItems().get(
-                            t.getTablePosition().getRow())
-                    ).setDeliveryTime(t.getNewValue());
-                    setNewCellValue("delivery_time", t.getNewValue(), productsTable.getFocusModel().getFocusedItem().getTitle());
+                new EventHandler<CellEditEvent<ProductsTableView, String>>() {
+                    @Override
+                    public void handle(CellEditEvent<ProductsTableView, String> t) {
+                        ((ProductsTableView) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())
+                        ).setDeliveryTime(t.getNewValue());
+                        setNewCellValue("delivery_time", t.getNewValue(), productsTable.getFocusModel().getFocusedItem().getTitle());
+                    }
                 }
-            }
         );
         deliveryTable.setItems(data);
     }
@@ -467,11 +439,11 @@ public class PCGUIController implements Initializable {
         });
         ObservableList<PricesTableView> data = FXCollections.observableArrayList();
         String[] priceTypes = {
-            "Розничная цена",
-            "Мелкий опт (+10)",
-            "Оптовая цена",
-            "Диллерская цена",
-            "Закупочная цена"
+                "Розничная цена",
+                "Мелкий опт (+10)",
+                "Оптовая цена",
+                "Диллерская цена",
+                "Закупочная цена"
         };
 
         for (String type : priceTypes) {
@@ -520,24 +492,24 @@ public class PCGUIController implements Initializable {
             }
         }));
         priceValue.setOnEditCommit(
-            new EventHandler<CellEditEvent<PricesTableView, Double>>() {
-                @Override
-                public void handle(CellEditEvent<PricesTableView, Double> t) {
-                    if (t.getRowValue().getType().equals("Закупочная цена")) {
-                        ((PricesTableView) t.getTableView().getItems().get(
-                            t.getTablePosition().getRow())
-                        ).setPrice(t.getNewValue());
-                        setNewPriceValue("price", t.getNewValue(), productsTable.getFocusModel().getFocusedItem().getTitle());
-                        try {
-                            getAllProductsList();
-                        } catch (SQLException e) {}
-                        buildPricesTable(selectedProduct);
-                    } else {
-                        AlertWindow.illegalAction();
-                        buildPricesTable(selectedProduct);
+                new EventHandler<CellEditEvent<PricesTableView, Double>>() {
+                    @Override
+                    public void handle(CellEditEvent<PricesTableView, Double> t) {
+                        if (t.getRowValue().getType().equals("Закупочная цена")) {
+                            ((PricesTableView) t.getTableView().getItems().get(
+                                    t.getTablePosition().getRow())
+                            ).setPrice(t.getNewValue());
+                            setNewPriceValue("price", t.getNewValue(), productsTable.getFocusModel().getFocusedItem().getTitle());
+                            try {
+                                getAllProductsList();
+                            } catch (SQLException e) {}
+                            buildPricesTable(selectedProduct);
+                        } else {
+                            AlertWindow.illegalAction();
+                            buildPricesTable(selectedProduct);
+                        }
                     }
                 }
-            }
         );
         priceValueRub.setCellValueFactory(new PropertyValueFactory<>("priceR"));
         pricesTable.setItems(data);
@@ -678,13 +650,13 @@ public class PCGUIController implements Initializable {
         });
         datasheetFileName.setCellValueFactory(new PropertyValueFactory<>("name"));
         datasheetTableContextMenu = ContextMenuBuilder.create().items(
-            MenuItemBuilder.create().text("Изменить даташит pdf-файл").onAction((ActionEvent arg0) -> {
-                try {
-                    setDatasheetFile();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }).build()
+                MenuItemBuilder.create().text("Изменить даташит pdf-файл").onAction((ActionEvent arg0) -> {
+                    try {
+                        setDatasheetFile();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }).build()
         ).build();
         datasheetFileTable.setContextMenu(datasheetTableContextMenu);
         datasheetFileTable.setItems(data);
@@ -741,10 +713,10 @@ public class PCGUIController implements Initializable {
             allProductsList.stream().forEach(product -> {
                 if(product.getVendor().equals(selectedVendor)) {
                     data.add(new ProductsTableView(
-                        product.getArticle(),
-                        product.getTitle(),
-                        product.getDescription(),
-                        product.getDeliveryTime())
+                            product.getArticle(),
+                            product.getTitle(),
+                            product.getDescription(),
+                            product.getDeliveryTime())
                     );
                 }
             });
@@ -761,10 +733,10 @@ public class PCGUIController implements Initializable {
             allProductsList.stream().forEach(product -> {
                 if(product.getSerie().equals(selectedSerie)) {
                     data.add(new ProductsTableView(
-                        product.getArticle(),
-                        product.getTitle(),
-                        product.getDescription(),
-                        product.getDeliveryTime())
+                            product.getArticle(),
+                            product.getTitle(),
+                            product.getDescription(),
+                            product.getDeliveryTime())
                     );
                 }
             });
@@ -811,34 +783,34 @@ public class PCGUIController implements Initializable {
         EventHandler<MouseEvent> mouseEventHandle = (MouseEvent event) -> { handleCategoryTreeMouseClicked(event); };
         categoriesTree.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseEventHandle);
         treeViewContextMenu = ContextMenuBuilder.create().items(
-            MenuItemBuilder.create().text("Установить коэффициенты цен").onAction((ActionEvent arg0) -> {
-                String selectedNode = (String)((TreeItem)categoriesTree.getSelectionModel().getSelectedItem()).getValue();
-                Integer selectedNodeID = null;
-                selectedNodeID = UtilPack.getCategoryIdFromTitle(selectedNode);
-                SetRatesWindow ratesWindow = new SetRatesWindow(selectedNodeID, null);
-                ratesWindow.showModalWindow();
-            }).build(),
-            MenuItemBuilder.create().text("Создать категорию").onAction((ActionEvent arg0) -> {
-                try {
-                    newCategoryDialog("main");
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }).build(),
-            MenuItemBuilder.create().text("Редактировать категорию").onAction((ActionEvent arg0) -> {
-                try {
-                    editCategoryDialog("main");
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }).build(),
-            MenuItemBuilder.create().text("Удалить категорию").onAction((ActionEvent arg0) -> {
-                try {
-                    deleteCategoryDialog("main");
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }).build()
+                MenuItemBuilder.create().text("Установить коэффициенты цен").onAction((ActionEvent arg0) -> {
+                    String selectedNode = (String)((TreeItem)categoriesTree.getSelectionModel().getSelectedItem()).getValue();
+                    Integer selectedNodeID = null;
+                    selectedNodeID = UtilPack.getCategoryIdFromTitle(selectedNode);
+                    SetRatesWindow ratesWindow = new SetRatesWindow(selectedNodeID, null);
+                    ratesWindow.showModalWindow();
+                }).build(),
+                MenuItemBuilder.create().text("Создать категорию").onAction((ActionEvent arg0) -> {
+                    try {
+                        newCategoryDialog("main");
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }).build(),
+                MenuItemBuilder.create().text("Редактировать категорию").onAction((ActionEvent arg0) -> {
+                    try {
+                        editCategoryDialog("main");
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }).build(),
+                MenuItemBuilder.create().text("Удалить категорию").onAction((ActionEvent arg0) -> {
+                    try {
+                        deleteCategoryDialog("main");
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }).build()
         ).build();
         categoriesTree.setContextMenu(treeViewContextMenu);
         stackPane.getChildren().add(categoriesTree);
@@ -995,27 +967,27 @@ public class PCGUIController implements Initializable {
         buildTreeNode(getAllCategoriesList(), rootItem, catalogRoot);
         treeView = new TreeView(rootItem);
         ContextMenu treeViewContextMenu1 = ContextMenuBuilder.create().items(
-            MenuItemBuilder.create().text("Создать категорию").onAction((ActionEvent arg0) -> {
-                try {
-                    newCategoryDialog("modal");
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }).build(),
-            MenuItemBuilder.create().text("Редактировать категорию").onAction((ActionEvent arg0) -> {
-                try {
-                    editCategoryDialog("modal");
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }).build(),
-            MenuItemBuilder.create().text("Удалить категорию").onAction((ActionEvent arg0) -> {
-                try {
-                    deleteCategoryDialog("modal");
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }).build()
+                MenuItemBuilder.create().text("Создать категорию").onAction((ActionEvent arg0) -> {
+                    try {
+                        newCategoryDialog("modal");
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }).build(),
+                MenuItemBuilder.create().text("Редактировать категорию").onAction((ActionEvent arg0) -> {
+                    try {
+                        editCategoryDialog("modal");
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }).build(),
+                MenuItemBuilder.create().text("Удалить категорию").onAction((ActionEvent arg0) -> {
+                    try {
+                        deleteCategoryDialog("modal");
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }).build()
         ).build();
         treeView.setContextMenu(treeViewContextMenu1);
         stackPane.getChildren().add(treeView);
@@ -1211,23 +1183,23 @@ public class PCGUIController implements Initializable {
         Optional<Product> result = AlertWindow.newProductDialog();
         if (result.isPresent()) {
             System.out.println("new product is " + "\n" +
-                result.get().getCategoryId() + "\n" +
-                result.get().getTitle() + "\n" +
-                result.get().getDescription() + "\n" +
-                result.get().getAnons() + "\n" +
-                result.get().getArticle() + "\n" +
-                result.get().getAvailable() + "\n" +
-                result.get().getDeliveryTime() + "\n" +
-                result.get().getEan() + "\n" +
-                result.get().getOutdated() + "\n" +
-                result.get().getPrice() + "\n" +
-                result.get().getSerie() + "\n" +
-                result.get().getProductKindId() + "\n" +
-                result.get().getVendor() + "\n" +
-                result.get().getRate() + "\n" +
-                result.get().getDiscount1() + "\n" +
-                result.get().getDiscount2() + "\n" +
-                result.get().getDiscount3()
+                    result.get().getCategoryId() + "\n" +
+                    result.get().getTitle() + "\n" +
+                    result.get().getDescription() + "\n" +
+                    result.get().getAnons() + "\n" +
+                    result.get().getArticle() + "\n" +
+                    result.get().getAvailable() + "\n" +
+                    result.get().getDeliveryTime() + "\n" +
+                    result.get().getEan() + "\n" +
+                    result.get().getOutdated() + "\n" +
+                    result.get().getPrice() + "\n" +
+                    result.get().getSerie() + "\n" +
+                    result.get().getProductKindId() + "\n" +
+                    result.get().getVendor() + "\n" +
+                    result.get().getRate() + "\n" +
+                    result.get().getDiscount1() + "\n" +
+                    result.get().getDiscount2() + "\n" +
+                    result.get().getDiscount3()
             );
         }
     }
@@ -1251,10 +1223,10 @@ public class PCGUIController implements Initializable {
         allProductsList.stream().forEach(product -> {
             if(product.getTitle().equals(selectedProduct)) {
                 selectedProductsTableViewItem[0] = new ProductsTableView(
-                    product.getArticle(),
-                    product.getTitle(),
-                    product.getDescription(),
-                    product.getDeliveryTime()
+                        product.getArticle(),
+                        product.getTitle(),
+                        product.getDescription(),
+                        product.getDeliveryTime()
                 );
                 categoryId[0] = product.getCategoryId();
             }
@@ -1262,10 +1234,10 @@ public class PCGUIController implements Initializable {
         allProductsList.stream().forEach(product -> {
             if(product.getCategoryId() == categoryId[0]) {
                 data.add(new ProductsTableView(
-                    product.getArticle(),
-                    product.getTitle(),
-                    product.getDescription(),
-                    product.getDeliveryTime())
+                        product.getArticle(),
+                        product.getTitle(),
+                        product.getDescription(),
+                        product.getDeliveryTime())
                 );
             }
         });
@@ -1700,7 +1672,7 @@ public class PCGUIController implements Initializable {
     }
     @FXML public  void startProgressBar(MouseEvent event) {
         Task task = createTask(event);
-        progressBar.progressProperty().bind(task.progressProperty());
+        //progressBar.progressProperty().bind(task.progressProperty());
         Platform.runLater(task);
     }
     @FXML private void handlePropertiesTreeMouseClicked(MouseEvent event) throws SQLException {
@@ -1719,106 +1691,106 @@ public class PCGUIController implements Initializable {
         onFocusedProductTableItem(selectedProduct);
         if (productsTable.getSelectionModel().getSelectedItems().size() == 1) {
             productTableContextMenu = ContextMenuBuilder.create().items(
-                MenuItemBuilder.create().text("Установить коэффициенты цен").onAction((ActionEvent arg0) -> {
-                    Integer selectedProductID = null;
-                    selectedProductID = UtilPack.getProductIdFromTitle(selectedProduct, allProductsList);
-                    SetRatesWindow ratesWindow = new SetRatesWindow(null, selectedProductID);
-                    ratesWindow.showModalWindow();
-                }).build(),
-                MenuItemBuilder.create().text("Открыть вкладку обзора свойств устройства").onAction((ActionEvent arg0) -> {
-                    try {
-                        openProductTab();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }).build(),
-                MenuItemBuilder.create().text("Открыть просмотр PDF-файла").onAction((ActionEvent arg0) -> {
-                    createAndConfigureImageLoadService();
-                    currentFile = new SimpleObjectProperty<>();
-                    currentImage = new SimpleObjectProperty<>();
-                    scroller.contentProperty().bind(currentImage);
-                    zoom = new SimpleDoubleProperty(1);
-                    // To implement zooming, we just get a new image from the PDFFile each time.
-                    // This seems to perform well in some basic tests but may need to be improved
-                    // E.g. load a larger image and scale in the ImageView, loading a new image only
-                    // when required.
-                    zoom.addListener(new ChangeListener<Number>() {
-                        @Override
-                        public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                            updateImage(pagination.getCurrentPageIndex());
+                    MenuItemBuilder.create().text("Установить коэффициенты цен").onAction((ActionEvent arg0) -> {
+                        Integer selectedProductID = null;
+                        selectedProductID = UtilPack.getProductIdFromTitle(selectedProduct, allProductsList);
+                        SetRatesWindow ratesWindow = new SetRatesWindow(null, selectedProductID);
+                        ratesWindow.showModalWindow();
+                    }).build(),
+                    MenuItemBuilder.create().text("Открыть вкладку обзора свойств устройства").onAction((ActionEvent arg0) -> {
+                        try {
+                            openProductTab();
+                        } catch (SQLException e) {
+                            e.printStackTrace();
                         }
-                    });
-                    currentZoomLabel.textProperty().bind(Bindings.format("%.0f %%", zoom.multiply(100)));
-                    bindPaginationToCurrentFile();
-                    createPaginationPageFactory();
-                    tabPane.getSelectionModel().select(pdfTab);
-                    try {
-                        loadPdfFile(productsTable.getSelectionModel().getSelectedItem().getTitle());
-                    } catch (SQLException e) {}
-                }).build(),
-                MenuItemBuilder.create().text("Изменить производителя устройства").onAction((ActionEvent arg0) -> {
-                    ContextBuilder.changeProductVendor(productsTable);
-                    try {
-                        getAllProductsList();
-                        fillMainTab(selectedProduct);
-                    } catch (SQLException e) {}
-                }).build(),
-                MenuItemBuilder.create().text("Изменить тип устройства").onAction((ActionEvent arg0) -> {
-                    ContextBuilder.changeProductKind(productsTable);
-                    try {
-                        getAllProductsList();
-                        fillMainTab(selectedProduct);
-                    } catch (SQLException e) {}
-                }).build(),
-                MenuItemBuilder.create().text("Переместить в категорию...").onAction((ActionEvent arg0) -> {
-                    try {changeProductCategoryDialog();} catch (SQLException e) {}
-                }).build(),
-                MenuItemBuilder.create().text("Добавить элемент...").onAction((ActionEvent arg0) -> {
-                    addProductDialog();
-                }).build(),
-                MenuItemBuilder.create().text("Удалить элемент...").onAction((ActionEvent arg0) -> {
-                    deleteProductDialog();
-                }).build(),
-                SeparatorMenuItemBuilder.create().build(),
-                MenuItemBuilder.create().text("Добавить аксессуар к выбранному устройству").onAction((ActionEvent arg0) -> {
-                    Accessory.addToSelectedOn(productsTable);
-                    fillProductTab(selectedProduct);
-                }).build()
+                    }).build(),
+                    MenuItemBuilder.create().text("Открыть просмотр PDF-файла").onAction((ActionEvent arg0) -> {
+                        createAndConfigureImageLoadService();
+                        currentFile = new SimpleObjectProperty<>();
+                        currentImage = new SimpleObjectProperty<>();
+                        scroller.contentProperty().bind(currentImage);
+                        zoom = new SimpleDoubleProperty(1);
+                        // To implement zooming, we just get a new image from the PDFFile each time.
+                        // This seems to perform well in some basic tests but may need to be improved
+                        // E.g. load a larger image and scale in the ImageView, loading a new image only
+                        // when required.
+                        zoom.addListener(new ChangeListener<Number>() {
+                            @Override
+                            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                                updateImage(pagination.getCurrentPageIndex());
+                            }
+                        });
+                        currentZoomLabel.textProperty().bind(Bindings.format("%.0f %%", zoom.multiply(100)));
+                        bindPaginationToCurrentFile();
+                        createPaginationPageFactory();
+                        tabPane.getSelectionModel().select(pdfTab);
+                        try {
+                            loadPdfFile(productsTable.getSelectionModel().getSelectedItem().getTitle());
+                        } catch (SQLException e) {}
+                    }).build(),
+                    MenuItemBuilder.create().text("Изменить производителя устройства").onAction((ActionEvent arg0) -> {
+                        ContextBuilder.changeProductVendor(productsTable);
+                        try {
+                            getAllProductsList();
+                            fillMainTab(selectedProduct);
+                        } catch (SQLException e) {}
+                    }).build(),
+                    MenuItemBuilder.create().text("Изменить тип устройства").onAction((ActionEvent arg0) -> {
+                        ContextBuilder.changeProductKind(productsTable);
+                        try {
+                            getAllProductsList();
+                            fillMainTab(selectedProduct);
+                        } catch (SQLException e) {}
+                    }).build(),
+                    MenuItemBuilder.create().text("Переместить в категорию...").onAction((ActionEvent arg0) -> {
+                        try {changeProductCategoryDialog();} catch (SQLException e) {}
+                    }).build(),
+                    MenuItemBuilder.create().text("Добавить элемент...").onAction((ActionEvent arg0) -> {
+                        addProductDialog();
+                    }).build(),
+                    MenuItemBuilder.create().text("Удалить элемент...").onAction((ActionEvent arg0) -> {
+                        deleteProductDialog();
+                    }).build(),
+                    SeparatorMenuItemBuilder.create().build(),
+                    MenuItemBuilder.create().text("Добавить аксессуар к выбранному устройству").onAction((ActionEvent arg0) -> {
+                        Accessory.addToSelectedOn(productsTable);
+                        fillProductTab(selectedProduct);
+                    }).build()
             ).build();
         } else if(productsTable.getSelectionModel().getSelectedItems().size() == 0) {
             productTableContextMenu = ContextMenuBuilder.create().items(
-                MenuItemBuilder.create().text("Импортировать элементы...").onAction((ActionEvent arg0) -> {
-                    tabPane.getSelectionModel().select(settingsTab);}).build()
+                    MenuItemBuilder.create().text("Импортировать элементы...").onAction((ActionEvent arg0) -> {
+                        tabPane.getSelectionModel().select(settingsTab);}).build()
             ).build();
         } else {
             productTableContextMenu = ContextMenuBuilder.create().items(
-                MenuItemBuilder.create().text("Переместить в категорию...").onAction((ActionEvent arg0) -> {
-                    try {
-                        changeProductCategoryDialog();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }).build(),
-                MenuItemBuilder.create().text("Удалить выбранные элементы").onAction((ActionEvent arg0) -> {
-                    deleteProductDialog();}).build(),
-                SeparatorMenuItemBuilder.create().build(),
-                MenuItemBuilder.create().text("Изменить производителя устройства").onAction((ActionEvent arg0) -> {
-                    ContextBuilder.changeProductVendor(productsTable);
-                    try {
-                        getAllProductsList();
-                        fillMainTab(selectedProduct);
-                    } catch (SQLException e) {}
-                }).build(),
-                MenuItemBuilder.create().text("Изменить тип устройства").onAction((ActionEvent arg0) -> {
-                    ContextBuilder.changeProductKind(productsTable);
-                    try {
-                        getAllProductsList();
-                        fillMainTab(selectedProduct);
-                    } catch (SQLException e) {}
-                }).build(),
-                MenuItemBuilder.create().text("Добавить аксессуар к выбранным устройствам").onAction((ActionEvent arg0) -> {
-                    Accessory.addToSelectedOn(productsTable);
-                }).build()
+                    MenuItemBuilder.create().text("Переместить в категорию...").onAction((ActionEvent arg0) -> {
+                        try {
+                            changeProductCategoryDialog();
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                    }).build(),
+                    MenuItemBuilder.create().text("Удалить выбранные элементы").onAction((ActionEvent arg0) -> {
+                        deleteProductDialog();}).build(),
+                    SeparatorMenuItemBuilder.create().build(),
+                    MenuItemBuilder.create().text("Изменить производителя устройства").onAction((ActionEvent arg0) -> {
+                        ContextBuilder.changeProductVendor(productsTable);
+                        try {
+                            getAllProductsList();
+                            fillMainTab(selectedProduct);
+                        } catch (SQLException e) {}
+                    }).build(),
+                    MenuItemBuilder.create().text("Изменить тип устройства").onAction((ActionEvent arg0) -> {
+                        ContextBuilder.changeProductKind(productsTable);
+                        try {
+                            getAllProductsList();
+                            fillMainTab(selectedProduct);
+                        } catch (SQLException e) {}
+                    }).build(),
+                    MenuItemBuilder.create().text("Добавить аксессуар к выбранным устройствам").onAction((ActionEvent arg0) -> {
+                        Accessory.addToSelectedOn(productsTable);
+                    }).build()
             ).build();
         }
         productsTable.setContextMenu(productTableContextMenu);
@@ -1830,10 +1802,10 @@ public class PCGUIController implements Initializable {
         allProductsList.stream().forEach(product -> {
             if (product.getTitle().equals(searchComboBox.getValue())) {
                 data.add(new ProductsTableView(
-                    product.getArticle(),
-                    product.getTitle(),
-                    product.getDescription(),
-                    product.getDeliveryTime())
+                        product.getArticle(),
+                        product.getTitle(),
+                        product.getDescription(),
+                        product.getDeliveryTime())
                 );
                 title[0] = product.getTitle();
             }
@@ -1911,20 +1883,20 @@ public class PCGUIController implements Initializable {
         for (int i = 0; i < propertyValuesList.size(); i++) {
             if (!currentTitle.equals(propertyValuesList.get(i).getPropertyId().getTitle())) {
                 propertyValues.add(new PropertiesTreeTableView(
-                    propertyValuesList.get(i).getPropertyId().getTitle(),
-                    propertyValuesList.get(i).getCond(),
-                    propertyValuesList.get(i).getValue() + " " + propertyValuesList.get(i).getMeasureId().getSymbolRu(),
-                    propertyValuesList.get(i).getMeasureId().getTitle(),
-                    propertyValuesList.get(i).getId()
+                        propertyValuesList.get(i).getPropertyId().getTitle(),
+                        propertyValuesList.get(i).getCond(),
+                        propertyValuesList.get(i).getValue() + " " + propertyValuesList.get(i).getMeasureId().getSymbolRu(),
+                        propertyValuesList.get(i).getMeasureId().getTitle(),
+                        propertyValuesList.get(i).getId()
                 ));
                 currentTitle = propertyValuesList.get(i).getPropertyId().getTitle();
             } else {
                 propertyValues.add(new PropertiesTreeTableView(
-                    "",
-                    propertyValuesList.get(i).getCond(),
-                    propertyValuesList.get(i).getValue() + " " + propertyValuesList.get(i).getMeasureId().getSymbolRu(),
-                    propertyValuesList.get(i).getMeasureId().getTitle(),
-                    propertyValuesList.get(i).getId()
+                        "",
+                        propertyValuesList.get(i).getCond(),
+                        propertyValuesList.get(i).getValue() + " " + propertyValuesList.get(i).getMeasureId().getSymbolRu(),
+                        propertyValuesList.get(i).getMeasureId().getTitle(),
+                        propertyValuesList.get(i).getId()
                 ));
             }
         }
@@ -1949,29 +1921,29 @@ public class PCGUIController implements Initializable {
         propertyValueColumn.setCellValueFactory(new TreeItemPropertyValueFactory("value"));
         propertyMeasureColumn.setCellValueFactory(new TreeItemPropertyValueFactory("measure"));
         propertiesTableContextMenu = ContextMenuBuilder.create().items(
-            MenuItemBuilder.create().text("Добавить новое свойство").onAction((ActionEvent ae1) -> {
-                ContextBuilder.createNewPropertyValue(productTabTitle, propertiesTree);
-                buildPropertiesTable(selectedPropertyType, selectedProduct);
-                propertiesTable.getSelectionModel().select(0);
-            }).build(),
-            MenuItemBuilder.create().text("Редактировать выбранное свойство").onAction((ActionEvent ae2) -> {
-                ContextBuilder.updateThePropertyValue(productTabTitle, propertiesTree, propertiesTable);
-                buildPropertiesTable(selectedPropertyType, selectedProduct);
-                propertiesTable.getSelectionModel().select(0);
-            }).build(),
-            MenuItemBuilder.create().text("Удалить выбранное свойство").onAction((ActionEvent ae3) -> {
-                ContextBuilder.deleteThePropertyValue(productTabTitle, propertiesTree, propertiesTable);
-                buildPropertiesTable(selectedPropertyType, selectedProduct);
-                propertiesTable.getSelectionModel().select(0);
-            }).build()
+                MenuItemBuilder.create().text("Добавить новое свойство").onAction((ActionEvent ae1) -> {
+                    ContextBuilder.createNewPropertyValue(productTabTitle, propertiesTree);
+                    buildPropertiesTable(selectedPropertyType, selectedProduct);
+                    propertiesTable.getSelectionModel().select(0);
+                }).build(),
+                MenuItemBuilder.create().text("Редактировать выбранное свойство").onAction((ActionEvent ae2) -> {
+                    ContextBuilder.updateThePropertyValue(productTabTitle, propertiesTree, propertiesTable);
+                    buildPropertiesTable(selectedPropertyType, selectedProduct);
+                    propertiesTable.getSelectionModel().select(0);
+                }).build(),
+                MenuItemBuilder.create().text("Удалить выбранное свойство").onAction((ActionEvent ae3) -> {
+                    ContextBuilder.deleteThePropertyValue(productTabTitle, propertiesTree, propertiesTable);
+                    buildPropertiesTable(selectedPropertyType, selectedProduct);
+                    propertiesTable.getSelectionModel().select(0);
+                }).build()
         ).build();
         propertiesTable.setContextMenu(propertiesTableContextMenu);
         propertiesTable.setRoot(root);
         propertiesTable.setShowRoot(false);
         propertiesTable.getColumns().setAll(propertyTitleColumn,
-            propertyConditionColumn,
-            propertyValueColumn,
-            propertyMeasureColumn);
+                propertyConditionColumn,
+                propertyValueColumn,
+                propertyMeasureColumn);
     }
     private void buildFunctionsTable1(String selectedProduct) {
         ArrayList<Functions> functions = new ArrayList<>(10);
@@ -1988,18 +1960,18 @@ public class PCGUIController implements Initializable {
         functionsTableTitleColumn1.setCellValueFactory(new PropertyValueFactory<>("title"));
         functionsTableSymbolColumn1.setCellValueFactory(new PropertyValueFactory<>("symbol"));
         functionsTable1ContextMenu = ContextMenuBuilder.create().items(
-            MenuItemBuilder.create().text("Добавить новую функцию").onAction((ActionEvent ae1) -> {
-                String selFunction = ContextBuilder.addFunctionToProduct(functionsTable1, productTabTitle, productTabKind);
-                buildFunctionsTable1(selectedProduct);
-                setFunctionDescriptionAndPicture(selFunction);
-            }).build(),
-            MenuItemBuilder.create().text("Редактировать выбранную функцию").onAction((ActionEvent ae2) -> {
-                ContextBuilder.editFunctionOfProduct();
-            }).build(),
-            MenuItemBuilder.create().text("Удалить выбранную функцию").onAction((ActionEvent ae3) -> {
-                ContextBuilder.removeFunctionFromProduct(functionsTable1, productTabTitle);
-                buildFunctionsTable1(selectedProduct);
-            }).build()
+                MenuItemBuilder.create().text("Добавить новую функцию").onAction((ActionEvent ae1) -> {
+                    String selFunction = ContextBuilder.addFunctionToProduct(functionsTable1, productTabTitle, productTabKind);
+                    buildFunctionsTable1(selectedProduct);
+                    setFunctionDescriptionAndPicture(selFunction);
+                }).build(),
+                MenuItemBuilder.create().text("Редактировать выбранную функцию").onAction((ActionEvent ae2) -> {
+                    ContextBuilder.editFunctionOfProduct();
+                }).build(),
+                MenuItemBuilder.create().text("Удалить выбранную функцию").onAction((ActionEvent ae3) -> {
+                    ContextBuilder.removeFunctionFromProduct(functionsTable1, productTabTitle);
+                    buildFunctionsTable1(selectedProduct);
+                }).build()
         ).build();
         functionsTable1.setContextMenu(functionsTable1ContextMenu);
         functionsTable1.setItems(list);
@@ -2122,14 +2094,14 @@ public class PCGUIController implements Initializable {
         accessoriesTableTitleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
         accessoriesTableDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
         accessoriesTableContextMenu = ContextMenuBuilder.create().items(
-            MenuItemBuilder.create().text("Добавить новый аксессуар").onAction((ActionEvent arg0) -> {
-                Accessory.addToSelectedOn(selectedProduct);
-                buildAccessoriesTable(selectedProduct);
-            }).build(),
-            MenuItemBuilder.create().text("Удалить выбранный аксессуар").onAction((ActionEvent arg0) -> {
-                Accessory.removeAccessoryFrom(accessoriesTable, selectedProduct);
-                buildAccessoriesTable(selectedProduct);
-            }).build()
+                MenuItemBuilder.create().text("Добавить новый аксессуар").onAction((ActionEvent arg0) -> {
+                    Accessory.addToSelectedOn(selectedProduct);
+                    buildAccessoriesTable(selectedProduct);
+                }).build(),
+                MenuItemBuilder.create().text("Удалить выбранный аксессуар").onAction((ActionEvent arg0) -> {
+                    Accessory.removeAccessoryFrom(accessoriesTable, selectedProduct);
+                    buildAccessoriesTable(selectedProduct);
+                }).build()
         ).build();
         accessoriesTable.setContextMenu(accessoriesTableContextMenu);
         accessoriesTable.setItems(data);
@@ -2803,6 +2775,10 @@ public class PCGUIController implements Initializable {
         Task task = createImportXLSTask();
         progressBarImportXLS.progressProperty().bind(task.progressProperty());
         Platform.runLater(task);
+        /*
+        thread  = new Thread(task);
+        thread.start();
+        */
     }
     private Task<Void> createImportXLSTask() {
         return new Task<Void>() {
@@ -2814,6 +2790,9 @@ public class PCGUIController implements Initializable {
                     Logger.getLogger(PCGUIController.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 Platform.runLater(() -> {
+                    //progressIndicator.progressProperty().unbind();
+                    //progressIndicator.setVisible(false);
+                    //progressIndicator.setProgress(0.0);
                     progressBarImportXLS.progressProperty().unbind();
                     progressBarImportXLS.setProgress(0.0);
                 });
@@ -2952,42 +2931,42 @@ public class PCGUIController implements Initializable {
             root.getChildren().add(item);
         });
         propertiesTreeTableContextMenu = ContextMenuBuilder.create().items(
-            MenuItemBuilder.create().text("Добавить новую характеристику").onAction((ActionEvent ae1) -> {
-                ContextBuilder.createNewProperty();
-                buildPropertiesTreeTable(selectedPropertiesKind);
-                buildFunctionsTable(selectedPropertiesKind);
-                propertiesTreeTable.refresh();
-                functionsTable.refresh();
-            }).build(),
-            MenuItemBuilder.create().text("Редактировать выбранную характеристику").onAction((ActionEvent ae2) -> {
-                ContextBuilder.updateTheProperty(propertiesTreeTable);
-                buildPropertiesTreeTable(selectedPropertiesKind);
-                buildFunctionsTable(selectedPropertiesKind);
-                propertiesTreeTable.refresh();
-                functionsTable.refresh();
-            }).build(),
-            MenuItemBuilder.create().text("Удалить выбранную характеристику").onAction((ActionEvent ae3) -> {
-                ContextBuilder.deleteTheProperty(propertiesTreeTable);
-                buildPropertiesTreeTable(selectedPropertiesKind);
-                buildFunctionsTable(selectedPropertiesKind);
-                propertiesTreeTable.refresh();
-                functionsTable.refresh();
-            }).build(),
-            SeparatorMenuItemBuilder.create().build(),
-            MenuItemBuilder.create().text("Добавить набор характеристик").onAction((ActionEvent ae3) -> {
-                ContextBuilder.addPropertyType(productKindsList);
-                buildPropertiesTreeTable(selectedPropertiesKind);
-                buildProductKindsList();
-                propertiesTreeTable.refresh();
-                functionsTable.refresh();
-            }).build(),
-            MenuItemBuilder.create().text("Удалить набор характеристик").onAction((ActionEvent ae3) -> {
-                ContextBuilder.removePropertyType(productKindsList, propertiesTreeTable);
-                buildPropertiesTreeTable(selectedPropertiesKind);
-                buildProductKindsList();
-                propertiesTreeTable.refresh();
-                functionsTable.refresh();
-            }).build()
+                MenuItemBuilder.create().text("Добавить новую характеристику").onAction((ActionEvent ae1) -> {
+                    ContextBuilder.createNewProperty();
+                    buildPropertiesTreeTable(selectedPropertiesKind);
+                    buildFunctionsTable(selectedPropertiesKind);
+                    propertiesTreeTable.refresh();
+                    functionsTable.refresh();
+                }).build(),
+                MenuItemBuilder.create().text("Редактировать выбранную характеристику").onAction((ActionEvent ae2) -> {
+                    ContextBuilder.updateTheProperty(propertiesTreeTable);
+                    buildPropertiesTreeTable(selectedPropertiesKind);
+                    buildFunctionsTable(selectedPropertiesKind);
+                    propertiesTreeTable.refresh();
+                    functionsTable.refresh();
+                }).build(),
+                MenuItemBuilder.create().text("Удалить выбранную характеристику").onAction((ActionEvent ae3) -> {
+                    ContextBuilder.deleteTheProperty(propertiesTreeTable);
+                    buildPropertiesTreeTable(selectedPropertiesKind);
+                    buildFunctionsTable(selectedPropertiesKind);
+                    propertiesTreeTable.refresh();
+                    functionsTable.refresh();
+                }).build(),
+                SeparatorMenuItemBuilder.create().build(),
+                MenuItemBuilder.create().text("Добавить набор характеристик").onAction((ActionEvent ae3) -> {
+                    ContextBuilder.addPropertyType(productKindsList);
+                    buildPropertiesTreeTable(selectedPropertiesKind);
+                    buildProductKindsList();
+                    propertiesTreeTable.refresh();
+                    functionsTable.refresh();
+                }).build(),
+                MenuItemBuilder.create().text("Удалить набор характеристик").onAction((ActionEvent ae3) -> {
+                    ContextBuilder.removePropertyType(productKindsList, propertiesTreeTable);
+                    buildPropertiesTreeTable(selectedPropertiesKind);
+                    buildProductKindsList();
+                    propertiesTreeTable.refresh();
+                    functionsTable.refresh();
+                }).build()
         ).build();
         propertiesTreeTable.setContextMenu(propertiesTreeTableContextMenu);
         propertiesTreeTable.setRoot(root);
@@ -3011,17 +2990,17 @@ public class PCGUIController implements Initializable {
         functionsTableTitleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
         functionsTableSymbolColumn.setCellValueFactory(new PropertyValueFactory<>("symbol"));
         functionsTableContextMenu = ContextMenuBuilder.create().items(
-            MenuItemBuilder.create().text("Добавить новую функцию").onAction((ActionEvent ae1) -> {
-                ContextBuilder.createNewFunction(UtilPack.getPropertyKindIdFromTitle(selectedPropertiesKind));
-                buildFunctionsTable(selectedPropertiesKind);
-            }).build(),
-            MenuItemBuilder.create().text("Редактировать выбранную функцию").onAction((ActionEvent ae2) -> {
-                ContextBuilder.updateTheFunction(UtilPack.getPropertyKindIdFromTitle(selectedPropertiesKind), functionsTable);
-            }).build(),
-            MenuItemBuilder.create().text("Удалить выбранную функцию").onAction((ActionEvent ae3) -> {
-                ContextBuilder.deleteTheFunction(functionsTable);
-                buildFunctionsTable(selectedPropertiesKind);
-            }).build()
+                MenuItemBuilder.create().text("Добавить новую функцию").onAction((ActionEvent ae1) -> {
+                    ContextBuilder.createNewFunction(UtilPack.getPropertyKindIdFromTitle(selectedPropertiesKind));
+                    buildFunctionsTable(selectedPropertiesKind);
+                }).build(),
+                MenuItemBuilder.create().text("Редактировать выбранную функцию").onAction((ActionEvent ae2) -> {
+                    ContextBuilder.updateTheFunction(UtilPack.getPropertyKindIdFromTitle(selectedPropertiesKind), functionsTable);
+                }).build(),
+                MenuItemBuilder.create().text("Удалить выбранную функцию").onAction((ActionEvent ae3) -> {
+                    ContextBuilder.deleteTheFunction(functionsTable);
+                    buildFunctionsTable(selectedPropertiesKind);
+                }).build()
         ).build();
         functionsTable.setContextMenu(functionsTableContextMenu);
         functionsTable.setItems(list);
@@ -3124,6 +3103,10 @@ public class PCGUIController implements Initializable {
         Task task = createImportTask();
         progressBarImportXLS.progressProperty().bind(task.progressProperty());
         Platform.runLater(task);
+        /*
+        thread  = new Thread(task);
+        thread.start();
+        */
     }
     @FXML private void handlePropertiesKindSelected() throws SQLException {
         String selectedPropertiesKind = productKindsList.getSelectionModel().getSelectedItem();
