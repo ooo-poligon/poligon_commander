@@ -1,5 +1,6 @@
 package modalwindows;
 
+import entities.Categories;
 import entities.Series;
 import entities.Vendors;
 import javafx.collections.FXCollections;
@@ -254,10 +255,7 @@ public class AlertWindow {
         TreeView<String> treeView = new TreeView<>();
         PCGUIController pcguiController = new PCGUIController();
         TreeView<String> category = pcguiController.buildModalCategoryTree(stackPane, treeView);
-        String selectedCategory = "";
-        if(!category.getSelectionModel().getSelectedItems().isEmpty()) {
-            selectedCategory = category.getSelectionModel().getSelectedItem().getValue();
-        }
+
         productTypeComboBox.setItems(productTypesTitles);
         productTypeComboBox.setEditable(true);
         vendorComboBox.setItems(vendorsTitles);
@@ -321,11 +319,23 @@ public class AlertWindow {
         ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonBar.ButtonData.CANCEL_CLOSE);
         dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
         dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
-        final String finalSelectedCategory = selectedCategory;
         dialog.setResultConverter((ButtonType b) -> {
+            int selectedCategoryId = 0;
+            String selectedCategory = "";
+            if(!category.getSelectionModel().getSelectedItems().isEmpty()) {
+                selectedCategory = category.getSelectionModel().getSelectedItem().getValue();
+                Session session = HibernateUtil.getSessionFactory().openSession();
+                Query query = session.createQuery("from Categories where title = :title");
+                query.setParameter("title", selectedCategory);
+                List result = query.list();
+                for (Iterator iterator = result.iterator(); iterator.hasNext();) {
+                    Categories cat = (Categories) iterator.next();
+                    selectedCategoryId = cat.getId();
+                }
+            }
             if (b == buttonTypeOk) {
                 return new Product(
-                    UtilPack.getCategoryIdFromTitle(finalSelectedCategory),
+                    selectedCategoryId,
                     titleTextField.getText(),
                     descriptionTextArea.getText(),
                     announceTextField.getText(),
@@ -456,5 +466,18 @@ public class AlertWindow {
             return null;
         });
         return dialog.showAndWait();
+    }
+    public static void fillRequiredFields() {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Внимание!");
+        alert.setHeaderText("Не заполнены необходимые поля!");
+        alert.setContentText("Поля \"Производитель\", \"Тип продукта\", \"Категория\" и \"Серия продукта\" должны быть заполнены обязательно!");
+        alert.show();
+    }
+    public static void waiting() {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Внимание!");
+        alert.setHeaderText("Подождите...");
+        alert.show();
     }
 }

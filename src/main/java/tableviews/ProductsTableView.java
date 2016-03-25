@@ -4,8 +4,7 @@
  */
 package tableviews;
 
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 
 /**
  *
@@ -13,13 +12,14 @@ import javafx.beans.property.StringProperty;
  */
 public class ProductsTableView {
 
+    private final BooleanProperty available;
     private final StringProperty article;
     private final StringProperty title;
     private final StringProperty description;
     private final StringProperty delivery_time;
     
     public ProductsTableView() {
-        this(null, null, null, null);
+        this(null, null, null, null, false);
     }
 
     public ProductsTableView(String article, String title) {
@@ -27,22 +27,45 @@ public class ProductsTableView {
         this.title       = new SimpleStringProperty(title);
         this.description = null;
         this.delivery_time = null;
+        this.available = new SimpleBooleanProperty();
     }
     
     public ProductsTableView(String delivery_time) {
         this.article       = null;
         this.title       = null;
         this.description = null;
-        this.delivery_time = new SimpleStringProperty(delivery_time);        
-    }    
+        this.delivery_time = new SimpleStringProperty(delivery_time);
+        this.available = new SimpleBooleanProperty();
+    }
 
-    public ProductsTableView(String article, String title, String description, String delivery_time) {
+    public ProductsTableView(BooleanProperty available) {
+        this.article       = null;
+        this.title       = null;
+        this.description = null;
+        this.delivery_time = null;
+        this.available = available;
+    }
+
+    public ProductsTableView(String article, String title, String description, String delivery_time, Boolean available) {
         this.article       = new SimpleStringProperty(article);
         this.title       = new SimpleStringProperty(title);
         this.description = new SimpleStringProperty(description);
-        this.delivery_time = new SimpleStringProperty(delivery_time);        
+        this.delivery_time = new SimpleStringProperty(delivery_time);
+        this.available = new SimpleBooleanProperty(available);
     }
-   
+
+    public boolean getAvailable() {
+        return available.get();
+    }
+
+    public BooleanProperty availableProperty() {
+        return available;
+    }
+
+    public void setAvailable(boolean available) {
+        this.available.set(available);
+    }
+
     public String getArticle() {
         return article.get();
     }

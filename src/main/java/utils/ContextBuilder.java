@@ -11,6 +11,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 import main.PCGUIController;
+import main.Product;
 import modalwindows.SetRatesWindow;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -1829,6 +1830,101 @@ public class ContextBuilder {
             tx.commit();
             session1.close();
         }
+    }
+    public static void deleteTheProduct(String selectedProduct) {
+        Products product = new Products();
+        Session session2 = HibernateUtil.getSessionFactory().openSession();
+        List res2 = session2.createQuery("from Products where title =\'" + selectedProduct + "\'").list();
+        for (Iterator iterator = res2.iterator(); iterator.hasNext();) {
+            product = (Products) iterator.next();
+        }
+        session2.close();
+
+        Dialog<Product> dialog = new Dialog<>();
+        dialog.setTitle("Удаление выбранного продукта.");
+        dialog.setHeaderText("Внимание! Выбранный продукт будет удалён из базы данных.");
+        dialog.setResizable(true);
+
+        Label label1 = new Label("Вы действительно хотите выполнить удаление?");
+
+        GridPane grid = new GridPane();
+
+        grid.add(label1, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        ButtonType buttonTypeOk = new ButtonType("Удалить", ButtonBar.ButtonData.OK_DONE);
+        ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
+        dialog.setResultConverter((ButtonType b) -> {
+            if (b == buttonTypeOk) {
+                return new Product(selectedProduct);
+            }
+            return null;
+        });
+        Optional<Product> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            Session session1 = HibernateUtil.getSessionFactory().openSession();
+            Transaction tx = session1.beginTransaction();
+
+            Query q = session1.createQuery("delete Products where id =" + product.getId());
+            q.executeUpdate();
+
+            tx.commit();
+            session1.close();
+        }
+    }
+    public static void deleteSelectedProducts(TableView productsTable) {
+        ObservableList<ProductsTableView> selectedProducts = productsTable.getSelectionModel().getSelectedItems();
+
+        Dialog<Product> dialog = new Dialog<>();
+        dialog.setTitle("Удаление выбранных продуктов.");
+        dialog.setHeaderText("Внимание! Выбранные продукты будут удалены из базы данных.");
+        dialog.setResizable(true);
+
+        Label label1 = new Label("Вы действительно хотите выполнить удаление?");
+
+        GridPane grid = new GridPane();
+
+        grid.add(label1, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        ButtonType buttonTypeOk = new ButtonType("Удалить", ButtonBar.ButtonData.OK_DONE);
+        ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
+
+        Optional<Product> result = dialog.showAndWait();
+
+        selectedProducts.stream().forEach(selectedProduct -> {
+            Products product = new Products();
+            Session session2 = HibernateUtil.getSessionFactory().openSession();
+            List res2 = session2.createQuery("from Products where title =\'" + selectedProduct.getTitle() + "\'").list();
+            for (Iterator iterator = res2.iterator(); iterator.hasNext();) {
+                product = (Products) iterator.next();
+            }
+            session2.close();
+
+            dialog.setResultConverter((ButtonType b) -> {
+                if (b == buttonTypeOk) {
+                    return new Product(selectedProduct.getTitle());
+                }
+                return null;
+            });
+
+            if (result.isPresent()) {
+                Session session1 = HibernateUtil.getSessionFactory().openSession();
+                Transaction tx = session1.beginTransaction();
+
+                Query q = session1.createQuery("delete Products where id =" + product.getId());
+                q.executeUpdate();
+
+                tx.commit();
+                session1.close();
+            }
+        });
     }
     public static void changeProductVendor(TableView<ProductsTableView> productsTable) {
         ObservableList<ProductsTableView> selectedProducts = productsTable.getSelectionModel().getSelectedItems();
