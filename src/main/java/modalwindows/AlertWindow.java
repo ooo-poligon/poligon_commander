@@ -26,6 +26,7 @@ import java.util.Optional;
  * Created by Igor Klekotnev on 11.03.2016.
  */
 public class AlertWindow {
+    private static StackPane stackPane = new StackPane();
     public static void alertNoRbcServerConnection () {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("Внимание!");
@@ -81,6 +82,7 @@ public class AlertWindow {
         return alert.showAndWait();
     }
     public static Optional<ButtonType> changeProductCategoryDialog(StackPane stackPaneModal, ButtonType buttonTypeOk, ButtonType buttonTypeCancel) {
+        stackPane = stackPaneModal;
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         DialogPane dialog = new DialogPane();
         alert.setDialogPane(dialog);
@@ -88,8 +90,8 @@ public class AlertWindow {
         alert.setHeaderText("Укажите категорию, в которую следует \nпереместить выбранные элементы:");
         alert.setResizable(false);
         AnchorPane anchorPane = new AnchorPane();
-        anchorPane.getChildren().add(stackPaneModal);
-        stackPaneModal.setAlignment(Pos.CENTER);
+        anchorPane.getChildren().add(stackPane);
+        stackPane.setAlignment(Pos.CENTER);
 
         dialog.setContent(anchorPane);
         dialog.getButtonTypes().add(buttonTypeOk);

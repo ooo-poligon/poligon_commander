@@ -808,21 +808,21 @@ public class PCGUIController implements Initializable {
                 }).build(),
                 MenuItemBuilder.create().text("Создать категорию").onAction((ActionEvent arg0) -> {
                     try {
-                        newCategoryDialog("main");
+                        newCategoryDialog("main", categoriesTree);
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
                 }).build(),
                 MenuItemBuilder.create().text("Редактировать категорию").onAction((ActionEvent arg0) -> {
                     try {
-                        editCategoryDialog("main");
+                        editCategoryDialog("main", categoriesTree);
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
                 }).build(),
                 MenuItemBuilder.create().text("Удалить категорию").onAction((ActionEvent arg0) -> {
                     try {
-                        deleteCategoryDialog("main");
+                        deleteCategoryDialog("main", categoriesTree);
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
@@ -982,24 +982,27 @@ public class PCGUIController implements Initializable {
         rootItem.setExpanded(true);
         buildTreeNode(getAllCategoriesList(), rootItem, catalogRoot);
         treeView = new TreeView(rootItem);
+        final TreeView finalTreeView = treeView;
+        final TreeView finalTreeView1 = treeView;
+        final TreeView finalTreeView2 = treeView;
         ContextMenu treeViewContextMenu1 = ContextMenuBuilder.create().items(
                 MenuItemBuilder.create().text("Создать категорию").onAction((ActionEvent arg0) -> {
                     try {
-                        newCategoryDialog("modal");
+                        newCategoryDialog("modal", finalTreeView1);
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
                 }).build(),
                 MenuItemBuilder.create().text("Редактировать категорию").onAction((ActionEvent arg0) -> {
                     try {
-                        editCategoryDialog("modal");
+                        editCategoryDialog("modal", finalTreeView);
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
                 }).build(),
                 MenuItemBuilder.create().text("Удалить категорию").onAction((ActionEvent arg0) -> {
                     try {
-                        deleteCategoryDialog("modal");
+                        deleteCategoryDialog("modal", finalTreeView2);
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
@@ -1034,7 +1037,7 @@ public class PCGUIController implements Initializable {
         }
         allProductsList.clear();
         getAllProductsList();
-        refreshProductsTable();
+        refreshProductsTable(selectedCategory);
         productsTable.getSelectionModel().clearAndSelect(0);
         productsTable.scrollTo(productsTable.getSelectionModel().getSelectedItem());
     }
@@ -1212,14 +1215,9 @@ public class PCGUIController implements Initializable {
         } catch (SQLException e) {}
     }
     // Перерисовывает таблицу товаров в зависимости от выбранного пункта в дереве категорий.
-    private void refreshProductsTable() {
-        try {
-            Integer selectedTreeId = UtilPack.getCategoryIdFromTitle(categoriesTree.getSelectionModel().getSelectedItem().getValue());
-            buildProductsTable(getProductList(selectedTreeId));
-        } catch (NullPointerException ne) {
-            Integer selectedTreeId = UtilPack.getCategoryIdFromTitle(treeView.getSelectionModel().getSelectedItem().getValue());
-            buildProductsTable(getProductList(selectedTreeId));
-        }
+    private void refreshProductsTable(String selectedCategory) {
+        Integer selectedTreeId = UtilPack.getCategoryIdFromTitle(selectedCategory);
+        buildProductsTable(getProductList(selectedTreeId));
     }
     // Вызывает диалог добавления нового товара из контектстного меню таблицы товаров.
     private void addProductDialog() {
@@ -1351,12 +1349,12 @@ public class PCGUIController implements Initializable {
         setVendorSelected(productsTable.getSelectionModel().getSelectedItem().getTitle());
         setCategorySelected(productsTable.getSelectionModel().getSelectedItem().getTitle());
     }
-    private void newCategoryDialog(String whatTree) throws SQLException {
+    private void newCategoryDialog(String whatTree, TreeView<String> treeView) throws SQLException {
         Optional<NewCategory> result = AlertWindow.newCategoryDialog();
         if (result.isPresent()) {
             newCatTitle = result.get().getTitle();
             newCatDescription = result.get().getDescription();
-            createNewCategory(whatTree);
+            createNewCategory(whatTree, treeView);
             if (whatTree.equals("main")) {
                 buildCategoryTree();
             } else if (whatTree.equals("modal")) {
@@ -1365,7 +1363,7 @@ public class PCGUIController implements Initializable {
             }
         }
     }
-    private void editCategoryDialog(String whatTree) throws SQLException {
+    private void editCategoryDialog(String whatTree, TreeView<String> treeView) throws SQLException {
         if (whatTree.equals("main")) {
             ArrayList<String> details = getCategoryDetails(categoriesTree.getSelectionModel().getSelectedItem().getValue());
             Optional<NewCategory> result = AlertWindow.editCategoryDialog(details);
@@ -1387,7 +1385,7 @@ public class PCGUIController implements Initializable {
             }
         }
     }
-    private void deleteCategoryDialog(String whatTree) throws SQLException {
+    private void deleteCategoryDialog(String whatTree, TreeView<String> treeView) throws SQLException {
         if (whatTree.equals("main")) {
             String catTitle = categoriesTree.getSelectionModel().getSelectedItem().getValue();
             Optional<ButtonType> result = AlertWindow.categoryDeleteAttention(catTitle);
@@ -1415,13 +1413,15 @@ public class PCGUIController implements Initializable {
             }
         }
     }
-    private void createNewCategory(String whatTree) throws SQLException {
-        String parentCategoryTitle = new String();
+    private void createNewCategory(String whatTree, TreeView<String> treeView) throws SQLException {
+        /*
         if (whatTree.equals("main")) {
             parentCategoryTitle = categoriesTree.getSelectionModel().getSelectedItem().getValue();
         } else if (whatTree.equals("modal")) {
             parentCategoryTitle = treeView.getSelectionModel().getSelectedItem().getValue();
         }
+        */
+        parentCategoryTitle = treeView.getSelectionModel().getSelectedItem().getValue();
         Integer parentId = UtilPack.getCategoryIdFromTitle(parentCategoryTitle);
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
@@ -3504,6 +3504,7 @@ public class PCGUIController implements Initializable {
     private final String noImageFile = "C:\\Users\\gnato\\Desktop\\Igor\\progs\\java_progs\\PoligonCommanderJ\\src\\main\\resources\\images\\noImage.gif";
     String selectedCategory = "";
     String focusedProduct = "";
+    String parentCategoryTitle = "";
 
     //booleans
     boolean clear = true;
