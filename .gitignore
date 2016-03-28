@@ -4,3 +4,5 @@
 /src/main/resources/hibernate.cfg.xml
 nb-configuration.xml
 nbactions.xml
+PoligonCommanderJ.iml
+poligoncommanderj.properties
