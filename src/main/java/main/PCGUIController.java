@@ -26,10 +26,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.TableColumn.CellEditEvent;
-import javafx.scene.control.cell.CheckBoxTableCell;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.control.cell.TreeItemPropertyValueFactory;
+import javafx.scene.control.cell.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -829,6 +826,7 @@ public class PCGUIController implements Initializable {
                 }).build()
         ).build();
         categoriesTree.setContextMenu(treeViewContextMenu);
+
         stackPane.getChildren().add(categoriesTree);
     }
     private void buildTreeNode (ObservableList<CategoriesTreeView> sections, TreeItem<String> rootItem, CategoriesTreeView catalogRoot) {

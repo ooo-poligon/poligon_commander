@@ -31,7 +31,8 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Categories.findAll", query = "SELECT c FROM Categories c"),
     @NamedQuery(name = "Categories.findById", query = "SELECT c FROM Categories c WHERE c.id = :id"),
     @NamedQuery(name = "Categories.findByTitle", query = "SELECT c FROM Categories c WHERE c.title = :title"),
-    @NamedQuery(name = "Categories.findByParent", query = "SELECT c FROM Categories c WHERE c.parent = :parent")})
+    @NamedQuery(name = "Categories.findByParent", query = "SELECT c FROM Categories c WHERE c.parent = :parent"),
+    @NamedQuery(name = "Categories.findByPublished", query = "SELECT c FROM Categories c WHERE c.published = :published")})
 public class Categories implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
@@ -47,6 +48,8 @@ public class Categories implements Serializable {
     private String description;
     @Column(name = "parent")
     private Integer parent;
+    @Column(name = "published")
+    private Integer published;
     @OneToMany(mappedBy = "categoryId")
     private Collection<Products> productsCollection;
 
@@ -92,6 +95,14 @@ public class Categories implements Serializable {
 
     public void setParent(Integer parent) {
         this.parent = parent;
+    }
+
+    public Integer getPublished() {
+        return published;
+    }
+
+    public void setPublished(Integer published) {
+        this.published = published;
     }
 
     @XmlTransient
