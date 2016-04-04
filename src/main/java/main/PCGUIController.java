@@ -7,10 +7,7 @@ import entities.Properties;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.IntegerBinding;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -113,7 +110,7 @@ public class PCGUIController implements Initializable {
             getAllProductsList();
             getAllFilesOfProgramList();
             getAllQuantitiesList();
-            getAllQuantitiesList();
+            getAllCategoriesList();
         }
         loadProgramCounter ++;
         loadSavedSettings();
@@ -291,20 +288,18 @@ public class PCGUIController implements Initializable {
             );
         }
     }
-    private ObservableList<CategoriesTreeView> getAllCategoriesList() {
-        ObservableList<CategoriesTreeView> sections = FXCollections.observableArrayList();
+    public static void getAllCategoriesList() {
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
             List categories = session.createQuery("FROM Categories").list();
             for (Iterator iterator = categories.iterator(); iterator.hasNext();) {
                 Categories category = (Categories) iterator.next();
-                sections.add(new CategoriesTreeView(category.getId(), category.getTitle(), category.getParent()));
+                allCategoriesList.add(new CategoriesTreeView(category.getId(), category.getTitle(), category.getParent(), category.getPublished()));
             }
         } catch (HibernateException e) {
         } finally {
             session.close();
         }
-        return sections;
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Таб "Номенклатура" //////////////////////////////////////////////////////////////////////////////////////////////
@@ -788,9 +783,9 @@ public class PCGUIController implements Initializable {
     // Построение дерева категорий каталога
     private void buildCategoryTree() {
         CategoriesTreeView catalogRoot = new CategoriesTreeView(0, catalogHeader, 0);
-        TreeItem<String> rootItem = new TreeItem<> (catalogRoot.getTitle());
+        CheckBoxTreeItem<String> rootItem = new CheckBoxTreeItem<> (catalogRoot.getTitle());
         rootItem.setExpanded(true);
-        buildTreeNode(getAllCategoriesList(), rootItem, catalogRoot);
+        buildTreeNode(allCategoriesList, rootItem, catalogRoot);
         categoriesTree = new TreeView<> (rootItem);
         categoriesTree.setShowRoot(false);
         EventHandler<MouseEvent> mouseEventHandle = (MouseEvent event) -> { handleCategoryTreeMouseClicked(event); };
@@ -826,14 +821,27 @@ public class PCGUIController implements Initializable {
                 }).build()
         ).build();
         categoriesTree.setContextMenu(treeViewContextMenu);
-
+        categoriesTree.setCellFactory(CheckBoxTreeCell.forTreeView(new Callback<TreeItem<String>, ObservableValue<Boolean>>() {
+            @Override
+            public ObservableValue<Boolean> call(TreeItem<String> param) {
+                return null;
+            }
+        }));
         stackPane.getChildren().add(categoriesTree);
     }
-    private void buildTreeNode (ObservableList<CategoriesTreeView> sections, TreeItem<String> rootItem, CategoriesTreeView catalogRoot) {
+    private void buildTreeNode (ObservableList<CategoriesTreeView> sections, CheckBoxTreeItem<String> rootItem, CategoriesTreeView catalogRoot) {
         sections.stream().filter((section) -> (
                 section.getParent().equals(catalogRoot.getId()))).forEach((CategoriesTreeView category) -> {
-            TreeItem<String> treeItem = new TreeItem<> (category.getTitle());
+            CheckBoxTreeItem<String> treeItem = new CheckBoxTreeItem<> (category.getTitle());
+            treeItem.setSelected(category.getPublished() == 1 ? true : false);
             rootItem.getChildren().add(treeItem);
+            rootItem.addEventHandler(CheckBoxTreeItem.<String>checkBoxSelectionChangedEvent(), new EventHandler<CheckBoxTreeItem.TreeModificationEvent<String>>() {
+                public void handle(CheckBoxTreeItem.TreeModificationEvent<String> event) {
+
+                    UtilPack.checkItemsSelected(rootItem);
+
+                }
+            });
             buildTreeNode(sections, treeItem, category);
         });
     }
@@ -861,7 +869,7 @@ public class PCGUIController implements Initializable {
         });
     }
     private void recursiveItems(ObservableList<ProductsTableView> data, Integer selectedNode) {
-        ArrayList<Integer> children = arrayChildren(selectedNode);
+        ArrayList<Integer> children = UtilPack.arrayChildren(selectedNode);
         if(!children.isEmpty()) {
             children.stream().forEach((ch) -> {
                 recursiveItems(data, ch);
@@ -877,17 +885,7 @@ public class PCGUIController implements Initializable {
             data.add(product);
         });
     }
-    private ArrayList<Integer> arrayChildren(Integer parent) {
-        ArrayList<Integer> children = new ArrayList<>(10);
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        List res = session.createQuery("From Categories where parent=" + parent).list();
-        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
-            Categories cat = (Categories) iterator.next();
-            children.add(cat.getId());
-        }
-        session.close();
-        return children;
-    }
+
     ////////////////////////////////////////////////////////////////
     private Task<Void> createTask(MouseEvent event) {
         return new Task<Void>() {
@@ -898,7 +896,7 @@ public class PCGUIController implements Initializable {
                 Node node = event.getPickResult().getIntersectedNode();
                 // Accept clicks only on node cells, and not on empty spaces of the TreeView
                 if (node instanceof Text || (node instanceof TreeCell && ((TreeCell) node).getText() != null)) {
-                    String selectedNode = (String) ((TreeItem)categoriesTree.getSelectionModel().getSelectedItem()).getValue();
+                    String selectedNode = (String) ((CheckBoxTreeItem)categoriesTree.getSelectionModel().getSelectedItem()).getValue();
                     subCategoriesList(selectedNode);
                     if (treeViewHandlerMode.isSelected()) {
                         includeLowerItems(data, selectedNode);
@@ -976,9 +974,9 @@ public class PCGUIController implements Initializable {
     // Создаёт модальное окно с деревом категорий товаров для диалога переноса товаров в другую категорию.
     public TreeView<String> buildModalCategoryTree(StackPane stackPane, TreeView treeView) {
         CategoriesTreeView catalogRoot = new CategoriesTreeView(0, catalogHeader, 0);
-        TreeItem<String> rootItem = new TreeItem<> (catalogRoot.getTitle());
+        CheckBoxTreeItem<String> rootItem = new CheckBoxTreeItem<> (catalogRoot.getTitle());
         rootItem.setExpanded(true);
-        buildTreeNode(getAllCategoriesList(), rootItem, catalogRoot);
+        buildTreeNode(allCategoriesList, rootItem, catalogRoot);
         treeView = new TreeView(rootItem);
         final TreeView finalTreeView = treeView;
         final TreeView finalTreeView1 = treeView;
@@ -1666,7 +1664,7 @@ public class PCGUIController implements Initializable {
         }
     }
     private void setCategorySelected(String selectedProduct) throws SQLException {
-        TreeItem<String> productOwner = new TreeItem<>();
+        CheckBoxTreeItem<String> productOwner = new CheckBoxTreeItem<>();
         final Categories[] category = {new Categories()};
         allProductsList.stream().forEach(product -> {
             if (product.getTitle().equals(selectedProduct)) {
@@ -1676,7 +1674,7 @@ public class PCGUIController implements Initializable {
         recursiveTreeCall(categoriesTree.getRoot(), UtilPack.getCategoryTitleFromId(category[0].getId()));
     }
     private void recursiveTreeCall(TreeItem<String> root, String categoryTitle) {
-        TreeItem<String> productOwner = new TreeItem<>();
+        TreeItem<String> productOwner = new CheckBoxTreeItem<>();
         for (TreeItem<String> item: root.getChildren()) {
             if (item.getValue().equals(categoryTitle)) {
                 productOwner = item;
@@ -3521,4 +3519,5 @@ public class PCGUIController implements Initializable {
     public static ArrayList<FileOfProgram> allFilesOfProgramList = new ArrayList<>(22000);
     public static ArrayList<QuantityOfProduct> allQuantitiesList = new ArrayList<>();
     public static ObservableList<String> allProductsTitles = FXCollections.observableArrayList();
+    public static ObservableList<CategoriesTreeView> allCategoriesList = FXCollections.observableArrayList();
 }

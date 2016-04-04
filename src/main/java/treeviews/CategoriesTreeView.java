@@ -18,21 +18,31 @@ public class CategoriesTreeView {
     private final IntegerProperty id;
     private final StringProperty title;
     private final IntegerProperty parent;
+    private final IntegerProperty published;
     
     public CategoriesTreeView() {
-        this(null, null, null);
+        this(null, null, null, null);
     }
     
     public CategoriesTreeView(String title) {
         this.id     = null;
         this.title  = new SimpleStringProperty(title);
         this.parent = null;
+        this.published = null;
     }
 
     public CategoriesTreeView(Integer id, String title, Integer parent) {
         this.id     = new SimpleIntegerProperty(id);
         this.title  = new SimpleStringProperty(title);
         this.parent = new SimpleIntegerProperty(parent);
+        this.published = null;
+    }
+
+    public CategoriesTreeView(Integer id, String title, Integer parent, Integer published) {
+        this.id     = new SimpleIntegerProperty(id);
+        this.title  = new SimpleStringProperty(title);
+        this.parent = new SimpleIntegerProperty(parent);
+        this.published = new SimpleIntegerProperty(published);
     }
 
     public Integer getId() {
@@ -69,5 +79,17 @@ public class CategoriesTreeView {
     
     public IntegerProperty parentProperty() {
         return parent;
-    }       
+    }
+
+    public int getPublished() {
+        return published.get();
+    }
+
+    public IntegerProperty publishedProperty() {
+        return published;
+    }
+
+    public void setPublished(int published) {
+        this.published.set(published);
+    }
 }

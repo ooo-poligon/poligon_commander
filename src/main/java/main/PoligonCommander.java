@@ -59,6 +59,7 @@ public class PoligonCommander extends Application {
                 PCGUIController.getAllProductsList();
                 PCGUIController.getAllFilesOfProgramList();
                 PCGUIController.getAllQuantitiesList();
+                PCGUIController.getAllCategoriesList();
                 /*
                 int count = 0;
                 for (int i = 0; i < PCGUIController.allProductsTitles.size(); i++) {

@@ -1040,14 +1040,9 @@ public class DBConnection {
                 return false;
             }
         };
-        try {
-            return ((DriverManager.getConnection(dbUrl, user, password)).createStatement()).executeQuery(query);
-        } catch (com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException mysqle) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.show();
-        }
 
-        return resultSet;
+        return ((DriverManager.getConnection(dbUrl, user, password)).createStatement()).executeQuery(query);
+
     }
     public int getUpdateResult(String query) throws SQLException {
         Connection connection = DriverManager.getConnection(dbUrl, user, password);

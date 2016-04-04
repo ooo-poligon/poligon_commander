@@ -1,18 +1,22 @@
 package utils;
 
 import entities.*;
-import javafx.collections.FXCollections;
+import entities.Properties;
 import javafx.collections.ObservableList;
+import javafx.scene.control.CheckBoxTreeItem;
 import javafx.scene.control.TreeItem;
+import main.PCGUIController;
 import main.Product;
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 import treetableviews.PropertiesTreeTableView;
+import treeviews.CategoriesTreeView;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by Igor Klekotnev on 11.03.2016.
@@ -91,6 +95,7 @@ public class UtilPack {
             id = productKind.getId();
         }
         return id;
+
     }
     public static String normalize(String string) {
         //проверить корректность работы "normalize" позже
@@ -159,6 +164,17 @@ public class UtilPack {
         session.close();
         return childTreeItems;
     }
+    public static ArrayList<Integer> arrayChildren(Integer parent) {
+        ArrayList<Integer> children = new ArrayList<>();
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List res = session.createQuery("From Categories where parent=" + parent).list();
+        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+            Categories cat = (Categories) iterator.next();
+            children.add(cat.getId());
+        }
+        session.close();
+        return children;
+    }
     public static String cleanHtml(String rawHtml) {
         String cleanHtml = new String();
         String cutString1 = "<html dir=\"ltr\"><head></head><body contenteditable=\"true\">";
@@ -166,5 +182,37 @@ public class UtilPack {
         cleanHtml = rawHtml.replace(cutString1, "");
         cleanHtml = cleanHtml.replace(cutString2, "");
         return cleanHtml;
+    }
+
+    public static void checkItemsSelected(CheckBoxTreeItem rootItem){
+        for(Object item : rootItem.getChildren()){
+
+            Session session = HibernateUtil.getSessionFactory().openSession();
+            Transaction tx = session.beginTransaction();
+            Query query = session.createQuery("from Categories where title = :title");
+            query.setParameter("title", ((CheckBoxTreeItem) item).getValue());
+            List result = query.list();
+            for (Iterator iterator = result.iterator(); iterator.hasNext();) {
+                Categories category = (Categories) iterator.next();
+                category.setPublished(((CheckBoxTreeItem) item).selectedProperty().getValue() ? 1 : 0);
+                session.saveOrUpdate(category);
+                tx.commit();
+            }
+            session.close();
+
+
+            /*
+            try {
+                PCGUIController.connection.getUpdateResult("update categories set published=" +
+                        (((CheckBoxTreeItem) item).selectedProperty().getValue() ? 1 : 0) + "where title=" +
+                        ((CheckBoxTreeItem) item).getValue());
+            } catch (SQLException e) {}
+            */
+            //System.out.println(((CheckBoxTreeItem) item).getValue() + " " + ((CheckBoxTreeItem) item).selectedProperty().getValue());
+
+            //checkItemsSelected((CheckBoxTreeItem) item);
+
+        }
+
     }
 }
