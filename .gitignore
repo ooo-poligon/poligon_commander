@@ -2,7 +2,9 @@
 /nbproject/
 /target/
 /src/main/resources/hibernate.cfg.xml
+/META-INF/persistence.xml
 nb-configuration.xml
 nbactions.xml
 PoligonCommanderJ.iml
 poligoncommanderj.properties
+PoligonCommander.iml
