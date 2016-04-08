@@ -36,7 +36,9 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.scene.web.HTMLEditor;
 import javafx.scene.web.WebView;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import javafx.stage.Window;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javafx.util.converter.IntegerStringConverter;
@@ -127,6 +129,7 @@ public class PCGUIController implements Initializable {
         buildCategoryTree();
         populateComboBox ();
         loadImportFields();
+        loadExportTables();
         buildVendorsTable();
         buildSeriesTable();
         buildProductKindsList();
@@ -2892,6 +2895,24 @@ public class PCGUIController implements Initializable {
         });
         importFieldsComboBox.setItems(fieldsNames);
     }
+    // Загружает в память список таблиц БД, доступных для экспорта в xls-файл
+    //Заполняет список значений tableDBForExportChoiceBox
+    private void loadExportTables() {
+        ArrayList<String> allTablesNames = new ArrayList<>();
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List res = session.createSQLQuery("select TABLE_NAME from INFORMATION_SCHEMA.TABLES\n" +
+                "where TABLE_TYPE = 'BASE TABLE'").list();
+        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+            String tableName = (String) iterator.next();
+            allTablesNames.add(tableName);
+        }
+        session.close();
+        ObservableList<String> tableNames = FXCollections.observableArrayList();
+        allTablesNames.stream().forEach((table) -> {
+            tableNames.add(table);
+        });
+        tableDBForExportComboBox.setItems(tableNames);
+    }
     // Получает из БД список всех названий продуктов и прикрепляет его к Combobox поиска по названию
     // Также вызывает экземпляр класса автодополнения при поиске
     private void populateComboBox () {
@@ -3137,6 +3158,9 @@ public class PCGUIController implements Initializable {
     private String sField() {
         return importFieldsComboBox.getValue();
     }
+    private String sTable() {
+        return tableDBForExportComboBox.getValue();
+    }
     private String sHeader() {
         String sh = new String();
         try {
@@ -3144,6 +3168,10 @@ public class PCGUIController implements Initializable {
         } catch (NullPointerException ne) {}
         return sh;
     }
+    @FXML private void getSelectedDBTable() {
+        sTable();
+    }
+
     @FXML private void getSelectedDBField() {
         sField();
     }
@@ -3192,6 +3220,17 @@ public class PCGUIController implements Initializable {
         if (fileXLS != null) {
             startProgressBarImportXLS();
         }
+    }
+    @FXML private void chooseDirectoryForExport() {
+        fileXLSExport = directoryForExport.showDialog(anchorPane.getScene().getWindow());
+        if (fileXLSExport != null) {
+            fileForExportPathLabel.setText(fileXLSExport.getPath());
+        }
+    }
+    @FXML private void startExport() {
+        String dbTable = tableDBForExportComboBox.getValue();
+        String targetLocationPath = fileForExportPathLabel.getText() + "\\" + exportFileNameTextField.getText();
+        XLSHandler.exportDBTableTo(dbTable, targetLocationPath);
     }
     @FXML private void getHeadersRowNumber(KeyEvent e) {
         if(e.getCode().toString().equals("ENTER")) {
@@ -3402,7 +3441,9 @@ public class PCGUIController implements Initializable {
     @FXML private Button startImportXLSButton;
     //@FXML private Button loadSavedSettingsButton;
     //@FXML Button testButton = new Button();
-    @FXML Button resetButton;
+    @FXML private Button resetButton;
+    @FXML private Button chooseFileForExportButton;
+    @FXML private Button startExportButton;
 
     // Labels
     @FXML private Label productTabTitle;
@@ -3410,6 +3451,7 @@ public class PCGUIController implements Initializable {
     @FXML private Label courseEUROLabel;
     @FXML private Label courseDateLabel;
     @FXML private Label productTabKind;
+    @FXML private Label fileForExportPathLabel;
 
     // ProgressBars
     @FXML private ProgressBar progressBar;
@@ -3435,6 +3477,7 @@ public class PCGUIController implements Initializable {
     // ComboBoxes
     @FXML private ComboBox<String> searchComboBox;
     @FXML private ComboBox<String> importFieldsComboBox;
+    @FXML private ComboBox<String> tableDBForExportComboBox;
 
     // TextFields
     @FXML private TextField headersRowTextField;
@@ -3460,6 +3503,7 @@ public class PCGUIController implements Initializable {
     @FXML private TextField directoryTitleTextField;
     @FXML private TextField contentTitleTextField;
     @FXML private TitledPane categoriesTitledPane;
+    @FXML private TextField exportFileNameTextField;
 
     // CheckBoxes
     @FXML private CheckBox treeViewHandlerMode;
@@ -3467,6 +3511,8 @@ public class PCGUIController implements Initializable {
     //Files & FileChoosers
     File fileXLS;
     final   FileChooser fileChooser = new FileChooser();
+    File fileXLSExport;
+    final DirectoryChooser directoryForExport = new DirectoryChooser();
 
     // Lists
     ArrayList<ArrayList<String>> allImportXLSContent = new ArrayList<>(120);
