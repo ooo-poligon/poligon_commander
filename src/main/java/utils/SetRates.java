@@ -21,19 +21,22 @@ public class SetRates {
     Double tenPlusDiscount;
     Double optDiscount;
     Double dealerDiscount;
+    Double special;
 
     public SetRates () {
         this.rate = null;
         this.tenPlusDiscount = null;
         this.optDiscount = null;
         this.dealerDiscount = null;
+        this.special = null;
     }
 
-    public SetRates (Double rate, Double tenPlusDiscount, Double optDiscount, Double dealerDiscount) {
+    public SetRates (Double rate, Double tenPlusDiscount, Double optDiscount, Double dealerDiscount, Double special) {
         this.rate = rate;
         this.tenPlusDiscount = tenPlusDiscount;
         this.optDiscount = optDiscount;
         this.dealerDiscount = dealerDiscount;
+        this.special = special;
     }
 
     public Double getRate() {
@@ -68,6 +71,14 @@ public class SetRates {
         this.dealerDiscount = dealerDiscount;
     }
 
+    public Double getSpecial() {
+        return special;
+    }
+
+    public void setSpecial(Double special) {
+        this.special = special;
+    }
+
     public void writeRates(String field, Integer productID) {
         Double value = 0.0;
         switch (field) {
@@ -82,6 +93,9 @@ public class SetRates {
                 break;
             case "discount3":
                 value = dealerDiscount;
+                break;
+            case "special":
+                value = special;
                 break;
         }
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -98,10 +112,11 @@ public class SetRates {
         for (Product product : PCGUIController.allProductsList) {
             if (product.getTitle().equals(selectedProduct)) {
                 ratesPack = new SetRates(
-                    product.getRate(),
-                    product.getDiscount1(),
-                    product.getDiscount2(),
-                    product.getDiscount3()
+                        product.getRate(),
+                        product.getDiscount1(),
+                        product.getDiscount2(),
+                        product.getDiscount3(),
+                        product.getSpecial()
                 );
             }
         }

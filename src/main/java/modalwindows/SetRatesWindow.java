@@ -22,6 +22,11 @@ public class SetRatesWindow {
     Integer selectedProductID;
     ArrayList<Integer> completeChildrenProducts = new ArrayList<>();
 
+    public SetRatesWindow(Integer selectedNodeID, Integer selectedProductID) {
+        this.selectedNodeID = selectedNodeID;
+        this.selectedProductID = selectedProductID;
+    }
+
     public Integer getSelectedNodeID() {
         return selectedNodeID;
     }
@@ -35,11 +40,6 @@ public class SetRatesWindow {
     }
 
     public void setSelectedProductID(Integer selectedProductID) {
-        this.selectedProductID = selectedProductID;
-    }
-
-    public SetRatesWindow(Integer selectedNodeID, Integer selectedProductID) {
-        this.selectedNodeID = selectedNodeID;
         this.selectedProductID = selectedProductID;
     }
 
@@ -90,7 +90,8 @@ public class SetRatesWindow {
                     product.getRate(),
                     product.getDiscount1(),
                     product.getDiscount2(),
-                    product.getDiscount3()
+                    product.getDiscount3(),
+                    product.getSpecial()
             );
         }
         session.close();
@@ -106,7 +107,7 @@ public class SetRatesWindow {
         alert.showAndWait();
     }
 
-    public void showModalWindow() {
+    public void showModalWindow(boolean showSpecial) {
         SetRates currentlySetRates = new SetRates();
         String textAtAlertHeader = "";
         if (selectedNodeID == null) {
@@ -129,16 +130,19 @@ public class SetRatesWindow {
         Label label4 = new Label("Скидка оптовая (%):  ");
         Label label5 = new Label("Скидка диллерская (%):  ");
         Label label6 = new Label("      Текущие значения:");
+        Label label7 = new Label("Специальная скидка (%):  ");
         Label br = new Label("");
         Label br1 = new Label("");
         Label br2 = new Label("");
         Label br3 = new Label("");
         Label br4 = new Label("");
         Label br5 = new Label("");
+        Label br6 = new Label("");
         TextField text1 = new TextField();
         TextField text3 = new TextField();
         TextField text4 = new TextField();
         TextField text5 = new TextField();
+        TextField text6 = new TextField();
         try {
             if ( currentlySetRates.getRate().equals(-999.0)) {
                 alertDifferentRates();
@@ -146,29 +150,34 @@ public class SetRatesWindow {
                 text3.setText(currentlySetRates.getTenPlusDiscount().toString());
                 text4.setText(currentlySetRates.getOptDiscount().toString());
                 text5.setText(currentlySetRates.getDealerDiscount().toString());
+                text6.setText(currentlySetRates.getSpecial().toString());
             } else if (currentlySetRates.getTenPlusDiscount().equals(-999.0)) {
                 alertDifferentRates();
                 text1.setText(currentlySetRates.getRate().toString());
                 text3.setText("разные значения");
                 text4.setText(currentlySetRates.getOptDiscount().toString());
                 text5.setText(currentlySetRates.getDealerDiscount().toString());
+                text6.setText(currentlySetRates.getSpecial().toString());
             } else if(currentlySetRates.getOptDiscount().equals(-999.0)) {
                 alertDifferentRates();
                 text1.setText(currentlySetRates.getRate().toString());
                 text3.setText(currentlySetRates.getTenPlusDiscount().toString());
                 text4.setText("разные значения");
                 text5.setText(currentlySetRates.getDealerDiscount().toString());
+                text6.setText(currentlySetRates.getSpecial().toString());
             } else if(currentlySetRates.getDealerDiscount().equals(-999.0)) {
                 alertDifferentRates();
                 text1.setText(currentlySetRates.getRate().toString());
                 text3.setText(currentlySetRates.getTenPlusDiscount().toString());
                 text4.setText(currentlySetRates.getOptDiscount().toString());
                 text5.setText("разные значения");
+                text6.setText(currentlySetRates.getSpecial().toString());
             } else {
                 text1.setText(currentlySetRates.getRate().toString());
                 text3.setText(currentlySetRates.getTenPlusDiscount().toString());
                 text4.setText(currentlySetRates.getOptDiscount().toString());
                 text5.setText(currentlySetRates.getDealerDiscount().toString());
+                text6.setText(currentlySetRates.getSpecial().toString());
             }
         } catch (NullPointerException ne) {}
 
@@ -189,6 +198,11 @@ public class SetRatesWindow {
         grid.add(label5, 1, 11);
         grid.add(text5, 2, 11);
         grid.add(br5, 1, 12);
+        if (showSpecial) {
+            grid.add(label7, 1, 13);
+            grid.add(text6, 2, 13);
+            grid.add(br6, 1, 14);
+        }
         dialog.getDialogPane().setContent(grid);
 
         ButtonType buttonTypeOk = new ButtonType("Установить", ButtonBar.ButtonData.OK_DONE);
@@ -201,7 +215,8 @@ public class SetRatesWindow {
                 return new SetRates(Double.parseDouble(text1.getText()),
                                     Double.parseDouble(text3.getText()),
                                     Double.parseDouble(text4.getText()),
-                                    Double.parseDouble(text5.getText()));
+                                    Double.parseDouble(text5.getText()),
+                                    Double.parseDouble(text6.getText()));
             }
             return null;
         });
@@ -211,13 +226,15 @@ public class SetRatesWindow {
             Double discount1 = result.get().getTenPlusDiscount();
             Double discount2 = result.get().getOptDiscount();
             Double discount3 = result.get().getDealerDiscount();
-            SetRates setRates = new SetRates(rate, discount1, discount2, discount3);
+            Double special   = result.get().getSpecial();
+            SetRates setRates = new SetRates(rate, discount1, discount2, discount3, special);
             if (result.isPresent()) {
                 if (selectedNodeID == null) {
                     setRates.writeRates("rate", selectedProductID);
                     setRates.writeRates("discount1", selectedProductID);
                     setRates.writeRates("discount2", selectedProductID);
                     setRates.writeRates("discount3", selectedProductID);
+                    setRates.writeRates("special", selectedProductID);
                     //res = session.createQuery("from Products where id =" + selectedProductID).list();
                 } else {
                     completeChildrenProducts(selectedNodeID).stream().forEach((productID) -> {
@@ -225,6 +242,7 @@ public class SetRatesWindow {
                         setRates.writeRates("discount1", productID);
                         setRates.writeRates("discount2", productID);
                         setRates.writeRates("discount3", productID);
+                        setRates.writeRates("special", productID);
                     });
                 }
             }

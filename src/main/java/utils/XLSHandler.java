@@ -94,7 +94,7 @@ public class XLSHandler {
                 Label  caption12 = new Label (12, 0, "product_kind_id"); excelSheet.addCell(caption12);
                 Label  caption13 = new Label (13, 0, "vendor"); excelSheet.addCell(caption13);
                 Label  caption14 = new Label (14, 0, "plugin_owner_id"); excelSheet.addCell(caption14);
-                Label  caption15 = new Label (15, 0, "accessory_owner_id"); excelSheet.addCell(caption15);
+                Label  caption15 = new Label (15, 0, "special"); excelSheet.addCell(caption15);
                 Label  caption16 = new Label (16, 0, "rate"); excelSheet.addCell(caption16);
                 Label  caption17 = new Label (17, 0, "discount1"); excelSheet.addCell(caption17);
                 Label  caption18 = new Label (18, 0, "discount2"); excelSheet.addCell(caption18);
@@ -130,7 +130,7 @@ public class XLSHandler {
                     excelSheet.addCell(vendor);
                     Number plugin_owner_id    = new Number(14, i, PCGUIController.allProductsList.get(i).getPluginOwnerId());
                     excelSheet.addCell(plugin_owner_id);
-                    Number accessory_owner_id = new Number(15, i, PCGUIController.allProductsList.get(i).getAccessoryOwnerId());
+                    Number accessory_owner_id = new Number(15, i, PCGUIController.allProductsList.get(i).getSpecial());
                     excelSheet.addCell(accessory_owner_id);
                     Number rate               = new Number(16, i, PCGUIController.allProductsList.get(i).getRate());
                     excelSheet.addCell(rate);

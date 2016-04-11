@@ -252,7 +252,7 @@ public class PCGUIController implements Initializable {
                     resultSet.getInt   ("product_kind_id"),
                     resultSet.getString("vendor"),
                     resultSet.getInt   ("plugin_owner_id"),
-                    resultSet.getInt   ("accessory_owner_id"),
+                    resultSet.getDouble("special"),
                     resultSet.getDouble("rate"),
                     resultSet.getDouble("discount1"),
                     resultSet.getDouble("discount2"),
@@ -449,6 +449,7 @@ public class PCGUIController implements Initializable {
         ObservableList<PricesTableView> data = FXCollections.observableArrayList();
         String[] priceTypes = {
                 "Розничная цена",
+                "СПЕЦИАЛЬНАЯ ЦЕНА",
                 "Мелкий опт (+10)",
                 "Оптовая цена",
                 "Диллерская цена",
@@ -458,26 +459,49 @@ public class PCGUIController implements Initializable {
         for (String type : priceTypes) {
             try {
                 Double retailPrice = basePrice * ratesPack.getRate();
+                Double specialDiscount = retailPrice - (retailPrice*ratesPack.getSpecial()/100.0);
                 Double tenPlusDiscount = retailPrice - (retailPrice*ratesPack.getTenPlusDiscount()/100.0);
-                Double optDiscount = retailPrice - (retailPrice*ratesPack.getOptDiscount()/100.0);
-                Double dealerDiscount = retailPrice - (retailPrice*ratesPack.getDealerDiscount()/100.0);
+                Double optDiscount     = retailPrice - (retailPrice*ratesPack.getOptDiscount()/100.0);
+                Double dealerDiscount  = retailPrice - (retailPrice*ratesPack.getDealerDiscount()/100.0);
                 switch (type) {
                     case "Розничная цена":
                         data.add(new PricesTableView(type, ((new BigDecimal(retailPrice)).setScale(2, RoundingMode.UP)).doubleValue(),
                                 ((new BigDecimal(retailPrice * course)).setScale(2, RoundingMode.UP)).doubleValue()));
                         break;
+                    case "СПЕЦИАЛЬНАЯ ЦЕНА":
+                        data.add(new PricesTableView(type, ((new BigDecimal(specialDiscount)).setScale(2, RoundingMode.UP)).doubleValue(),
+                                ((new BigDecimal(specialDiscount * course)).setScale(2, RoundingMode.UP)).doubleValue()));
+                        break;
                     case "Мелкий опт (+10)":
-                        data.add(new PricesTableView(type, ((new BigDecimal(tenPlusDiscount)).setScale(2, RoundingMode.UP)).doubleValue(),
-                                ((new BigDecimal(tenPlusDiscount * course)).setScale(2, RoundingMode.UP)).doubleValue()));
-                        break;
+                        if (specialDiscount >= tenPlusDiscount) {
+                            data.add(new PricesTableView(type, ((new BigDecimal(tenPlusDiscount)).setScale(2, RoundingMode.UP)).doubleValue(),
+                                    ((new BigDecimal(tenPlusDiscount * course)).setScale(2, RoundingMode.UP)).doubleValue()));
+                            break;
+                        } else {
+                            data.add(new PricesTableView(type, ((new BigDecimal(specialDiscount)).setScale(2, RoundingMode.UP)).doubleValue(),
+                                    ((new BigDecimal(specialDiscount * course)).setScale(2, RoundingMode.UP)).doubleValue()));
+                            break;
+                        }
                     case "Оптовая цена":
-                        data.add(new PricesTableView(type, ((new BigDecimal(optDiscount)).setScale(2, RoundingMode.UP)).doubleValue(),
-                                ((new BigDecimal(optDiscount * course)).setScale(2, RoundingMode.UP)).doubleValue()));
-                        break;
+                        if (specialDiscount >= optDiscount) {
+                            data.add(new PricesTableView(type, ((new BigDecimal(optDiscount)).setScale(2, RoundingMode.UP)).doubleValue(),
+                                    ((new BigDecimal(optDiscount * course)).setScale(2, RoundingMode.UP)).doubleValue()));
+                            break;
+                        } else {
+                            data.add(new PricesTableView(type, ((new BigDecimal(specialDiscount)).setScale(2, RoundingMode.UP)).doubleValue(),
+                                    ((new BigDecimal(specialDiscount * course)).setScale(2, RoundingMode.UP)).doubleValue()));
+                            break;
+                        }
                     case "Диллерская цена":
-                        data.add(new PricesTableView(type, ((new BigDecimal(dealerDiscount)).setScale(2, RoundingMode.UP)).doubleValue(),
-                                ((new BigDecimal(dealerDiscount * course)).setScale(2, RoundingMode.UP)).doubleValue()));
-                        break;
+                        if (specialDiscount >= dealerDiscount) {
+                            data.add(new PricesTableView(type, ((new BigDecimal(dealerDiscount)).setScale(2, RoundingMode.UP)).doubleValue(),
+                                    ((new BigDecimal(dealerDiscount * course)).setScale(2, RoundingMode.UP)).doubleValue()));
+                            break;
+                        } else {
+                            data.add(new PricesTableView(type, ((new BigDecimal(specialDiscount)).setScale(2, RoundingMode.UP)).doubleValue(),
+                                    ((new BigDecimal(specialDiscount * course)).setScale(2, RoundingMode.UP)).doubleValue()));
+                            break;
+                        }
                     case "Закупочная цена":
                         data.add(new PricesTableView(type, ((new BigDecimal(basePrice)).setScale(2, RoundingMode.UP)).doubleValue(),
                                 ((new BigDecimal(basePrice * course)).setScale(2, RoundingMode.UP)).doubleValue()));
@@ -793,13 +817,20 @@ public class PCGUIController implements Initializable {
         categoriesTree.setShowRoot(false);
         EventHandler<MouseEvent> mouseEventHandle = (MouseEvent event) -> { handleCategoryTreeMouseClicked(event); };
         categoriesTree.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseEventHandle);
+        boolean showSpecial = false;
         treeViewContextMenu = ContextMenuBuilder.create().items(
                 MenuItemBuilder.create().text("Установить коэффициенты цен").onAction((ActionEvent arg0) -> {
                     String selectedNode = (String)((TreeItem)categoriesTree.getSelectionModel().getSelectedItem()).getValue();
                     Integer selectedNodeID = null;
                     selectedNodeID = UtilPack.getCategoryIdFromTitle(selectedNode);
                     SetRatesWindow ratesWindow = new SetRatesWindow(selectedNodeID, null);
-                    ratesWindow.showModalWindow();
+                    ratesWindow.showModalWindow(showSpecial);
+                    try {
+                        getAllProductsList();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                    buildPricesTable(selectedProduct);
                 }).build(),
                 MenuItemBuilder.create().text("Создать категорию").onAction((ActionEvent arg0) -> {
                     try {
@@ -1788,12 +1819,19 @@ public class PCGUIController implements Initializable {
     @FXML private void handleProductTableMousePressed(MouseEvent event1) {
         onFocusedProductTableItem(selectedProduct);
         if (productsTable.getSelectionModel().getSelectedItems().size() == 1) {
+            boolean showSpecial = true;
             productTableContextMenu = ContextMenuBuilder.create().items(
                     MenuItemBuilder.create().text("Установить коэффициенты цен").onAction((ActionEvent arg0) -> {
                         Integer selectedProductID = null;
                         selectedProductID = UtilPack.getProductIdFromTitle(selectedProduct, allProductsList);
                         SetRatesWindow ratesWindow = new SetRatesWindow(null, selectedProductID);
-                        ratesWindow.showModalWindow();
+                        ratesWindow.showModalWindow(showSpecial);
+                        try {
+                            getAllProductsList();
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                        buildPricesTable(selectedProduct);
                     }).build(),
                     MenuItemBuilder.create().text("Открыть вкладку обзора свойств устройства").onAction((ActionEvent arg0) -> {
                         try {

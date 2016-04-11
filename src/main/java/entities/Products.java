@@ -48,14 +48,18 @@ public class Products implements Serializable {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "productId")
     private Collection<ProductsFunctions> productsFunctionsCollection;
     @Basic(optional = false)
+
     @Column(name = "plugin_owner_id")
     private int pluginOwnerId;
     @Basic(optional = false)
-    @Column(name = "accessory_owner_id")
-    private int accessoryOwnerId;
+
+    @Column(name = "special")
+    private double special;
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "productId")
     private Collection<PropertyValues> propertyValuesCollection;
     private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -349,12 +353,12 @@ public class Products implements Serializable {
         this.pluginOwnerId = pluginOwnerId;
     }
 
-    public int getAccessoryOwnerId() {
-        return accessoryOwnerId;
+    public double getSpecial() {
+        return special;
     }
 
-    public void setAccessoryOwnerId(int accessoryOwnerId) {
-        this.accessoryOwnerId = accessoryOwnerId;
+    public void setSpecial(double special) {
+        this.special = special;
     }
 
     @XmlTransient
