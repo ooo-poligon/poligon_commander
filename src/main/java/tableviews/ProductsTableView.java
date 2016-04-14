@@ -13,13 +13,14 @@ import javafx.beans.property.*;
 public class ProductsTableView {
 
     private final BooleanProperty available;
+    private final BooleanProperty outdated;
     private final StringProperty article;
     private final StringProperty title;
     private final StringProperty description;
     private final StringProperty delivery_time;
     
     public ProductsTableView() {
-        this(null, null, null, null, false);
+        this(null, null, null, null, false, false);
     }
 
     public ProductsTableView(String article, String title) {
@@ -28,6 +29,7 @@ public class ProductsTableView {
         this.description = null;
         this.delivery_time = null;
         this.available = new SimpleBooleanProperty();
+        this.outdated = new SimpleBooleanProperty();
     }
     
     public ProductsTableView(String delivery_time) {
@@ -36,22 +38,26 @@ public class ProductsTableView {
         this.description = null;
         this.delivery_time = new SimpleStringProperty(delivery_time);
         this.available = new SimpleBooleanProperty();
+        this.outdated = new SimpleBooleanProperty();
     }
 
-    public ProductsTableView(BooleanProperty available) {
+    public ProductsTableView(BooleanProperty available, BooleanProperty outdated) {
         this.article       = null;
         this.title       = null;
         this.description = null;
         this.delivery_time = null;
         this.available = available;
+        this.outdated = outdated;
     }
 
-    public ProductsTableView(String article, String title, String description, String delivery_time, Boolean available) {
+    public ProductsTableView(String article, String title, String description, String delivery_time,
+                             Boolean available, Boolean outdated) {
         this.article       = new SimpleStringProperty(article);
         this.title       = new SimpleStringProperty(title);
         this.description = new SimpleStringProperty(description);
         this.delivery_time = new SimpleStringProperty(delivery_time);
         this.available = new SimpleBooleanProperty(available);
+        this.outdated = new SimpleBooleanProperty(outdated);
     }
 
     public boolean getAvailable() {
@@ -64,6 +70,26 @@ public class ProductsTableView {
 
     public void setAvailable(boolean available) {
         this.available.set(available);
+    }
+
+    public boolean getOutdated() {
+        return outdated.get();
+    }
+
+    public BooleanProperty outdatedProperty() {
+        return outdated;
+    }
+
+    public void setOutdated(boolean outdated) {
+        this.outdated.set(outdated);
+    }
+
+    public String getDelivery_time() {
+        return delivery_time.get();
+    }
+
+    public void setDelivery_time(String delivery_time) {
+        this.delivery_time.set(delivery_time);
     }
 
     public String getArticle() {

@@ -35,6 +35,7 @@
                                     <TableView fx:id="productsTable" editable="true" onKeyPressed="#productsMoveUpDownByKeyboard" onMousePressed="#handleProductTableMousePressed" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.hgrow="ALWAYS" GridPane.valignment="TOP" GridPane.vgrow="ALWAYS">
                                       <columns>
                                           <TableColumn fx:id="productAvailable" maxWidth="40.0" minWidth="40.0" prefWidth="40.0" resizable="false" text="Сайт" />
+                                          <TableColumn fx:id="productOutdated" maxWidth="40.0" minWidth="40.0" prefWidth="40.0" resizable="false" text="Снят" />
                                           <TableColumn fx:id="productArticle" maxWidth="-1.0" minWidth="100.0" prefWidth="200.0" text="Артикул" />
                                         <TableColumn fx:id="productTitle" maxWidth="-1.0" minWidth="300.0" prefWidth="300.0" text="Наименование" />
                                         <TableColumn fx:id="productDescription" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="-1.0" text="Краткое описание" />

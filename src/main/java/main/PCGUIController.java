@@ -45,6 +45,7 @@ import javafx.util.converter.IntegerStringConverter;
 import modalwindows.AlertWindow;
 import modalwindows.SetRatesWindow;
 import org.hibernate.*;
+import org.hibernate.dialect.SybaseDialect;
 import org.hibernate.exception.JDBCConnectionException;
 import settings.LocalDBSettings;
 import settings.PriceCalcSettings;
@@ -292,6 +293,7 @@ public class PCGUIController implements Initializable {
         }
     }
     public static void getAllCategoriesList() {
+        allCategoriesList.clear();
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
             List categories = session.createQuery("FROM Categories").list();
@@ -317,7 +319,8 @@ public class PCGUIController implements Initializable {
                         product.getTitle(),
                         product.getDescription(),
                         product.getDeliveryTime(),
-                        product.getAvailable() == 1 ? true : false)
+                        product.getAvailable() == 1 ? true : false,
+                        product.getOutdated()  == 1 ? true : false)
                 );
             }
         });
@@ -333,7 +336,8 @@ public class PCGUIController implements Initializable {
                         product.getTitle(),
                         product.getDescription(),
                         product.getDeliveryTime(),
-                        product.getAvailable() == 1 ? true : false)
+                        product.getAvailable() == 1 ? true : false,
+                        product.getOutdated()  == 1 ? true : false)
                 );
             }
         });
@@ -388,10 +392,11 @@ public class PCGUIController implements Initializable {
                 new EventHandler<CellEditEvent<ProductsTableView, String>>() {
                     @Override
                     public void handle(CellEditEvent<ProductsTableView, String> t) {
+                        String previousProductTitle = productsTable.getSelectionModel().getSelectedItem().getTitle();
                         ((ProductsTableView) t.getTableView().getItems().get(
                                 t.getTablePosition().getRow())
                         ).setTitle(t.getNewValue());
-                        setNewCellValue("title", t.getNewValue(), productsTable.getFocusModel().getFocusedItem().getTitle());
+                        setNewCellValue("title", t.getNewValue(), previousProductTitle);
                     }
                 }
         );
@@ -414,6 +419,14 @@ public class PCGUIController implements Initializable {
         for (ProductsTableView productsTableView : data) {
             productsTableView.availableProperty().addListener((obs, oldValue, newValue) ->{
                 setNewCellValue("available", newValue, productsTableView.getTitle());
+            });
+        }
+        productOutdated.setCellValueFactory(new PropertyValueFactory<ProductsTableView, Boolean>("outdated"));
+        productOutdated.setCellFactory(CheckBoxTableCell.forTableColumn(productOutdated));
+        // add listeners to boolean properties:
+        for (ProductsTableView productsTableView : data) {
+            productsTableView.outdatedProperty().addListener((obs, oldValue, newValue) ->{
+                setNewCellValue("outdated", newValue, productsTableView.getTitle());
             });
         }
         productsTable.setItems(data);
@@ -750,7 +763,8 @@ public class PCGUIController implements Initializable {
                             product.getTitle(),
                             product.getDescription(),
                             product.getDeliveryTime(),
-                            product.getAvailable() == 1 ? true : false)
+                            product.getAvailable() == 1 ? true : false,
+                            product.getOutdated()  == 1 ? true : false)
                     );
                 }
             });
@@ -771,7 +785,8 @@ public class PCGUIController implements Initializable {
                             product.getTitle(),
                             product.getDescription(),
                             product.getDeliveryTime(),
-                            product.getAvailable() == 1 ? true : false)
+                            product.getAvailable() == 1 ? true : false,
+                            product.getOutdated()  == 1 ? true : false)
                     );
                 }
             });
@@ -825,33 +840,19 @@ public class PCGUIController implements Initializable {
                     selectedNodeID = UtilPack.getCategoryIdFromTitle(selectedNode);
                     SetRatesWindow ratesWindow = new SetRatesWindow(selectedNodeID, null);
                     ratesWindow.showModalWindow(showSpecial);
-                    try {
-                        getAllProductsList();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
+                    try { getAllProductsList(); } catch (SQLException e) {}
                     buildPricesTable(selectedProduct);
                 }).build(),
                 MenuItemBuilder.create().text("Создать категорию").onAction((ActionEvent arg0) -> {
-                    try {
-                        newCategoryDialog("main", categoriesTree);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
+                    try { newCategoryDialog("main", categoriesTree); } catch (SQLException e) {}
+                    getAllCategoriesList();
+                    buildCategoryTree();
                 }).build(),
                 MenuItemBuilder.create().text("Редактировать категорию").onAction((ActionEvent arg0) -> {
-                    try {
-                        editCategoryDialog("main", categoriesTree);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
+                    try { editCategoryDialog("main", categoriesTree); } catch (SQLException e) {}
                 }).build(),
                 MenuItemBuilder.create().text("Удалить категорию").onAction((ActionEvent arg0) -> {
-                    try {
-                        deleteCategoryDialog("main", categoriesTree);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
+                    try { deleteCategoryDialog("main", categoriesTree); } catch (SQLException e) {}
                 }).build()
         ).build();
         categoriesTree.setContextMenu(treeViewContextMenu);
@@ -1022,6 +1023,8 @@ public class PCGUIController implements Initializable {
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
+                    getAllCategoriesList();
+                    buildCategoryTree();
                 }).build(),
                 MenuItemBuilder.create().text("Редактировать категорию").onAction((ActionEvent arg0) -> {
                     try {
@@ -1171,6 +1174,7 @@ public class PCGUIController implements Initializable {
     }
     // Вносит в БД новые значения, полученные при редактировании таблицы товаров.
     private void setNewCellValue(String fieldName, String newValue, String productTitle) {
+        System.out.println("What we have: " + fieldName + " " + newValue + " " + productTitle);
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
         Query query = session.createQuery("UPDATE Products set " + fieldName + "= :newValue where title= :title");
@@ -1352,7 +1356,8 @@ public class PCGUIController implements Initializable {
                         product.getTitle(),
                         product.getDescription(),
                         product.getDeliveryTime(),
-                        product.getAvailable() == 1 ? true : false
+                        product.getAvailable() == 1 ? true : false,
+                        product.getOutdated()  == 1 ? true : false
                 );
                 categoryId[0] = product.getCategoryId();
             }
@@ -1364,7 +1369,8 @@ public class PCGUIController implements Initializable {
                         product.getTitle(),
                         product.getDescription(),
                         product.getDeliveryTime(),
-                        product.getAvailable() == 1 ? true : false)
+                        product.getAvailable() == 1 ? true : false,
+                        product.getOutdated()  == 1 ? true : false)
                 );
             }
         });
@@ -1401,6 +1407,7 @@ public class PCGUIController implements Initializable {
                 newCatTitle = result.get().getTitle();
                 newCatDescription = result.get().getDescription();
                 editCategory(categoriesTree.getSelectionModel().getSelectedItem().getValue(), newCatTitle, newCatDescription);
+                getAllCategoriesList();
                 buildCategoryTree();
             }
         } else if (whatTree.equals("modal")) {
@@ -1410,6 +1417,7 @@ public class PCGUIController implements Initializable {
                 newCatTitle = result.get().getTitle();
                 newCatDescription = result.get().getDescription();
                 editCategory(treeView.getSelectionModel().getSelectedItem().getValue(), newCatTitle, newCatDescription);
+                getAllCategoriesList();
                 buildCategoryTree();
                 buildModalCategoryTree(stackPaneModal, treeView);
             }
@@ -1424,6 +1432,7 @@ public class PCGUIController implements Initializable {
                 Integer catId = UtilPack.getCategoryIdFromTitle(catTitle);
                 replaceProductsUp(catId, parentCatId);
                 deleteCategory(catTitle);
+                getAllCategoriesList();
                 buildCategoryTree();
                 ObservableList<ProductsTableView> data = FXCollections.observableArrayList();
                 productsTable.setItems(data);
@@ -1436,6 +1445,7 @@ public class PCGUIController implements Initializable {
                 Integer catId = UtilPack.getCategoryIdFromTitle(catTitle);
                 replaceProductsUp(catId, parentCatId);
                 deleteCategory(catTitle);
+                getAllCategoriesList();
                 buildCategoryTree();
                 buildModalCategoryTree(stackPaneModal, treeView);
                 ObservableList<ProductsTableView> data = FXCollections.observableArrayList();
@@ -1459,6 +1469,7 @@ public class PCGUIController implements Initializable {
         category.setTitle(newCatTitle);
         category.setDescription(newCatDescription);
         category.setParent(parentId);
+        category.setPublished(0);
         session.save(category);
         tx.commit();
         session.close();
@@ -1975,7 +1986,8 @@ public class PCGUIController implements Initializable {
                         product.getTitle(),
                         product.getDescription(),
                         product.getDeliveryTime(),
-                        product.getAvailable() == 1 ? true : false)
+                        product.getAvailable() == 1 ? true : false,
+                        product.getOutdated()  == 1 ? true : false)
                 );
                 title[0] = product.getTitle();
             }
@@ -3209,7 +3221,14 @@ public class PCGUIController implements Initializable {
     @FXML private void getSelectedDBTable() {
         sTable();
     }
-
+    /*
+    @FXML private void removeProducts() {
+        XLSHandler.removeFromDBProductsInList();
+    }
+    @FXML private void addDiscounts() {
+        XLSHandler.addDiscountsToDb();
+    }
+    */
     @FXML private void getSelectedDBField() {
         sField();
     }
@@ -3415,6 +3434,7 @@ public class PCGUIController implements Initializable {
     // TableViews & TableColumns
     @FXML private TableView<ProductsTableView>            productsTable;
     @FXML private TableColumn<ProductsTableView, Boolean> productAvailable;
+    @FXML private TableColumn<ProductsTableView, Boolean> productOutdated;
     @FXML private TableColumn<ProductsTableView, String>  productArticle;
     @FXML private TableColumn<ProductsTableView, String>  productTitle;
     @FXML private TableColumn<ProductsTableView, String>  productDescription;

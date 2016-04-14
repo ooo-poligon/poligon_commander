@@ -145,8 +145,8 @@ public class XLSToDBImport {
                     case ("Снято с производства"):
                         outdatedColumn.addAll(getColumnByHeader(allImportXLSContent, compareDetail.get(0)));
                         for (int i = 0; i < outdatedColumn.size(); i++) {
-                            if (!(outdatedColumn.get(i).equals(""))) {
-                                updateProducts("outdated", Integer.parseInt(outdatedColumn.get(i)), titlesColumn.get(i));
+                            if (outdatedColumn.get(i).equals("1")) {
+                                updateProducts("outdated", 1, titlesColumn.get(i));
                             } else {
                                 updateProducts("outdated", 0, titlesColumn.get(i));
                             }

@@ -18,6 +18,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
+import entities.FileTypes;
+import entities.Files;
+import entities.Products;
 import javafx.scene.control.Alert;
 import jxl.Cell;
 import jxl.Sheet;
@@ -39,19 +42,27 @@ import jxl.write.WriteException;
 import jxl.write.biff.RowsExceededException;
 import main.PCGUIController;
 import modalwindows.AlertWindow;
+import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 /**
  * Created by Igor Klekotnev on 25.09.2015.
  */
 public class XLSHandler {
+    private static DBConnection connection = new DBConnection("local");
     //метод для считывания содержимого таблицы
     public static ArrayList<ArrayList<String>> grabData(String inFile) throws IOException {
         ArrayList<ArrayList<String>> allColumnsContent = new ArrayList<>();  
         File inputWorkbook = new File(inFile);
+
+        WorkbookSettings ws = new WorkbookSettings();
+        ws.setEncoding("Cp1252");
+
+
         Workbook w;
         try {
-            w = Workbook.getWorkbook(inputWorkbook);
+            w = Workbook.getWorkbook(inputWorkbook, ws);
             // получаем первый лист
             Sheet sheet = w.getSheet(0);
             for (int c = 0; c < sheet.getColumns(); c++) {
@@ -65,6 +76,22 @@ public class XLSHandler {
         } catch (BiffException e) {
         }
         return allColumnsContent;
+    }
+    public static ArrayList<String> grabSelectedColumn(String inFile, Integer columnNumber) throws IOException {
+        ArrayList<String> columnContent = new ArrayList<>();
+        File inputWorkbook = new File(inFile);
+        Workbook w;
+        try {
+            w = Workbook.getWorkbook(inputWorkbook);
+            // получаем первый лист
+            Sheet sheet = w.getSheet(0);
+            for (int r = 0; r < sheet.getRows(); r++) {
+                Cell cellContent = sheet.getCell(columnNumber, r);
+                columnContent.add(cellContent.getContents());
+            }
+        } catch (BiffException e) {
+        }
+        return columnContent;
     }
     public static void exportDBTableTo(String dbTable, String targetPath) {
         File file = new File(targetPath);
@@ -161,6 +188,95 @@ public class XLSHandler {
             str = str.replace('\n', ' ');
         }
         return str;
+    }
+    public static void removeFromDBProductsInList() {
+        ArrayList<String> wrongIds = new ArrayList<>();
+        ArrayList<Products> wrongProducts = new ArrayList<>();
+        ArrayList<FileTypes> allFileTypes = new ArrayList<>();
+        try {
+            wrongIds = grabSelectedColumn("c:\\wrong.xls", 1);
+        } catch (IOException ex) {}
+
+        wrongIds.stream().forEach(wid -> {
+            try {
+                DBConnection connection = new DBConnection("local");
+                connection.getUpdateResult("delete from files where owner_id=" + Integer.parseInt(wid));
+                System.out.println("deleted files for " + wid);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+        });
+        wrongIds.stream().forEach(wid -> {
+            try {
+                DBConnection connection = new DBConnection("local");
+                connection.getUpdateResult("delete from quantity where product_id=" + Integer.parseInt(wid));
+                System.out.println("deleted quantity for" + wid);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+        });
+        System.out.println("All over");
+        wrongIds.stream().forEach(wid -> {
+            try {
+                connection.getUpdateResult("delete from products where id=" + Integer.parseInt(wid));
+                System.out.println("deleted product " + wid);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+        System.out.println("All over");
+    }
+
+    public static void addDiscountsToDb() {
+        ArrayList<ArrayList<String>> productsData = new ArrayList<>();
+        try {
+            productsData = grabData("c:\\right1.xls");
+        } catch (IOException ex) {
+        }
+
+        for (int i = 0; i < productsData.get(0).size(); i++) {
+
+
+            try {
+                DBConnection connection = new DBConnection("local");
+                connection.getUpdateResult("update products set rate=" + Double.parseDouble(productsData.get(3).get(i).replace(',', '.')) +
+                        "  where id=" + Double.parseDouble(productsData.get(1).get(i)));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try {
+                DBConnection connection = new DBConnection("local");
+                connection.getUpdateResult("update products set discount1=" + Double.parseDouble(productsData.get(4).get(i).replace(',', '.')) +
+                        "  where id=" + Double.parseDouble(productsData.get(1).get(i)));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try {
+                DBConnection connection = new DBConnection("local");
+                connection.getUpdateResult("update products set discount2=" + Double.parseDouble(productsData.get(5).get(i).replace(',', '.')) +
+                        "  where id=" + Double.parseDouble(productsData.get(1).get(i)));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try {
+                DBConnection connection = new DBConnection("local");
+                connection.getUpdateResult("update products set discount3=" + Double.parseDouble(productsData.get(6).get(i).replace(',', '.')) +
+                        "  where id=" + Double.parseDouble(productsData.get(1).get(i)));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try {
+                DBConnection connection = new DBConnection("local");
+                connection.getUpdateResult("update products set special=0" +
+                        "  where id=" + Double.parseDouble(productsData.get(1).get(i)));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        System.out.println("All over");
     }
 }
 
