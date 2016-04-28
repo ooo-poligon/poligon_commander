@@ -29,14 +29,15 @@
     <class>entities.ProductsAccessories</class>
     <class>entities.ProductsFunctions</class>
     <class>entities.StaticContents</class>
+    <class>entities.Companies</class>
+    <class>entities.Groups</class>
+    <class>entities.Users</class>
 
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:mysql://server03.poligon.corp:3306/trade?zeroDateTimeBehavior=convertToNull"/>
       <property name="javax.persistence.jdbc.user" value="trade"/>
       <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
       <property name="javax.persistence.jdbc.password" value="GuOjBoslen"/>
-
-
     </properties>
   </persistence-unit>
 </persistence>

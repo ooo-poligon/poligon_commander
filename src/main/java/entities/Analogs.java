@@ -41,12 +41,15 @@ public class Analogs implements Serializable {
     @Lob
     @Column(name = "description")
     private String description;
-    @JoinColumn(name = "vendor", referencedColumnName = "title")
-    @ManyToOne
-    private Vendors vendor;
+    @Column(name = "addition")
+    private String addition;
+    @Column(name = "vendor")
+    private String vendor;
     @JoinColumn(name = "prototype_id", referencedColumnName = "id")
     @ManyToOne
     private Products prototypeId;
+    @Column(name = "prototype")
+    private String prototype;
 
     public Analogs() {
     }
@@ -79,11 +82,19 @@ public class Analogs implements Serializable {
         this.description = description;
     }
 
-    public Vendors getVendor() {
+    public String getAddition() {
+        return addition;
+    }
+
+    public void setAddition(String addition) {
+        this.addition = addition;
+    }
+
+    public String getVendor() {
         return vendor;
     }
 
-    public void setVendor(Vendors vendor) {
+    public void setVendor(String vendor) {
         this.vendor = vendor;
     }
 
@@ -93,6 +104,14 @@ public class Analogs implements Serializable {
 
     public void setPrototypeId(Products prototypeId) {
         this.prototypeId = prototypeId;
+    }
+
+    public String getPrototype() {
+        return prototype;
+    }
+
+    public void setPrototype(String prototype) {
+        this.prototype = prototype;
     }
 
     @Override

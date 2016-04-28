@@ -133,6 +133,9 @@ public class PCGUIController implements Initializable {
         loadExportTables();
         buildVendorsTable();
         buildSeriesTable();
+        buildUsersTable();
+        buildCompaniesTable();
+        buildGroupsTable();
         buildProductKindsList();
         tabBrowserWebView.getEngine().load(siteUrlTextField.getText());
         productsTable.getSelectionModel().setSelectionMode(javafx.scene.control.SelectionMode.MULTIPLE);
@@ -615,36 +618,27 @@ public class PCGUIController implements Initializable {
         quantitiesTable.setItems(quantities);
     }
     private void buildAnalogsTable(String selectedProduct) {
+        String likeProduct = selectedProduct.split(" ")[0];
         ObservableList<AnalogsTableView> analogs = FXCollections.observableArrayList();
-        ArrayList<Integer> paIds = new ArrayList<>(10);
-        ArrayList<Product> aProducts = new ArrayList<>(10);
+        ArrayList<Analogs> analogsItems = new ArrayList<>(10);
         Session session = HibernateUtil.getSessionFactory().openSession();
         try {
-            List response = session.createQuery(
-                    "From ProductsAnalogs where productId=" +
-                            UtilPack.getProductIdFromTitle(selectedProduct, allProductsList)).list();
+            Query query = session.createQuery("From Analogs where prototype like :prototype");
+            query.setParameter("prototype", likeProduct);
+            List response = query.list();
             for (Iterator iterator = response.iterator(); iterator.hasNext();) {
-                ProductsAnalogs pa = (ProductsAnalogs) iterator.next();
-                paIds.add(pa.getAnalogId());
+                Analogs a = (Analogs) iterator.next();
+                analogsItems.add(a);
             }
         } catch (HibernateException e) {
         } finally {
             session.close();
         }
-        for (Integer id: paIds) {
-            allProductsList.stream().forEach(product -> {
-                if (product.getId() == id) {
-                    aProducts.add(product);
-                }
-            });
-        }
-
-        if (aProducts.size() == 0) {
-            analogs = getNullAnalogs();
-        } else {
-            for (int i = 0; i < aProducts.size(); i++) {
-                analogs.add(i, new AnalogsTableView(aProducts.get(i).getTitle(), aProducts.get(i).getVendor()));
-            }
+        analogsItems.stream().forEach(a -> {
+            analogs.add(new AnalogsTableView(a.getTitle(), a.getVendor()));
+        });
+        if (analogs.size() == 0) {
+            analogs.add(new AnalogsTableView("не найдено", ""));
         }
 
         analogTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
@@ -656,9 +650,9 @@ public class PCGUIController implements Initializable {
                 if(mouseEvent.getButton().equals(MouseButton.PRIMARY)){
                     if(mouseEvent.getClickCount() == 2){
                         try {
-                            fillMainTab(analogsTable.getSelectionModel().getSelectedItem().getTitle());
+                            fillMainTab(productsTable.getSelectionModel().getSelectedItem().getTitle());
                         } catch (SQLException e) {}
-                        fillProductTab(analogsTable.getSelectionModel().getSelectedItem().getTitle());
+                        fillProductTab(productsTable.getSelectionModel().getSelectedItem().getTitle());
                     }
                 }
             }
@@ -685,6 +679,397 @@ public class PCGUIController implements Initializable {
             ).build();
         }
         analogsTable.setContextMenu(analogsTableContextMenu);
+    }
+    private String getTitleFromId(String table, int id) {
+        ResultSet resultSet = null;
+        try {
+            resultSet = connection.getResult("select title from " + table + " where id =" + id);
+            while (resultSet.next()) {
+                return resultSet.getString("title");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private void buildUsersTable() {
+        ObservableList<UsersTableView> data = FXCollections.observableArrayList();
+        ObservableList<String> groups = FXCollections.observableArrayList();
+        ObservableList<String> companies = FXCollections.observableArrayList();
+
+        ResultSet resultSet1 = null;
+        ResultSet resultSet2 = null;
+        ResultSet resultSet3 = null;
+        ResultSet resultSet4 = null;
+        ResultSet resultSet5 = null;
+        ResultSet resultSet6 = null;
+
+        ArrayList<ArrayList> bigHash = new ArrayList<>();
+
+        try {
+            resultSet1 = connection.getResult("select id, group_id, company_id  from users");
+            while (resultSet1.next()) {
+                ArrayList<Integer> miniHash = new ArrayList<>();
+                miniHash.add(resultSet1.getInt("id"));
+                miniHash.add(resultSet1.getInt("group_id"));
+                miniHash.add(resultSet1.getInt("company_id"));
+                bigHash.add(miniHash);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            resultSet5 = connection.getResult("select * from companies");
+            while (resultSet5.next()) {
+                companies.add(resultSet5.getString("title"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        try {
+            resultSet6 = connection.getResult("select * from groups");
+            while (resultSet6.next()) {
+                groups.add(resultSet6.getString("title"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        for (ArrayList miniHash: bigHash) {
+            try {
+                resultSet4 = connection.getResult("select * from users where id =" + miniHash.get(0));
+                while (resultSet4.next()) {
+                    data.add(new UsersTableView(
+                            resultSet4.getInt("id"),
+                            resultSet4.getString("name"),
+                            resultSet4.getString("email"),
+                            resultSet4.getString("encrypted_password"),
+                            getTitleFromId("groups", (int)miniHash.get(1)),
+                            getTitleFromId("companies", (int)miniHash.get(2)),
+                            resultSet4.getString("position"),
+                            resultSet4.getString("phone")
+
+                    ));
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+/*
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            List response = session.createQuery("from Users ").list();
+            for (Iterator iterator = response.iterator(); iterator.hasNext();) {
+                Users u = (Users) iterator.next();
+                data.add(new UsersTableView(u.getId(), u.getName(), u.getEmail()));
+            }
+        } catch (HibernateException e) {
+        } finally {
+            session.close();
+        }
+*/
+
+        userIdTableColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        userNameTableColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        userNameTableColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        userNameTableColumn.setOnEditCommit(
+            new EventHandler<CellEditEvent<UsersTableView, String>>() {
+                @Override
+                public void handle(CellEditEvent<UsersTableView, String> t) {
+                    ((UsersTableView) t.getTableView().getItems().get(
+                            t.getTablePosition().getRow())
+                    ).setName(t.getNewValue());
+                    setNewUserValue("name", t.getNewValue(), usersTable.getFocusModel().getFocusedItem().getId());
+                }
+            }
+        );
+        userEmailTableColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
+        userEmailTableColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        userEmailTableColumn.setOnEditCommit(
+            new EventHandler<CellEditEvent<UsersTableView, String>>() {
+                @Override
+                public void handle(CellEditEvent<UsersTableView, String> t) {
+                    ((UsersTableView) t.getTableView().getItems().get(
+                            t.getTablePosition().getRow())
+                    ).setEmail(t.getNewValue());
+                    setNewUserValue("email", t.getNewValue(), usersTable.getFocusModel().getFocusedItem().getId());
+                }
+            }
+        );
+        userPasswordTableColumn.setCellValueFactory(new PropertyValueFactory<>("encrypted_password"));
+        userPasswordTableColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        userPasswordTableColumn.setOnEditCommit(
+            new EventHandler<CellEditEvent<UsersTableView, String>>() {
+                @Override
+                public void handle(CellEditEvent<UsersTableView, String> t) {
+                    ((UsersTableView) t.getTableView().getItems().get(
+                            t.getTablePosition().getRow())
+                    ).setEncryptedPassword(t.getNewValue());
+                    setNewUserPassword(t.getNewValue(), usersTable.getFocusModel().getFocusedItem().getId());
+                }
+            }
+        );
+        userGroupTableColumn.setCellValueFactory(new PropertyValueFactory<>("group"));
+        userGroupTableColumn.setCellFactory(ComboBoxTableCell.forTableColumn(groups));
+        userGroupTableColumn.setOnEditCommit(
+                new EventHandler<CellEditEvent<UsersTableView, String>>() {
+                    @Override
+                    public void handle(CellEditEvent<UsersTableView,String> t) {
+                        ((UsersTableView) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())
+                        ).setGroup(t.getNewValue());
+                        setNewUserGroup(t.getNewValue(), usersTable.getFocusModel().getFocusedItem().getId());
+                    };
+                }
+        );
+        userCompanyTableColumn.setCellValueFactory(new PropertyValueFactory<>("company"));
+        userCompanyTableColumn.setCellFactory(ComboBoxTableCell.forTableColumn(companies));
+        userCompanyTableColumn.setOnEditCommit(
+                new EventHandler<CellEditEvent<UsersTableView, String>>() {
+                    @Override
+                    public void handle(CellEditEvent<UsersTableView,String> t) {
+                        ((UsersTableView) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())
+                        ).setCompany(t.getNewValue());
+                        setNewUserCompany(t.getNewValue(), usersTable.getFocusModel().getFocusedItem().getId());
+                    };
+                }
+        );
+
+        userPositionTableColumn.setCellValueFactory(new PropertyValueFactory<>("position"));
+        userPositionTableColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        userPositionTableColumn.setOnEditCommit(
+            new EventHandler<CellEditEvent<UsersTableView, String>>() {
+                @Override
+                public void handle(CellEditEvent<UsersTableView, String> t) {
+                    ((UsersTableView) t.getTableView().getItems().get(
+                            t.getTablePosition().getRow())
+                    ).setPosition(t.getNewValue());
+                    setNewUserValue("position", t.getNewValue(), usersTable.getFocusModel().getFocusedItem().getId());
+                }
+            }
+        );
+        userPhoneTableColumn.setCellValueFactory(new PropertyValueFactory<>("phone"));
+        userPhoneTableColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        userPhoneTableColumn.setOnEditCommit(
+            new EventHandler<CellEditEvent<UsersTableView, String>>() {
+                @Override
+                public void handle(CellEditEvent<UsersTableView, String> t) {
+                    ((UsersTableView) t.getTableView().getItems().get(
+                            t.getTablePosition().getRow())
+                    ).setPhone(t.getNewValue());
+                    setNewUserValue("phone", t.getNewValue(), usersTable.getFocusModel().getFocusedItem().getId());
+                }
+            }
+        );
+        usersTableContextMenu = ContextMenuBuilder.create().items(
+                MenuItemBuilder.create().text("Добавить нового пользователя").onAction((ActionEvent arg0) -> {
+                    ContextBuilder.addNewUser();
+                    buildUsersTable();
+                }).build(),
+                MenuItemBuilder.create().text("Удалить пользователя").onAction((ActionEvent arg0) -> {
+                    ContextBuilder.deleteUser(usersTable.getFocusModel().getFocusedItem().getId());
+                    buildUsersTable();
+                }).build()
+        ).build();
+        usersTable.setContextMenu(usersTableContextMenu);
+        usersTable.setItems(data);
+    }
+    private void buildCompaniesTable() {
+        ObservableList<CompaniesTableView> data = FXCollections.observableArrayList();
+        ResultSet resultSet = null;
+        try {
+            resultSet = connection.getResult("select * from companies");
+            while (resultSet.next()) {
+                data.add(new CompaniesTableView(
+                        resultSet.getBoolean("dealer"),
+                        resultSet.getString("title"),
+                        resultSet.getString("address"),
+                        resultSet.getString("phone"),
+                        resultSet.getString("email"),
+                        resultSet.getString("site"),
+                        resultSet.getString("fax")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+/*
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            List response = session.createQuery("from Companies ").list();
+            for (Iterator iterator = response.iterator(); iterator.hasNext();) {
+                Companies c = (Companies) iterator.next();
+                data.add(new CompaniesTableView(c.getDealer(), c.getTitle(), c.getAddress(), c.getPhone(), c.getEmail(),
+                        c.getSite(), c.getFax()));
+            }
+        } catch (HibernateException e) {
+        } finally {
+            session.close();
+        }
+*/
+
+        companyDealerColumn.setCellValueFactory(new PropertyValueFactory<CompaniesTableView, Boolean>("dealer"));
+        companyDealerColumn.setCellFactory(CheckBoxTableCell.forTableColumn(companyDealerColumn));
+        // add listeners to boolean properties:
+        for (CompaniesTableView companiesTableView : data) {
+            companiesTableView.dealerProperty().addListener((obs, oldValue, newValue) ->{
+                setDealerCompanyValue(newValue, companiesTableView.getTitle());
+            });
+        }
+        companyTitleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
+        companyTitleColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        companyTitleColumn.setOnEditCommit(
+                new EventHandler<CellEditEvent<CompaniesTableView, String>>() {
+                    @Override
+                    public void handle(CellEditEvent<CompaniesTableView, String> t) {
+                        ((CompaniesTableView) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())
+                        ).setTitle(t.getNewValue());
+                        setNewCompanyValue("title", t.getNewValue(), companiesTable.getFocusModel().getFocusedItem().getTitle());
+                    }
+                }
+        );
+        companyPhoneColumn.setCellValueFactory(new PropertyValueFactory<>("phone"));
+        companyPhoneColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        companyPhoneColumn.setOnEditCommit(
+                new EventHandler<CellEditEvent<CompaniesTableView, String>>() {
+                    @Override
+                    public void handle(CellEditEvent<CompaniesTableView, String> t) {
+                        ((CompaniesTableView) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())
+                        ).setPhone(t.getNewValue());
+                        setNewCompanyValue("phone", t.getNewValue(), companiesTable.getFocusModel().getFocusedItem().getTitle());
+                    }
+                }
+        );
+        companyEmailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
+        companyEmailColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        companyEmailColumn.setOnEditCommit(
+                new EventHandler<CellEditEvent<CompaniesTableView, String>>() {
+                    @Override
+                    public void handle(CellEditEvent<CompaniesTableView, String> t) {
+                        ((CompaniesTableView) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())
+                        ).setEmail(t.getNewValue());
+                        setNewCompanyValue("email", t.getNewValue(), companiesTable.getFocusModel().getFocusedItem().getTitle());
+                    }
+                }
+        );
+        companySiteColumn.setCellValueFactory(new PropertyValueFactory<>("site"));
+        companySiteColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        companySiteColumn.setOnEditCommit(
+                new EventHandler<CellEditEvent<CompaniesTableView, String>>() {
+                    @Override
+                    public void handle(CellEditEvent<CompaniesTableView, String> t) {
+                        ((CompaniesTableView) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())
+                        ).setSite(t.getNewValue());
+                        setNewCompanyValue("site", t.getNewValue(), companiesTable.getFocusModel().getFocusedItem().getTitle());
+                    }
+                }
+        );
+        companyAddressColumn.setCellValueFactory(new PropertyValueFactory<>("address"));
+        companyAddressColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        companyAddressColumn.setOnEditCommit(
+                new EventHandler<CellEditEvent<CompaniesTableView, String>>() {
+                    @Override
+                    public void handle(CellEditEvent<CompaniesTableView, String> t) {
+                        ((CompaniesTableView) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())
+                        ).setAddress(t.getNewValue());
+                        setNewCompanyValue("address", t.getNewValue(), companiesTable.getFocusModel().getFocusedItem().getTitle());
+                    }
+                }
+        );
+        companyFaxColumn.setCellValueFactory(new PropertyValueFactory<>("fax"));
+        companyFaxColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        companyFaxColumn.setOnEditCommit(
+                new EventHandler<CellEditEvent<CompaniesTableView, String>>() {
+                    @Override
+                    public void handle(CellEditEvent<CompaniesTableView, String> t) {
+                        ((CompaniesTableView) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())
+                        ).setFax(t.getNewValue());
+                        setNewCompanyValue("fax", t.getNewValue(), companiesTable.getFocusModel().getFocusedItem().getTitle());
+                    }
+                }
+        );
+        companiesTableContextMenu = ContextMenuBuilder.create().items(
+                MenuItemBuilder.create().text("Добавить новую компанию").onAction((ActionEvent arg0) -> {
+                    ContextBuilder.addNewCompany();
+                    buildUsersTable();
+                    buildCompaniesTable();
+                }).build(),
+                MenuItemBuilder.create().text("Удалить компанию").onAction((ActionEvent arg0) -> {
+                    ContextBuilder.deleteCompany(companiesTable.getFocusModel().getFocusedItem().getTitle());
+                    buildUsersTable();
+                    buildCompaniesTable();
+                }).build()
+        ).build();
+        companiesTable.setContextMenu(companiesTableContextMenu);
+        companiesTable.setItems(data);
+    }
+    private void buildGroupsTable() {
+        ObservableList<GroupsTableView> data = FXCollections.observableArrayList();
+        ResultSet resultSet = null;
+        try {
+            resultSet = connection.getResult("select * from groups");
+            while (resultSet.next()) {
+                data.add(new GroupsTableView(
+                        resultSet.getString("title"),
+                        resultSet.getString("description")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+/*
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            List response = session.createQuery("from Groups ").list();
+            for (Iterator iterator = response.iterator(); iterator.hasNext();) {
+                Groups g = (Groups) iterator.next();
+                data.add(new GroupsTableView(g.getTitle(), g.getDescription()));
+            }
+        } catch (HibernateException e) {
+        } finally {
+            session.close();
+        }
+*/
+        groupTitleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
+
+        groupDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+        groupDescriptionColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        groupDescriptionColumn.setOnEditCommit(
+                new EventHandler<CellEditEvent<GroupsTableView, String>>() {
+                    @Override
+                    public void handle(CellEditEvent<GroupsTableView, String> t) {
+                        ((GroupsTableView) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())
+                        ).setDescription(t.getNewValue());
+                        setNewGroupValue("description", t.getNewValue(), groupsTable.getFocusModel().getFocusedItem().getTitle());
+                    }
+                }
+        );
+
+        groupsTableContextMenu = ContextMenuBuilder.create().items(
+                MenuItemBuilder.create().text("Добавить новую группу").onAction((ActionEvent arg0) -> {
+                    ContextBuilder.addNewGroup();
+                    buildUsersTable();
+                    buildGroupsTable();
+                }).build(),
+                MenuItemBuilder.create().text("Удалить группу").onAction((ActionEvent arg0) -> {
+                    ContextBuilder.deleteGroup(groupsTable.getFocusModel().getFocusedItem().getTitle());
+                    buildUsersTable();
+                    buildGroupsTable();
+                }).build()
+        ).build();
+        groupsTable.setContextMenu(groupsTableContextMenu);
+        groupsTable.setItems(data);
     }
     private void buildDatasheetFileTable(String selectedProduct) {
         ObservableList<DatasheetTableView> data = FXCollections.observableArrayList();
@@ -1170,6 +1555,57 @@ public class PCGUIController implements Initializable {
             }
             session.getTransaction().commit();
             session.close();
+        }
+    }
+    private void setNewUserValue(String fieldName, String newValue, int userId) {
+        try {
+            int resultSet = connection.getUpdateResult("update users set " + fieldName + "=\"" + newValue.replace("\"", "\\\"") + "\" where id =" + userId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    private void setNewUserGroup(String newValue, int userId) {
+        try {
+            int resultSet = connection.getUpdateResult("update users set group_id=(select id from groups where title =\"" + newValue.replace("\"", "\\\"") + "\") where id =" + userId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    private void setNewUserCompany(String newValue, int userId) {
+        try {
+            int resultSet = connection.getUpdateResult("update users set company_id=(select id from companies where title =\"" + newValue.replace("\"", "\\\"") + "\")where id =" + userId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    private void setNewUserPassword(String newPassword, int userId) {
+        String newEncryptedPassword = Password.hashPassword(newPassword);
+        try {
+            int resultSet = connection.getUpdateResult("update users set encrypted_password =\"" + newEncryptedPassword + "\" where id =" + userId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    private void setDealerCompanyValue(Boolean newValue, String companyTitle) {
+        Integer intNewValue = newValue ? 1 : 0;
+        try {
+            int resultSet = connection.getUpdateResult("update companies set dealer=" + newValue + " where title =\"" + companyTitle.replace("\"", "\\\"") + "\"");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    private void setNewCompanyValue(String fieldName, String newValue, String companyTitle) {
+        try {
+            int resultSet = connection.getUpdateResult("update companies set " + fieldName + "=\"" + newValue.replace("\"", "\\\"") + "\" where title =\"" + companyTitle.replace("\"", "\\\"") + "\"");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    private void setNewGroupValue(String fieldName, String newValue, String groupTitle) {
+        try {
+            int resultSet = connection.getUpdateResult("update groups set " + fieldName + "=\"" + newValue.replace("\"", "\\\"") + "\" where title =\"" + groupTitle.replace("\"", "\\\"") + "\"");
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
     // Вносит в БД новые значения, полученные при редактировании таблицы товаров.
@@ -3430,6 +3866,9 @@ public class PCGUIController implements Initializable {
     @ FXML private ContextMenu contentsListContextMenu;
     @ FXML private ContextMenu analogsTableContextMenu;
     @ FXML private ContextMenu seriesTableContextMenu;
+    @ FXML private ContextMenu usersTableContextMenu;
+    @ FXML private ContextMenu companiesTableContextMenu;
+    @ FXML private ContextMenu groupsTableContextMenu;
 
     // TableViews & TableColumns
     @FXML private TableView<ProductsTableView>            productsTable;
@@ -3487,6 +3926,29 @@ public class PCGUIController implements Initializable {
     @FXML private TableView<SeriesTableView>                seriesTable;
     @FXML private TableColumn<SeriesTableView, String>      serieTableColumn;
     @FXML private TableColumn<SeriesTableView, String>      serieVendorTableColumn;
+
+    @FXML private TableView<UsersTableView>                 usersTable;
+    @FXML private TableColumn<UsersTableView, Integer>      userIdTableColumn;
+    @FXML private TableColumn<UsersTableView, String>       userNameTableColumn;
+    @FXML private TableColumn<UsersTableView, String>       userEmailTableColumn;
+    @FXML private TableColumn<UsersTableView, String>       userPasswordTableColumn;
+    @FXML private TableColumn<UsersTableView, String>       userGroupTableColumn;
+    @FXML private TableColumn<UsersTableView, String>       userCompanyTableColumn;
+    @FXML private TableColumn<UsersTableView, String>       userPositionTableColumn;
+    @FXML private TableColumn<UsersTableView, String>       userPhoneTableColumn;
+
+    @FXML private TableView<CompaniesTableView>             companiesTable;
+    @FXML private TableColumn<CompaniesTableView, Boolean>  companyDealerColumn;
+    @FXML private TableColumn<CompaniesTableView, String>   companyTitleColumn;
+    @FXML private TableColumn<CompaniesTableView, String>   companyPhoneColumn;
+    @FXML private TableColumn<CompaniesTableView, String>   companyEmailColumn;
+    @FXML private TableColumn<CompaniesTableView, String>   companySiteColumn;
+    @FXML private TableColumn<CompaniesTableView, String>   companyAddressColumn;
+    @FXML private TableColumn<CompaniesTableView, String>   companyFaxColumn;
+
+    @FXML private TableView<GroupsTableView>                groupsTable;
+    @FXML private TableColumn<GroupsTableView, String>      groupTitleColumn;
+    @FXML private TableColumn<GroupsTableView, String>      groupDescriptionColumn;
 
     //TreeTableViews
     @FXML private TreeTableView<PropertiesTreeTableView>  propertiesTreeTable;

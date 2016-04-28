@@ -12,6 +12,7 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 import main.PCGUIController;
 import main.Product;
+import modalwindows.AlertWindow;
 import modalwindows.SetRatesWindow;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -25,6 +26,10 @@ import treetableviews.PropertiesTreeTableView;
 
 import javax.swing.text.*;
 import java.io.File;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -2057,5 +2062,100 @@ public class ContextBuilder {
             tx.commit();
         }
         session1.close();
+    }
+
+    public static void addNewUser() {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();
+        DBConnection connection = new DBConnection("local");
+        try {
+            int resultSet = connection.getUpdateResult(
+                    "insert into users (name, email, encrypted_password, sign_in_count, created_at, updated_at) values (\"новый пользователь\", \"test@test.ru\", \"\", 0, \"" +
+                            dateFormat.format(date) + "\", \"" +
+                            dateFormat.format(date) + "\")");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    public static void deleteUser(int id) {
+        DBConnection connection = new DBConnection("local");
+        try {
+            int resultSet = connection.getUpdateResult("delete from users where id =" + id);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void addNewCompany() {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();
+        DBConnection connection = new DBConnection("local");
+        try {
+            int resultSet = connection.getUpdateResult(
+                    "insert into companies (title, created_at, updated_at) values (\"новая компания\", \"" +
+                            dateFormat.format(date) + "\", \"" +
+                            dateFormat.format(date) + "\")");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    public static void deleteCompany(String title) {
+        DBConnection connection = new DBConnection("local");
+        int count = 0;
+        ResultSet resultSet = null;
+        try {
+            resultSet = connection.getResult("select * from users where company_id =(select id from companies where title =\"" + title.replace("\"", "\\\"") + "\")");
+            while (resultSet.next()) {
+                count ++;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        if( count == 0 ) {
+            try {
+                int resultSet1 = connection.getUpdateResult("delete from companies where title =\"" +title.replace("\"", "\\\"") + "\"");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        } else {
+            AlertWindow.showErrorDeleteRefs();
+        }
+    }
+
+    public static void addNewGroup() {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();
+        DBConnection connection = new DBConnection("local");
+        try {
+            int resultSet = connection.getUpdateResult(
+                    "insert into groups (title, created_at, updated_at) values (\"новая группа\", \"" +
+                            dateFormat.format(date) + "\", \"" +
+                            dateFormat.format(date) + "\")");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    public static void deleteGroup(String title) {
+        DBConnection connection = new DBConnection("local");
+        int count = 0;
+        ResultSet resultSet = null;
+        try {
+            resultSet = connection.getResult("select * from users where group_id =(select id from groups where title =\"" + title.replace("\"", "\\\"") + "\")");
+            while (resultSet.next()) {
+                count ++;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        if( count == 0 ) {
+            try {
+                int resultSet1 = connection.getUpdateResult("delete from groups where title =\"" +title.replace("\"", "\\\"") + "\"");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        } else {
+            AlertWindow.showErrorDeleteRefs();
+        }
+
     }
 }

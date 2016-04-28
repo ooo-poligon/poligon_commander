@@ -26,7 +26,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
- * @author kataev
+ * @author Igor Klekotnev
  */
 @Entity
 @Table(name = "vendors")

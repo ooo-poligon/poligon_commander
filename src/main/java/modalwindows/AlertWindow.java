@@ -65,6 +65,11 @@ public class AlertWindow {
         alert.setContentText("Ошибка соединения с базой данных.\nРекомендуется перезапустить приложение.");
         alert.show();
     }
+    public static void showErrorDeleteRefs() {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setContentText("Нельзя удалить эту запись, пока на неё ссылаются другие записи.");
+        alert.show();
+    }
     public static void functionNotReady() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Внимание!");

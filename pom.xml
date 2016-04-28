@@ -4,7 +4,7 @@
 
     <groupId>info.poligon</groupId>
     <artifactId>PoligonCommander</artifactId>
-    <version>1.3</version>
+    <version>1.4</version>
     <packaging>jar</packaging>
 
     <name>PoligonCommander</name>
@@ -146,6 +146,11 @@
         </plugins>
     </build>
     <dependencies>
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.3m</version>
+        </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>

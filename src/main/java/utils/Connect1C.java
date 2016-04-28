@@ -8,7 +8,7 @@ import com.jacob.com.Variant;
  * Created by Igor Klekotnev on 14.01.2016.
  */
 public class Connect1C {
-    /*
+/*
     ActiveXComponent v8App = new ActiveXComponent(prop.getProperty("v8.Application"));
     String conString = "File=Path;Usr=Admin;Pwd=Admin";
     Variant connected = Dispatch.call(v8, "Connect", conString);
@@ -24,5 +24,5 @@ public class Connect1C {
             Dispatch.get(select, "Ref").getDispatch();
         }
     }
-    */
+*/
 }

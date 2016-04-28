@@ -1533,6 +1533,77 @@
                            </children></AnchorPane>
                     </content>
                   </Tab>
+                  <Tab text="Пользователи">
+                    <content>
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                           <children>
+                              <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <children>
+                                    <AnchorPane VBox.vgrow="ALWAYS">
+                                       <children>
+                                          <TableView fx:id="usersTable" editable="true" tableMenuButtonVisible="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                            <columns>
+                                                <TableColumn fx:id="userIdTableColumn" prefWidth="75.0" text="id" />
+                                              <TableColumn fx:id="userNameTableColumn" prefWidth="75.0" text="ФИО" />
+                                              <TableColumn fx:id="userEmailTableColumn" prefWidth="75.0" text="Email" />
+                                                <TableColumn fx:id="userPasswordTableColumn" prefWidth="75.0" text="Пароль" />
+                                                <TableColumn fx:id="userGroupTableColumn" prefWidth="75.0" text="Группа" />
+                                                <TableColumn fx:id="userCompanyTableColumn" prefWidth="75.0" text="Компания" />
+                                                <TableColumn fx:id="userPositionTableColumn" prefWidth="75.0" text="Должность" />
+                                                <TableColumn fx:id="userPhoneTableColumn" prefWidth="75.0" text="Телефон" />
+                                            </columns>
+                                             <columnResizePolicy>
+                                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                             </columnResizePolicy>
+                                             <contextMenu>
+                                                <ContextMenu fx:id="usersTableContextMenu" />
+                                             </contextMenu>
+                                          </TableView>
+                                       </children>
+                                    </AnchorPane>
+                                    <AnchorPane prefHeight="200.0" VBox.vgrow="ALWAYS">
+                                       <children>
+                                          <TableView fx:id="companiesTable" editable="true" tableMenuButtonVisible="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                            <columns>
+                                                <TableColumn fx:id="companyDealerColumn" maxWidth="60.0" minWidth="60.0" prefWidth="60.0" resizable="false" text="Диллер" />
+                                              <TableColumn fx:id="companyTitleColumn" prefWidth="304.0" text="Название" />
+                                              <TableColumn fx:id="companyPhoneColumn" prefWidth="75.0" text="Телефон" />
+                                                <TableColumn fx:id="companyEmailColumn" prefWidth="75.0" text="Email" />
+                                                <TableColumn fx:id="companySiteColumn" prefWidth="75.0" text="Сайт" />
+                                                <TableColumn fx:id="companyAddressColumn" prefWidth="75.0" text="Адрес" />
+                                                <TableColumn fx:id="companyFaxColumn" prefWidth="75.0" text="Факс" />
+                                            </columns>
+                                             <columnResizePolicy>
+                                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                             </columnResizePolicy>
+                                             <contextMenu>
+                                                <ContextMenu fx:id="companiesTableContextMenu" />
+                                             </contextMenu>
+                                          </TableView>
+                                       </children>
+                                    </AnchorPane>
+                                    <AnchorPane prefHeight="150.0">
+                                       <children>
+                                          <TableView fx:id="groupsTable" editable="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                            <columns>
+                                              <TableColumn fx:id="groupTitleColumn" maxWidth="200.0" minWidth="200.0" prefWidth="200.0" resizable="false" text="Группа пользователей" />
+                                              <TableColumn fx:id="groupDescriptionColumn" prefWidth="75.0" text="Описание" />
+                                            </columns>
+                                             <columnResizePolicy>
+                                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                             </columnResizePolicy>
+                                             <contextMenu>
+                                                <ContextMenu fx:id="groupsTableContextMenu" />
+                                             </contextMenu>
+                                          </TableView>
+                                       </children>
+                                    </AnchorPane>
+                                 </children>
+                              </VBox>
+                           </children>
+                        </AnchorPane>
+                    </content>
+                  </Tab>
               </tabs>
             </TabPane>
          </center>
