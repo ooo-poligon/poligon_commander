@@ -155,8 +155,8 @@ public class XLSHandler {
                     excelSheet.addCell(product_kind_id);
                     Label  vendor             = new Label (13, i, PCGUIController.allProductsList.get(i).getVendor());
                     excelSheet.addCell(vendor);
-                    Number plugin_owner_id    = new Number(14, i, PCGUIController.allProductsList.get(i).getPluginOwnerId());
-                    excelSheet.addCell(plugin_owner_id);
+                    Number currency_id    = new Number(14, i, PCGUIController.allProductsList.get(i).getCurrencyId());
+                    excelSheet.addCell(currency_id);
                     Number accessory_owner_id = new Number(15, i, PCGUIController.allProductsList.get(i).getSpecial());
                     excelSheet.addCell(accessory_owner_id);
                     Number rate               = new Number(16, i, PCGUIController.allProductsList.get(i).getRate());

@@ -18,12 +18,13 @@ public class Product {
     private String serie;
     private int productKindId;
     private String vendor;
-    private int pluginOwnerId;
+    private int currencyId;
     private double special;
     private double rate;
     private double discount1;
     private double discount2;
     private double discount3;
+    private double rubRetail;
 
     public Product(String title) {
         this.title = title;
@@ -32,8 +33,8 @@ public class Product {
     public Product(int categoryId, String title, String description, String anons,
                    String article, int available, String deliveryTime, String ean,
                    int outdated, double price, String serie, int productKindId,
-                   String vendor, double rate, double discount1, double discount2,
-                   double discount3) {
+                   String vendor, int currencyId, double rate, double discount1,
+                   double discount2, double discount3, double rubRetail) {
         this.id = null;
         this.categoryId = categoryId;
         this.title = title;
@@ -48,18 +49,19 @@ public class Product {
         this.serie = serie;
         this.productKindId = productKindId;
         this.vendor = vendor;
-        this.pluginOwnerId = 0;
+        this.currencyId = currencyId;
         this.special = 1;
         this.rate = rate;
         this.discount1 = discount1;
         this.discount2 = discount2;
         this.discount3 = discount3;
+        this.rubRetail = rubRetail;
     }
 
     public Product(Integer id, int categoryId, String title, String description, String anons,
                    String article, int available, String deliveryTime, String ean, int outdated, double price,
-                   String serie, int productKindId, String vendor, int pluginOwnerId, double special,
-                   double rate, double discount1, double discount2, double discount3) {
+                   String serie, int productKindId, String vendor, int currencyId, double special,
+                   double rate, double discount1, double discount2, double discount3, double rubRetail) {
         this.id = id;
         this.categoryId = categoryId;
         this.title = title;
@@ -74,12 +76,13 @@ public class Product {
         this.serie = serie;
         this.productKindId = productKindId;
         this.vendor = vendor;
-        this.pluginOwnerId = pluginOwnerId;
+        this.currencyId = currencyId;
         this.special = special;
         this.rate = rate;
         this.discount1 = discount1;
         this.discount2 = discount2;
         this.discount3 = discount3;
+        this.rubRetail = rubRetail;
     }
 
     public Integer getId() {
@@ -194,12 +197,12 @@ public class Product {
         this.vendor = vendor;
     }
 
-    public int getPluginOwnerId() {
-        return pluginOwnerId;
+    public int getCurrencyId() {
+        return currencyId;
     }
 
-    public void setPluginOwnerId(int pluginOwnerId) {
-        this.pluginOwnerId = pluginOwnerId;
+    public void setCurrencyId(int currencyId) {
+        this.currencyId = currencyId;
     }
 
     public double getSpecial() {
@@ -240,5 +243,13 @@ public class Product {
 
     public void setDiscount3(double discount3) {
         this.discount3 = discount3;
+    }
+
+    public double getRubRetail() {
+        return rubRetail;
+    }
+
+    public void setRubRetail(double rubRetail) {
+        this.rubRetail = rubRetail;
     }
 }

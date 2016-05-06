@@ -95,6 +95,17 @@ public class Products implements Serializable {
     private double discount2;
     @Column(name = "discount3")
     private double discount3;
+    @Column(name = "rub_retail")
+    private double rubRetail;
+
+    public double getRubRetail() {
+        return rubRetail;
+    }
+
+    public void setRubRetail(double rubRetail) {
+        this.rubRetail = rubRetail;
+    }
+
     @OneToMany(mappedBy = "productId")
     private Collection<Quantity> quantityCollection;
     @JoinColumn(name = "serie", referencedColumnName = "title")
@@ -110,6 +121,18 @@ public class Products implements Serializable {
     @JoinColumn(name = "vendor", referencedColumnName = "title")
     @ManyToOne(optional = true)
     private Vendors vendor;
+
+    @JoinColumn(name = "currency_id", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private Currencies currencyId;
+
+    public Currencies getCurrencyId() {
+        return currencyId;
+    }
+
+    public void setCurrencyId(Currencies currencyId) {
+        this.currencyId = currencyId;
+    }
 
     @OneToMany(mappedBy = "prototypeId")
     private Collection<Analogs> analogsCollection;

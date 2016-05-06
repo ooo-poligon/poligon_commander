@@ -60,6 +60,13 @@ public class AlertWindow {
                 "Все остальные цены являются расчётными и редактированию не подлежат.");
         alert.showAndWait();
     }
+    public static void illegalActionR() {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Внимание!");
+        alert.setHeaderText("Недопустимое действие!");
+        alert.setContentText("В этой таблице цен можно устанавливать только закупочную и розничную цену.");
+        alert.showAndWait();
+    }
     public static void showError() {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setContentText("Ошибка соединения с базой данных.\nРекомендуется перезапустить приложение.");
@@ -211,12 +218,15 @@ public class AlertWindow {
     }
     public static Optional<Product> newProductDialog() {
         ArrayList<String> allProductTypes = UtilPack.getAllProductTypes();
+        ArrayList<String> allCurrencies = UtilPack.getAllCurrencies();
         ArrayList<String> allVendors = UtilPack.getAllVendors();
         ArrayList<Series> allSeries = UtilPack.getAllSeries();
         ObservableList<String> productTypesTitles = FXCollections.observableArrayList();
+        ObservableList<String> currenciesTitles = FXCollections.observableArrayList();
         ObservableList<String> vendorsTitles = FXCollections.observableArrayList();
         ObservableList<String> seriesTitles =  FXCollections.observableArrayList();
         productTypesTitles.addAll(allProductTypes);
+        currenciesTitles.addAll(allCurrencies);
         vendorsTitles.addAll(allVendors);
         allSeries.stream().forEach(serie -> {
             seriesTitles.add(serie.getTitle());
@@ -241,7 +251,7 @@ public class AlertWindow {
         TextField announceTextField     = new TextField("");
         Label descriptionLabel          = new Label("Краткое описание:  ");
         TextArea descriptionTextArea    = new TextArea("");
-        Label inputPriceLabel           = new Label("Закупочная цена: ");
+        Label inputPriceLabel           = new Label("Закупочная цена: (в валюте производителя)");
         TextField inputPriceTextField   = new TextField("0.0");
         Label rateLabel                 = new Label("Коэффициент наценки: ");
         TextField rateTextField         = new TextField("0.0");
@@ -249,6 +259,8 @@ public class AlertWindow {
         TextField discount1TextField    = new TextField("0.0");
         TextField discount2TextField    = new TextField("0.0");
         TextField discount3TextField    = new TextField("0.0");
+        Label rubRetailLabel            = new Label("Цена в рублях для российских производителей.");
+        TextField rubRetailTextField    = new TextField("0.0");
         Label availableLabel            = new Label("Доступен\nдля заказа ");
         CheckBox availableCheckBox      = new CheckBox();
         Label outdatedLabel             = new Label("Снят\nс производства ");
@@ -256,8 +268,10 @@ public class AlertWindow {
         Label productTypeLabel          = new Label("Тип продукта: ");
         ComboBox<String> productTypeComboBox = new ComboBox<>();
         Label vendorLabel               = new Label("Производитель: ");
-        Label categoryLabel               = new Label("Выберите категорию: ");
+        Label currencyLabel             = new Label("Валюта: ");
+        Label categoryLabel             = new Label("Выберите категорию: ");
         ComboBox<String> vendorComboBox = new ComboBox<>();
+        ComboBox<String> currencyComboBox = new ComboBox<>();
         StackPane stackPane = new StackPane();
         TreeView<String> treeView = new TreeView<>();
         PCGUIController pcguiController = new PCGUIController();
@@ -265,11 +279,14 @@ public class AlertWindow {
 
         productTypeComboBox.setItems(productTypesTitles);
         productTypeComboBox.setEditable(true);
+        currencyComboBox.setItems(currenciesTitles);
+        currencyComboBox.setEditable(true);
         vendorComboBox.setItems(vendorsTitles);
         vendorComboBox.setEditable(true);
         seriesComboBox.setItems(seriesTitles);
         seriesComboBox.setEditable(true);
         AutoCompleteComboBoxListener autoCompleteProductTypeComboBox = new AutoCompleteComboBoxListener(productTypeComboBox);
+        AutoCompleteComboBoxListener autoCompleteCurrencyComboBox = new AutoCompleteComboBoxListener(currencyComboBox);
         AutoCompleteComboBoxListener autoCompleteVendorComboBox = new AutoCompleteComboBoxListener(vendorComboBox);
         AutoCompleteComboBoxListener autoCompleteSerieComboBox = new AutoCompleteComboBoxListener(seriesComboBox);
 
@@ -297,6 +314,8 @@ public class AlertWindow {
 
         grid.add(deliveryTimeLabel, 1, 5);
         grid.add(deliveryTimeTextField, 2, 5);
+        grid.add(currencyLabel, 3, 5);
+        grid.add(currencyComboBox, 4, 5);
 
         grid.add(announceLabel, 1, 6);
         grid.add(announceTextField, 2, 5, 3, 5);
@@ -311,11 +330,14 @@ public class AlertWindow {
         grid.add(discount2TextField, 3, 10);
         grid.add(discount3TextField, 4, 10);
 
-        grid.add(descriptionLabel, 1, 11);
+        grid.add(rubRetailLabel, 1, 11);
+        grid.add(rubRetailTextField, 2, 11);
 
-        grid.add(descriptionTextArea, 1, 12, 4, 12);
+        grid.add(descriptionLabel, 1, 13);
+        grid.add(descriptionTextArea, 1, 13, 4, 13);
+
         grid.add(categoryLabel, 5, 1);
-        grid.add(stackPane, 5, 2, 6, 22);
+        grid.add(stackPane, 5, 2, 6, 24);
 
         grid.setHgap(10);
         grid.setVgap(10);
@@ -355,10 +377,12 @@ public class AlertWindow {
                     seriesComboBox.getValue(),
                     UtilPack.getProductKindIdFromTitle(productTypeComboBox.getValue()),
                     vendorComboBox.getValue(),
+                    UtilPack.getCurrencyIdFromTitle(currencyComboBox.getValue()),
                     Double.parseDouble(rateTextField.getText()),
                     Double.parseDouble(discount1TextField.getText()),
                     Double.parseDouble(discount2TextField.getText()),
-                    Double.parseDouble(discount3TextField.getText())
+                    Double.parseDouble(discount3TextField.getText()),
+                    Double.parseDouble(rubRetailTextField.getText())
                 );
             }
             return null;

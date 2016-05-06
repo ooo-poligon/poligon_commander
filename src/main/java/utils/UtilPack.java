@@ -84,6 +84,13 @@ public class UtilPack {
         });
         return title[0];
     }
+    public static Integer getProductCurrency (String title, ArrayList<Product> allProductsList) {
+        final Integer[] id = {0};
+        allProductsList.stream().forEach((product) -> {
+            if(product.getTitle().equals(title)) id[0] = product.getCurrencyId();
+        });
+        return id[0];
+    }
     public static int getProductKindIdFromTitle (String title) {
         int id = 0;
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -95,7 +102,18 @@ public class UtilPack {
             id = productKind.getId();
         }
         return id;
-
+    }
+    public static int getCurrencyIdFromTitle (String title) {
+        int id = 0;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Query query = session.createQuery("from Currencies where title = :title");
+        query.setParameter("title", title);
+        List result = query.list();
+        for (Iterator iterator = result.iterator(); iterator.hasNext();) {
+            Currencies currency = (Currencies) iterator.next();
+            id = currency.getId();
+        }
+        return id;
     }
     public static String normalize(String string) {
         //проверить корректность работы "normalize" позже
@@ -129,6 +147,17 @@ public class UtilPack {
         }
         session.close();
         return productTypes;
+    }
+    public static ArrayList<String> getAllCurrencies() {
+        ArrayList<String> currencies = new ArrayList<>();
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List result = session.createQuery("from Currencies ").list();
+        for(Iterator iterator = result.iterator(); iterator.hasNext();) {
+            Currencies currency = (Currencies) iterator.next();
+            currencies.add(currency.getTitle());
+        }
+        session.close();
+        return currencies;
     }
     public static ArrayList<String> getAllVendors() {
         ArrayList<String> vendors = new ArrayList<>();
