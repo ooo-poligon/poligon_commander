@@ -51,7 +51,7 @@ public class ProductImage {
         }
         List pictureList = session.createQuery("From Files where ownerId=" + ownerId).list();
         if (pictureList.isEmpty()) {
-            Files pictureFile = new Files(file.getName(), file.getPath(), "Это изображение для " + selectedProduct, (new FileTypes(1)), (new Products(ownerId)));
+            Files pictureFile = new Files(file.getName(), file.getPath().replace("C:", "c:"), "Это изображение для " + selectedProduct, (new FileTypes(1)), (new Products(ownerId)));
             session.saveOrUpdate(pictureFile);
         } else {
             for (Iterator iterator = pictureList.iterator(); iterator.hasNext();) {

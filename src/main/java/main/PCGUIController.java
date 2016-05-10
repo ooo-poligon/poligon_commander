@@ -47,10 +47,7 @@ import modalwindows.SetRatesWindow;
 import org.hibernate.*;
 import org.hibernate.dialect.SybaseDialect;
 import org.hibernate.exception.JDBCConnectionException;
-import settings.LocalDBSettings;
-import settings.PriceCalcSettings;
-import settings.SiteDBSettings;
-import settings.SiteUrlSettings;
+import settings.*;
 import tableviews.*;
 import treetableviews.PropertiesTreeTableView;
 import treeviews.CategoriesTreeView;
@@ -94,6 +91,7 @@ public class PCGUIController implements Initializable {
         LocalDBSettings localDBSettings = new LocalDBSettings();
         PriceCalcSettings priceCalcSettings = new PriceCalcSettings();
         SiteUrlSettings siteUrlSettings = new SiteUrlSettings();
+        SiteSettings siteSettings = new SiteSettings();
         try {siteUrlTextField.setText(siteUrlSettings.loadSetting());
         } catch (NullPointerException ne) {siteUrlTextField.setText("");}
         addCBRTextField.setText(priceCalcSettings.loadSetting("addCBR"));
@@ -107,6 +105,7 @@ public class PCGUIController implements Initializable {
         titleLocalDB.setText(localDBSettings.loadSetting("titleLocalDB"));
         userLocalDB.setText(localDBSettings.loadSetting("userLocalDB"));
         passwordLocalDB.setText(localDBSettings.loadSetting("passwordLocalDB"));
+        siteOrdersReceiverTextField.setText(siteSettings.loadSetting("siteOrdersReceiver"));
     }
     @FXML private void resetProgram() throws SQLException {
         if (loadProgramCounter != 0) {
@@ -3931,6 +3930,10 @@ public class PCGUIController implements Initializable {
         siteUrlSettings.saveSetting(siteUrlTextField.getText());
         tabBrowserWebView.getEngine().load(siteUrlTextField.getText());
     }
+    @FXML private void saveSiteOrdersReceiver() {
+        SiteSettings siteSettings = new SiteSettings();
+        siteSettings.saveSetting("siteOrdersReceiver", siteOrdersReceiverTextField.getText());
+    }
 
     // Panes
     @FXML private AnchorPane anchorPane;
@@ -4136,6 +4139,7 @@ public class PCGUIController implements Initializable {
     @FXML private TextField contentTitleTextField;
     @FXML private TitledPane categoriesTitledPane;
     @FXML private TextField exportFileNameTextField;
+    @FXML private TextField siteOrdersReceiverTextField;
 
     // CheckBoxes
     @FXML private CheckBox treeViewHandlerMode;
