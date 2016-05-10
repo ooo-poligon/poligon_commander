@@ -42,12 +42,14 @@ import javafx.stage.Window;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javafx.util.converter.IntegerStringConverter;
+import jdk.nashorn.internal.runtime.regexp.RegExp;
 import modalwindows.AlertWindow;
 import modalwindows.SetRatesWindow;
 import org.hibernate.*;
 import org.hibernate.dialect.SybaseDialect;
 import org.hibernate.exception.JDBCConnectionException;
 import settings.*;
+import sun.misc.Regexp;
 import tableviews.*;
 import treetableviews.PropertiesTreeTableView;
 import treeviews.CategoriesTreeView;
@@ -1179,6 +1181,8 @@ public class PCGUIController implements Initializable {
                 MenuItemBuilder.create().text("Изменить даташит pdf-файл").onAction((ActionEvent arg0) -> {
                     try {
                         setDatasheetFile();
+                        getAllFilesOfProgramList();
+                        buildDatasheetFileTable(selectedProduct);
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
@@ -2321,6 +2325,7 @@ public class PCGUIController implements Initializable {
         }
     }
     private void setDatasheetFile() throws SQLException {
+        fileChooser.setInitialDirectory(new File(fileChooserDirectoryCash));
         File file = fileChooser.showOpenDialog(anchorPane.getScene().getWindow());
         if (file != null) {
             Session session = HibernateUtil.getSessionFactory().openSession();
@@ -2328,7 +2333,7 @@ public class PCGUIController implements Initializable {
             List pdfList = session.createQuery("From Files where ownerId=" +
                     UtilPack.getProductIdFromTitle(selectedProduct, allProductsList) + "and fileTypeId=2").list();
             if (pdfList.isEmpty()) {
-                Files pdfFile = new Files(file.getName(), file.getPath(), "Это даташит для " +
+                Files pdfFile = new Files(file.getName(), file.getPath().replace("C:", "c:"), "Это даташит для " +
                         selectedProduct, (new FileTypes(2)), (new Products(UtilPack.getProductIdFromTitle(selectedProduct, allProductsList))));
                 session.saveOrUpdate(pdfFile);
                 datasheetFileTable.refresh();
@@ -2337,13 +2342,15 @@ public class PCGUIController implements Initializable {
                     Files pdf = (Files) iterator.next();
                     if ((!pdf.getName().equals(file.getName())) || (!pdf.getPath().equals(file.getPath()))) {
                         pdf.setName(file.getName());
-                        pdf.setPath(file.getPath());
+                        pdf.setPath(file.getPath().replace("C:", "c:"));
                         pdf.setDescription("Это даташит для " + selectedProduct);
                         session.saveOrUpdate(pdf);
                         datasheetFileTable.refresh();
                     }
                 }
             }
+            fileChooserDirectoryCash = makeCorrectDirectoryPath(file.getPath());
+            System.out.println("fileChooserDirectoryCash is " + fileChooserDirectoryCash);
             tx.commit();
             session.close();
         }
@@ -2353,6 +2360,18 @@ public class PCGUIController implements Initializable {
         gridPanePDF.getChildren().add(deliveryTable);
         productsTable.setFocusTraversable(true);
         datasheetFileTable.refresh();
+    }
+    private String makeCorrectDirectoryPath(String fullPath) {
+        String listString = "";
+        ArrayList<String> pathParts = new ArrayList<>();
+        for (int i = 0; i < fullPath.split("\\\\").length; i++) {
+            pathParts.add(fullPath.split("\\\\")[i]);
+        }
+        pathParts.remove(pathParts.size() - 1);
+        for (String s : pathParts) {
+            listString += s + "\\";
+        }
+        return listString;
     }
     @FXML private void handleCategoryTreeMouseClicked(MouseEvent event) {
         startProgressBar(event);
@@ -4179,6 +4198,7 @@ public class PCGUIController implements Initializable {
     String newVendorDescription;
     String newVendorCurrency;
     String newVendorAddress;
+    String fileChooserDirectoryCash = "C:\\";
 
     private final String noImageFile = "C:\\Users\\gnato\\Desktop\\Igor\\progs\\java_progs\\PoligonCommanderJ\\src\\main\\resources\\images\\noImage.gif";
     String selectedCategory = "";

@@ -58,7 +58,7 @@ public class ProductImage {
                 Files pic = (Files) iterator.next();
                 if ((pic.getFileTypeId().getId() == 1) && ((!pic.getName().equals(file.getName())) || (!pic.getPath().equals(file.getPath())))) {
                     pic.setName(file.getName());
-                    pic.setPath(file.getPath());
+                    pic.setPath(file.getPath().replace("C:", "c:"));
                     pic.setDescription("Это изображение для " + selectedProduct);
                     session.saveOrUpdate(pic);
                 }
