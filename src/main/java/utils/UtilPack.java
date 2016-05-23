@@ -212,7 +212,6 @@ public class UtilPack {
         cleanHtml = cleanHtml.replace(cutString2, "");
         return cleanHtml;
     }
-
     public static void checkItemsSelected(CheckBoxTreeItem rootItem){
         for(Object item : rootItem.getChildren()){
 

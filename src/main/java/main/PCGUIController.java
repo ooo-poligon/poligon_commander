@@ -3855,6 +3855,16 @@ public class PCGUIController implements Initializable {
         String targetLocationPath = fileForExportPathLabel.getText() + "\\" + exportFileNameTextField.getText();
         XLSHandler.exportDBTableTo(dbTable, targetLocationPath);
     }
+    @FXML private void chooseDirectoryForExportPrices() {
+        fileXLSExport = directoryForExportPrices.showDialog(anchorPane.getScene().getWindow());
+        targetDir = fileXLSExport.getPath();
+        if (fileXLSExport != null) {
+            dirForExportPricesPathLabel.setText(targetDir);
+        }
+    }
+    @FXML private void startExportPrices() {
+        XLSHandler.exportDBPricesTo(allProductsList, targetDir);
+    }
     @FXML private void getHeadersRowNumber(KeyEvent e) {
         if(e.getCode().toString().equals("ENTER")) {
             ObservableList<String> data = FXCollections.observableArrayList();
@@ -3961,8 +3971,8 @@ public class PCGUIController implements Initializable {
     @FXML private StackPane  propertiesStackPane;
     @FXML private GridPane   gridPane;
     @FXML private GridPane   gridPanePDF;
-    @FXML private GridPane productTabGridPaneImageView;
-    @FXML private GridPane functionGridPaneImageView;
+    @FXML private GridPane   productTabGridPaneImageView;
+    @FXML private GridPane   functionGridPaneImageView;
     StackPane stackPaneModal = new StackPane();
 
     @FXML private HTMLEditor htmlEditor;
@@ -4097,7 +4107,9 @@ public class PCGUIController implements Initializable {
     //@FXML Button testButton = new Button();
     @FXML private Button resetButton;
     @FXML private Button chooseFileForExportButton;
+    @FXML private Button chooseDirForExportPricesButton;
     @FXML private Button startExportButton;
+    @FXML private Button startExportPricesButton;
 
     // Labels
     @FXML private Label productTabTitle;
@@ -4106,6 +4118,7 @@ public class PCGUIController implements Initializable {
     @FXML private Label courseDateLabel;
     @FXML private Label productTabKind;
     @FXML private Label fileForExportPathLabel;
+    @FXML private Label dirForExportPricesPathLabel;
 
     // ProgressBars
     @FXML private ProgressBar progressBar;
@@ -4168,6 +4181,7 @@ public class PCGUIController implements Initializable {
     final   FileChooser fileChooser = new FileChooser();
     File fileXLSExport;
     final DirectoryChooser directoryForExport = new DirectoryChooser();
+    final DirectoryChooser directoryForExportPrices = new DirectoryChooser();
 
     // Lists
     ArrayList<ArrayList<String>> allImportXLSContent = new ArrayList<>(120);
@@ -4199,6 +4213,7 @@ public class PCGUIController implements Initializable {
     String newVendorCurrency;
     String newVendorAddress;
     String fileChooserDirectoryCash = "C:\\";
+    String targetDir;
 
     private final String noImageFile = "C:\\Users\\gnato\\Desktop\\Igor\\progs\\java_progs\\PoligonCommanderJ\\src\\main\\resources\\images\\noImage.gif";
     String selectedCategory = "";

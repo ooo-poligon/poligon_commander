@@ -11,6 +11,8 @@ package utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -21,6 +23,7 @@ import java.util.Locale;
 import entities.FileTypes;
 import entities.Files;
 import entities.Products;
+import entities.Vendors;
 import javafx.scene.control.Alert;
 import jxl.Cell;
 import jxl.Sheet;
@@ -41,6 +44,7 @@ import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
 import jxl.write.biff.RowsExceededException;
 import main.PCGUIController;
+import main.Product;
 import modalwindows.AlertWindow;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -180,6 +184,82 @@ public class XLSHandler {
             }
         } catch (IOException e) {} catch (WriteException e) {}
     }
+    public static void exportDBPricesTo(ArrayList<Product> allProductsList, String targetDir) {
+        ArrayList<String> vendors_list = new ArrayList<>();
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List result = session.createQuery("From Vendors").list();
+        for(Iterator iterator = result.iterator(); iterator.hasNext();) {
+            Vendors vendor = (Vendors) iterator.next();
+            if ((!vendor.getTitle().equals("не указан")) && (!vendor.getTitle().equals("ПОЛИГОН"))) {
+               vendors_list.add(vendor.getTitle());
+            }
+        }
+        session.close();
+        for(String vendor: vendors_list) {
+            String targetPath = targetDir + "\\" + vendor + ".xls";
+            File file = new File(targetPath);
+            WorkbookSettings wbSettings = new WorkbookSettings();
+            wbSettings.setLocale(new Locale("ru", "RU"));
+            WritableWorkbook workbook = null;
+            try {
+                workbook = Workbook.createWorkbook(file, wbSettings);
+                workbook.createSheet("Prices for " + vendor, 0);
+                WritableSheet excelSheet = workbook.getSheet(0);
+
+                Label  caption1 = new Label ( 0, 0, "Название"); excelSheet.addCell(caption1);
+                Label  caption2 = new Label ( 1, 0, "Базовая цена"); excelSheet.addCell(caption2);
+                Label  caption3 = new Label ( 2, 0, "10+"); excelSheet.addCell(caption3);
+                Label  caption4 = new Label ( 3, 0, "Опт"); excelSheet.addCell(caption4);
+                Label  caption5 = new Label ( 4, 0, "Дилер"); excelSheet.addCell(caption5);
+                int j = 1;
+                // iteration begins from 1 because row with number 0 occupies captions row, made just before
+                for (int i = 1; i < allProductsList.size(); i++) {
+                    if (allProductsList.get(i).getVendor().equals(vendor)) {
+                        Label  title = new Label ( 0, j, allProductsList.get(i).getTitle());
+                        excelSheet.addCell(title);
+
+
+
+                        Double retail_price = allProductsList.get(i).getPrice() * allProductsList.get(i).getRate();
+                        Double discount_ten_plus = retail_price - (retail_price / 100) * allProductsList.get(i).getDiscount1();
+                        Double discount_opt = retail_price - (retail_price / 100) * allProductsList.get(i).getDiscount2();
+                        Double discount_dealer = retail_price - (retail_price / 100) * allProductsList.get(i).getDiscount3();
+                        Number price = new Number( 1, j, round2(retail_price));
+                        excelSheet.addCell(price);
+                        if (allProductsList.get(i).getSpecial() != 0) {
+                            retail_price = retail_price - (retail_price / 100) * allProductsList.get(i).getSpecial();
+                            price = new Number( 1, j, round2(retail_price));
+                            excelSheet.addCell(price);
+                        }
+                        retail_price = allProductsList.get(i).getPrice() * allProductsList.get(i).getRate();
+                        if (allProductsList.get(i).getSpecial() > allProductsList.get(i).getDiscount1()) {
+                            discount_ten_plus = retail_price - (retail_price / 100) * allProductsList.get(i).getSpecial();
+                        }
+                        if (allProductsList.get(i).getSpecial() > allProductsList.get(i).getDiscount2()) {
+                            discount_opt = retail_price - (retail_price / 100) * allProductsList.get(i).getSpecial();
+                        }
+                        if (allProductsList.get(i).getSpecial() > allProductsList.get(i).getDiscount3()) {
+                            discount_dealer = retail_price - (retail_price / 100) * allProductsList.get(i).getSpecial();
+                        }
+
+                        Number discount1 = new Number( 2, j, round2(discount_ten_plus));
+                        excelSheet.addCell(discount1);
+
+                        Number discount2 = new Number( 3, j, round2(discount_opt));
+                        excelSheet.addCell(discount2);
+
+                        Number discount3 = new Number( 4, j, round2(discount_dealer));
+                        excelSheet.addCell(discount3);
+                        j++;
+                    } else {
+                        continue;
+                    }
+                }
+                workbook.write();
+                workbook.close();
+            } catch (IOException e) {} catch (WriteException e) {}
+        }
+    }
     // не работает пока...
     private static String cleanUp(String string) {
         String str = new String();
@@ -228,7 +308,6 @@ public class XLSHandler {
         });
         System.out.println("All over");
     }
-
     public static void addDiscountsToDb() {
         ArrayList<ArrayList<String>> productsData = new ArrayList<>();
         try {
@@ -277,6 +356,9 @@ public class XLSHandler {
         }
 
         System.out.println("All over");
+    }
+    private static Double round2(Double val) {
+        return new BigDecimal(val.toString()).setScale(2, RoundingMode.UP).doubleValue();
     }
 }
 

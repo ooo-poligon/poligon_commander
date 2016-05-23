@@ -1215,6 +1215,7 @@
                                                         </columnConstraints>
                                                         <rowConstraints>
                                                           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                         </rowConstraints>
                                                          <children>
                                                             <AnchorPane GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="BASELINE" GridPane.vgrow="ALWAYS">
@@ -1231,6 +1232,22 @@
                                                                         </AnchorPane>
                                                                         <TextField fx:id="exportFileNameTextField" promptText="имя файла..." />
                                                                         <Button fx:id="startExportButton" minWidth="55.0" mnemonicParsing="false" onAction="#startExport" text="Пуск!" HBox.hgrow="ALWAYS" />
+                                                                     </children>
+                                                                  </HBox>
+                                                               </children>
+                                                            </AnchorPane>
+                                                            <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1">
+                                                               <children>
+                                                                  <HBox alignment="BASELINE_LEFT" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+                                                                     <children>
+                                                                        <Label alignment="CENTER" minWidth="200.0" text="Выгрузить базовую цену  и цены со скидками  в файл формата XLS:  " HBox.hgrow="ALWAYS" />
+                                                                        <Button fx:id="chooseDirForExportPricesButton" minWidth="140.0" mnemonicParsing="false" onAction="#chooseDirectoryForExportPrices" text="Выбрать папку для экспорта" HBox.hgrow="ALWAYS" />
+                                                                        <AnchorPane HBox.hgrow="ALWAYS">
+                                                                           <children>
+                                                                              <Label fx:id="dirForExportPricesPathLabel" maxWidth="1.7976931348623157E308" minWidth="150.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="0.0" />
+                                                                           </children>
+                                                                        </AnchorPane>
+                                                                        <Button fx:id="startExportPricesButton" minWidth="55.0" mnemonicParsing="false" onAction="#startExportPrices" text="Пуск!" HBox.hgrow="ALWAYS" />
                                                                      </children>
                                                                   </HBox>
                                                                </children>
