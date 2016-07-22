@@ -33,7 +33,7 @@ import javax.xml.bind.annotation.XmlTransient;
         @NamedQuery(name = "ProductKinds.findByTitle", query = "SELECT p FROM ProductKinds p WHERE p.title = :title")})
 public class ProductKinds implements Serializable {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "productKindId")
-    private Collection<KindsTypes> kindsTypesCollection;
+    private Collection<ProductKindsPropertyTypes> productKindsPropertyTypesCollection;
     @OneToMany(mappedBy = "productKindId")
     private Collection<Functions> functionsCollection;
     private static final long serialVersionUID = 1L;
@@ -120,12 +120,12 @@ public class ProductKinds implements Serializable {
     }
 
     @XmlTransient
-    public Collection<KindsTypes> getKindsTypesCollection() {
-        return kindsTypesCollection;
+    public Collection<ProductKindsPropertyTypes> getProductKindsPropertyTypesCollection() {
+        return productKindsPropertyTypesCollection;
     }
 
-    public void setKindsTypesCollection(Collection<KindsTypes> kindsTypesCollection) {
-        this.kindsTypesCollection = kindsTypesCollection;
+    public void setProductKindsPropertyTypesCollection(Collection<ProductKindsPropertyTypes> productKindsPropertyTypesCollection) {
+        this.productKindsPropertyTypesCollection = productKindsPropertyTypesCollection;
     }
 
 }

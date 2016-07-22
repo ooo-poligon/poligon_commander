@@ -10,10 +10,8 @@ import javafx.scene.control.TableView;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
-import main.PCGUIController;
 import main.Product;
 import modalwindows.AlertWindow;
-import modalwindows.SetRatesWindow;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -24,7 +22,6 @@ import tableviews.ProductsTableView;
 import tableviews.VendorsTableView;
 import treetableviews.PropertiesTreeTableView;
 
-import javax.swing.text.*;
 import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -590,8 +587,8 @@ public class ContextBuilder {
         });
 
         Dialog<NewPropertyType> dialog = new Dialog<>();
-        dialog.setTitle("Добавление нового набора характеристик.");
-        dialog.setHeaderText("Выберите набор характеристик из списка:");
+        dialog.setTitle("Добавление нового набора свойств.");
+        dialog.setHeaderText("Выберите набор свойств из списка:");
         dialog.setResizable(false);
 
         Label label1 = new Label("Добавить набор: ");
@@ -619,22 +616,26 @@ public class ContextBuilder {
         if (result.isPresent()) {
             Session session3 = HibernateUtil.getSessionFactory().openSession();
             Transaction tx = session3.beginTransaction();
-            KindsTypes kindsTypes = new KindsTypes();
-            kindsTypes.setProductKindId(productKind);
-            kindsTypes.setPropertyTypeId(new PropertyTypes(result.get().getPropertyTypeID()));
-            session3.save(kindsTypes);
+            ProductKindsPropertyTypes productKindsPropertyTypes = new ProductKindsPropertyTypes();
+            productKindsPropertyTypes.setProductKindId(productKind);
+            productKindsPropertyTypes.setPropertyTypeId(new PropertyTypes(result.get().getPropertyTypeID()));
+            session3.save(productKindsPropertyTypes);
             tx.commit();
             session3.close();
         }
     }
     public static void removePropertyType(ListView<String> productKindsList, TreeTableView<PropertiesTreeTableView>  propertiesTreeTable) {
-        KindsTypes selectedKindsTypes = new KindsTypes();
+        ProductKindsPropertyTypes selectedProductKindsPropertyTypes = new ProductKindsPropertyTypes();
         String selectedProductKind  = productKindsList.getSelectionModel().getSelectedItem();
         String selectedPropertyType = propertiesTreeTable.getSelectionModel().getSelectedItem().getValue().getTitle();
 
         Dialog<NewKindsTypes> dialog = new Dialog<>();
-        dialog.setTitle("Удаление выбранного набора характеристик.");
-        dialog.setHeaderText("Выбранный набор характеристик не удалится из базы данных,\n" +
+        dialog.setTitle("Удаление выбранного набора свойств.");
+        dialog.setHeaderText(
+                "Внимание! Перед удалением набора свойств" +
+                "убедитесь что любому из этих свойств не назначены значения,\n" +
+                "в противном случае может произойти сбой в работе программы!\n" +
+                "Выбранный набор свойств не удалится из базы данных,\n" +
                 "но перестанет принадлежать выбранному типу устройств.");
         dialog.setResizable(false);
 
@@ -646,7 +647,7 @@ public class ContextBuilder {
         grid.add(label3, 1, 2);
         dialog.getDialogPane().setContent(grid);
 
-        ButtonType buttonTypeOk = new ButtonType("Добавить", ButtonBar.ButtonData.OK_DONE);
+        ButtonType buttonTypeOk = new ButtonType("Удалить", ButtonBar.ButtonData.OK_DONE);
         ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonBar.ButtonData.CANCEL_CLOSE);
         dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
         dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
@@ -677,17 +678,17 @@ public class ContextBuilder {
         if (result.isPresent()) {
 
             Session session = HibernateUtil.getSessionFactory().openSession();
-            List res = session.createQuery("from KindsTypes where productKindId =" + result.get().getProductKindID() +
+            List res = session.createQuery("from ProductKindsPropertyTypes where productKindId =" + result.get().getProductKindID() +
                     " and propertyTypeId =" + result.get().getPropertyTypeID()).list();
             for (Iterator iterator = res.iterator(); iterator.hasNext();) {
-                selectedKindsTypes = (KindsTypes) iterator.next();
+                selectedProductKindsPropertyTypes = (ProductKindsPropertyTypes) iterator.next();
             }
             session.close();
 
             Session session3 = HibernateUtil.getSessionFactory().openSession();
             Transaction tx = session3.beginTransaction();
-            System.out.println("delete KindsTypes where id =" + selectedKindsTypes.getId());
-            Query q = session3.createQuery("delete KindsTypes where id =" + selectedKindsTypes.getId());
+            System.out.println("delete ProductKindsPropertyTypes where id =" + selectedProductKindsPropertyTypes.getId());
+            Query q = session3.createQuery("delete ProductKindsPropertyTypes where id =" + selectedProductKindsPropertyTypes.getId());
             q.executeUpdate();
             tx.commit();
             session3.close();
@@ -695,7 +696,7 @@ public class ContextBuilder {
             System.out.println("selectedPropertyType " + selectedPropertyType);
             System.out.println("selectedProductKindID " + selectedProductKindID);
             System.out.println("selectedPropertyTypeID " + selectedPropertyTypeID);
-            System.out.println("selectedKindsTypes.getId() " + selectedKindsTypes.getId());
+            System.out.println("selectedProductKindsPropertyTypes.getId() " + selectedProductKindsPropertyTypes.getId());
         }
     }
 
@@ -831,7 +832,7 @@ public class ContextBuilder {
         grid.add(text2, 2, 3);
         dialog.getDialogPane().setContent(grid);
 
-        ButtonType buttonTypeOk = new ButtonType("Добавить", ButtonBar.ButtonData.OK_DONE);
+        ButtonType buttonTypeOk = new ButtonType("Изменить", ButtonBar.ButtonData.OK_DONE);
         ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonBar.ButtonData.CANCEL_CLOSE);
         dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
         dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);

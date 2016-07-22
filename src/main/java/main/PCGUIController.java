@@ -12,7 +12,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.embed.swing.SwingFXUtils;
@@ -38,18 +37,14 @@ import javafx.scene.web.HTMLEditor;
 import javafx.scene.web.WebView;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
-import javafx.stage.Window;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javafx.util.converter.IntegerStringConverter;
-import jdk.nashorn.internal.runtime.regexp.RegExp;
 import modalwindows.AlertWindow;
 import modalwindows.SetRatesWindow;
 import org.hibernate.*;
-import org.hibernate.dialect.SybaseDialect;
 import org.hibernate.exception.JDBCConnectionException;
 import settings.*;
-import sun.misc.Regexp;
 import tableviews.*;
 import treetableviews.PropertiesTreeTableView;
 import treeviews.CategoriesTreeView;
@@ -69,7 +64,6 @@ import java.nio.channels.FileChannel;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -92,10 +86,10 @@ public class PCGUIController implements Initializable {
         SiteDBSettings siteDBSettings = new SiteDBSettings();
         LocalDBSettings localDBSettings = new LocalDBSettings();
         PriceCalcSettings priceCalcSettings = new PriceCalcSettings();
-        SiteUrlSettings siteUrlSettings = new SiteUrlSettings();
-        SiteSettings siteSettings = new SiteSettings();
-        try {siteUrlTextField.setText(siteUrlSettings.loadSetting());
-        } catch (NullPointerException ne) {siteUrlTextField.setText("");}
+        //SiteUrlSettings siteUrlSettings = new SiteUrlSettings();
+        //SiteSettings siteSettings = new SiteSettings();
+        //try {siteUrlTextField.setText(siteUrlSettings.loadSetting());
+        //} catch (NullPointerException ne) {siteUrlTextField.setText("");}
         addCBRTextField.setText(priceCalcSettings.loadSetting("addCBR"));
         addressSiteDB.setText(siteDBSettings.loadSetting("addressSiteDB"));
         portSiteDB.setText(siteDBSettings.loadSetting("portSiteDB"));
@@ -107,7 +101,7 @@ public class PCGUIController implements Initializable {
         titleLocalDB.setText(localDBSettings.loadSetting("titleLocalDB"));
         userLocalDB.setText(localDBSettings.loadSetting("userLocalDB"));
         passwordLocalDB.setText(localDBSettings.loadSetting("passwordLocalDB"));
-        siteOrdersReceiverTextField.setText(siteSettings.loadSetting("siteOrdersReceiver"));
+        //siteOrdersReceiverTextField.setText(siteSettings.loadSetting("siteOrdersReceiver"));
     }
     @FXML private void resetProgram() throws SQLException {
         if (loadProgramCounter != 0) {
@@ -132,13 +126,13 @@ public class PCGUIController implements Initializable {
         populateComboBox ();
         loadImportFields();
         loadExportTables();
-        buildVendorsTable();
-        buildSeriesTable();
+        //buildVendorsTable();
+        //buildSeriesTable();
         buildUsersTable();
         buildCompaniesTable();
         buildGroupsTable();
         buildProductKindsList();
-        tabBrowserWebView.getEngine().load(siteUrlTextField.getText());
+        //tabBrowserWebView.getEngine().load(siteUrlTextField.getText());
         productsTable.getSelectionModel().setSelectionMode(javafx.scene.control.SelectionMode.MULTIPLE);
         productsTable.getSelectionModel().selectedItemProperty().addListener(
             (observable, oldValue, newValue) -> {
@@ -192,8 +186,8 @@ public class PCGUIController implements Initializable {
                 }
             }
         );
-        vendorsTable.getSelectionModel().select(0);
-        handleVendorsTableMousePressed();
+        //vendorsTable.getSelectionModel().select(0);
+        //handleVendorsTableMousePressed();
         try {fillMainTab(productTabTitle.getText());} catch (SQLException e) {}
     }
     @FXML private void saveAddCBRToDB() throws SQLException {
@@ -1440,7 +1434,7 @@ public class PCGUIController implements Initializable {
         propertiesStackPane.getChildren().clear();
         //Получаем вид продукта для товара, преданного в параметре
         ProductKinds kind = new ProductKinds();
-        ArrayList<KindsTypes> types = new ArrayList<>(50);
+        ArrayList<ProductKindsPropertyTypes> types = new ArrayList<>();
         ObservableList<PropertiesTreeView> data = FXCollections.observableArrayList();
         Session session = HibernateUtil.getSessionFactory().openSession();
         List list = session.createQuery("From Products where id =" + UtilPack.getProductIdFromTitle(selectedProduct, allProductsList)).list();
@@ -1449,11 +1443,11 @@ public class PCGUIController implements Initializable {
             kind = product.getProductKindId();
         }
         session.close();
-        //Получаем типы характеристик для этого вида товара
+        //Получаем типы свойств для этого вида товара
         Session session0 = HibernateUtil.getSessionFactory().openSession();
-        List list0 = session0.createQuery("From KindsTypes where productKindId =" + kind.getId()).list();
+        List list0 = session0.createQuery("From ProductKindsPropertyTypes where productKindId =" + kind.getId()).list();
         for (Iterator iterator0 = list0.iterator(); iterator0.hasNext();) {
-            KindsTypes kindsType = (KindsTypes) iterator0.next();
+            ProductKindsPropertyTypes kindsType = (ProductKindsPropertyTypes) iterator0.next();
             types.add(kindsType);
         }
         session0.close();
@@ -1466,7 +1460,7 @@ public class PCGUIController implements Initializable {
             }
             session1.close();
         });
-        ArrayList<PropertiesTreeView> properties = new ArrayList(50);
+        ArrayList<PropertiesTreeView> properties = new ArrayList();
         data.stream().forEach((section) -> {
             properties.add(section);
         });
@@ -1933,7 +1927,7 @@ public class PCGUIController implements Initializable {
             }
         }
         productsTable.getSelectionModel().select(selectedProductsTableViewItem[0]);
-        setVendorSelected(productsTable.getSelectionModel().getSelectedItem().getTitle());
+        //setVendorSelected(productsTable.getSelectionModel().getSelectedItem().getTitle());
         setCategorySelected(productsTable.getSelectionModel().getSelectedItem().getTitle());
     }
     private void newCategoryDialog(String whatTree, TreeView<String> treeView) throws SQLException {
@@ -2141,7 +2135,7 @@ public class PCGUIController implements Initializable {
             newVendorAddress = result.get().getAddress();
             newVendorRate = result.get().getRate();
             createNewVendor();
-            buildVendorsTable();
+            //buildVendorsTable();
         }
     }
     private void createNewVendor() {
@@ -2177,7 +2171,7 @@ public class PCGUIController implements Initializable {
             session1.save(serie);
             tx.commit();
             session1.close();
-            buildSeriesTable();
+            //buildSeriesTable();
         }
     }
     private void editSerieDialog(String selectedSerie) {
@@ -2209,7 +2203,7 @@ public class PCGUIController implements Initializable {
             session1.saveOrUpdate(serie);
             tx.commit();
             session1.close();
-            buildSeriesTable();
+            //buildSeriesTable();
         }
     }
     private void deleteSerieDialog(String selectedSerie) {
@@ -2267,7 +2261,10 @@ public class PCGUIController implements Initializable {
                 category[0] = new Categories(product.getCategoryId());
             }
         });
-        recursiveTreeCall(categoriesTree.getRoot(), UtilPack.getCategoryTitleFromId(category[0].getId()));
+        try {
+            recursiveTreeCall(categoriesTree.getRoot(), UtilPack.getCategoryTitleFromId(category[0].getId()));
+        } catch (NullPointerException e) {}
+
     }
     private void recursiveTreeCall(TreeItem<String> root, String categoryTitle) {
         TreeItem<String> productOwner = new CheckBoxTreeItem<>();
@@ -2591,6 +2588,8 @@ public class PCGUIController implements Initializable {
             session.close();
         } catch (NullPointerException ne) {}
         buildAccessoriesTable(selectedProduct);
+        buildPropertiesTree(selectedProduct);
+        buildFunctionsTable1(selectedProduct);
     }
     // Сохраняет в БД описание картинки товара.
     @FXML private void changePicDescription() throws SQLException {
@@ -3665,9 +3664,9 @@ public class PCGUIController implements Initializable {
         ArrayList<Integer> typesIds = new ArrayList<>(10);
         ArrayList<PropertiesTreeTableView> properties = new ArrayList<>(10);
         Session session = HibernateUtil.getSessionFactory().openSession();
-        List res = session.createQuery("from KindsTypes where productKindId =" + UtilPack.getPropertyKindIdFromTitle(selectedPropertiesKind)).list();
+        List res = session.createQuery("from ProductKindsPropertyTypes where productKindId =" + UtilPack.getPropertyKindIdFromTitle(selectedPropertiesKind)).list();
         for (Iterator iterator = res.iterator(); iterator.hasNext();) {
-            KindsTypes kt = (KindsTypes) iterator.next();
+            ProductKindsPropertyTypes kt = (ProductKindsPropertyTypes) iterator.next();
             typesIds.add(kt.getPropertyTypeId().getId());
         }
         session.close();
@@ -3684,7 +3683,7 @@ public class PCGUIController implements Initializable {
         properties.stream().forEach((prop) -> {
             treeItems.add(new TreeItem<PropertiesTreeTableView>(prop));
         });
-        TreeItem<PropertiesTreeTableView> root = new TreeItem<>(new PropertiesTreeTableView("Все характеристики"));
+        TreeItem<PropertiesTreeTableView> root = new TreeItem<>(new PropertiesTreeTableView("Все наборы свойств"));
         root.setExpanded(true);
         treeItems.stream().forEach((item) -> {
             ArrayList<TreeItem> children = null;
@@ -3697,42 +3696,43 @@ public class PCGUIController implements Initializable {
             root.getChildren().add(item);
         });
         propertiesTreeTableContextMenu = ContextMenuBuilder.create().items(
-                MenuItemBuilder.create().text("Добавить новую характеристику").onAction((ActionEvent ae1) -> {
-                    ContextBuilder.createNewProperty();
-                    buildPropertiesTreeTable(selectedPropertiesKind);
-                    buildFunctionsTable(selectedPropertiesKind);
-                    propertiesTreeTable.refresh();
-                    functionsTable.refresh();
-                }).build(),
-                MenuItemBuilder.create().text("Редактировать выбранную характеристику").onAction((ActionEvent ae2) -> {
-                    ContextBuilder.updateTheProperty(propertiesTreeTable);
-                    buildPropertiesTreeTable(selectedPropertiesKind);
-                    buildFunctionsTable(selectedPropertiesKind);
-                    propertiesTreeTable.refresh();
-                    functionsTable.refresh();
-                }).build(),
-                MenuItemBuilder.create().text("Удалить выбранную характеристику").onAction((ActionEvent ae3) -> {
-                    ContextBuilder.deleteTheProperty(propertiesTreeTable);
-                    buildPropertiesTreeTable(selectedPropertiesKind);
-                    buildFunctionsTable(selectedPropertiesKind);
-                    propertiesTreeTable.refresh();
-                    functionsTable.refresh();
-                }).build(),
-                SeparatorMenuItemBuilder.create().build(),
-                MenuItemBuilder.create().text("Добавить набор характеристик").onAction((ActionEvent ae3) -> {
+                MenuItemBuilder.create().text("Добавить набор свойств").onAction((ActionEvent ae3) -> {
                     ContextBuilder.addPropertyType(productKindsList);
                     buildPropertiesTreeTable(selectedPropertiesKind);
                     buildProductKindsList();
                     propertiesTreeTable.refresh();
                     functionsTable.refresh();
                 }).build(),
-                MenuItemBuilder.create().text("Удалить набор характеристик").onAction((ActionEvent ae3) -> {
+                MenuItemBuilder.create().text("Удалить набор свойств").onAction((ActionEvent ae3) -> {
                     ContextBuilder.removePropertyType(productKindsList, propertiesTreeTable);
                     buildPropertiesTreeTable(selectedPropertiesKind);
                     buildProductKindsList();
                     propertiesTreeTable.refresh();
                     functionsTable.refresh();
+                }).build(),
+                SeparatorMenuItemBuilder.create().build(),
+                MenuItemBuilder.create().text("Добавить новое свойство").onAction((ActionEvent ae1) -> {
+                    ContextBuilder.createNewProperty();
+                    buildPropertiesTreeTable(selectedPropertiesKind);
+                    buildFunctionsTable(selectedPropertiesKind);
+                    propertiesTreeTable.refresh();
+                    functionsTable.refresh();
+                }).build(),
+                MenuItemBuilder.create().text("Редактировать выбранное свойство").onAction((ActionEvent ae2) -> {
+                    ContextBuilder.updateTheProperty(propertiesTreeTable);
+                    buildPropertiesTreeTable(selectedPropertiesKind);
+                    buildFunctionsTable(selectedPropertiesKind);
+                    propertiesTreeTable.refresh();
+                    functionsTable.refresh();
+                }).build(),
+                MenuItemBuilder.create().text("Удалить выбранное свойство").onAction((ActionEvent ae3) -> {
+                    ContextBuilder.deleteTheProperty(propertiesTreeTable);
+                    buildPropertiesTreeTable(selectedPropertiesKind);
+                    buildFunctionsTable(selectedPropertiesKind);
+                    propertiesTreeTable.refresh();
+                    functionsTable.refresh();
                 }).build()
+
         ).build();
         propertiesTreeTable.setContextMenu(propertiesTreeTableContextMenu);
         propertiesTreeTable.setRoot(root);
@@ -3957,7 +3957,7 @@ public class PCGUIController implements Initializable {
     @FXML private void saveSiteUrlToDb() {
         SiteUrlSettings siteUrlSettings = new SiteUrlSettings();
         siteUrlSettings.saveSetting(siteUrlTextField.getText());
-        tabBrowserWebView.getEngine().load(siteUrlTextField.getText());
+        //tabBrowserWebView.getEngine().load(siteUrlTextField.getText());
     }
     @FXML private void saveSiteOrdersReceiver() {
         SiteSettings siteSettings = new SiteSettings();
@@ -4099,7 +4099,7 @@ public class PCGUIController implements Initializable {
     @FXML private TreeTableColumn<PropertiesTreeTableView, String> propertiesTreeTableTitleColumn;
 
     //WebView
-    @FXML private WebView tabBrowserWebView;
+    //@FXML private WebView tabBrowserWebView;
 
     // Buttons
     @FXML private Button startImportXLSButton;

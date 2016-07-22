@@ -18,7 +18,7 @@
     <class>entities.ImportFields</class>
     <class>entities.PropertyValues</class>
     <class>entities.Functions</class>
-    <class>entities.KindsTypes</class>
+    <class>entities.ProductKindsPropertyTypes</class>
 
     <class>entities.Articles</class>
     <class>entities.Videos</class>

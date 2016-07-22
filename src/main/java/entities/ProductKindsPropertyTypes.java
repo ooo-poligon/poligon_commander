@@ -5,8 +5,6 @@ package entities;
  *
  */
 
-        import entities.ProductKinds;
-        import entities.PropertyTypes;
         import java.io.Serializable;
         import javax.persistence.Basic;
         import javax.persistence.Column;
@@ -26,12 +24,12 @@ package entities;
  * @author kataev
  */
 @Entity
-@Table(name = "kinds_types")
+@Table(name = "product_kinds_property_types")
 @XmlRootElement
 @NamedQueries({
-        @NamedQuery(name = "KindsTypes.findAll", query = "SELECT k FROM KindsTypes k"),
-        @NamedQuery(name = "KindsTypes.findById", query = "SELECT k FROM KindsTypes k WHERE k.id = :id")})
-public class KindsTypes implements Serializable {
+        @NamedQuery(name = "ProductKindsPropertyTypes.findAll", query = "SELECT k FROM ProductKindsPropertyTypes k"),
+        @NamedQuery(name = "ProductKindsPropertyTypes.findById", query = "SELECT k FROM ProductKindsPropertyTypes k WHERE k.id = :id")})
+public class ProductKindsPropertyTypes implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,10 +43,10 @@ public class KindsTypes implements Serializable {
     @ManyToOne(optional = false)
     private PropertyTypes propertyTypeId;
 
-    public KindsTypes() {
+    public ProductKindsPropertyTypes() {
     }
 
-    public KindsTypes(Integer id) {
+    public ProductKindsPropertyTypes(Integer id) {
         this.id = id;
     }
 
@@ -86,10 +84,10 @@ public class KindsTypes implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof KindsTypes)) {
+        if (!(object instanceof ProductKindsPropertyTypes)) {
             return false;
         }
-        KindsTypes other = (KindsTypes) object;
+        ProductKindsPropertyTypes other = (ProductKindsPropertyTypes) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
@@ -98,7 +96,7 @@ public class KindsTypes implements Serializable {
 
     @Override
     public String toString() {
-        return "agreements.KindsTypes[ id=" + id + " ]";
+        return "agreements.ProductKindsPropertyTypes[ id=" + id + " ]";
     }
 
 }
