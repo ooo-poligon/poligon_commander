@@ -157,9 +157,9 @@ public class XLSHandler {
                     excelSheet.addCell(serie);
                     Number product_kind_id    = new Number(12, i, PCGUIController.allProductsList.get(i).getProductKindId());
                     excelSheet.addCell(product_kind_id);
-                    Label  vendor             = new Label (13, i, PCGUIController.allProductsList.get(i).getVendor());
-                    excelSheet.addCell(vendor);
-                    Number currency_id    = new Number(14, i, PCGUIController.allProductsList.get(i).getCurrencyId());
+                    Number  vendor_id         = new Number (13, i, PCGUIController.allProductsList.get(i).getVendorId());
+                    excelSheet.addCell(vendor_id);
+                    Number currency_id        = new Number(14, i, PCGUIController.allProductsList.get(i).getCurrencyId());
                     excelSheet.addCell(currency_id);
                     Number accessory_owner_id = new Number(15, i, PCGUIController.allProductsList.get(i).getSpecial());
                     excelSheet.addCell(accessory_owner_id);
@@ -185,25 +185,26 @@ public class XLSHandler {
         } catch (IOException e) {} catch (WriteException e) {}
     }
     public static void exportDBPricesTo(ArrayList<Product> allProductsList, String targetDir) {
-        ArrayList<String> vendors_list = new ArrayList<>();
+        ArrayList<Vendors> vendors_list = new ArrayList<>();
+        ArrayList<Integer> vendors_ids = new ArrayList<>();
         Session session = HibernateUtil.getSessionFactory().openSession();
         List result = session.createQuery("From Vendors").list();
         for(Iterator iterator = result.iterator(); iterator.hasNext();) {
             Vendors vendor = (Vendors) iterator.next();
             if ((!vendor.getTitle().equals("не указан")) && (!vendor.getTitle().equals("ПОЛИГОН"))) {
-               vendors_list.add(vendor.getTitle());
+               vendors_list.add(vendor);
             }
         }
         session.close();
-        for(String vendor: vendors_list) {
-            String targetPath = targetDir + "\\" + vendor + ".xls";
+        for(Vendors vendor: vendors_list) {
+            String targetPath = targetDir + "\\" + vendor.getTitle() + ".xls";
             File file = new File(targetPath);
             WorkbookSettings wbSettings = new WorkbookSettings();
             wbSettings.setLocale(new Locale("ru", "RU"));
             WritableWorkbook workbook = null;
             try {
                 workbook = Workbook.createWorkbook(file, wbSettings);
-                workbook.createSheet("Prices for " + vendor, 0);
+                workbook.createSheet("Prices for " + vendor.getTitle(), 0);
                 WritableSheet excelSheet = workbook.getSheet(0);
 
                 Label  caption1 = new Label ( 0, 0, "Название"); excelSheet.addCell(caption1);
@@ -214,11 +215,9 @@ public class XLSHandler {
                 int j = 1;
                 // iteration begins from 1 because row with number 0 occupies captions row, made just before
                 for (int i = 1; i < allProductsList.size(); i++) {
-                    if (allProductsList.get(i).getVendor().equals(vendor)) {
+                    if (allProductsList.get(i).getVendorId() == (vendor.getId())) {
                         Label  title = new Label ( 0, j, allProductsList.get(i).getTitle());
                         excelSheet.addCell(title);
-
-
 
                         Double retail_price = allProductsList.get(i).getPrice() * allProductsList.get(i).getRate();
                         Double discount_ten_plus = retail_price - (retail_price / 100) * allProductsList.get(i).getDiscount1();

@@ -219,7 +219,7 @@ public class AlertWindow {
     public static Optional<Product> newProductDialog() {
         ArrayList<String> allProductTypes = UtilPack.getAllProductTypes();
         ArrayList<String> allCurrencies = UtilPack.getAllCurrencies();
-        ArrayList<String> allVendors = UtilPack.getAllVendors();
+        ArrayList<Vendors> allVendors = UtilPack.getAllVendorsEntities();
         ArrayList<Series> allSeries = UtilPack.getAllSeries();
         ObservableList<String> productTypesTitles = FXCollections.observableArrayList();
         ObservableList<String> currenciesTitles = FXCollections.observableArrayList();
@@ -227,7 +227,8 @@ public class AlertWindow {
         ObservableList<String> seriesTitles =  FXCollections.observableArrayList();
         productTypesTitles.addAll(allProductTypes);
         currenciesTitles.addAll(allCurrencies);
-        vendorsTitles.addAll(allVendors);
+        allVendors.stream().forEach((vendor) -> {vendorsTitles.add(vendor.getTitle());});
+        //vendorsTitles.addAll(allVendors);
         allSeries.stream().forEach(serie -> {
             seriesTitles.add(serie.getTitle());
         });
@@ -376,7 +377,7 @@ public class AlertWindow {
                     Double.parseDouble(inputPriceTextField.getText()),
                     seriesComboBox.getValue(),
                     UtilPack.getProductKindIdFromTitle(productTypeComboBox.getValue()),
-                    vendorComboBox.getValue(),
+                    new Integer(0),
                     UtilPack.getCurrencyIdFromTitle(currencyComboBox.getValue()),
                     Double.parseDouble(rateTextField.getText()),
                     Double.parseDouble(discount1TextField.getText()),

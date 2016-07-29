@@ -255,7 +255,7 @@ public class PCGUIController implements Initializable {
                     resultSet.getDouble("price"),
                     resultSet.getString("serie"),
                     resultSet.getInt   ("product_kind_id"),
-                    resultSet.getString("vendor"),
+                    resultSet.getInt   ("vendor_id"),
                     resultSet.getInt   ("currency_id"),
                     resultSet.getDouble("special"),
                     resultSet.getDouble("rate"),
@@ -1237,7 +1237,7 @@ public class PCGUIController implements Initializable {
         seriesTable.setItems(data);
     }
     @FXML private void handleVendorsTableMousePressed() {
-        selectedVendor = vendorsTable.getSelectionModel().getSelectedItem().getTitle();
+        /*selectedVendor = vendorsTable.getSelectionModel().getSelectedItem().getTitle();
         ObservableList<ProductsTableView> data = FXCollections.observableArrayList();
         try {
             allProductsList.stream().forEach(product -> {
@@ -1256,10 +1256,10 @@ public class PCGUIController implements Initializable {
         buildProductsTable(data);
         productsTable.getSelectionModel().select(0);
         onFocusedProductTableItem(selectedProduct);
-        fillProductTab(selectedProduct);
+        fillProductTab(selectedProduct);*/
     }
     @FXML private void handleSeriesTableMousePressed() {
-        selectedSerie = seriesTable.getSelectionModel().getSelectedItem().getTitle();
+        /*selectedSerie = seriesTable.getSelectionModel().getSelectedItem().getTitle();
         ObservableList<ProductsTableView> data = FXCollections.observableArrayList();
         try {
             allProductsList.stream().forEach(product -> {
@@ -1278,7 +1278,7 @@ public class PCGUIController implements Initializable {
         buildProductsTable(data);
         productsTable.getSelectionModel().select(0);
         onFocusedProductTableItem(selectedProduct);
-        fillProductTab(selectedProduct);
+        fillProductTab(selectedProduct);*/
     }
     private void buildImageView(String selectedProduct) {
         if (selectedProduct == null) {
@@ -1792,7 +1792,7 @@ public class PCGUIController implements Initializable {
         Optional<Product> result = AlertWindow.newProductDialog();
         if (result.isPresent()) {
             if ((result.get().getProductKindId() == 0) || (result.get().getSerie().equals(null)) ||
-                (result.get().getCategoryId() == 0 || result.get().getVendor().equals(null))) {
+                (result.get().getCategoryId() == 0 || result.get().getVendorId() == 0)) {
                 AlertWindow.fillRequiredFields();
             }
             Categories category = new Categories();
@@ -1835,8 +1835,8 @@ public class PCGUIController implements Initializable {
 
                 Session session4 = HibernateUtil.getSessionFactory().openSession();
                 session4.beginTransaction();
-                Query query4 = session4.createQuery("from Vendors where title = :title");
-                query4.setParameter("title", result.get().getVendor());
+                Query query4 = session4.createQuery("from Vendors where id = :id");
+                query4.setParameter("id", result.get().getVendorId());
                 List res4 = query4.list();
                 for (Iterator iterator = res4.iterator(); iterator.hasNext(); ) {
                     vendor = (Vendors) iterator.next();

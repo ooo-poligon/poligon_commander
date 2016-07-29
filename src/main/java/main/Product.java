@@ -17,7 +17,7 @@ public class Product {
     private double price;
     private String serie;
     private int productKindId;
-    private String vendor;
+    private int vendorId;
     private int currencyId;
     private double special;
     private double rate;
@@ -33,7 +33,7 @@ public class Product {
     public Product(int categoryId, String title, String description, String anons,
                    String article, int available, String deliveryTime, String ean,
                    int outdated, double price, String serie, int productKindId,
-                   String vendor, int currencyId, double rate, double discount1,
+                   int vendorId, int currencyId, double rate, double discount1,
                    double discount2, double discount3, double rubRetail) {
         this.id = null;
         this.categoryId = categoryId;
@@ -48,7 +48,7 @@ public class Product {
         this.price = price;
         this.serie = serie;
         this.productKindId = productKindId;
-        this.vendor = vendor;
+        this.vendorId = vendorId;
         this.currencyId = currencyId;
         this.special = 1;
         this.rate = rate;
@@ -60,7 +60,7 @@ public class Product {
 
     public Product(Integer id, int categoryId, String title, String description, String anons,
                    String article, int available, String deliveryTime, String ean, int outdated, double price,
-                   String serie, int productKindId, String vendor, int currencyId, double special,
+                   String serie, int productKindId, int vendorId, int currencyId, double special,
                    double rate, double discount1, double discount2, double discount3, double rubRetail) {
         this.id = id;
         this.categoryId = categoryId;
@@ -75,7 +75,7 @@ public class Product {
         this.price = price;
         this.serie = serie;
         this.productKindId = productKindId;
-        this.vendor = vendor;
+        this.vendorId = vendorId;
         this.currencyId = currencyId;
         this.special = special;
         this.rate = rate;
@@ -189,12 +189,12 @@ public class Product {
         this.productKindId = productKindId;
     }
 
-    public String getVendor() {
-        return vendor;
+    public int getVendorId() {
+        return vendorId;
     }
 
-    public void setVendor(String vendor) {
-        this.vendor = vendor;
+    public void setVendorId(int vendorId) {
+        this.vendorId = vendorId;
     }
 
     public int getCurrencyId() {

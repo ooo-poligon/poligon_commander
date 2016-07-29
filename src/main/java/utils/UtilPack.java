@@ -164,6 +164,17 @@ public class UtilPack {
         session.close();
         return vendors;
     }
+    public static ArrayList<Vendors> getAllVendorsEntities() {
+        ArrayList<Vendors> vendors = new ArrayList<>();
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List result = session.createQuery("from Vendors").list();
+        for(Iterator iterator = result.iterator(); iterator.hasNext();) {
+            Vendors vendor = (Vendors) iterator.next();
+            vendors.add(vendor);
+        }
+        session.close();
+        return vendors;
+    }
     public static ArrayList<Series> getAllSeries() {
         ArrayList<Series> series = new ArrayList();
         Session session = HibernateUtil.getSessionFactory().openSession();
