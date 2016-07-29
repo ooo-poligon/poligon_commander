@@ -20,11 +20,12 @@ import javafx.event.ActionEvent;
 import tableviews.KindsTableView;
 import tableviews.ProductsTableView;
 import tableviews.VendorsTableView;
-import treetableviews.PropertiesTreeTableView;
+import tableviews.ProductPropertiesTableView;
 
 import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.Collator;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -188,7 +189,7 @@ public class ContextBuilder {
             session4.close();
         }
     }
-    public static void updateThePropertyValue(Label productTabTitle, TreeView<String> propertiesTree, TreeTableView propertiesTable) {
+    public static void updateThePropertyValue(Label productTabTitle, TreeView<String> propertiesTree, TableView propertiesTable) {
         String selectedProduct = productTabTitle.getText();
         Session session = HibernateUtil.getSessionFactory().openSession();
         List res = session.createQuery("from Products where title=\'" + selectedProduct + "\'").list();
@@ -264,7 +265,7 @@ public class ContextBuilder {
 
         ObservableList<TreeTablePosition> treeTablePositions = propertiesTable.getSelectionModel().getSelectedCells();
         for (TreeTablePosition treeTablePosition: treeTablePositions) {
-            PropertiesTreeTableView propertiesTreeTableView = (PropertiesTreeTableView)treeTablePosition.getTreeItem().getValue();
+            ProductPropertiesTableView propertiesTreeTableView = (ProductPropertiesTableView)treeTablePosition.getTreeItem().getValue();
             selectedPropertyValueID = propertiesTreeTableView.getPropertyValueID();
         }
 
@@ -349,7 +350,7 @@ public class ContextBuilder {
             session4.close();
         }
     }
-    public static void deleteThePropertyValue(Label productTabTitle, TreeView<String> propertiesTree, TreeTableView propertiesTable) {
+    public static void deleteThePropertyValue(Label productTabTitle, TreeView<String> propertiesTree, TableView propertiesTable) {
         String selectedProduct = productTabTitle.getText();
         Session session = HibernateUtil.getSessionFactory().openSession();
         List res = session.createQuery("from Products where title=\'" + selectedProduct + "\'").list();
@@ -370,7 +371,7 @@ public class ContextBuilder {
 
         ObservableList<TreeTablePosition> treeTablePositions = propertiesTable.getSelectionModel().getSelectedCells();
         for (TreeTablePosition treeTablePosition: treeTablePositions) {
-            PropertiesTreeTableView propertiesTreeTableView = (PropertiesTreeTableView)treeTablePosition.getTreeItem().getValue();
+            ProductPropertiesTableView propertiesTreeTableView = (ProductPropertiesTableView)treeTablePosition.getTreeItem().getValue();
             selectedPropertyValueID = propertiesTreeTableView.getPropertyValueID();
         }
 
@@ -624,7 +625,7 @@ public class ContextBuilder {
             session3.close();
         }
     }
-    public static void removePropertyType(ListView<String> productKindsList, TreeTableView<PropertiesTreeTableView>  propertiesTreeTable) {
+    public static void removePropertyType(ListView<String> productKindsList, TreeTableView<ProductPropertiesTableView>  propertiesTreeTable) {
         ProductKindsPropertyTypes selectedProductKindsPropertyTypes = new ProductKindsPropertyTypes();
         String selectedProductKind  = productKindsList.getSelectionModel().getSelectedItem();
         String selectedPropertyType = propertiesTreeTable.getSelectionModel().getSelectedItem().getValue().getTitle();
@@ -772,7 +773,7 @@ public class ContextBuilder {
             session3.close();
         }
     }
-    public static void updateTheProperty(TreeTableView<PropertiesTreeTableView>  propertiesTreeTable) {
+    public static void updateTheProperty(TreeTableView<ProductPropertiesTableView>  propertiesTreeTable) {
         Properties property = new Properties();
         String propertyTitle = propertiesTreeTable.getSelectionModel().getSelectedItem().getValue().getTitle();
         ComboBox<String> propertyTypesComboBox = new ComboBox<>();
@@ -856,7 +857,7 @@ public class ContextBuilder {
             session3.close();
         }
     }
-    public static void deleteTheProperty(TreeTableView<PropertiesTreeTableView>  propertiesTreeTable) {
+    public static void deleteTheProperty(TreeTableView<ProductPropertiesTableView>  propertiesTreeTable) {
         Properties property = new Properties();
         String selectedProperty = propertiesTreeTable.getSelectionModel().getSelectedItem().getValue().getTitle();
 
@@ -1254,7 +1255,8 @@ public class ContextBuilder {
                 " только на вкладке \"Настройки\" данного приложения.");
         alert.showAndWait();
     }
-    public static void removeFunctionFromProduct(TableView functionsTable1, Label productTabTitle) {
+    public static void removeFunctionFromProduct(TableView functionsTable1, Label productTabTitle, TextArea functionDescriptionTextArea,
+                                                 String noImageFile, GridPane functionGridPaneImageView, ImageView functionImageView) {
         String selectedProduct = productTabTitle.getText();
         FunctionsTableView functionsTableView = (FunctionsTableView)functionsTable1.getSelectionModel().getSelectedItem();
         selectedFunctionID = functionsTableView.getId();
@@ -1311,6 +1313,8 @@ public class ContextBuilder {
             tx.commit();
             session4.close();
         }
+        functionDescriptionTextArea.setText("");
+        ProductImage.open(new File(noImageFile), functionGridPaneImageView, functionImageView);
     }
 
     public static void makeNewsItem() {
@@ -2013,6 +2017,9 @@ public class ContextBuilder {
         kindsList.stream().forEach((kinds) -> {
             kindsTitles.add(kinds.getTitle());
         });
+        Collator collator = Collator.getInstance(); //Your locale here
+        collator.setStrength(Collator.PRIMARY); //desired strength
+        Collections.sort(kindsTitles, collator);
         kindsComboBox.setItems(kindsTitles);
         kindsComboBox.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -2026,11 +2033,11 @@ public class ContextBuilder {
         });
 
         Dialog<KindsTableView> dialog = new Dialog<>();
-        dialog.setTitle("Изменить производителя устройства");
+        dialog.setTitle("Изменить тип устройства");
         dialog.setHeaderText("");
         dialog.setResizable(false);
 
-        Label label1 = new Label("Выберите производителя из списка:");
+        Label label1 = new Label("Выберите тип устройства из списка:");
         Label br = new Label("");
 
         GridPane grid = new GridPane();

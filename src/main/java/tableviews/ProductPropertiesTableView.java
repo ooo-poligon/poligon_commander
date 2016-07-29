@@ -1,4 +1,4 @@
-package treetableviews;
+package tableviews;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -6,7 +6,7 @@ import javafx.beans.property.StringProperty;
 /**
  * Created by Igor Klekotnev on 11.01.2016.
  */
-public class PropertiesTreeTableView {
+public class ProductPropertiesTableView {
     private StringProperty title;
     private StringProperty cond;
     private StringProperty value;
@@ -14,21 +14,21 @@ public class PropertiesTreeTableView {
 
     private Integer propertyValueID;
 
-    public PropertiesTreeTableView (String title) {
+    public ProductPropertiesTableView(String title) {
         this.title = new SimpleStringProperty(title);
         this.cond  = null;
         this.value = null;
         this.measure = null;
     }
 
-    public PropertiesTreeTableView(String title, String cond, String value, String measure) {
+    public ProductPropertiesTableView(String title, String cond, String value, String measure) {
         this.title   = new SimpleStringProperty(title);
         this.cond    = new SimpleStringProperty(cond);
         this.value   = new SimpleStringProperty(value);
         this.measure = new SimpleStringProperty(measure);
     }
 
-    public PropertiesTreeTableView(String title, String cond, String value, String measure, Integer propertyValueID) {
+    public ProductPropertiesTableView(String title, String cond, String value, String measure, Integer propertyValueID) {
         this.title   = new SimpleStringProperty(title);
         this.cond    = new SimpleStringProperty(cond);
         this.value   = new SimpleStringProperty(value);

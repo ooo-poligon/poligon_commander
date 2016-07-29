@@ -43,7 +43,7 @@ public class SiteSettings {
         tx.commit();
         session.close();
     }
-    public String loadSetting(String settingsTitle) {
+    public static String loadSetting(String settingsTitle) {
         String settingValue = "";
         try {
             Session session = HibernateUtil.getSessionFactory().openSession();

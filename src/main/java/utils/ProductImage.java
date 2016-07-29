@@ -7,7 +7,8 @@ package utils;
 import entities.FileTypes;
 import entities.Files;
 import entities.Products;
-import java.io.File;
+
+import java.io.*;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -17,10 +18,15 @@ import java.util.logging.Logger;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
+import main.PCGUIController;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.TransientObjectException;
+import org.hibernate.cfg.Settings;
+import settings.SFTPSettings;
+
+import static utils.SshUtils.sftp;
 
 /**
  *
@@ -34,14 +40,20 @@ public class ProductImage {
         try {
             String localUrl = file.toURI().toURL().toString();
             imageView.setImage(new Image(localUrl));
-            imageView.setFitHeight(250);
+            imageView.setFitHeight(220);
             imageView.setPreserveRatio(true);
             imageView.setSmooth(true);
             imageView.setCache(true);
             gridPane.getChildren().add(imageView);
         } catch (MalformedURLException ex) {}
     }
-    public static void save(File file, String selectedProduct) {
+    public static void save(File inFile, String selectedProduct) {
+        File file = null;
+        try {
+            file = new File(copyToPlace(inFile, selectedProduct, "device", null));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         Integer ownerId = 0;
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
@@ -51,14 +63,14 @@ public class ProductImage {
         }
         List pictureList = session.createQuery("From Files where ownerId=" + ownerId).list();
         if (pictureList.isEmpty()) {
-            Files pictureFile = new Files(file.getName(), file.getPath().replace("C:", "c:"), "Это изображение для " + selectedProduct, (new FileTypes(1)), (new Products(ownerId)));
+            Files pictureFile = new Files(file.getName(), file.getPath(), "Это изображение для " + selectedProduct, (new FileTypes(1)), (new Products(ownerId)));
             session.saveOrUpdate(pictureFile);
         } else {
             for (Iterator iterator = pictureList.iterator(); iterator.hasNext();) {
                 Files pic = (Files) iterator.next();
                 if ((pic.getFileTypeId().getId() == 1) && ((!pic.getName().equals(file.getName())) || (!pic.getPath().equals(file.getPath())))) {
                     pic.setName(file.getName());
-                    pic.setPath(file.getPath().replace("C:", "c:"));
+                    pic.setPath(file.getPath());
                     pic.setDescription("Это изображение для " + selectedProduct);
                     session.saveOrUpdate(pic);
                 }
@@ -68,7 +80,13 @@ public class ProductImage {
         session.close();
     }
 
-    public static void save(String picPath, String selectedProduct) {
+    public static void save(String inPicPath, String selectedProduct) {
+        String picPath = null;
+        try {
+            picPath = copyToPlace(new File(inPicPath), selectedProduct, "device", null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         Products product = new Products();
         Session sess = HibernateUtil.getSessionFactory().openSession();
         Query query = sess.createQuery("from Products where title = :title");
@@ -104,17 +122,90 @@ public class ProductImage {
         } catch (TransientObjectException e) {}
     }
 
+    public static void saveDimImage(File inFile, String selectedProduct) {
+        File file = null;
+        try {
+            file = new File(copyToPlace(inFile, selectedProduct, "dim", null));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Integer ownerId = 0;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = session.beginTransaction();
+        List ids = session.createSQLQuery("select id from products where title=\"" + selectedProduct + "\"").list();
+        for (Iterator iterator = ids.iterator(); iterator.hasNext();) {
+            ownerId = (Integer) iterator.next();
+        }
+        List pictureList = session.createQuery("From Files where ownerId=" + ownerId + "and file_type_id=" + 4).list();
+        if (pictureList.isEmpty()) {
+            Files pictureFile = new Files(file.getName(), file.getPath(), "Это схема габаритов для " + selectedProduct, (new FileTypes(4)), (new Products(ownerId)));
+            session.saveOrUpdate(pictureFile);
+        } else {
+            for (Iterator iterator = pictureList.iterator(); iterator.hasNext();) {
+                Files pic = (Files) iterator.next();
+                if ((pic.getFileTypeId().getId() == 4) &&
+                        ((!pic.getName().equals(file.getName())) ||
+                                (!pic.getPath().equals(file.getPath())))) {
+                    pic.setName(file.getName());
+                    pic.setPath(file.getPath());
+                    pic.setDescription("Это схема габаритов для " + selectedProduct);
+                    session.saveOrUpdate(pic);
+                }
+            }
+        }
+        tx.commit();
+        session.close();
+    }
+
+    public static void savePlugImage(File inFile, String selectedProduct, int plugNumber) {
+        File file = null;
+        try {
+            file = new File(copyToPlace(inFile, selectedProduct, "plug", plugNumber));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Integer ownerId = 0;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = session.beginTransaction();
+        List ids = session.createSQLQuery("select id from products where title=\"" + selectedProduct + "\"").list();
+        for (Iterator iterator = ids.iterator(); iterator.hasNext();) {
+            ownerId = (Integer) iterator.next();
+        }
+        int fileTypeId = 3;
+        if (plugNumber == 2) fileTypeId = 7;
+        List pictureList = session.createQuery("From Files where ownerId=" + ownerId + "and file_type_id=" + fileTypeId).list();
+        if (pictureList.isEmpty()) {
+            Files pictureFile = new Files(file.getName(), file.getPath(), "Это схема подключения №" + plugNumber + " для " + selectedProduct, (new FileTypes(fileTypeId)), (new Products(ownerId)));
+            session.saveOrUpdate(pictureFile);
+        } else {
+            for (Iterator iterator = pictureList.iterator(); iterator.hasNext();) {
+                Files pic = (Files) iterator.next();
+                if ((pic.getFileTypeId().getId() == fileTypeId) &&
+                        ((!pic.getName().equals(file.getName())) ||
+                                (!pic.getPath().equals(file.getPath())))) {
+                    pic.setName(file.getName());
+                    pic.setPath(file.getPath());
+                    pic.setDescription("Это схема подключения №" + plugNumber + " для " + selectedProduct);
+                    session.saveOrUpdate(pic);
+                }
+            }
+        }
+        tx.commit();
+        session.close();
+    }
+
     private static String picName(String picPath) {
         ArrayList<String> pathParts = new ArrayList<>();
         for (int i = 0; i < picPath.split("/").length; i++) {
             pathParts.add(picPath.split("/")[i]);
         }
-        return pathParts.get(picPath.split("/").length - 1);
+        String name = pathParts.get(picPath.split("/").length - 1);
+        return name;
     }
 
     private static String localWindowsPath(String picPath) {
         ArrayList<String> pathParts = new ArrayList<>();
-        String localPath = "c:\\poligon_images";
+        String localPath = "\\\\Server03\\бд_сайта\\poligon_images\\catalog";
         if (picPath.split("/").length==0) {
             return "";
         } else {
@@ -123,5 +214,84 @@ public class ProductImage {
             }
         }
         return localPath;
+    }
+
+    private static String copyToPlace(File file, String selectedProduct, String picType, Integer plugNumber) throws IOException {
+        String vendorTitle = "";
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Query query = session.createQuery("from Products where title = :title");
+        query.setParameter("title", selectedProduct);
+        List result = query.list();
+        for(Iterator iterator = result.iterator(); iterator.hasNext();) {
+            Products product = (Products) iterator.next();
+            vendorTitle = product.getVendorId().getTitle();
+        }
+        session.close();
+        String resPath = "";
+        String fileName = "";
+        String fileType = "";
+        if( plugNumber != null) {
+            fileName = selectedProduct.replace(" ", "_") + "_" + picType + plugNumber + ".jpg";
+        } else {
+            fileName = selectedProduct.replace(" ", "_") + "_" + picType + ".jpg";
+        }
+        fileType = picType;
+        resPath = "\\\\Server03\\бд_сайта\\poligon_images\\catalog\\" + vendorTitle + "\\" + fileType + "s\\" + fileName ;
+        copyFile(file, new File(resPath));
+        String sshUser = "";
+        String sshPass = "";
+        String sshHost = "";
+
+        Session session1 = HibernateUtil.getSessionFactory().openSession();
+        Query query1 = session1.createQuery("from entities.Settings where kind = :kind and title = :title");
+        query1.setParameter("kind", "SFTPSettings");
+        query1.setParameter("title", "userSFTP");
+        List result1 = query1.list();
+        for(Iterator iterator = result1.iterator(); iterator.hasNext();) {
+            entities.Settings setting = (entities.Settings) iterator.next();
+            sshUser = setting.getTextValue();
+        }
+        session1.close();
+        Session session2 = HibernateUtil.getSessionFactory().openSession();
+        Query query2 = session2.createQuery("from entities.Settings where kind = :kind and title = :title");
+        query2.setParameter("kind", "SFTPSettings");
+        query2.setParameter("title", "passwordSFTP");
+        List result2 = query2.list();
+        for(Iterator iterator = result2.iterator(); iterator.hasNext();) {
+            entities.Settings setting = (entities.Settings) iterator.next();
+            sshPass = setting.getTextValue();
+        }
+        session2.close();
+        Session session3 = HibernateUtil.getSessionFactory().openSession();
+        Query query3 = session3.createQuery("from entities.Settings where kind = :kind and title = :title");
+        query3.setParameter("kind", "SFTPSettings");
+        query3.setParameter("title", "serverSFTP");
+        List result3 = query3.list();
+        for(Iterator iterator = result3.iterator(); iterator.hasNext();) {
+            entities.Settings setting = (entities.Settings) iterator.next();
+            sshHost = setting.getTextValue();
+        }
+        session3.close();
+        String remotePlace = "/var/www/poligon/data/www/poligon.info/images/catalog/" + vendorTitle + "/" + fileType + "s/" ;
+        sftp(("file://" + resPath.replace("\\", "/")), ("ssh://" + sshUser + ":" + sshPass + "@" + sshHost + remotePlace));
+
+        return resPath;
+    }
+
+    private static void copyFile(File source, File dest) throws IOException {
+        InputStream is = null;
+        OutputStream os = null;
+        try {
+            is = new FileInputStream(source);
+            os = new FileOutputStream(dest);
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = is.read(buffer)) > 0) {
+                os.write(buffer, 0, length);
+            }
+        } finally {
+            is.close();
+            os.close();
+        }
     }
 }

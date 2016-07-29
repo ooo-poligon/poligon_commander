@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 public class PoligonCommander extends Application {
-    public static final String SPLASH_IMAGE = "/images/splash_1_7.png";
+    public static final String SPLASH_IMAGE = "/images/splash_1_8.png";
 
     private Pane splashLayout;
     private ProgressBar loadProgress;
@@ -89,7 +89,7 @@ public class PoligonCommander extends Application {
         Parent root = FXMLLoader.load(getClass().getResource("/fxml/PCGUI.fxml"));
         Scene scene = new Scene(root);
         mainStage.setScene(scene);
-        mainStage.setTitle("\"Poligon Commander\" (version 1.7)");
+        mainStage.setTitle("\"Poligon Commander\" (version 1.8)");
         mainStage.show();
         mainStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override

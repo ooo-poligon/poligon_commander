@@ -10,55 +10,46 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Created by Igor Klekotnev on 15.01.2016.
+ * Created by Igor Klekotnev on 28.07.2016.
  */
 
-public class SiteDBSettings {
-    private String addressSiteDB;
-    private String portSiteDB;
-    private String titleSiteDB;
-    private String userSiteDB;
-    private String passwordSiteDB;
-    private final String settingsType = "SiteDBSettings";
+public class SFTPSettings {
+    private String serverSFTP;
+    private String portSFTP;
+    private String userSFTP;
+    private String passwordSFTP;
+    private final String settingsType = "SFTPSettings";
 
-    public String getAddressSiteDB() {
-        return addressSiteDB;
+    public String getServerSFTP() {
+        return serverSFTP;
     }
 
-    public void setAddressSiteDB(String addressSiteDB) {
-        this.addressSiteDB = addressSiteDB;
+    public void setServerSFTP(String serverSFTP) {
+        this.serverSFTP = serverSFTP;
     }
 
-    public String getPortSiteDB() {
-        return portSiteDB;
+    public String getPortSFTP() {
+        return portSFTP;
     }
 
-    public void setPortSiteDB(String portSiteDB) {
-        this.portSiteDB = portSiteDB;
+    public void setPortSFTP(String portSFTP) {
+        this.portSFTP = portSFTP;
     }
 
-    public String getTitleSiteDB() {
-        return titleSiteDB;
+    public String getUserSFTP() {
+        return userSFTP;
     }
 
-    public void setTitleSiteDB(String titleSiteDB) {
-        this.titleSiteDB = titleSiteDB;
+    public void setUserSFTP(String userSFTP) {
+        this.userSFTP = userSFTP;
     }
 
-    public String getUserSiteDB() {
-        return userSiteDB;
+    public String getPasswordSFTP() {
+        return passwordSFTP;
     }
 
-    public void setUserSiteDB(String userSiteDB) {
-        this.userSiteDB = userSiteDB;
-    }
-
-    public String getPasswordSiteDB() {
-        return passwordSiteDB;
-    }
-
-    public void setPasswordSiteDB(String passwordSiteDB) {
-        this.passwordSiteDB = passwordSiteDB;
+    public void setPasswordSFTP(String passwordSFTP) {
+        this.passwordSFTP = passwordSFTP;
     }
 
     public String getSettingsType() {
@@ -70,7 +61,7 @@ public class SiteDBSettings {
         Session session = HibernateUtil.getSessionFactory().openSession();
         List res = session.createQuery("from Settings " +
                 "where title=\'"+ settingTitle +"\'" +
-                "and kind=\'SiteDBSettings\'").list();
+                "and kind=\'SFTPSettings\'").list();
         for (Iterator iterator = res.iterator(); iterator.hasNext();) {
             Settings setting = (Settings) iterator.next();
             setId = setting.getId();
@@ -106,3 +97,4 @@ public class SiteDBSettings {
         return settingValue;
     }
 }
+

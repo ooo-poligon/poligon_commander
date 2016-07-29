@@ -108,12 +108,15 @@ public class Products implements Serializable {
 
     @OneToMany(mappedBy = "productId")
     private Collection<Quantity> quantityCollection;
+
     @JoinColumn(name = "serie", referencedColumnName = "title")
     @ManyToOne
     private Series serie;
+
     @JoinColumn(name = "category_id", referencedColumnName = "id")
     @ManyToOne
     private Categories categoryId;
+
     @JoinColumn(name = "product_kind_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private ProductKinds productKindId;
@@ -121,6 +124,10 @@ public class Products implements Serializable {
     @JoinColumn(name = "vendor", referencedColumnName = "title")
     @ManyToOne(optional = true)
     private Vendors vendor;
+
+    @JoinColumn(name = "vendor_id", referencedColumnName = "id")
+    @ManyToOne(optional = true)
+    private Vendors vendorId;
 
     @JoinColumn(name = "currency_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
@@ -305,6 +312,14 @@ public class Products implements Serializable {
 
     public void setVendor(Vendors vendor) {
         this.vendor = vendor;
+    }
+
+    public Vendors getVendorId() {
+        return vendorId;
+    }
+
+    public void setVendorId(Vendors vendorId) {
+        this.vendorId = vendorId;
     }
 
     @XmlTransient

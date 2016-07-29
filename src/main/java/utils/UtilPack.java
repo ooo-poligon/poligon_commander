@@ -2,20 +2,14 @@ package utils;
 
 import entities.*;
 import entities.Properties;
-import javafx.collections.ObservableList;
 import javafx.scene.control.CheckBoxTreeItem;
 import javafx.scene.control.TreeItem;
-import main.PCGUIController;
 import main.Product;
-import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import treetableviews.PropertiesTreeTableView;
-import treeviews.CategoriesTreeView;
+import tableviews.ProductPropertiesTableView;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -181,14 +175,14 @@ public class UtilPack {
         session.close();
         return series;
     }
-    public static ArrayList<TreeItem> treeItemChildren(TreeItem<PropertiesTreeTableView> item) {
+    public static ArrayList<TreeItem> treeItemChildren(TreeItem<ProductPropertiesTableView> item) {
         String itemTitle = item.getValue().getTitle();
         ArrayList<TreeItem> childTreeItems = new ArrayList<>(10);
         Session session = HibernateUtil.getSessionFactory().openSession();
         List res = session.createQuery("from Properties where propertyTypeId=" + UtilPack.getPropertyTypeIdFromTitle(itemTitle)).list();
         for (Iterator iterator = res.iterator(); iterator.hasNext();) {
             Properties property = (Properties) iterator.next();
-            childTreeItems.add(new TreeItem(new PropertiesTreeTableView(property.getTitle())));
+            childTreeItems.add(new TreeItem(new ProductPropertiesTableView(property.getTitle())));
         }
         session.close();
         return childTreeItems;

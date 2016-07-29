@@ -12,9 +12,9 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="AnchorPane" fx:id="anchorPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.PCGUIController">
+<AnchorPane id="AnchorPane" fx:id="anchorPane" minHeight="1024.0" minWidth="1280.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.PCGUIController">
    <children>
-      <BorderPane prefHeight="1024.0" prefWidth="1280.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <center>
             <TabPane fx:id="tabPane" prefWidth="940.0" tabClosingPolicy="UNAVAILABLE" tabMinWidth="200.0" BorderPane.alignment="CENTER">
               <tabs>
@@ -269,7 +269,20 @@
                                              <children>
                                                 <AnchorPane VBox.vgrow="NEVER">
                                                    <children>
-                                                      <ComboBox fx:id="searchComboBox" editable="true" maxWidth="1.7976931348623157E308" onKeyPressed="#handleSearchComboBox" promptText="Введите название товара" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                      <HBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                         <children>
+                                                            <AnchorPane>
+                                                               <children>
+                                                                  <Button mnemonicParsing="false" text="Шаблон" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                               </children>
+                                                            </AnchorPane>
+                                                            <AnchorPane HBox.hgrow="ALWAYS">
+                                                               <children>
+                                                                  <ComboBox fx:id="searchComboBox" editable="true" maxWidth="1.7976931348623157E308" onKeyPressed="#handleSearchComboBox" promptText="Введите название товара" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                               </children>
+                                                            </AnchorPane>
+                                                         </children>
+                                                      </HBox>
                                                    </children>
                                                 </AnchorPane>
                                                 <AnchorPane VBox.vgrow="ALWAYS">
@@ -348,7 +361,7 @@
                                           </HBox>
                                        </children>
                                     </AnchorPane>
-                                    <AnchorPane VBox.vgrow="ALWAYS">
+                                    <AnchorPane prefHeight="500.0" VBox.vgrow="ALWAYS">
                                        <children>
                                           <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
                                             <columnConstraints>
@@ -414,17 +427,17 @@
                                                          <children>
                                                             <AnchorPane VBox.vgrow="ALWAYS">
                                                                <children>
-                                                                  <TreeTableView fx:id="propertiesTable" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                  <TableView fx:id="propertiesTable" editable="true" layoutX="1.0" layoutY="24.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                     <columns>
-                                                                      <TreeTableColumn fx:id="propertyTitleColumn" prefWidth="136.0" text="Свойство" />
-                                                                        <TreeTableColumn fx:id="propertyConditionColumn" prefWidth="128.0" text="Условие" />
-                                                                      <TreeTableColumn fx:id="propertyValueColumn" prefWidth="122.0" text="Значение" />
-                                                                        <TreeTableColumn fx:id="propertyMeasureColumn" prefWidth="75.0" text="Ед. изм." visible="false" />
+                                                                      <TableColumn fx:id="propertyTitleColumn" prefWidth="180.0" text="Свойство" />
+                                                                      <TableColumn fx:id="propertyConditionColumn" prefWidth="180.0" text="Условие" />
+                                                                        <TableColumn fx:id="propertyValueColumn" prefWidth="130.0" text="Значение" />
+                                                                        <TableColumn fx:id="propertyMeasureColumn" text="Ед. изм." />
                                                                     </columns>
                                                                      <contextMenu>
                                                                         <ContextMenu fx:id="propertiesTableContextMenu" />
                                                                      </contextMenu>
-                                                                  </TreeTableView>
+                                                                  </TableView>
                                                                </children>
                                                             </AnchorPane>
                                                             <AnchorPane prefHeight="200.0" VBox.vgrow="ALWAYS">
@@ -485,7 +498,7 @@
                                                       </VBox>
                                                    </children>
                                                 </AnchorPane>
-                                                <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                                                <AnchorPane>
                                                    <children>
                                                       <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
                                                          <children>
@@ -528,7 +541,7 @@
                                                                      <children>
                                                                         <AnchorPane VBox.vgrow="ALWAYS">
                                                                            <children>
-                                                                              <TextArea fx:id="picDescriptionTextArea" prefHeight="74.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                                              <TextArea fx:id="picDescriptionTextArea" prefHeight="40.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                                                            </children>
                                                                         </AnchorPane>
                                                                         <AnchorPane VBox.vgrow="NEVER">
@@ -560,6 +573,59 @@
                                                                   </VBox>
                                                                </children>
                                                             </AnchorPane>
+                                                            <AnchorPane>
+                                                               <children>
+                                                                  <Label text="Изображение габаритов:" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="10.0">
+                                                                     <font>
+                                                                        <Font name="System Bold" size="14.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                               </children>
+                                                            </AnchorPane>
+                                                            <AnchorPane prefHeight="240.0" prefWidth="200.0">
+                                                               <children>
+                                                                  <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                     <children>
+                                                                        <AnchorPane minHeight="210.0" VBox.vgrow="ALWAYS">
+                                                                           <children>
+                                                                              <GridPane fx:id="productDimsGridPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                                <columnConstraints>
+                                                                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                                                </columnConstraints>
+                                                                                <rowConstraints>
+                                                                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                                                </rowConstraints>
+                                                                                 <children>
+                                                                                    <ImageView fx:id="productDimsImageView" fitHeight="200.0" fitWidth="230.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
+                                                                                 </children>
+                                                                              </GridPane>
+                                                                           </children>
+                                                                        </AnchorPane>
+                                                                        <AnchorPane VBox.vgrow="ALWAYS">
+                                                                           <children>
+                                                                              <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                                <columnConstraints>
+                                                                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                                                </columnConstraints>
+                                                                                <rowConstraints>
+                                                                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                                                </rowConstraints>
+                                                                                 <children>
+                                                                                    <AnchorPane prefHeight="200.0" prefWidth="200.0" />
+                                                                                    <AnchorPane GridPane.columnIndex="1">
+                                                                                       <children>
+                                                                                          <Button fx:id="changeDimsImageButton" layoutX="74.0" layoutY="2.0" mnemonicParsing="false" onAction="#setDimsImageButtonPress" text="Изменить фото" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                                                       </children>
+                                                                                    </AnchorPane>
+                                                                                 </children>
+                                                                              </GridPane>
+                                                                           </children>
+                                                                        </AnchorPane>
+                                                                     </children>
+                                                                  </VBox>
+                                                               </children>
+                                                            </AnchorPane>
                                                          </children>
                                                       </VBox>
                                                    </children>
@@ -568,49 +634,179 @@
                                           </GridPane>
                                        </children>
                                     </AnchorPane>
-                                    <AnchorPane>
-                                       <children>
-                                          <Line endX="5000.0" startX="-1000.0" stroke="#bfbfbf" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="10.0" />
-                                       </children>
-                                    </AnchorPane>
-                                    <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                                    <AnchorPane prefHeight="200.0" VBox.vgrow="ALWAYS">
                                        <children>
                                           <GridPane AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                                             <columnConstraints>
-                                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="30.0" prefWidth="100.0" />
+                                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="70.0" prefWidth="100.0" />
                                             </columnConstraints>
                                             <rowConstraints>
-                                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                              <RowConstraints vgrow="ALWAYS" />
                                             </rowConstraints>
                                              <children>
-                                                <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                                                <AnchorPane GridPane.columnIndex="1">
                                                    <children>
-                                                      <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                      <HBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                          <children>
-                                                            <AnchorPane>
+                                                            <AnchorPane HBox.hgrow="ALWAYS">
                                                                <children>
-                                                                  <Label text="Аксессуары:" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                                     <font>
-                                                                        <Font name="System Bold" size="14.0" />
-                                                                     </font>
-                                                                  </Label>
-                                                               </children>
-                                                            </AnchorPane>
-                                                            <AnchorPane prefHeight="200.0" prefWidth="200.0">
-                                                               <children>
-                                                                  <TableView fx:id="accessoriesTable" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                                    <columns>
-                                                                      <TableColumn fx:id="accessoriesTableTitleColumn" minWidth="-Infinity" prefWidth="300.0" text="Название" />
-                                                                      <TableColumn fx:id="accessoriesTableDescriptionColumn" minWidth="-Infinity" prefWidth="712.0" text="Описание" />
-                                                                    </columns>
-                                                                     <contextMenu>
-                                                                        <ContextMenu fx:id="accessoriesTableContextMenu" />
-                                                                     </contextMenu>
-                                                                  </TableView>
+                                                                  <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                     <children>
+                                                                        <AnchorPane>
+                                                                           <children>
+                                                                              <Label text="Аксессуары:" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                                 <font>
+                                                                                    <Font name="System Bold" size="14.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                           </children>
+                                                                        </AnchorPane>
+                                                                        <AnchorPane VBox.vgrow="ALWAYS">
+                                                                           <children>
+                                                                              <TableView fx:id="accessoriesTable" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                                <columns>
+                                                                                  <TableColumn fx:id="accessoriesTableTitleColumn" minWidth="-Infinity" prefWidth="320.0" text="Название" />
+                                                                                  <TableColumn fx:id="accessoriesTableDescriptionColumn" minWidth="-Infinity" prefWidth="712.0" text="Описание" />
+                                                                                </columns>
+                                                                                 <contextMenu>
+                                                                                    <ContextMenu fx:id="accessoriesTableContextMenu" />
+                                                                                 </contextMenu>
+                                                                              </TableView>
+                                                                           </children>
+                                                                        </AnchorPane>
+                                                                     </children>
+                                                                  </VBox>
                                                                </children>
                                                             </AnchorPane>
                                                          </children>
-                                                      </VBox>
+                                                      </HBox>
+                                                   </children>
+                                                </AnchorPane>
+                                                <AnchorPane prefWidth="525.0">
+                                                   <children>
+                                                      <TabPane tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
+                                                        <tabs>
+                                                          <Tab fx:id="plug1Tab" text="Подключение (слот №1)">
+                                                               <content>
+                                                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                                     <children>
+                                                                        <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                           <children>
+                                                                              <AnchorPane minHeight="220.0">
+                                                                                 <children>
+                                                                                    <GridPane fx:id="plug1GridPane" minHeight="220.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                                       <children>
+                                                                                          <ImageView fx:id="plug1ImageView" fitHeight="220.0" fitWidth="220.0" pickOnBounds="true" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="NEVER" />
+                                                                                       </children>
+                                                                                       <columnConstraints>
+                                                                                          <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
+                                                                                       </columnConstraints>
+                                                                                       <rowConstraints>
+                                                                                          <RowConstraints minHeight="220.0" vgrow="NEVER" />
+                                                                                          <RowConstraints />
+                                                                                       </rowConstraints>
+                                                                                    </GridPane>
+                                                                                 </children>
+                                                                              </AnchorPane>
+                                                                              <AnchorPane fx:id="textAndButtonsAncorPane1" prefHeight="200.0" prefWidth="200.0">
+                                                                                 <children>
+                                                                                    <HBox fx:id="textAndButtonsHBox1" prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                                       <children>
+                                                                                          <AnchorPane fx:id="textAncorPane1">
+                                                                                             <children>
+                                                                                                <TextArea fx:id="plug1TextArea" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
+                                                                                             </children>
+                                                                                          </AnchorPane>
+                                                                                          <AnchorPane>
+                                                                                             <children>
+                                                                                                <VBox AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+                                                                                                   <children>
+                                                                                                      <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                                                                                                         <children>
+                                                                                                            <Button fx:id="changePlug1ImageButton" minWidth="120.0" mnemonicParsing="false" onAction="#setPlug1ImageButtonPress" text="Изменить фото " AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                                                                         </children>
+                                                                                                      </AnchorPane>
+                                                                                                      <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                                                                                                         <children>
+                                                                                                            <Button fx:id="changePlug1ImageDescButton" mnemonicParsing="false" onAction="#setPlug1ImageDescButtonPress" text="Сохр. описание" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                                                                         </children>
+                                                                                                      </AnchorPane>
+                                                                                                   </children>
+                                                                                                </VBox>
+                                                                                             </children>
+                                                                                          </AnchorPane>
+                                                                                       </children>
+                                                                                    </HBox>
+                                                                                 </children>
+                                                                              </AnchorPane>
+                                                                           </children>
+                                                                        </VBox>
+                                                                     </children>
+                                                                  </AnchorPane>
+                                                               </content>
+                                                          </Tab>
+                                                          <Tab fx:id="plug2Tab" text="Подключение (слот №2)">
+                                                               <content>
+                                                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                                     <children>
+                                                                        <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                           <children>
+                                                                              <AnchorPane>
+                                                                                 <children>
+                                                                                    <GridPane fx:id="plug2GridPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                                       <children>
+                                                                                          <ImageView fx:id="plug2ImageView" fitHeight="200.0" fitWidth="220.0" pickOnBounds="true" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="NEVER" />
+                                                                                       </children>
+                                                                                       <columnConstraints>
+                                                                                          <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
+                                                                                       </columnConstraints>
+                                                                                       <rowConstraints>
+                                                                                          <RowConstraints vgrow="NEVER" />
+                                                                                          <RowConstraints />
+                                                                                       </rowConstraints>
+                                                                                    </GridPane>
+                                                                                 </children>
+                                                                              </AnchorPane>
+                                                                              <AnchorPane fx:id="textAndButtonsAncorPane11" prefHeight="200.0" prefWidth="200.0">
+                                                                                 <children>
+                                                                                    <HBox fx:id="textAndButtonsHBox11" prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                                       <children>
+                                                                                          <AnchorPane fx:id="textAncorPane11">
+                                                                                             <children>
+                                                                                                <TextArea fx:id="plug2TextArea" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
+                                                                                             </children>
+                                                                                          </AnchorPane>
+                                                                                          <AnchorPane>
+                                                                                             <children>
+                                                                                                <VBox AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+                                                                                                   <children>
+                                                                                                      <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                                                                                                         <children>
+                                                                                                            <Button fx:id="changePlug2ImageButton" minWidth="120.0" mnemonicParsing="false" onAction="#setPlug2ImageButtonPress" text="Изменить фото " AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                                                                         </children>
+                                                                                                      </AnchorPane>
+                                                                                                      <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                                                                                                         <children>
+                                                                                                            <Button fx:id="changePlug2ImageDescButton" mnemonicParsing="false" onAction="#setPlug2ImageDescButtonPress" text="Сохр. описание" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                                                                         </children>
+                                                                                                      </AnchorPane>
+                                                                                                   </children>
+                                                                                                </VBox>
+                                                                                             </children>
+                                                                                          </AnchorPane>
+                                                                                       </children>
+                                                                                    </HBox>
+                                                                                 </children>
+                                                                              </AnchorPane>
+                                                                           </children>
+                                                                        </VBox>
+                                                                     </children>
+                                                                  </AnchorPane>
+                                                               </content>
+                                                          </Tab>
+                                                        </tabs>
+                                                      </TabPane>
                                                    </children>
                                                 </AnchorPane>
                                              </children>
@@ -943,18 +1139,18 @@
                     <content>
                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                            <children>
-                              <GridPane layoutX="170.0" layoutY="141.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                              <GridPane layoutX="170.0" layoutY="141.0" minHeight="1024.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                 <columnConstraints>
                                   <ColumnConstraints hgrow="SOMETIMES" maxWidth="507.0" minWidth="10.0" percentWidth="25.0" prefWidth="372.0" />
                                   <ColumnConstraints hgrow="ALWAYS" maxWidth="-Infinity" percentWidth="75.0" />
                                 </columnConstraints>
                                 <rowConstraints>
-                                  <RowConstraints maxHeight="392.0" minHeight="10.0" percentHeight="35.0" prefHeight="392.0" vgrow="SOMETIMES" />
-                                  <RowConstraints maxHeight="300.0" minHeight="10.0" percentHeight="30.0" prefHeight="101.0" vgrow="SOMETIMES" />
+                                  <RowConstraints maxHeight="392.0" minHeight="392.0" percentHeight="35.0" prefHeight="392.0" vgrow="SOMETIMES" />
+                                  <RowConstraints maxHeight="300.0" minHeight="101.0" percentHeight="30.0" prefHeight="101.0" vgrow="SOMETIMES" />
                                   <RowConstraints minHeight="10.0" percentHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                 </rowConstraints>
                                  <children>
-                                    <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                                    <AnchorPane prefWidth="200.0">
                                        <children>
                                           <VBox layoutX="120.0" layoutY="24.0" prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                              <children>
@@ -1156,9 +1352,9 @@
                                                       </Label>
                                                    </children>
                                                 </AnchorPane>
-                                                <AnchorPane>
+                                                <AnchorPane minHeight="50.0" prefHeight="50.0" VBox.vgrow="ALWAYS">
                                                    <children>
-                                                      <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                      <GridPane minHeight="50.0" prefHeight="50.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                         <columnConstraints>
                                                           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                                         </columnConstraints>
@@ -1167,14 +1363,14 @@
                                                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                         </rowConstraints>
                                                          <children>
-                                                            <AnchorPane GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="BASELINE" GridPane.vgrow="ALWAYS">
+                                                            <AnchorPane prefHeight="100.0" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="BASELINE" GridPane.vgrow="ALWAYS">
                                                                <children>
                                                                   <HBox alignment="BASELINE_LEFT" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                                                                      <children>
                                                                         <ComboBox fx:id="tableDBForExportComboBox" minWidth="180.0" onAction="#getSelectedDBTable" prefWidth="180.0" promptText="Экспорт таблицы БД" />
                                                                         <Label alignment="CENTER" minWidth="200.0" text=" в файл формата XLS: " HBox.hgrow="ALWAYS" />
                                                                         <Button fx:id="chooseFileForExportButton" minWidth="140.0" mnemonicParsing="false" onAction="#chooseDirectoryForExport" text="Выбрать папку для экспорта" HBox.hgrow="ALWAYS" />
-                                                                        <AnchorPane HBox.hgrow="ALWAYS">
+                                                                        <AnchorPane minHeight="20.0" HBox.hgrow="ALWAYS">
                                                                            <children>
                                                                               <Label fx:id="fileForExportPathLabel" maxWidth="1.7976931348623157E308" minWidth="150.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="0.0" />
                                                                            </children>
@@ -1191,7 +1387,7 @@
                                                                      <children>
                                                                         <Label alignment="CENTER" minWidth="200.0" text="Выгрузить базовую цену  и цены со скидками  в файл формата XLS:  " HBox.hgrow="ALWAYS" />
                                                                         <Button fx:id="chooseDirForExportPricesButton" minWidth="140.0" mnemonicParsing="false" onAction="#chooseDirectoryForExportPrices" text="Выбрать папку для экспорта" HBox.hgrow="ALWAYS" />
-                                                                        <AnchorPane HBox.hgrow="ALWAYS">
+                                                                        <AnchorPane minHeight="20.0" HBox.hgrow="ALWAYS">
                                                                            <children>
                                                                               <Label fx:id="dirForExportPricesPathLabel" maxWidth="1.7976931348623157E308" minWidth="150.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="0.0" />
                                                                            </children>
@@ -1497,6 +1693,86 @@
                                                                   </AnchorPane>
                                                             </content>
                                                           </Tab>
+                                                            <Tab text="Доступ по SFTP">
+                                                              <content>
+                                                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                                     <children>
+                                                                        <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                           <children>
+                                                                              <AnchorPane prefHeight="40.0" prefWidth="512.0">
+                                                                                 <children>
+                                                                                    <Label layoutX="110.0" layoutY="9.0" text="Доступ к удалённому серверу по SFTP" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                                       <font>
+                                                                                          <Font name="System Bold" size="14.0" />
+                                                                                       </font>
+                                                                                    </Label>
+                                                                                 </children>
+                                                                              </AnchorPane>
+                                                                              <AnchorPane>
+                                                                                 <children>
+                                                                                    <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                                       <children>
+                                                                                          <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                                                                                             <children>
+                                                                                                <Label layoutX="38.0" layoutY="18.0" text="Адрес сервера:" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="0.0" />
+                                                                                             </children>
+                                                                                          </AnchorPane>
+                                                                                          <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1">
+                                                                                             <children>
+                                                                                                <Label layoutX="38.0" layoutY="18.0" text="Порт соединения:" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="0.0" />
+                                                                                             </children>
+                                                                                          </AnchorPane>
+                                                                                          <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="2">
+                                                                                             <children>
+                                                                                                <Label layoutX="38.0" layoutY="17.0" text="Пользователь:" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="0.0" />
+                                                                                             </children>
+                                                                                          </AnchorPane>
+                                                                                          <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="3">
+                                                                                             <children>
+                                                                                                <Label layoutX="38.0" layoutY="17.0" text="Пароль:" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="0.0" />
+                                                                                             </children>
+                                                                                          </AnchorPane>
+                                                                                          <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1">
+                                                                                             <children>
+                                                                                                <TextField fx:id="serverSFTP" layoutX="2.0" layoutY="14.0" onAction="#saveServerSFTP" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                                                             </children>
+                                                                                          </AnchorPane>
+                                                                                          <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                                                                             <children>
+                                                                                                <TextField fx:id="portSFTP" layoutX="2.0" layoutY="14.0" onAction="#savePortSFTP" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                                                             </children>
+                                                                                          </AnchorPane>
+                                                                                          <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                                                                             <children>
+                                                                                                <TextField fx:id="userSFTP" layoutX="2.0" layoutY="13.0" onAction="#saveUserSFTP" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                                                             </children>
+                                                                                          </AnchorPane>
+                                                                                          <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                                                                                             <children>
+                                                                                                <PasswordField fx:id="passwordSFTP" layoutX="2.0" layoutY="4.0" onAction="#savePasswordSFTP" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                                                             </children>
+                                                                                          </AnchorPane>
+                                                                                       </children>
+                                                                                       <columnConstraints>
+                                                                                          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="40.0" prefWidth="100.0" />
+                                                                                          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                                                       </columnConstraints>
+                                                                                       <rowConstraints>
+                                                                                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                                                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                                                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                                                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                                                       </rowConstraints>
+                                                                                    </GridPane>
+                                                                                 </children>
+                                                                              </AnchorPane>
+                                                                              <AnchorPane VBox.vgrow="ALWAYS" />
+                                                                           </children>
+                                                                        </VBox>
+                                                                     </children>
+                                                                  </AnchorPane>
+                                                              </content>
+                                                            </Tab>
                                                         </tabs>
                                                       </TabPane>
                                                    </children>
