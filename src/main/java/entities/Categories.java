@@ -46,6 +46,8 @@ public class Categories implements Serializable {
     @Lob
     @Column(name = "description")
     private String description;
+    @Column(name = "image_path")
+    private String imagePath;
     @Column(name = "parent")
     private Integer parent;
     @Column(name = "published")
@@ -103,6 +105,14 @@ public class Categories implements Serializable {
 
     public void setPublished(Integer published) {
         this.published = published;
+    }
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
     }
 
     @XmlTransient

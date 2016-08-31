@@ -231,9 +231,9 @@ public class ProductImage {
         String fileName = "";
         String fileType = "";
         if( plugNumber != null) {
-            fileName = selectedProduct.replace(" ", "_") + "_" + picType + plugNumber + ".jpg";
+            fileName = selectedProduct.replace(" ", "_").replace("/", "_").replace(",", "_") + "_" + picType + plugNumber + ".jpg";
         } else {
-            fileName = selectedProduct.replace(" ", "_") + "_" + picType + ".jpg";
+            fileName = selectedProduct.replace(" ", "_").replace("/", "_").replace(",", "_") + "_" + picType + ".jpg";
         }
         fileType = picType;
         resPath = "\\\\Server03\\бд_сайта\\poligon_images\\catalog\\" + vendorTitle + "\\" + fileType + "s\\" + fileName ;

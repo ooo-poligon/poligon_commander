@@ -1936,10 +1936,11 @@ public class PCGUIController implements Initializable {
         setCategorySelected(productsTable.getSelectionModel().getSelectedItem().getTitle());
     }
     private void newCategoryDialog(String whatTree, TreeView<String> treeView) throws SQLException {
-        Optional<NewCategory> result = AlertWindow.newCategoryDialog();
+        Optional<NewCategory> result = AlertWindow.newCategoryDialog(treeView);
         if (result.isPresent()) {
             newCatTitle = result.get().getTitle();
             newCatDescription = result.get().getDescription();
+            newCatPicturePath  = result.get().getImagePath();
             createNewCategory(whatTree, treeView);
             if (whatTree.equals("main")) {
                 buildCategoryTree();
@@ -1956,7 +1957,8 @@ public class PCGUIController implements Initializable {
             if (result.isPresent()) {
                 newCatTitle = result.get().getTitle();
                 newCatDescription = result.get().getDescription();
-                editCategory(categoriesTree.getSelectionModel().getSelectedItem().getValue(), newCatTitle, newCatDescription);
+                newCatPicturePath  = result.get().getImagePath();
+                editCategory(categoriesTree.getSelectionModel().getSelectedItem().getValue(), newCatTitle, newCatDescription, newCatPicturePath);
                 getAllCategoriesList();
                 buildCategoryTree();
             }
@@ -1966,7 +1968,8 @@ public class PCGUIController implements Initializable {
             if (result.isPresent()) {
                 newCatTitle = result.get().getTitle();
                 newCatDescription = result.get().getDescription();
-                editCategory(treeView.getSelectionModel().getSelectedItem().getValue(), newCatTitle, newCatDescription);
+                newCatPicturePath  = result.get().getImagePath();
+                editCategory(treeView.getSelectionModel().getSelectedItem().getValue(), newCatTitle, newCatDescription, newCatPicturePath);
                 getAllCategoriesList();
                 buildCategoryTree();
                 buildModalCategoryTree(stackPaneModal, treeView);
@@ -1978,7 +1981,7 @@ public class PCGUIController implements Initializable {
             String catTitle = categoriesTree.getSelectionModel().getSelectedItem().getValue();
             Optional<ButtonType> result = AlertWindow.categoryDeleteAttention(catTitle);
             if ((result.isPresent()) && (result.get() == ButtonType.OK)) {
-                Integer parentCatId = getParentCatId(catTitle);
+                Integer parentCatId = UtilPack.getParentCatId(catTitle);
                 Integer catId = UtilPack.getCategoryIdFromTitle(catTitle);
                 replaceProductsUp(catId, parentCatId);
                 deleteCategory(catTitle);
@@ -1991,7 +1994,7 @@ public class PCGUIController implements Initializable {
             String catTitle = treeView.getSelectionModel().getSelectedItem().getValue();
             Optional<ButtonType> result = AlertWindow.categoryDeleteAttention(catTitle);
             if ((result.isPresent()) && (result.get() == ButtonType.OK)) {
-                Integer parentCatId = getParentCatId(catTitle);
+                Integer parentCatId = UtilPack.getParentCatId(catTitle);
                 Integer catId = UtilPack.getCategoryIdFromTitle(catTitle);
                 replaceProductsUp(catId, parentCatId);
                 deleteCategory(catTitle);
@@ -2018,23 +2021,33 @@ public class PCGUIController implements Initializable {
         Categories category = new Categories();
         category.setTitle(newCatTitle);
         category.setDescription(newCatDescription);
+        category.setImagePath(newCatPicturePath);
         category.setParent(parentId);
         category.setPublished(0);
         session.save(category);
         tx.commit();
         session.close();
+        //String picName = newCatPicturePath.replace('\\', '@').split("@")[(newCatPicturePath.replace('\\', '@')).split("@").length - 1];
+        //String targetRemoteCatPixFolder = "images/design/categories/" +
+        //        UtilPack.getCategoryVendorFromId(UtilPack.getCategoryIdFromTitle(parentCategoryTitle)) + picName;
+        //UtilPack.startFTP(newCatPicturePath, targetRemoteCatPixFolder);
     }
-    private void editCategory(String categoryTitle, String newTitle, String NewDescription) throws SQLException {
+    private void editCategory(String categoryTitle, String newTitle, String NewDescription, String NewImagePath) throws SQLException {
         Integer id = UtilPack.getCategoryIdFromTitle (categoryTitle);
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
-        Query query = session.createQuery("update Categories set title = :title, description = :description where id = :id");
+        Query query = session.createQuery("update Categories set title = :title, description = :description, imagePath = :imagePath where id = :id");
         query.setParameter("title", newTitle);
         query.setParameter("description", NewDescription);
+        query.setParameter("imagePath", NewImagePath);
         query.setParameter("id", id);
         query.executeUpdate();
         tx.commit();
         session.close();
+        //String picName = NewImagePath.replace('\\', '@').split("@")[(NewImagePath.replace('\\', '@')).split("@").length - 1];
+        //String targetRemoteCatPixFolder = "images/design/categories/" +
+        //        UtilPack.getCategoryVendorFromId(id) + picName;
+        //UtilPack.startFTP(NewImagePath, targetRemoteCatPixFolder);
     }
     private void deleteCategory(String categoryTitle) throws SQLException {
         Integer id = UtilPack.getCategoryIdFromTitle (categoryTitle);
@@ -2053,31 +2066,17 @@ public class PCGUIController implements Initializable {
         try {
             List response = session.createQuery("From Categories where id=" + id).list();
             for (Iterator iterator = response.iterator(); iterator.hasNext();) {
-                Categories categorie = (Categories) iterator.next();
-                details.add(categorie.getTitle());
-                details.add(categorie.getDescription());
+                Categories category = (Categories) iterator.next();
+                details.add(category.getTitle());
+                details.add(category.getDescription());
+                details.add(category.getImagePath());
+                details.add(UtilPack.getCategoryVendorFromId(category.getParent()));
             }
         } catch (HibernateException e) {
         } finally {
             session.close();
         }
         return details;
-    }
-    private Integer getParentCatId(String categoryTitle) throws SQLException {
-        Integer id = UtilPack.getCategoryIdFromTitle(categoryTitle);
-        Integer parentId = 0;
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        try {
-            List response = session.createQuery("From Categories where id=" + id).list();
-            for (Iterator iterator = response.iterator(); iterator.hasNext();) {
-                Categories categorie = (Categories) iterator.next();
-                parentId = categorie.getParent();
-            }
-        } catch (HibernateException e) {
-        } finally {
-            session.close();
-        }
-        return parentId;
     }
     private void replaceProductsUp(Integer catId, Integer parentCatId) throws SQLException {
         ArrayList<String> productsUp = new ArrayList<>(100);
@@ -4433,6 +4432,7 @@ public class PCGUIController implements Initializable {
     String selectedSerie;
     String newCatTitle = "";
     String newCatDescription;
+    String newCatPicturePath;
     String selectedDBKey = "Наименование продукта";
     String catalogHeader = "Каталог товаров";
     String newVendorTitle = "";

@@ -5,18 +5,24 @@ import entities.Series;
 import entities.Vendors;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Line;
+import javafx.stage.FileChooser;
 import main.PCGUIController;
 import main.Product;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import utils.*;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -26,6 +32,7 @@ import java.util.Optional;
  * Created by Igor Klekotnev on 11.03.2016.
  */
 public class AlertWindow {
+    private static String picPath = "";
     private static StackPane stackPane = new StackPane();
     public static void alertNoRbcServerConnection () {
         Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -110,23 +117,48 @@ public class AlertWindow {
         dialog.getButtonTypes().add(buttonTypeCancel);
         return alert.showAndWait();
     }
-    public static Optional<NewCategory> newCategoryDialog() {
+    public static Optional<NewCategory> newCategoryDialog(TreeView<String> treeView) {
+        String parentCategoryTitle = treeView.getSelectionModel().getSelectedItem().getValue();
         Dialog<NewCategory> dialog = new Dialog<>();
         dialog.setTitle("Создание новой категории");
         dialog.setHeaderText("Введите название новой категории. Она будет размещена внутри выбранной категории.");
-        dialog.setResizable(false);
+        dialog.setResizable(true);
 
         Label label1 = new Label("Введите название:  ");
         Label label2 = new Label("Описание (необязательно):  ");
+        Label label3 = new Label("");
+        Label label4 = new Label("");
         TextField text1 = new TextField();
         TextArea text2 = new TextArea();
-
-        GridPane grid = new GridPane();
+        Button setImageButton = new Button("Выбрать изображение");
+        ImageView image1 = new ImageView();
+        image1.setFitHeight(300.0);
+        image1.setPreserveRatio(true);
+        GridPane grid  = new GridPane();
+        GridPane grid1 = new GridPane();
         grid.add(label1, 1, 1);
         grid.add(text1, 2, 1);
         grid.add(label2, 1, 2);
         grid.add(text2, 2, 2);
+        grid.add(label3, 1, 3);
+        grid.add(grid1, 2, 4);
+        grid1.add(image1, 0, 0);
+        grid.add(label4, 1, 5);
+        grid.add(setImageButton, 2, 6);
         dialog.getDialogPane().setContent(grid);
+
+        setImageButton.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(javafx.event.ActionEvent event) {
+                FileChooser fileChooser = new FileChooser();
+                File file = fileChooser.showOpenDialog(grid.getScene().getWindow());
+                if (file != null) {
+                    ProductImage.open(new File(file.getAbsolutePath()), grid1, image1);
+                }
+                picPath = file.getAbsolutePath();
+            }
+        });
 
         ButtonType buttonTypeOk = new ButtonType("Создать", ButtonBar.ButtonData.OK_DONE);
         ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonBar.ButtonData.CANCEL_CLOSE);
@@ -134,7 +166,14 @@ public class AlertWindow {
         dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
         dialog.setResultConverter((ButtonType b) -> {
             if (b == buttonTypeOk) {
-                return new NewCategory(text1.getText(), text2.getText());
+                String picName = picPath.replace('\\', '@').split("@")[(picPath.replace('\\', '@')).split("@").length - 1];
+                String newPicPath = "\\\\Server03\\бд_сайта\\poligon_images\\design\\categories\\" + UtilPack.getCategoryVendorFromId(UtilPack.getCategoryIdFromTitle(parentCategoryTitle)) + "\\" + picName;
+                try {
+                    UtilPack.copyFile(new File(picPath), new File(newPicPath));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return new NewCategory(text1.getText(), text2.getText(), newPicPath);
             }
             return null;
         });
@@ -144,7 +183,7 @@ public class AlertWindow {
         Dialog<NewCategory> dialog = new Dialog<>();
         dialog.setTitle("Редактирование категории");
         dialog.setHeaderText("Здесь Вы можете отредактировать название и/или описание выбранной категории.");
-        dialog.setResizable(false);
+        dialog.setResizable(true);
 
         Label label1 = new Label("Введите название:  ");
         Label label2 = new Label("Описание (необязательно):  ");
@@ -152,13 +191,37 @@ public class AlertWindow {
         TextArea text2 = new TextArea();
         text1.setText(details.get(0));
         text2.setText(details.get(1));
-
+        Label label3 = new Label("");
+        Label label4 = new Label("");
+        Button setImageButton = new Button("Выбрать изображение");
+        ImageView image1 = new ImageView();
+        image1.setFitHeight(300.0);
+        image1.setPreserveRatio(true);
         GridPane grid = new GridPane();
+        GridPane grid1 = new GridPane();
         grid.add(label1, 1, 1);
         grid.add(text1, 2, 1);
         grid.add(label2, 1, 2);
         grid.add(text2, 2, 2);
+        grid.add(label3, 1, 3);
+        grid.add(grid1, 2, 4);
+        grid1.add(image1, 0, 0);
+        grid.add(label4, 1, 5);
+        grid.add(setImageButton, 2, 6);
         dialog.getDialogPane().setContent(grid);
+        if(details.get(2) != null) ProductImage.open(new File(details.get(2)), grid1, image1);
+        setImageButton.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(javafx.event.ActionEvent event) {
+                FileChooser fileChooser = new FileChooser();
+                File file = fileChooser.showOpenDialog(grid.getScene().getWindow());
+                if (file != null) {
+                    ProductImage.open(new File(file.getAbsolutePath()), grid1, image1);
+                }
+                picPath = file.getAbsolutePath();
+            }
+        });
 
         ButtonType buttonTypeOk = new ButtonType("Сохранить", ButtonBar.ButtonData.OK_DONE);
         ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonBar.ButtonData.CANCEL_CLOSE);
@@ -166,7 +229,14 @@ public class AlertWindow {
         dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
         dialog.setResultConverter((ButtonType b) -> {
             if (b == buttonTypeOk) {
-                return new NewCategory(text1.getText(), text2.getText());
+                String picName = picPath.replace('\\', '@').split("@")[(picPath.replace('\\', '@')).split("@").length - 1];
+                String newPicPath = "\\\\Server03\\бд_сайта\\poligon_images\\design\\categories\\" + details.get(3) + "\\" + picName;
+                try {
+                    UtilPack.copyFile(new File(picPath), new File(newPicPath));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return new NewCategory(text1.getText(), text2.getText(), newPicPath);
             }
             return null;
         });

@@ -34,29 +34,31 @@ import javax.xml.bind.annotation.XmlTransient;
         @NamedQuery(name = "Properties.findById", query = "SELECT p FROM Properties p WHERE p.id = :id"),
         @NamedQuery(name = "Properties.findByTitle", query = "SELECT p FROM Properties p WHERE p.title = :title")})
 public class Properties implements Serializable {
-    @Basic(optional = false)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "propertyId")
     private Collection<PropertyValues> propertyValuesCollection;
+
     @JoinColumn(name = "value_id", referencedColumnName = "id")
     @ManyToOne
     private PropertyValues valueId;
     private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
+
     @Column(name = "title")
     private String title;
+
     @JoinColumn(name = "product_id", referencedColumnName = "id")
     @ManyToOne(optional = true)
     private Products productId;
+
     @JoinColumn(name = "property_type_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private PropertyTypes propertyTypeId;
 
-    public Properties() {
-    }
+    public Properties() {}
 
     public Properties(Integer id) {
         this.id = id;

@@ -2,15 +2,28 @@ package utils;
 
 import entities.*;
 import entities.Properties;
+import entities.Settings;
 import javafx.scene.control.CheckBoxTreeItem;
 import javafx.scene.control.TreeItem;
 import main.Product;
+import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystemOptions;
+import org.apache.commons.vfs2.Selectors;
+import org.apache.commons.vfs2.impl.StandardFileSystemManager;
+import org.apache.commons.vfs2.provider.sftp.SftpFileSystemConfigBuilder;
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.cfg.*;
 import tableviews.ProductPropertiesTableView;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.*;
+import java.nio.file.Files;
 
 /**
  * Created by Igor Klekotnev on 11.03.2016.
@@ -39,6 +52,80 @@ public class UtilPack {
             title = category.getTitle();
         }
         return title;
+    }
+    public static String getCategoryVendorFromId (int id) {
+        int parentCatId = 0;
+        try {
+            parentCatId = getParentCatId(id);
+        } catch (SQLException e) {}
+        System.out.println("parentCatId is " + parentCatId);
+        if((parentCatId == 1) || (parentCatId == 2)) {
+            if((parentCatId == 1) && (id == 5650)) {
+                return "VEMER";
+            } else if((parentCatId == 1) && (id == 5414)) {
+                return "GRAESSLIN";
+            } else if((parentCatId == 1) && (id == 6441)) {
+                return "TEHNOPLAST";
+            } else if((parentCatId == 1) && (id == 5933)) {
+                return "RELECO";
+            } else if((parentCatId == 1) && (id == 74)) {
+                return "CITEL";
+            } else if((parentCatId == 1) && (id == 5512)) {
+                return "CBI";
+            } else if((parentCatId == 1) && (id == 142)) {
+                return "TELE";
+            } else if((parentCatId == 1) && (id == 5535)) {
+                return "SONDER";
+            } else if((parentCatId == 1) && (id == 6321)) {
+                return "Poligonspb";
+            } else if((parentCatId == 1) && (id == 5818)) {
+                return "RELEQUICK";
+            } else if((parentCatId == 1) && (id == 5583)) {
+                return "EMKO";
+            } else if((parentCatId == 1) && (id == 5094)) {
+                return "BENEDICT";
+            } else if((parentCatId == 2) && (id == 4847)) {
+                return "HUBER+SUHNER";
+            } else {
+                return getCategoryVendorFromId (parentCatId);
+            }
+        } else if((parentCatId == 0) || (parentCatId == 3)) {
+            return "ANY_VENDORS";
+        } else {
+            return getCategoryVendorFromId (parentCatId);
+        }
+    }
+    public static Integer getParentCatId(String categoryTitle) throws SQLException {
+        Integer id = UtilPack.getCategoryIdFromTitle(categoryTitle);
+        Integer parentId = 0;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            List response = session.createQuery("From Categories where id=" + id).list();
+            for (Iterator iterator = response.iterator(); iterator.hasNext();) {
+                Categories categorie = (Categories) iterator.next();
+                parentId = categorie.getParent();
+            }
+        } catch (HibernateException e) {
+        } finally {
+            session.close();
+        }
+        return parentId;
+    }
+    public static Integer getParentCatId(Integer categoryId) throws SQLException {
+        Integer id = categoryId;
+        Integer parentId = 0;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            List response = session.createQuery("From Categories where id=" + id).list();
+            for (Iterator iterator = response.iterator(); iterator.hasNext();) {
+                Categories categorie = (Categories) iterator.next();
+                parentId = categorie.getParent();
+            }
+        } catch (HibernateException e) {
+        } finally {
+            session.close();
+        }
+        return parentId;
     }
     public static Integer getPropertyTypeIdFromTitle (String title) {
         Integer id = 0;
@@ -247,5 +334,75 @@ public class UtilPack {
 
         }
 
+    }
+    public static void copyFile(File source, File dest) throws IOException {
+        Files.copy(source.toPath(), dest.toPath());
+    }
+    public static boolean startFTP(String filepath, String remotePath){
+        StandardFileSystemManager manager = new StandardFileSystemManager();
+        String serverAddress = "";
+        String userId = "";
+        String password = "";
+        try {
+            Session session = HibernateUtil.getSessionFactory().openSession();
+            List list = session.createQuery("from Settings where title = \"serverSFTP\" and kind = \"SFTPSettings\"").list();
+            for (Iterator iterator = list.iterator(); iterator.hasNext();) {
+                Settings setting = (Settings) iterator.next();
+                serverAddress = setting.getTextValue();
+            }
+            session.close();
+
+            Session session1 = HibernateUtil.getSessionFactory().openSession();
+            List list1 = session1.createQuery("from Settings where title = \"userSFTP\" and kind = \"SFTPSettings\"").list();
+            for (Iterator iterator = list1.iterator(); iterator.hasNext();) {
+                Settings setting = (Settings) iterator.next();
+                userId = setting.getTextValue();
+            }
+            session1.close();
+
+            Session session2 = HibernateUtil.getSessionFactory().openSession();
+            List list2 = session2.createQuery("from Settings where title = \"passwordSFTP\" and kind = \"SFTPSettings\"").list();
+            for (Iterator iterator = list2.iterator(); iterator.hasNext();) {
+                Settings setting = (Settings) iterator.next();
+                password = setting.getTextValue();
+            }
+            session2.close();
+
+            //check if the file exists
+            File file = new File(filepath);
+            if (!file.exists())
+                throw new RuntimeException("Error. Local file not found");
+
+            //Initializes the file manager
+            manager.init();
+
+            //Setup our SFTP configuration
+            FileSystemOptions opts = new FileSystemOptions();
+            SftpFileSystemConfigBuilder.getInstance().setStrictHostKeyChecking(opts, "no");
+            SftpFileSystemConfigBuilder.getInstance().setUserDirIsRoot(opts, true);
+            SftpFileSystemConfigBuilder.getInstance().setTimeout(opts, 10000);
+
+            //Create the SFTP URI using the host name, userid, password,  remote path and file name
+            String sftpUri = "sftp://" + userId + ":" + password +  "@" + serverAddress + "/" +
+                    remotePath;
+
+            // Create local file object
+            FileObject localFile = manager.resolveFile(file.getAbsolutePath());
+
+            // Create remote file object
+            FileObject remoteFile = manager.resolveFile(sftpUri, opts);
+
+            // Copy local file to sftp server
+            remoteFile.copyFrom(localFile, Selectors.SELECT_SELF);
+            System.out.println("File upload successful");
+
+        }
+        catch (Exception ex) {
+            return false;
+        }
+        finally {
+            manager.close();
+        }
+        return true;
     }
 }
