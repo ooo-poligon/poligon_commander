@@ -127,6 +127,18 @@ public class UtilPack {
         }
         return parentId;
     }
+    public static Integer getPropertyIdFromTitle (String title) {
+        Integer id = 0;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Query query = session.createQuery("from Properties where title = :title");
+        query.setParameter("title", title);
+        List result = query.list();
+        for (Iterator iterator = result.iterator(); iterator.hasNext();) {
+            Properties property = (Properties) iterator.next();
+            id = property.getId();
+        }
+        return id;
+    }
     public static Integer getPropertyTypeIdFromTitle (String title) {
         Integer id = 0;
         Session session = HibernateUtil.getSessionFactory().openSession();

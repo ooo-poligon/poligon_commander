@@ -1450,7 +1450,7 @@
                                                                                           <Label text="Наборы свойств:" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                                                                        </children>
                                                                                     </AnchorPane>
-                                                                                    <AnchorPane>
+                                                                                    <AnchorPane disable="true">
                                                                                        <children>
                                                                                           <TreeTableView fx:id="propertiesTreeTable" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
                                                                                             <columns>
@@ -1793,6 +1793,59 @@
                                                           <Button fx:id="loadSavedSettingsButton" mnemonicParsing="false" onAction="#loadSavedSettings" text="Применить" />
                                                         </items>
                                                       </ToolBar>
+                                                   </children>
+                                                </AnchorPane>
+                                             </children>
+                                          </VBox>
+                                       </children>
+                                    </AnchorPane>
+                                    <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                       <children>
+                                          <VBox layoutX="269.0" layoutY="78.0" prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                             <children>
+                                                <AnchorPane>
+                                                   <children>
+                                                      <HBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
+                                                         <children>
+                                                            <AnchorPane HBox.hgrow="ALWAYS">
+                                                               <children>
+                                                                  <Label text="Таблица свойств для типа устройств" AnchorPane.bottomAnchor="3.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+                                                                     <font>
+                                                                        <Font name="System Bold" size="20.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                               </children>
+                                                            </AnchorPane>
+                                                            <AnchorPane HBox.hgrow="ALWAYS">
+                                                               <children>
+                                                                  <GridPane nodeOrientation="LEFT_TO_RIGHT" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+                                                                    <columnConstraints>
+                                                                      <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                                      <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                                    </columnConstraints>
+                                                                    <rowConstraints>
+                                                                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                                    </rowConstraints>
+                                                                     <children>
+                                                                        <Button fx:id="addPropertyToTableButton" mnemonicParsing="false" onAction="#addPropertyToTable" text="Добавиь свойство" />
+                                                                        <Button fx:id="deletePropertyFromTableButton" mnemonicParsing="false" onAction="#deletePropertyFromTable" text="Удалить свойство" GridPane.columnIndex="1" />
+                                                                     </children>
+                                                                  </GridPane>
+                                                               </children>
+                                                            </AnchorPane>
+                                                         </children>
+                                                      </HBox>
+                                                   </children>
+                                                </AnchorPane>
+                                                <AnchorPane VBox.vgrow="ALWAYS">
+                                                   <children>
+                                                      <TableView fx:id="productKindPropertiesTable" editable="true" layoutX="51.0" layoutY="14.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
+                                                        <columns>
+                                                          <TableColumn fx:id="productKindPropertiesTitleColumn" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="520.0" text="Название свойства" />
+                                                          <TableColumn fx:id="productKindPropertiesOptionalColumn" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="300.0" text="Опция (курсивом под названием)" />
+                                                            <TableColumn fx:id="productKindPropertiesSymbolColumn" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="100.0" text="Символ" />
+                                                        </columns>
+                                                      </TableView>
                                                    </children>
                                                 </AnchorPane>
                                              </children>

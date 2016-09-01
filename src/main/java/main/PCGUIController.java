@@ -3851,6 +3851,78 @@ public class PCGUIController implements Initializable {
         productKindsList.setContextMenu(productKindsListContextMenu);
         productKindsList.setItems(items);
     }
+    private void buildProductKindPropertiesTable(String selectedProductKind) {
+        productKindsPropertiesList.clear();
+        ArrayList<Integer> selectedProductKindPropertiesIds = new ArrayList<>();
+        ArrayList<Properties> propertiesList = new ArrayList<>();
+        ResultSet resultSet = null;
+        try {
+            resultSet = connection.getResult("select property_id from product_kinds_properties where product_kind_id =" + UtilPack.getProductKindIdFromTitle(selectedProductKind));
+            while (resultSet.next()) {
+                selectedProductKindPropertiesIds.add(resultSet.getInt("property_id"));
+            }
+        } catch (SQLException e) {}
+
+        selectedProductKindPropertiesIds.stream().forEach((pid) -> {
+            Session session1 = HibernateUtil.getSessionFactory().openSession();
+            List res1 = session1.createQuery("from Properties where id =" + pid).list();
+            for (Iterator iterator = res1.iterator(); iterator.hasNext();) {
+                Properties p = (Properties) iterator.next();
+                propertiesList.add(p);
+            }
+            session1.close();
+        });
+
+        propertiesList.stream().forEach((p) -> {
+            productKindsPropertiesList.add(new ProductKindPropertiesTableView(p.getTitle(), p.getOptional(), p.getSymbol()));
+        });
+        productKindPropertiesTitleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
+        productKindPropertiesTitleColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        productKindPropertiesTitleColumn.setOnEditCommit(
+                t -> {
+                    String oldPropertyTitle = t.getTableView().getItems().get(t.getTablePosition().getRow()).getTitle();
+                    (t.getTableView().getItems().get(t.getTablePosition().getRow())).setTitle(t.getNewValue());
+                    setProductKindsPropertyCellValue("title", t.getNewValue(), oldPropertyTitle);
+                }
+        );
+
+        productKindPropertiesOptionalColumn.setCellValueFactory(new PropertyValueFactory<>("optional"));
+        productKindPropertiesOptionalColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        productKindPropertiesOptionalColumn.setOnEditCommit(
+                t -> {
+                    String oldPropertyTitle = t.getTableView().getItems().get(t.getTablePosition().getRow()).getTitle();
+                    (t.getTableView().getItems().get(t.getTablePosition().getRow())).setOptional(t.getNewValue());
+                    setProductKindsPropertyCellValue("optional", t.getNewValue(), oldPropertyTitle);
+                }
+        );
+
+        productKindPropertiesSymbolColumn.setCellValueFactory(new PropertyValueFactory<>("symbol"));
+        productKindPropertiesSymbolColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        productKindPropertiesSymbolColumn.setOnEditCommit(
+                t -> {
+                    String oldPropertyTitle = t.getTableView().getItems().get(t.getTablePosition().getRow()).getTitle();
+                    (t.getTableView().getItems().get(t.getTablePosition().getRow())).setSymbol(t.getNewValue());
+                    setProductKindsPropertyCellValue("symbol", t.getNewValue(), oldPropertyTitle);
+                }
+        );
+
+        productKindPropertiesTable.setItems(productKindsPropertiesList);
+    }
+    private void setProductKindsPropertyCellValue(String fieldName, String newValue, String propertyTitle) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = session.beginTransaction();
+        Query query = session.createQuery("UPDATE Properties set " + fieldName + "= :newValue where id= :id");
+        query.setParameter("newValue", newValue);
+        query.setParameter("id", UtilPack.getPropertyIdFromTitle(propertyTitle));
+        query.executeUpdate();
+        tx.commit();
+        session.close();
+
+        try {
+            getAllProductsList();
+            productKindPropertiesTable.refresh();
+        } catch (SQLException e) {}
+    }
     private void buildPropertiesTreeTable(String selectedPropertiesKind) {
         ArrayList<Integer> typesIds = new ArrayList<>(10);
         ArrayList<ProductPropertiesTableView> properties = new ArrayList<>(10);
@@ -4102,8 +4174,10 @@ public class PCGUIController implements Initializable {
     }
     @FXML private void handlePropertiesKindSelected() throws SQLException {
         String selectedPropertiesKind = productKindsList.getSelectionModel().getSelectedItem();
-        buildPropertiesTreeTable(selectedPropertiesKind);
+        String selectedProductKind    = productKindsList.getSelectionModel().getSelectedItem();
+        //buildPropertiesTreeTable(selectedPropertiesKind);
         buildFunctionsTable(selectedPropertiesKind);
+        buildProductKindPropertiesTable(selectedProductKind);
     }
     @FXML private void saveAddressSiteDB() {
         SiteDBSettings address = new SiteDBSettings();
@@ -4174,6 +4248,90 @@ public class PCGUIController implements Initializable {
     @FXML private void saveSiteOrdersReceiver() {
         SiteSettings siteSettings = new SiteSettings();
         siteSettings.saveSetting("siteOrdersReceiver", siteOrdersReceiverTextField.getText());
+    }
+    @FXML private void addPropertyToTable() {
+        Integer selectedProductKindId = UtilPack.getProductKindIdFromTitle(productKindsList.getSelectionModel().getSelectedItem());
+        ProductKindPropertiesTableView newRow = new ProductKindPropertiesTableView("", "", "");
+        productKindsPropertiesList.add(newRow);
+
+        productKindPropertiesTitleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
+        productKindPropertiesTitleColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        productKindPropertiesTitleColumn.setOnEditCommit(
+                t -> {
+                    (t.getTableView().getItems().get(t.getTablePosition().getRow())).setTitle(t.getNewValue());
+                    setNewProductKindsProperty("title", t.getNewValue(), selectedProductKindId);
+                }
+        );
+
+        productKindPropertiesOptionalColumn.setCellValueFactory(new PropertyValueFactory<>("optional"));
+        productKindPropertiesOptionalColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        productKindPropertiesOptionalColumn.setOnEditCommit(
+                t -> {
+                    (t.getTableView().getItems().get(t.getTablePosition().getRow())).setOptional(t.getNewValue());
+                    setNewProductKindsProperty("optional", t.getNewValue(), selectedProductKindId);
+                }
+        );
+
+        productKindPropertiesSymbolColumn.setCellValueFactory(new PropertyValueFactory<>("symbol"));
+        productKindPropertiesSymbolColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        productKindPropertiesSymbolColumn.setOnEditCommit(
+                t -> {
+                    (t.getTableView().getItems().get(t.getTablePosition().getRow())).setSymbol(t.getNewValue());
+                    setNewProductKindsProperty("symbol", t.getNewValue(), selectedProductKindId);
+                }
+        );
+
+        productKindPropertiesTable.setItems(productKindsPropertiesList);
+        int rowNumber = productKindsPropertiesList.size() - 1;
+        productKindPropertiesTable.requestFocus();
+        productKindPropertiesTable.getSelectionModel().select(rowNumber);
+        productKindPropertiesTable.getFocusModel().focus(rowNumber);
+        productKindPropertiesTitleColumn.setEditable(true);
+    }
+    private void setNewProductKindsProperty(String columnTitle, String valueToSave, Integer selectedProductKindId) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = session.beginTransaction();
+        Properties newProperty = new Properties();
+        if (columnTitle.equals("title")) {
+            newProperty.setTitle(valueToSave);
+        } else if (columnTitle.equals("optional")) {
+            newProperty.setOptional(valueToSave);
+        } else if (columnTitle.equals("symbol")) {
+            newProperty.setSymbol(valueToSave);
+        }
+        session.saveOrUpdate(newProperty);
+        tx.commit();
+
+        bindPropertyToProductKind(newProperty.getId(), selectedProductKindId);
+        session.close();
+    }
+    private void  bindPropertyToProductKind(int propertyId, int productKindId) {
+        String q = "INSERT INTO product_kinds_properties (property_id,product_kind_id) VALUES(" + propertyId + "," + productKindId + ")";
+        try {
+            connection.getUpdateResult(q);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
+    @FXML private void deletePropertyFromTable() {
+        // Get selected row and delete
+        int ix = productKindPropertiesTable.getSelectionModel().getSelectedIndex();
+        ProductKindPropertiesTableView row = (ProductKindPropertiesTableView) productKindPropertiesTable.getSelectionModel().getSelectedItem();
+
+        // Select a row
+        if (!(productKindPropertiesTable.getItems().size() == 0)) {
+            productKindsPropertiesList.remove(ix);
+        }
+        if ((productKindPropertiesTable.getItems().size() == 0)) {
+            return;
+        }
+        if (ix != 0) {
+            ix = ix -1;
+        }
+        productKindPropertiesTable.requestFocus();
+        productKindPropertiesTable.getSelectionModel().select(ix);
+        productKindPropertiesTable.getFocusModel().focus(ix);
     }
 
     // Panes
@@ -4312,6 +4470,11 @@ public class PCGUIController implements Initializable {
     @FXML private TableColumn<GroupsTableView, String>      groupTitleColumn;
     @FXML private TableColumn<GroupsTableView, String>      groupDescriptionColumn;
 
+    @FXML private TableView<ProductKindPropertiesTableView>                productKindPropertiesTable;
+    @FXML private TableColumn<ProductKindPropertiesTableView, String>      productKindPropertiesTitleColumn;
+    @FXML private TableColumn<ProductKindPropertiesTableView, String>      productKindPropertiesOptionalColumn;
+    @FXML private TableColumn<ProductKindPropertiesTableView, String>      productKindPropertiesSymbolColumn;
+
     //TreeTableViews
     @FXML private TreeTableView<ProductPropertiesTableView>  propertiesTreeTable;
     @FXML private TreeTableColumn<ProductPropertiesTableView, String> propertiesTreeTableTitleColumn;
@@ -4331,6 +4494,8 @@ public class PCGUIController implements Initializable {
     @FXML private Button changeDimsImageButton;
     @FXML private Button changePlug1ImageButton;
     @FXML private Button changePlug2ImageButton;
+    @FXML private Button addPropertyToTableButton;
+    @FXML private Button deletePropertyFromTableButton;
 
     // Labels
     @FXML private Label productTabTitle;
@@ -4465,4 +4630,5 @@ public class PCGUIController implements Initializable {
     public static ArrayList<QuantityOfProduct> allQuantitiesList = new ArrayList<>();
     public static ObservableList<String> allProductsTitles = FXCollections.observableArrayList();
     public static ObservableList<CategoriesTreeView> allCategoriesList = FXCollections.observableArrayList();
+    public static ObservableList<ProductKindPropertiesTableView> productKindsPropertiesList = FXCollections.observableArrayList();
 }

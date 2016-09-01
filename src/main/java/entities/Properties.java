@@ -34,12 +34,7 @@ import javax.xml.bind.annotation.XmlTransient;
         @NamedQuery(name = "Properties.findById", query = "SELECT p FROM Properties p WHERE p.id = :id"),
         @NamedQuery(name = "Properties.findByTitle", query = "SELECT p FROM Properties p WHERE p.title = :title")})
 public class Properties implements Serializable {
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "propertyId")
-    private Collection<PropertyValues> propertyValuesCollection;
 
-    @JoinColumn(name = "value_id", referencedColumnName = "id")
-    @ManyToOne
-    private PropertyValues valueId;
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -50,13 +45,26 @@ public class Properties implements Serializable {
     @Column(name = "title")
     private String title;
 
+    @Column(name = "optional")
+    private String optional;
+
+    @Column(name = "symbol")
+    private String symbol;
+
     @JoinColumn(name = "product_id", referencedColumnName = "id")
     @ManyToOne(optional = true)
     private Products productId;
 
     @JoinColumn(name = "property_type_id", referencedColumnName = "id")
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = true)
     private PropertyTypes propertyTypeId;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "propertyId")
+    private Collection<PropertyValues> propertyValuesCollection;
+
+    @JoinColumn(name = "value_id", referencedColumnName = "id")
+    @ManyToOne
+    private PropertyValues valueId;
 
     public Properties() {}
 
@@ -78,6 +86,22 @@ public class Properties implements Serializable {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getOptional() {
+        return optional;
+    }
+
+    public void setOptional(String optional) {
+        this.optional = optional;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
     }
 
     public Products getProductId() {

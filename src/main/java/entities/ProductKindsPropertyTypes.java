@@ -21,7 +21,7 @@ package entities;
 
 /**
  *
- * @author kataev
+ * @author Igor Klekotnev
  */
 @Entity
 @Table(name = "product_kinds_property_types")
