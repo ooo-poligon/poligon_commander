@@ -17,6 +17,7 @@ import javafx.concurrent.WorkerStateEvent;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
@@ -61,6 +62,7 @@ import java.math.RoundingMode;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -219,22 +221,6 @@ public class PCGUIController implements Initializable {
             onFocusedProductTableItem(selectedProduct);
         }
     }
-    /*
-    @FXML private void vendorsMoveUpDownByKeyboard(KeyEvent keyEvent1) {
-        if(keyEvent1.getCode() == KeyCode.DOWN) {
-            handleVendorsTableMousePressed();
-        } else if(keyEvent1.getCode() == KeyCode.UP) {
-            handleVendorsTableMousePressed();
-        }
-    }
-    @FXML private void seriesMoveUpDownByKeyboard(KeyEvent keyEvent2) {
-        if(keyEvent2.getCode() == KeyCode.DOWN) {
-            handleSeriesTableMousePressed();
-        } else if(keyEvent2.getCode() == KeyCode.UP) {
-            handleSeriesTableMousePressed();
-        }
-    }
-    */
     public static void getAllProductsList() throws SQLException {
         allProductsTitles.clear();
         allProductsList.clear();
@@ -1791,14 +1777,14 @@ public class PCGUIController implements Initializable {
     private void addProductDialog() {
         Optional<Product> result = AlertWindow.newProductDialog();
         if (result.isPresent()) {
-            if ((result.get().getProductKindId() == 0) || (result.get().getSerie().equals(null)) ||
-                (result.get().getCategoryId() == 0 || result.get().getVendorId() == 0)) {
+            if ((result.get().getProductKindId() == 0) ||
+                (result.get().getCategoryId() == 0)) {
                 AlertWindow.fillRequiredFields();
             }
             Categories category = new Categories();
-            Series serie = new Series();
+            //Series serie = new Series();
             ProductKinds productKind = new ProductKinds();
-            Vendors vendor = new Vendors();
+            //Vendors vendor = new Vendors();
             Currencies currency = new Currencies();
             try {
                 Session session1 = HibernateUtil.getSessionFactory().openSession();
@@ -1811,7 +1797,7 @@ public class PCGUIController implements Initializable {
                 session1.getTransaction().commit();
                 session1.close();
 
-                Session session2 = HibernateUtil.getSessionFactory().openSession();
+                /*Session session2 = HibernateUtil.getSessionFactory().openSession();
                 session2.beginTransaction();
                 Query query2 = session2.createQuery("from Series where title = :title");
                 query2.setParameter("title", result.get().getSerie());
@@ -1821,7 +1807,7 @@ public class PCGUIController implements Initializable {
                 }
                 session2.save(serie);
                 session2.getTransaction().commit();
-                session2.close();
+                session2.close();*/
 
                 Session session3 = HibernateUtil.getSessionFactory().openSession();
                 session3.beginTransaction();
@@ -1833,7 +1819,7 @@ public class PCGUIController implements Initializable {
                 session3.getTransaction().commit();
                 session3.close();
 
-                Session session4 = HibernateUtil.getSessionFactory().openSession();
+                /*Session session4 = HibernateUtil.getSessionFactory().openSession();
                 session4.beginTransaction();
                 Query query4 = session4.createQuery("from Vendors where id = :id");
                 query4.setParameter("id", result.get().getVendorId());
@@ -1843,7 +1829,7 @@ public class PCGUIController implements Initializable {
                 }
                 session4.save(vendor);
                 session4.getTransaction().commit();
-                session4.close();
+                session4.close();*/
 
                 Session session5 = HibernateUtil.getSessionFactory().openSession();
                 session5.beginTransaction();
@@ -1862,9 +1848,9 @@ public class PCGUIController implements Initializable {
                 Products product = new Products();
                 product.setTitle(result.get().getTitle());
                 product.setCategoryId(category);
-                product.setSerie(serie);
+                //product.setSerie(serie);
                 product.setProductKindId(productKind);
-                product.setVendor(vendor);
+                //product.setVendor(vendor);
                 product.setDescription(result.get().getDescription());
                 product.setAnons(result.get().getAnons());
                 product.setArticle(result.get().getArticle());
@@ -2390,7 +2376,8 @@ public class PCGUIController implements Initializable {
         if (node instanceof Text || (node instanceof TreeCell && ((TreeCell) node).getText() != null)) {
             String selectedNode = (String) ((TreeItem)propertiesTree.getSelectionModel().getSelectedItem()).getValue();
             subPropertiesList(selectedNode);
-            buildPropertiesTable(selectedNode, productTabTitle.getText());
+            //buildPropertiesTable(selectedNode, productTabTitle.getText());
+            buildProductPropertiesForKindTable(productTabTitle.getText());
             propertiesTable.getSelectionModel().select(0);
         }
     }
@@ -2463,11 +2450,18 @@ public class PCGUIController implements Initializable {
                         addProductDialog();
                         try {
                             getAllProductsList();
+                            fillMainTab(selectedProduct);
                             productsTable.refresh();
                         } catch (SQLException e) {}
                     }).build(),
                     MenuItemBuilder.create().text("Удалить элемент...").onAction((ActionEvent arg0) -> {
                         ContextBuilder.deleteTheProduct(selectedProduct);
+                        try {
+                            getAllProductsList();
+                            fillMainTab(selectedProduct);
+                            productsTable.refresh();
+                            categoriesTree.getSelectionModel().select(categoriesTree.getSelectionModel().getSelectedItem());
+                        } catch (SQLException e) {}
                     }).build(),
                     SeparatorMenuItemBuilder.create().build(),
                     MenuItemBuilder.create().text("Добавить аксессуар к выбранному устройству").onAction((ActionEvent arg0) -> {
@@ -2581,9 +2575,69 @@ public class PCGUIController implements Initializable {
     // Заполняет заголовок вкладки свойств товара названием текущего выбранного товара,
     // а также отображает картинку товара, еасли она определена.
     private void fillProductTab(String selectedProduct) {
-        ObservableList<ProductPropertiesTableView> pList = FXCollections.observableArrayList();
+        ObservableList<ProductPropertiesForKindTableView> pList = FXCollections.observableArrayList();
         ObservableList<FunctionsTableView> fList = FXCollections.observableArrayList();
-        propertiesTable.setItems(pList);
+
+        if (selectedProduct == null) {
+            pList.add(new ProductPropertiesForKindTableView("", "", "", ""));
+        } else {
+            ArrayList<Properties> properties = new ArrayList<>(10);
+            ArrayList<PropertyValues> propertyValues = new ArrayList<>(10);
+            String pkTitle = getProductKindTitle(selectedProduct);
+            int productKindId = UtilPack.getProductKindIdFromTitle(pkTitle);
+
+            Session session1 = HibernateUtil.getSessionFactory().openSession();
+            List res1 = session1.createQuery(
+                    "from Properties where productKindId =" + productKindId
+            ).list();
+            for (Iterator iterator = res1.iterator(); iterator.hasNext();) {
+                Properties property = (Properties) iterator.next();
+                properties.add(property);
+            }
+            session1.close();
+
+            Session session2 = HibernateUtil.getSessionFactory().openSession();
+            List res2 = session2.createQuery(
+                    "from PropertyValues where productId =" + UtilPack.getProductIdFromTitle(selectedProduct, allProductsList)
+            ).list();
+            for (Iterator iterator = res2.iterator(); iterator.hasNext();) {
+                PropertyValues pv = (PropertyValues) iterator.next();
+                propertyValues.add(pv);
+            }
+            session2.close();
+
+            properties.stream().forEach((p) -> {
+                String value = "";
+                for (PropertyValues pv: propertyValues) {
+                    if (pv.getPropertyId().getId() == p.getId()) {
+                        value = pv.getValue();
+                    }
+                }
+                pList.add(new ProductPropertiesForKindTableView(
+                        p.getTitle(),
+                        p.getOptional(),
+                        p.getSymbol(),
+                        value
+                ));
+            });
+
+        }
+
+        productPropertiesForKindTitleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
+        productPropertiesForKindOptionalColumn.setCellValueFactory(new PropertyValueFactory<>("optional"));
+        productPropertiesForKindSymbolColumn.setCellValueFactory(new PropertyValueFactory<>("symbol"));
+        productPropertiesForKindValueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
+        productPropertiesForKindValueColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        productPropertiesForKindValueColumn.setOnEditCommit(
+                t -> {
+                    String propertyTitle = t.getTableView().getItems().get(t.getTablePosition().getRow()).getTitle();
+                    (t.getTableView().getItems().get(t.getTablePosition().getRow())).setValue(t.getNewValue());
+                    setPropertyValueForProduct(t.getNewValue(), propertyTitle, selectedProduct);
+                }
+        );
+
+        productPropertiesForKindTable.setItems(pList);
+
         functionsTable1.setItems(fList);
         functionDescriptionTextArea.setText("");
         try {
@@ -2692,8 +2746,22 @@ public class PCGUIController implements Initializable {
             session.close();
         } catch (NullPointerException ne) {}
         buildAccessoriesTable(selectedProduct);
-        buildPropertiesTree(selectedProduct);
+        //buildPropertiesTree(selectedProduct);
         buildFunctionsTable1(selectedProduct);
+    }
+    private void setPropertyValueForProduct(String newValue, String propertyTitle, String selectedProduct) {
+        int propertyId = UtilPack.getPropertyIdFromTitle(propertyTitle);
+        int selectedProductId = UtilPack.getProductIdFromTitle(selectedProduct, allProductsList);
+
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = session.beginTransaction();
+        PropertyValues pv = new PropertyValues();
+        pv.setValue(newValue);
+        pv.setProductId(new Products(selectedProductId));
+        pv.setPropertyId(new Properties(propertyId));
+        session.save(pv);
+        tx.commit();
+        session.close();
     }
     // Сохраняет в БД описание картинки товара.
     @FXML private void changePicDescription() throws SQLException {
@@ -2844,22 +2912,70 @@ public class PCGUIController implements Initializable {
         propertiesTableContextMenu = ContextMenuBuilder.create().items(
                 MenuItemBuilder.create().text("Добавить новое свойство").onAction((ActionEvent ae1) -> {
                     ContextBuilder.createNewPropertyValue(productTabTitle, propertiesTree);
-                    buildPropertiesTable(selectedPropertyType, selectedProduct);
+                    //buildPropertiesTable(selectedPropertyType, selectedProduct);
+                    buildProductPropertiesForKindTable(selectedProduct);
                     propertiesTable.getSelectionModel().select(0);
                 }).build(),
                 MenuItemBuilder.create().text("Редактировать выбранное свойство").onAction((ActionEvent ae2) -> {
                     ContextBuilder.updateThePropertyValue(productTabTitle, propertiesTree, propertiesTable);
-                    buildPropertiesTable(selectedPropertyType, selectedProduct);
+                    //buildPropertiesTable(selectedPropertyType, selectedProduct);
+                    buildProductPropertiesForKindTable(selectedProduct);
                     propertiesTable.getSelectionModel().select(0);
                 }).build(),
                 MenuItemBuilder.create().text("Удалить выбранное свойство").onAction((ActionEvent ae3) -> {
                     ContextBuilder.deleteThePropertyValue(productTabTitle, propertiesTree, propertiesTable);
-                    buildPropertiesTable(selectedPropertyType, selectedProduct);
+                    //buildPropertiesTable(selectedPropertyType, selectedProduct);
+                    buildProductPropertiesForKindTable(selectedProduct);
                     propertiesTable.getSelectionModel().select(0);
                 }).build()
         ).build();
         propertiesTable.setContextMenu(propertiesTableContextMenu);
         propertiesTable.setItems(propertyValues);
+    }
+    private ObservableList<ProductPropertiesForKindTableView> buildProductPropertiesForKindTable(String selectedProduct) {
+        Products product = new Products();
+        ObservableList<ProductPropertiesForKindTableView> productPropertiesForKind = FXCollections.observableArrayList();
+        ArrayList<Properties> properties = new ArrayList<>(10);
+        ArrayList<PropertyValues> propertyValues = new ArrayList<>(10);
+
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List res = session.createQuery(
+                "from Products where title =\"" + selectedProduct + "\""
+        ).list();
+        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+            product = (Products) iterator.next();
+        }
+        session.close();
+
+        Session session1 = HibernateUtil.getSessionFactory().openSession();
+        List res1 = session1.createQuery(
+                "from Properties where productKindId =" + product.getProductKindId().getId()
+        ).list();
+        for (Iterator iterator = res1.iterator(); iterator.hasNext();) {
+            Properties property = (Properties) iterator.next();
+            properties.add(property);
+        }
+        session1.close();
+
+        Session session2 = HibernateUtil.getSessionFactory().openSession();
+        List res2 = session2.createQuery(
+                "from PropertyValues"
+        ).list();
+        for (Iterator iterator = res2.iterator(); iterator.hasNext();) {
+            PropertyValues propertyValue = (PropertyValues) iterator.next();
+            propertyValues.add(propertyValue);
+        }
+        session2.close();
+
+        productPropertiesForKind.add(new ProductPropertiesForKindTableView(
+                "2",
+                "2",
+                "2",
+                "2"
+        ));
+
+
+        return productPropertiesForKind;
     }
     private void buildFunctionsTable1(String selectedProduct) {
         ArrayList<Functions> functions = new ArrayList<>(10);
@@ -2902,7 +3018,8 @@ public class PCGUIController implements Initializable {
         propertiesTree.getSelectionModel().select(0);
         String selectedPropertyTitle = propertiesTree.getSelectionModel().getSelectedItem().getValue();
         subPropertiesList(selectedPropertyTitle);
-        buildPropertiesTable(selectedPropertyTitle, selectedProduct);
+        //buildPropertiesTable(selectedPropertyTitle, selectedProduct);
+        buildProductPropertiesForKindTable(selectedProduct);
         propertiesTable.getSelectionModel().select(0);
     }
     private void setSelectFunction() {
@@ -3857,9 +3974,9 @@ public class PCGUIController implements Initializable {
         ArrayList<Properties> propertiesList = new ArrayList<>();
         ResultSet resultSet = null;
         try {
-            resultSet = connection.getResult("select property_id from product_kinds_properties where product_kind_id =" + UtilPack.getProductKindIdFromTitle(selectedProductKind));
+            resultSet = connection.getResult("select id from properties where product_kind_id =" + UtilPack.getProductKindIdFromTitle(selectedProductKind));
             while (resultSet.next()) {
-                selectedProductKindPropertiesIds.add(resultSet.getInt("property_id"));
+                selectedProductKindPropertiesIds.add(resultSet.getInt("id"));
             }
         } catch (SQLException e) {}
 
@@ -4289,6 +4406,15 @@ public class PCGUIController implements Initializable {
         productKindPropertiesTitleColumn.setEditable(true);
     }
     private void setNewProductKindsProperty(String columnTitle, String valueToSave, Integer selectedProductKindId) {
+        ProductKinds productKind = new ProductKinds();
+        Session session1 = HibernateUtil.getSessionFactory().openSession();
+        List list = session1.createQuery("from ProductKinds where id=" + selectedProductKindId).list();
+        for(Iterator iterator = list.iterator(); iterator.hasNext();) {
+            ProductKinds pk = (ProductKinds) iterator.next();
+            productKind = pk;
+        }
+        session1.close();
+
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
         Properties newProperty = new Properties();
@@ -4299,10 +4425,11 @@ public class PCGUIController implements Initializable {
         } else if (columnTitle.equals("symbol")) {
             newProperty.setSymbol(valueToSave);
         }
+        newProperty.setProductKindId(productKind);
         session.saveOrUpdate(newProperty);
         tx.commit();
 
-        bindPropertyToProductKind(newProperty.getId(), selectedProductKindId);
+        //bindPropertyToProductKind(newProperty.getId(), selectedProductKindId);
         session.close();
     }
     private void  bindPropertyToProductKind(int propertyId, int productKindId) {
@@ -4314,10 +4441,21 @@ public class PCGUIController implements Initializable {
         }
 
     }
+    private void  unBindPropertyFromProductKind(int propertyId, int productKindId) {
+        String q = "DELETE FROM product_kinds_properties WHERE product_kinds_properties.property_id=" + propertyId + " AND product_kinds_properties.product_kind_id=" + productKindId;
+        try {
+            connection.getUpdateResult(q);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
     @FXML private void deletePropertyFromTable() {
-        // Get selected row and delete
         int ix = productKindPropertiesTable.getSelectionModel().getSelectedIndex();
-        ProductKindPropertiesTableView row = (ProductKindPropertiesTableView) productKindPropertiesTable.getSelectionModel().getSelectedItem();
+        String deletedPropertyTitle = productKindPropertiesTable.getSelectionModel().getSelectedItem().getTitle();
+        Integer selectedProductKindId = UtilPack.getProductKindIdFromTitle(productKindsList.getSelectionModel().getSelectedItem());
+
+        String q = "DELETE FROM properties WHERE properties.title=\"" + deletedPropertyTitle + "\" AND properties.product_kind_id=" + selectedProductKindId;
+        try {connection.getUpdateResult(q);} catch (SQLException e) {}
 
         // Select a row
         if (!(productKindPropertiesTable.getItems().size() == 0)) {
@@ -4332,6 +4470,8 @@ public class PCGUIController implements Initializable {
         productKindPropertiesTable.requestFocus();
         productKindPropertiesTable.getSelectionModel().select(ix);
         productKindPropertiesTable.getFocusModel().focus(ix);
+
+        //unBindPropertyFromProductKind(UtilPack.getPropertyIdFromTitle(deletedPropertyTitle), selectedProductKindId);
     }
 
     // Panes
@@ -4430,6 +4570,12 @@ public class PCGUIController implements Initializable {
     @FXML private TableColumn<ProductPropertiesTableView, String>propertyValueColumn;
     @FXML private TableColumn<ProductPropertiesTableView, String>propertyMeasureColumn;
     @FXML private TableColumn<ProductPropertiesTableView, String>propertyConditionColumn;
+
+    @FXML private TableView<ProductPropertiesForKindTableView>           productPropertiesForKindTable;
+    @FXML private TableColumn<ProductPropertiesForKindTableView, String> productPropertiesForKindTitleColumn;
+    @FXML private TableColumn<ProductPropertiesForKindTableView, String> productPropertiesForKindOptionalColumn;
+    @FXML private TableColumn<ProductPropertiesForKindTableView, String> productPropertiesForKindSymbolColumn;
+    @FXML private TableColumn<ProductPropertiesForKindTableView, String> productPropertiesForKindValueColumn;
 
     @FXML private TableView<FunctionsTableView>           functionsTable;
     @FXML private TableColumn<FunctionsTableView, String> functionsTableTitleColumn;

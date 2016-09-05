@@ -55,6 +55,10 @@ public class Properties implements Serializable {
     @ManyToOne(optional = true)
     private Products productId;
 
+    @JoinColumn(name = "product_kind_id", referencedColumnName = "id")
+    @ManyToOne(optional = true)
+    private ProductKinds productKindId;
+
     @JoinColumn(name = "property_type_id", referencedColumnName = "id")
     @ManyToOne(optional = true)
     private PropertyTypes propertyTypeId;
@@ -110,6 +114,14 @@ public class Properties implements Serializable {
 
     public void setProductId(Products productId) {
         this.productId = productId;
+    }
+
+    public ProductKinds getProductKindId() {
+        return productKindId;
+    }
+
+    public void setProductKindId(ProductKinds productKindId) {
+        this.productKindId = productKindId;
     }
 
     public PropertyTypes getPropertyTypeId() {
