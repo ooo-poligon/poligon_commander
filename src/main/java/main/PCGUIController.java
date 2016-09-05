@@ -72,6 +72,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.controlsfx.control.spreadsheet.SpreadsheetView;
 /**
  *
  * @author Igor Klekotnev
@@ -2630,9 +2631,12 @@ public class PCGUIController implements Initializable {
         productPropertiesForKindValueColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         productPropertiesForKindValueColumn.setOnEditCommit(
                 t -> {
+                    int rowNumber = t.getTablePosition().getRow();
                     String propertyTitle = t.getTableView().getItems().get(t.getTablePosition().getRow()).getTitle();
                     (t.getTableView().getItems().get(t.getTablePosition().getRow())).setValue(t.getNewValue());
                     setPropertyValueForProduct(t.getNewValue(), propertyTitle, selectedProduct);
+                    t.getTableView().getSelectionModel().selectBelowCell();
+                    t.getTableView().edit(rowNumber + 1, t.getTableView().getEditingCell().getTableColumn());
                 }
         );
 
@@ -2752,16 +2756,32 @@ public class PCGUIController implements Initializable {
     private void setPropertyValueForProduct(String newValue, String propertyTitle, String selectedProduct) {
         int propertyId = UtilPack.getPropertyIdFromTitle(propertyTitle);
         int selectedProductId = UtilPack.getProductIdFromTitle(selectedProduct, allProductsList);
+        PropertyValues currentPropertyValue = null;
 
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = session.beginTransaction();
-        PropertyValues pv = new PropertyValues();
-        pv.setValue(newValue);
-        pv.setProductId(new Products(selectedProductId));
-        pv.setPropertyId(new Properties(propertyId));
-        session.save(pv);
-        tx.commit();
-        session.close();
+        Session session1 = HibernateUtil.getSessionFactory().openSession();
+        List result = session1.createQuery("from PropertyValues where propertyId=" + propertyId + " and productId=" + selectedProductId).list();
+        for(Iterator iterator = result.iterator(); iterator.hasNext();) {
+            currentPropertyValue = (PropertyValues) iterator.next();
+        }
+        session1.close();
+        if (currentPropertyValue == null) {
+            Session session = HibernateUtil.getSessionFactory().openSession();
+            Transaction tx = session.beginTransaction();
+            PropertyValues pv = new PropertyValues();
+            pv.setValue(newValue);
+            pv.setProductId(new Products(selectedProductId));
+            pv.setPropertyId(new Properties(propertyId));
+            session.save(pv);
+            tx.commit();
+            session.close();
+        } else {
+            Session session = HibernateUtil.getSessionFactory().openSession();
+            Transaction tx = session.beginTransaction();
+            currentPropertyValue.setValue(newValue);
+            session.saveOrUpdate(currentPropertyValue);
+            tx.commit();
+            session.close();
+        }
     }
     // Сохраняет в БД описание картинки товара.
     @FXML private void changePicDescription() throws SQLException {
@@ -3997,9 +4017,12 @@ public class PCGUIController implements Initializable {
         productKindPropertiesTitleColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         productKindPropertiesTitleColumn.setOnEditCommit(
                 t -> {
+                    int rowNumber = t.getTablePosition().getRow();
                     String oldPropertyTitle = t.getTableView().getItems().get(t.getTablePosition().getRow()).getTitle();
                     (t.getTableView().getItems().get(t.getTablePosition().getRow())).setTitle(t.getNewValue());
                     setProductKindsPropertyCellValue("title", t.getNewValue(), oldPropertyTitle);
+                    t.getTableView().getSelectionModel().selectBelowCell();
+                    t.getTableView().edit(rowNumber + 1, t.getTableView().getEditingCell().getTableColumn());
                 }
         );
 
@@ -4007,9 +4030,12 @@ public class PCGUIController implements Initializable {
         productKindPropertiesOptionalColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         productKindPropertiesOptionalColumn.setOnEditCommit(
                 t -> {
+                    int rowNumber = t.getTablePosition().getRow();
                     String oldPropertyTitle = t.getTableView().getItems().get(t.getTablePosition().getRow()).getTitle();
                     (t.getTableView().getItems().get(t.getTablePosition().getRow())).setOptional(t.getNewValue());
                     setProductKindsPropertyCellValue("optional", t.getNewValue(), oldPropertyTitle);
+                    t.getTableView().getSelectionModel().selectBelowCell();
+                    t.getTableView().edit(rowNumber + 1, t.getTableView().getEditingCell().getTableColumn());
                 }
         );
 
@@ -4017,9 +4043,12 @@ public class PCGUIController implements Initializable {
         productKindPropertiesSymbolColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         productKindPropertiesSymbolColumn.setOnEditCommit(
                 t -> {
+                    int rowNumber = t.getTablePosition().getRow();
                     String oldPropertyTitle = t.getTableView().getItems().get(t.getTablePosition().getRow()).getTitle();
                     (t.getTableView().getItems().get(t.getTablePosition().getRow())).setSymbol(t.getNewValue());
                     setProductKindsPropertyCellValue("symbol", t.getNewValue(), oldPropertyTitle);
+                    t.getTableView().getSelectionModel().selectBelowCell();
+                    t.getTableView().edit(rowNumber + 1, t.getTableView().getEditingCell().getTableColumn());
                 }
         );
 
@@ -4441,21 +4470,20 @@ public class PCGUIController implements Initializable {
         }
 
     }
-    private void  unBindPropertyFromProductKind(int propertyId, int productKindId) {
-        String q = "DELETE FROM product_kinds_properties WHERE product_kinds_properties.property_id=" + propertyId + " AND product_kinds_properties.product_kind_id=" + productKindId;
-        try {
-            connection.getUpdateResult(q);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    private void  deleteProperty(int propertyId, int productKindId) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = session.beginTransaction();
+        Query query1 = session.createQuery("delete PropertyValues where propertyId=" + propertyId);
+        query1.executeUpdate();
+        Query query2 = session.createQuery("delete Properties where Id=" + propertyId + " and productKindId=" + productKindId);
+        query2.executeUpdate();
+        tx.commit();
+        session.close();
     }
     @FXML private void deletePropertyFromTable() {
         int ix = productKindPropertiesTable.getSelectionModel().getSelectedIndex();
         String deletedPropertyTitle = productKindPropertiesTable.getSelectionModel().getSelectedItem().getTitle();
         Integer selectedProductKindId = UtilPack.getProductKindIdFromTitle(productKindsList.getSelectionModel().getSelectedItem());
-
-        String q = "DELETE FROM properties WHERE properties.title=\"" + deletedPropertyTitle + "\" AND properties.product_kind_id=" + selectedProductKindId;
-        try {connection.getUpdateResult(q);} catch (SQLException e) {}
 
         // Select a row
         if (!(productKindPropertiesTable.getItems().size() == 0)) {
@@ -4471,7 +4499,7 @@ public class PCGUIController implements Initializable {
         productKindPropertiesTable.getSelectionModel().select(ix);
         productKindPropertiesTable.getFocusModel().focus(ix);
 
-        //unBindPropertyFromProductKind(UtilPack.getPropertyIdFromTitle(deletedPropertyTitle), selectedProductKindId);
+        deleteProperty(UtilPack.getPropertyIdFromTitle(deletedPropertyTitle), selectedProductKindId);
     }
 
     // Panes

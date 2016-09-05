@@ -4,6 +4,7 @@ import entities.*;
 import entities.Properties;
 import entities.Settings;
 import javafx.scene.control.CheckBoxTreeItem;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TreeItem;
 import main.Product;
 import org.apache.commons.vfs2.FileObject;
@@ -16,6 +17,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.*;
+import tableviews.ProductPropertiesForKindTableView;
 import tableviews.ProductPropertiesTableView;
 
 import java.io.File;
