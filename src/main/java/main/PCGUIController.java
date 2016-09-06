@@ -4475,7 +4475,7 @@ public class PCGUIController implements Initializable {
         Transaction tx = session.beginTransaction();
         Query query1 = session.createQuery("delete PropertyValues where propertyId=" + propertyId);
         query1.executeUpdate();
-        Query query2 = session.createQuery("delete Properties where Id=" + propertyId + " and productKindId=" + productKindId);
+        Query query2 = session.createQuery("delete Properties where id=" + propertyId + " and productKindId=" + productKindId);
         query2.executeUpdate();
         tx.commit();
         session.close();

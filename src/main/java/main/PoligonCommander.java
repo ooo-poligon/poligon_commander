@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 public class PoligonCommander extends Application {
-    public static final String SPLASH_IMAGE = "/images/splash_1_9.png";
+    public static final String SPLASH_IMAGE = "/images/splash_2_0.png";
 
     private Pane splashLayout;
     private ProgressBar loadProgress;
