@@ -2379,7 +2379,7 @@ public class PCGUIController implements Initializable {
             String selectedNode = (String) ((TreeItem)propertiesTree.getSelectionModel().getSelectedItem()).getValue();
             subPropertiesList(selectedNode);
             //buildPropertiesTable(selectedNode, productTabTitle.getText());
-            buildProductPropertiesForKindTable(productTabTitle.getText());
+            //buildProductPropertiesForKindTable(productTabTitle.getText());
             propertiesTable.getSelectionModel().select(0);
         }
     }
@@ -2608,10 +2608,10 @@ public class PCGUIController implements Initializable {
             }
             session2.close();
 
-            properties.stream().forEach((p) -> {
+            for (Properties p : properties) {
                 String value = "";
                 for (PropertyValues pv: propertyValues) {
-                    if (pv.getPropertyId().getId() == p.getId()) {
+                    if (Objects.equals(pv.getPropertyId().getId(), p.getId())) {
                         value = pv.getValue();
                     }
                 }
@@ -2621,7 +2621,7 @@ public class PCGUIController implements Initializable {
                         p.getSymbol(),
                         value
                 ));
-            });
+            }
 
         }
 
