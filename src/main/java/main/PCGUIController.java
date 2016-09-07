@@ -72,7 +72,8 @@ import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import org.controlsfx.control.spreadsheet.SpreadsheetView;
+import org.controlsfx.control.spreadsheet.*;
+
 /**
  *
  * @author Igor Klekotnev
@@ -3989,6 +3990,8 @@ public class PCGUIController implements Initializable {
         productKindsList.setItems(items);
     }
     private void buildProductKindPropertiesTable(String selectedProductKind) {
+        Callback<TableColumn<ProductKindPropertiesTableView, String>, TableCell<ProductKindPropertiesTableView, String>> cellFactory
+                = (TableColumn<ProductKindPropertiesTableView, String> p) -> new EditingCell();
         productKindsPropertiesList.clear();
         ArrayList<Integer> selectedProductKindPropertiesIds = new ArrayList<>();
         ArrayList<Properties> propertiesList = new ArrayList<>();
@@ -4014,16 +4017,28 @@ public class PCGUIController implements Initializable {
             productKindsPropertiesList.add(new ProductKindPropertiesTableView(p.getTitle(), p.getOptional(), p.getSymbol()));
         });
         productKindPropertiesTitleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
-        productKindPropertiesTitleColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        productKindPropertiesTitleColumn.setCellFactory(cellFactory);
         productKindPropertiesTitleColumn.setOnEditCommit(
                 t -> {
+                    String oldTitle = (t.getTableView().getItems().get(t.getTablePosition().getRow())).getTitle();
                     (t.getTableView().getItems().get(t.getTablePosition().getRow())).setTitle(t.getNewValue());
-                    setNewProductKindsProperty(t.getNewValue(), UtilPack.getProductKindIdFromTitle(selectedProductKind));
+                    if(oldTitle.equals("")) {
+                        setNewProductKindsProperty(
+                                t.getNewValue(),
+                                UtilPack.getProductKindIdFromTitle(selectedProductKind));
+                    } else {
+                        setProductKindsPropertyCellValue(
+                                "title",
+                                t.getNewValue(),
+                                oldTitle
+                        );
+                    }
+
                 }
         );
 
         productKindPropertiesOptionalColumn.setCellValueFactory(new PropertyValueFactory<>("optional"));
-        productKindPropertiesOptionalColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        productKindPropertiesOptionalColumn.setCellFactory(cellFactory);
         productKindPropertiesOptionalColumn.setOnEditCommit(
                 t -> {
                     (t.getTableView().getItems().get(t.getTablePosition().getRow())).setOptional(t.getNewValue());
@@ -4037,6 +4052,7 @@ public class PCGUIController implements Initializable {
 
         productKindPropertiesSymbolColumn.setCellValueFactory(new PropertyValueFactory<>("symbol"));
         productKindPropertiesSymbolColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        //productKindPropertiesOptionalColumn.setCellFactory(cellFactory);
         productKindPropertiesSymbolColumn.setOnEditCommit(
                 t -> {
                     (t.getTableView().getItems().get(t.getTablePosition().getRow())).setSymbol(t.getNewValue());
@@ -4044,10 +4060,13 @@ public class PCGUIController implements Initializable {
                             "symbol",
                             t.getNewValue(),
                             (t.getTableView().getItems().get(t.getTablePosition().getRow())).getTitle()
-                    );}
+                    );
+                    addPropertyToTable();
+                }
         );
 
         productKindPropertiesTable.setItems(productKindsPropertiesList);
+        //productKindPropertiesTable.addEventHandler();
     }
     private void setProductKindsPropertyCellValue(String fieldName, String newValue, String propertyTitle) {
         Session session = HibernateUtil.getSessionFactory().openSession();
