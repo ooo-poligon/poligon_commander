@@ -1,5 +1,7 @@
 package tableviews;
 
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
@@ -7,20 +9,35 @@ import javafx.beans.property.StringProperty;
  * Created by Igor Klekotnev on 01.09.16.
  */
 public class ProductKindPropertiesTableView {
-    private final StringProperty title;
-    private final StringProperty optional;
-    private final StringProperty symbol;
+    private final StringProperty  orderNumber;
+    private final StringProperty  title;
+    private final StringProperty  optional;
+    private final StringProperty  symbol;
 
     public ProductKindPropertiesTableView() {
-        this.title  = null;
+        this.orderNumber    = null;
+        this.title    = null;
         this.optional = null;
-        this.symbol = null;
+        this.symbol   = null;
     }
 
-    public ProductKindPropertiesTableView(String title, String optional, String symbol) {
-        this.title  = new SimpleStringProperty(title);
-        this.optional = new SimpleStringProperty(optional);
-        this.symbol = new SimpleStringProperty(symbol);
+    public ProductKindPropertiesTableView(String orderNumber, String title, String optional, String symbol) {
+        this.orderNumber = new SimpleStringProperty(orderNumber);
+        this.title       = new SimpleStringProperty(title);
+        this.optional    = new SimpleStringProperty(optional);
+        this.symbol      = new SimpleStringProperty(symbol);
+    }
+
+    public String getOrderNumber() {
+        return orderNumber.get();
+    }
+
+    public StringProperty orderNumberProperty() {
+        return orderNumber;
+    }
+
+    public void setOrderNumber(String orderNumber) {
+        this.orderNumber.set(orderNumber);
     }
 
     public String getTitle() {

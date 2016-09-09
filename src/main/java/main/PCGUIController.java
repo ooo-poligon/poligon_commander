@@ -17,7 +17,6 @@ import javafx.concurrent.WorkerStateEvent;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
@@ -45,6 +44,7 @@ import modalwindows.AlertWindow;
 import modalwindows.SetRatesWindow;
 import org.hibernate.*;
 import org.hibernate.exception.JDBCConnectionException;
+import org.hibernate.procedure.internal.Util;
 import settings.*;
 import tableviews.*;
 import tableviews.ProductPropertiesTableView;
@@ -62,7 +62,6 @@ import java.math.RoundingMode;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -72,7 +71,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import org.controlsfx.control.spreadsheet.*;
 
 /**
  *
@@ -2581,7 +2579,7 @@ public class PCGUIController implements Initializable {
         ObservableList<FunctionsTableView> fList = FXCollections.observableArrayList();
 
         if (selectedProduct == null) {
-            pList.add(new ProductPropertiesForKindTableView("", "", "", ""));
+            pList.add(new ProductPropertiesForKindTableView("", "", "", "", ""));
         } else {
             ArrayList<Properties> properties = new ArrayList<>(10);
             ArrayList<PropertyValues> propertyValues = new ArrayList<>(10);
@@ -2616,15 +2614,15 @@ public class PCGUIController implements Initializable {
                     }
                 }
                 pList.add(new ProductPropertiesForKindTableView(
+                        p.getOrderNumber().toString(),
                         p.getTitle(),
                         p.getOptional(),
                         p.getSymbol(),
                         value
                 ));
             }
-
         }
-
+        productPropertiesForKindOrderNumberColumn.setCellValueFactory(new PropertyValueFactory<>("orderNumber"));
         productPropertiesForKindTitleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
         productPropertiesForKindOptionalColumn.setCellValueFactory(new PropertyValueFactory<>("optional"));
         productPropertiesForKindSymbolColumn.setCellValueFactory(new PropertyValueFactory<>("symbol"));
@@ -2633,14 +2631,14 @@ public class PCGUIController implements Initializable {
         productPropertiesForKindValueColumn.setOnEditCommit(
                 t -> {
                     int rowNumber = t.getTablePosition().getRow();
+                    String propertyOrderNumber = t.getTableView().getItems().get(t.getTablePosition().getRow()).getOrderNumber();
                     String propertyTitle = t.getTableView().getItems().get(t.getTablePosition().getRow()).getTitle();
                     (t.getTableView().getItems().get(t.getTablePosition().getRow())).setValue(t.getNewValue());
-                    setPropertyValueForProduct(t.getNewValue(), propertyTitle, selectedProduct);
+                    setPropertyValueForProduct(t.getNewValue(), propertyOrderNumber, propertyTitle, selectedProduct);
                     t.getTableView().getSelectionModel().selectBelowCell();
                     t.getTableView().edit(rowNumber + 1, t.getTableView().getEditingCell().getTableColumn());
                 }
         );
-
         productPropertiesForKindTable.setItems(pList);
 
         functionsTable1.setItems(fList);
@@ -2754,34 +2752,48 @@ public class PCGUIController implements Initializable {
         //buildPropertiesTree(selectedProduct);
         buildFunctionsTable1(selectedProduct);
     }
-    private void setPropertyValueForProduct(String newValue, String propertyTitle, String selectedProduct) {
-        int propertyId = UtilPack.getPropertyIdFromTitle(propertyTitle);
+    private void setPropertyValueForProduct(String newValue, String propertyOrderNumber, String propertyTitle, String selectedProduct) {
+        ArrayList<Integer> propertyIds = UtilPack.getPropertyIdFromTitle(propertyTitle);
+        ArrayList<Properties> properties = new ArrayList<>();
         int selectedProductId = UtilPack.getProductIdFromTitle(selectedProduct, allProductsList);
-        PropertyValues currentPropertyValue = null;
 
-        Session session1 = HibernateUtil.getSessionFactory().openSession();
-        List result = session1.createQuery("from PropertyValues where propertyId=" + propertyId + " and productId=" + selectedProductId).list();
-        for(Iterator iterator = result.iterator(); iterator.hasNext();) {
-            currentPropertyValue = (PropertyValues) iterator.next();
+        for(Integer id : propertyIds ) {
+            Session session2 = HibernateUtil.getSessionFactory().openSession();
+            List result2 = session2.createQuery("from Properties where id=" + id).list();
+            for (Iterator iterator = result2.iterator(); iterator.hasNext(); ) {
+                Properties p = (Properties) iterator.next();
+                properties.add(p);
+            }
+            session2.close();
         }
-        session1.close();
-        if (currentPropertyValue == null) {
-            Session session = HibernateUtil.getSessionFactory().openSession();
-            Transaction tx = session.beginTransaction();
-            PropertyValues pv = new PropertyValues();
-            pv.setValue(newValue);
-            pv.setProductId(new Products(selectedProductId));
-            pv.setPropertyId(new Properties(propertyId));
-            session.save(pv);
-            tx.commit();
-            session.close();
-        } else {
-            Session session = HibernateUtil.getSessionFactory().openSession();
-            Transaction tx = session.beginTransaction();
-            currentPropertyValue.setValue(newValue);
-            session.saveOrUpdate(currentPropertyValue);
-            tx.commit();
-            session.close();
+        for(Properties p : properties ) {
+            PropertyValues currentPropertyValue = null;
+            Session session1 = HibernateUtil.getSessionFactory().openSession();
+            List result = session1.createQuery("from PropertyValues where propertyId=" + p.getId() + " and productId=" + selectedProductId).list();
+            for (Iterator iterator = result.iterator(); iterator.hasNext(); ) {
+                currentPropertyValue = (PropertyValues) iterator.next();
+            }
+            session1.close();
+            if (currentPropertyValue == null) {
+                Session session = HibernateUtil.getSessionFactory().openSession();
+                Transaction tx = session.beginTransaction();
+                PropertyValues pv = new PropertyValues();
+                pv.setValue(newValue);
+                pv.setProductId(new Products(selectedProductId));
+                pv.setPropertyId(new Properties(p.getId()));
+                session.save(pv);
+                tx.commit();
+                session.close();
+            } else {
+                if (p.getOrderNumber().toString().equals(propertyOrderNumber)) {
+                    Session session = HibernateUtil.getSessionFactory().openSession();
+                    Transaction tx = session.beginTransaction();
+                    currentPropertyValue.setValue(newValue);
+                    session.saveOrUpdate(currentPropertyValue);
+                    tx.commit();
+                    session.close();
+                }
+            }
         }
     }
     // Сохраняет в БД описание картинки товара.
@@ -2989,6 +3001,7 @@ public class PCGUIController implements Initializable {
         session2.close();
 
         productPropertiesForKind.add(new ProductPropertiesForKindTableView(
+                "2",
                 "2",
                 "2",
                 "2",
@@ -4014,74 +4027,125 @@ public class PCGUIController implements Initializable {
         });
 
         propertiesList.stream().forEach((p) -> {
-            productKindsPropertiesList.add(new ProductKindPropertiesTableView(p.getTitle(), p.getOptional(), p.getSymbol()));
+            productKindsPropertiesList.add(new ProductKindPropertiesTableView(p.getOrderNumber().toString(), p.getTitle(), p.getOptional(), p.getSymbol()));
         });
+        productKindPropertiesOrderColumn.setCellValueFactory(new PropertyValueFactory<>("orderNumber"));
+        productKindPropertiesOrderColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        //productKindPropertiesTitleColumn.setCellFactory(cellFactory);
+        productKindPropertiesOrderColumn.setOnEditCommit(
+                t -> {
+                    String orderNumber = (t.getTableView().getItems().get(t.getTablePosition().getRow()).getOrderNumber());
+                    (t.getTableView().getItems().get(t.getTablePosition().getRow())).setOrderNumber(t.getNewValue());
+                    setProductKindsPropertyCellValue(orderNumber, "orderNumber", t);
+                }
+        );
         productKindPropertiesTitleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
-        productKindPropertiesTitleColumn.setCellFactory(cellFactory);
+        //productKindPropertiesTitleColumn.setCellFactory(cellFactory);
+        productKindPropertiesTitleColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         productKindPropertiesTitleColumn.setOnEditCommit(
                 t -> {
-                    String oldTitle = (t.getTableView().getItems().get(t.getTablePosition().getRow())).getTitle();
+                    String orderNumber = (t.getTableView().getItems().get(t.getTablePosition().getRow()).getOrderNumber());
                     (t.getTableView().getItems().get(t.getTablePosition().getRow())).setTitle(t.getNewValue());
-                    if(oldTitle.equals("")) {
-                        setNewProductKindsProperty(
-                                t.getNewValue(),
-                                UtilPack.getProductKindIdFromTitle(selectedProductKind));
-                    } else {
-                        setProductKindsPropertyCellValue(
-                                "title",
-                                t.getNewValue(),
-                                oldTitle
-                        );
-                    }
-
+                    setProductKindsPropertyCellValue(orderNumber, "title", t);
                 }
         );
-
         productKindPropertiesOptionalColumn.setCellValueFactory(new PropertyValueFactory<>("optional"));
-        productKindPropertiesOptionalColumn.setCellFactory(cellFactory);
+        //productKindPropertiesOptionalColumn.setCellFactory(cellFactory);
+        productKindPropertiesOptionalColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         productKindPropertiesOptionalColumn.setOnEditCommit(
                 t -> {
+                    String orderNumber = (t.getTableView().getItems().get(t.getTablePosition().getRow()).getOrderNumber());
                     (t.getTableView().getItems().get(t.getTablePosition().getRow())).setOptional(t.getNewValue());
-                    setProductKindsPropertyCellValue(
-                            "optional",
-                            t.getNewValue(),
-                            (t.getTableView().getItems().get(t.getTablePosition().getRow())).getTitle()
-                    );
+                    setProductKindsPropertyCellValue(orderNumber, "optional", t);
                 }
         );
-
         productKindPropertiesSymbolColumn.setCellValueFactory(new PropertyValueFactory<>("symbol"));
         productKindPropertiesSymbolColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         //productKindPropertiesOptionalColumn.setCellFactory(cellFactory);
         productKindPropertiesSymbolColumn.setOnEditCommit(
                 t -> {
+                    String orderNumber = (t.getTableView().getItems().get(t.getTablePosition().getRow()).getOrderNumber());
                     (t.getTableView().getItems().get(t.getTablePosition().getRow())).setSymbol(t.getNewValue());
-                    setProductKindsPropertyCellValue(
-                            "symbol",
-                            t.getNewValue(),
-                            (t.getTableView().getItems().get(t.getTablePosition().getRow())).getTitle()
-                    );
-                    addPropertyToTable();
+                    setProductKindsPropertyCellValue(orderNumber, "symbol", t);
+                    //addPropertyToTable();
                 }
         );
 
         productKindPropertiesTable.setItems(productKindsPropertiesList);
+        productKindPropertiesTable.sortPolicyProperty().set( new Callback<TableView<ProductKindPropertiesTableView>, Boolean>() {
+            @Override
+            public Boolean call(TableView<ProductKindPropertiesTableView> param) {
+                Comparator<ProductKindPropertiesTableView> comparator = new Comparator<ProductKindPropertiesTableView>() {
+                    @Override
+                    public int compare(ProductKindPropertiesTableView r1, ProductKindPropertiesTableView r2) {
+                        if (param.getComparator() == null) {
+                            return 0;
+                        } else {
+                            return param.getComparator().compare(r1, r2);
+                        }
+                    }
+                };
+                FXCollections.sort(productKindPropertiesTable.getItems(), comparator);
+                return true;
+            }
+        });
         //productKindPropertiesTable.addEventHandler();
     }
-    private void setProductKindsPropertyCellValue(String fieldName, String newValue, String propertyTitle) {
+    private void setProductKindsPropertyCellValue(String orderNumber, String fieldName, CellEditEvent<ProductKindPropertiesTableView, String> t) {
+        String newValue = "";
+        String request = "";
+        int productKindId = UtilPack.getProductKindIdFromTitle(productKindsList.getSelectionModel().getSelectedItem());
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
-        Query query = session.createQuery("UPDATE Properties set " + fieldName + "= :newValue where id= :id");
-        query.setParameter("newValue", newValue);
-        query.setParameter("id", UtilPack.getPropertyIdFromTitle(propertyTitle));
+        if (fieldName.equals("orderNumber")) {
+            newValue = t.getTableView().getItems().get(t.getTablePosition().getRow()).getOrderNumber();
+            request = "UPDATE Properties set " + fieldName + " = " + newValue + " where orderNumber = " + orderNumber + " and productKindId = " + productKindId;
+        } else {
+            switch (fieldName) {
+                case "title":
+                    newValue = t.getTableView().getItems().get(t.getTablePosition().getRow()).getTitle();
+                    break;
+                case "optional":
+                    newValue = t.getTableView().getItems().get(t.getTablePosition().getRow()).getOptional();
+                    break;
+                case "symbol":
+                    newValue = t.getTableView().getItems().get(t.getTablePosition().getRow()).getSymbol();
+                    break;
+            }
+            request = "UPDATE Properties set " + fieldName + " = :newValue where orderNumber = " + orderNumber + " and productKindId = " + productKindId;
+        }
+        Query query = session.createQuery(request);
+        if (!fieldName.equals("orderNumber")) {
+            query.setParameter("newValue", newValue);
+        }
         query.executeUpdate();
         tx.commit();
         session.close();
-
         try {
             getAllProductsList();
             productKindPropertiesTable.refresh();
         } catch (SQLException e) {}
+    }
+    private void  deleteProperty(int orderNumber, String title) {
+        Integer productKindId = UtilPack.getProductKindIdFromTitle(productKindsList.getSelectionModel().getSelectedItem());
+        Properties property = new Properties();
+
+        Session session0 = HibernateUtil.getSessionFactory().openSession();
+        Query query = session0.createQuery("from Properties where orderNumber = " +
+                orderNumber + " and productKindId = " + productKindId);
+        List result = query.list();
+        for (Iterator iterator = result.iterator(); iterator.hasNext();) {
+            property = (Properties) iterator.next();
+        }
+
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = session.beginTransaction();
+        Query query1 = session.createQuery("delete PropertyValues where propertyId=" + property.getId());
+        query1.executeUpdate();
+        Query query2 = session.createQuery("delete Properties where id=" + property.getId() + " and productKindId=" + productKindId);
+        query2.executeUpdate();
+        tx.commit();
+        session.close();
     }
     private void buildPropertiesTreeTable(String selectedPropertiesKind) {
         ArrayList<Integer> typesIds = new ArrayList<>(10);
@@ -4359,7 +4423,6 @@ public class PCGUIController implements Initializable {
         SiteDBSettings password = new SiteDBSettings();
         password.saveSetting("passwordSiteDB", passwordSiteDB.getText());
     }
-
     @FXML private void saveServerSFTP() {
         SiteDBSettings server = new SiteDBSettings();
         server.saveSetting("serverSFTP", serverSFTP.getText());
@@ -4410,51 +4473,28 @@ public class PCGUIController implements Initializable {
         siteSettings.saveSetting("siteOrdersReceiver", siteOrdersReceiverTextField.getText());
     }
     @FXML private void addPropertyToTable() {
-        Integer selectedProductKindId = UtilPack.getProductKindIdFromTitle(productKindsList.getSelectionModel().getSelectedItem());
-        ProductKindPropertiesTableView newRow = new ProductKindPropertiesTableView("", "", "");
+        int newRowNumber = productKindPropertiesTable.getItems().size() + 1;
+        ProductKindPropertiesTableView newRow = new ProductKindPropertiesTableView(Integer.toString(newRowNumber), "", "", "");
         productKindsPropertiesList.add(newRow);
-
-
         productKindPropertiesTable.setItems(productKindsPropertiesList);
         int rowNumber = productKindsPropertiesList.size() - 1;
         productKindPropertiesTable.requestFocus();
         productKindPropertiesTable.getSelectionModel().select(rowNumber);
         productKindPropertiesTable.getFocusModel().focus(rowNumber);
-        productKindPropertiesTitleColumn.setEditable(true);
-    }
-    private void setNewProductKindsProperty(String newPropertyTitle, Integer selectedProductKindId) {
-        ProductKinds productKind = new ProductKinds();
-        Session session1 = HibernateUtil.getSessionFactory().openSession();
-        List list = session1.createQuery("from ProductKinds where id=" + selectedProductKindId).list();
-        for(Iterator iterator = list.iterator(); iterator.hasNext();) {
-            ProductKinds pk = (ProductKinds) iterator.next();
-            productKind = pk;
-        }
-        session1.close();
-
+        int productKindId = UtilPack.getProductKindIdFromTitle(productKindsList.getSelectionModel().getSelectedItem());
+        System.out.println("productKindId = " + productKindId);
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
-        Properties newProperty = new Properties();
-        newProperty.setTitle(newPropertyTitle);
-        newProperty.setProductKindId(productKind);
-        session.saveOrUpdate(newProperty);
-        tx.commit();
-        session.close();
-    }
-    private void  deleteProperty(int propertyId, int productKindId) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = session.beginTransaction();
-        Query query1 = session.createQuery("delete PropertyValues where propertyId=" + propertyId);
-        query1.executeUpdate();
-        Query query2 = session.createQuery("delete Properties where id=" + propertyId + " and productKindId=" + productKindId);
-        query2.executeUpdate();
+        Query query = session.createSQLQuery("insert into properties (order_number, product_kind_id) values (" + newRowNumber +
+                ", (select id from product_kinds where id = " + productKindId + "))");
+        query.executeUpdate();
         tx.commit();
         session.close();
     }
     @FXML private void deletePropertyFromTable() {
         int ix = productKindPropertiesTable.getSelectionModel().getSelectedIndex();
         String deletedPropertyTitle = productKindPropertiesTable.getSelectionModel().getSelectedItem().getTitle();
-        Integer selectedProductKindId = UtilPack.getProductKindIdFromTitle(productKindsList.getSelectionModel().getSelectedItem());
+        int orderNumber = Integer.getInteger(productKindPropertiesTable.getSelectionModel().getSelectedItem().getOrderNumber());
 
         // Select a row
         if (!(productKindPropertiesTable.getItems().size() == 0)) {
@@ -4469,8 +4509,7 @@ public class PCGUIController implements Initializable {
         productKindPropertiesTable.requestFocus();
         productKindPropertiesTable.getSelectionModel().select(ix);
         productKindPropertiesTable.getFocusModel().focus(ix);
-
-        deleteProperty(UtilPack.getPropertyIdFromTitle(deletedPropertyTitle), selectedProductKindId);
+        deleteProperty(orderNumber, deletedPropertyTitle);
     }
 
     // Panes
@@ -4571,6 +4610,7 @@ public class PCGUIController implements Initializable {
     @FXML private TableColumn<ProductPropertiesTableView, String>propertyConditionColumn;
 
     @FXML private TableView<ProductPropertiesForKindTableView>           productPropertiesForKindTable;
+    @FXML private TableColumn<ProductPropertiesForKindTableView, String> productPropertiesForKindOrderNumberColumn;
     @FXML private TableColumn<ProductPropertiesForKindTableView, String> productPropertiesForKindTitleColumn;
     @FXML private TableColumn<ProductPropertiesForKindTableView, String> productPropertiesForKindOptionalColumn;
     @FXML private TableColumn<ProductPropertiesForKindTableView, String> productPropertiesForKindSymbolColumn;
@@ -4615,10 +4655,11 @@ public class PCGUIController implements Initializable {
     @FXML private TableColumn<GroupsTableView, String>      groupTitleColumn;
     @FXML private TableColumn<GroupsTableView, String>      groupDescriptionColumn;
 
-    @FXML private TableView<ProductKindPropertiesTableView>                productKindPropertiesTable;
-    @FXML private TableColumn<ProductKindPropertiesTableView, String>      productKindPropertiesTitleColumn;
-    @FXML private TableColumn<ProductKindPropertiesTableView, String>      productKindPropertiesOptionalColumn;
-    @FXML private TableColumn<ProductKindPropertiesTableView, String>      productKindPropertiesSymbolColumn;
+    @FXML private TableView<ProductKindPropertiesTableView>           productKindPropertiesTable;
+    @FXML private TableColumn<ProductKindPropertiesTableView, String> productKindPropertiesOrderColumn;
+    @FXML private TableColumn<ProductKindPropertiesTableView, String> productKindPropertiesTitleColumn;
+    @FXML private TableColumn<ProductKindPropertiesTableView, String> productKindPropertiesOptionalColumn;
+    @FXML private TableColumn<ProductKindPropertiesTableView, String> productKindPropertiesSymbolColumn;
 
     //TreeTableViews
     @FXML private TreeTableView<ProductPropertiesTableView>  propertiesTreeTable;

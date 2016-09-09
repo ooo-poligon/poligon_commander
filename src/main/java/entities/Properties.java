@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
- * @author kataev
+ * @author Igor Klekotnev
  */
 @Entity
 @Table(name = "properties")
@@ -41,6 +41,9 @@ public class Properties implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
+
+    @Column(name = "order_number")
+    private Integer orderNumber;
 
     @Column(name = "title")
     private String title;
@@ -82,6 +85,14 @@ public class Properties implements Serializable {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public Integer getOrderNumber() {
+        return orderNumber;
+    }
+
+    public void setOrderNumber(Integer orderNumber) {
+        this.orderNumber = orderNumber;
     }
 
     public String getTitle() {

@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.shape.*?>
+<?import java.lang.*?>
 <?import javafx.scene.text.*?>
-<?import javafx.scene.media.*?>
 <?import javafx.scene.web.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.image.*?>
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
@@ -389,10 +385,11 @@
                                                                <children>
                                                                   <TableView fx:id="productPropertiesForKindTable" editable="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                     <columns>
+                                                                        <TableColumn fx:id="productPropertiesForKindOrderNumberColumn" minWidth="40.0" prefWidth="40.0" text="№" />
                                                                       <TableColumn fx:id="productPropertiesForKindTitleColumn" minWidth="300.0" prefWidth="300.0" text="Название" />
-                                                                      <TableColumn fx:id="productPropertiesForKindOptionalColumn" minWidth="300.0" prefWidth="300.0" text="Опция (курсив)" />
+                                                                      <TableColumn fx:id="productPropertiesForKindOptionalColumn" minWidth="260.0" prefWidth="260.0" text="Опция (курсив)" />
                                                                         <TableColumn fx:id="productPropertiesForKindSymbolColumn" prefWidth="90.0" text="Символ" />
-                                                                        <TableColumn fx:id="productPropertiesForKindValueColumn" minWidth="200.0" prefWidth="200.0" text="Значение" />
+                                                                        <TableColumn fx:id="productPropertiesForKindValueColumn" minWidth="200.0" prefWidth="150.0" text="Значение" />
                                                                     </columns>
                                                                   </TableView>
                                                                </children>
@@ -1821,7 +1818,8 @@
                                                    <children>
                                                       <TableView fx:id="productKindPropertiesTable" editable="true" layoutX="51.0" layoutY="14.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
                                                         <columns>
-                                                          <TableColumn fx:id="productKindPropertiesTitleColumn" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="520.0" text="Название свойства" />
+                                                            <TableColumn fx:id="productKindPropertiesOrderColumn" prefWidth="50.0" text="№" />
+                                                          <TableColumn fx:id="productKindPropertiesTitleColumn" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="480.0" text="Название свойства" />
                                                           <TableColumn fx:id="productKindPropertiesOptionalColumn" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="300.0" text="Опция (курсивом под названием)" />
                                                             <TableColumn fx:id="productKindPropertiesSymbolColumn" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="100.0" text="Символ" />
                                                         </columns>

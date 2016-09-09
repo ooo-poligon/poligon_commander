@@ -3,6 +3,9 @@ package utils;
 import entities.*;
 import entities.Properties;
 import entities.Settings;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.scene.control.CheckBoxTreeItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TreeItem;
@@ -129,17 +132,17 @@ public class UtilPack {
         }
         return parentId;
     }
-    public static Integer getPropertyIdFromTitle (String title) {
-        Integer id = 0;
+    public static ArrayList<Integer> getPropertyIdFromTitle (String title) {
+        ArrayList<Integer> ids = new ArrayList<>();
         Session session = HibernateUtil.getSessionFactory().openSession();
         Query query = session.createQuery("from Properties where title = :title");
         query.setParameter("title", title);
         List result = query.list();
         for (Iterator iterator = result.iterator(); iterator.hasNext();) {
             Properties property = (Properties) iterator.next();
-            id = property.getId();
+            ids.add(property.getId());
         }
-        return id;
+        return ids;
     }
     public static Integer getPropertyTypeIdFromTitle (String title) {
         Integer id = 0;
