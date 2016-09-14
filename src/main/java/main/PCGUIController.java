@@ -40,6 +40,7 @@ import javafx.stage.FileChooser;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javafx.util.converter.IntegerStringConverter;
+import jxl.read.biff.BiffException;
 import modalwindows.AlertWindow;
 import modalwindows.SetRatesWindow;
 import org.hibernate.*;
@@ -197,6 +198,7 @@ public class PCGUIController implements Initializable {
         //vendorsTable.getSelectionModel().select(0);
         //handleVendorsTableMousePressed();
         try {fillMainTab(productTabTitle.getText());} catch (SQLException e) {}
+        //System.out.println("OS is " + System.getProperty("os.name"));
     }
     @FXML private void saveAddCBRToDB() throws SQLException {
         PriceCalcSettings priceCalcSettings = new PriceCalcSettings();
@@ -2486,13 +2488,20 @@ public class PCGUIController implements Initializable {
                 MenuItemBuilder.create().text("Удалить выбранные элементы").onAction((ActionEvent arg0) -> {
 
                     ContextBuilder.deleteSelectedProducts(productsTable);
+                    try {
+                        getAllProductsList();
+                        fillMainTab(selectedProduct);
+                        productsTable.refresh();
+                        categoriesTree.getSelectionModel().select(categoriesTree.getSelectionModel().getSelectedItem());
+                    } catch (SQLException e) {}
+                    /*
                     Task task = deleteProductsTask();
                     progressBar.progressProperty().bind(task.progressProperty());
                     Platform.runLater(task);
 
                     Thread thread  = new Thread(task);
                     thread.start();
-
+                    */
 
                 ;}).build(),
                 SeparatorMenuItemBuilder.create().build(),
@@ -3969,7 +3978,7 @@ public class PCGUIController implements Initializable {
         }
     }
     private void buildProductKindsList() {
-        String selectedPropertiesKind = productKindsList.getSelectionModel().getSelectedItem();
+        //String selectedPropertiesKind = productKindsList.getSelectionModel().getSelectedItem();
         ObservableList<String> items = FXCollections.observableArrayList();
         Session session = HibernateUtil.getSessionFactory().openSession();
         List res = session.createQuery("from ProductKinds").list();
@@ -4092,14 +4101,117 @@ public class PCGUIController implements Initializable {
         //productKindPropertiesTable.addEventHandler();
     }
     private void setProductKindsPropertyCellValue(String orderNumber, String fieldName, CellEditEvent<ProductKindPropertiesTableView, String> t) {
+        int productKindId = UtilPack.getProductKindIdFromTitle(productKindsList.getSelectionModel().getSelectedItem());
+        Properties currentProperty = new Properties();
+
+        Session session0 = HibernateUtil.getSessionFactory().openSession();
+        if ((t.getTableView().getItems().get(t.getTablePosition().getRow()).getTitle() != null) &&
+            (t.getTableView().getItems().get(t.getTablePosition().getRow()).getOptional() != null) &&
+            (t.getTableView().getItems().get(t.getTablePosition().getRow()).getSymbol() != null)
+                ) {
+            Query query0 = session0.createQuery("from Properties where (orderNumber = " +
+                    orderNumber +
+                    " and title = :title) and (optional = :optional and symbol = :symbol) and productKindId = " +
+                    productKindId);
+            query0.setParameter("title", t.getTableView().getItems().get(t.getTablePosition().getRow()).getTitle());
+            query0.setParameter("optional", t.getTableView().getItems().get(t.getTablePosition().getRow()).getOptional());
+            query0.setParameter("symbol", t.getTableView().getItems().get(t.getTablePosition().getRow()).getSymbol());
+            List<Properties> res = query0.list();
+            for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+                currentProperty = (Properties) iterator.next();
+            }
+        } else if ((t.getTableView().getItems().get(t.getTablePosition().getRow()).getTitle() != null) &&
+                (t.getTableView().getItems().get(t.getTablePosition().getRow()).getOptional() != null) &&
+                (t.getTableView().getItems().get(t.getTablePosition().getRow()).getSymbol() == null)
+                ) {
+            Query query0 = session0.createQuery(
+                    "from Properties where orderNumber = " + orderNumber + " and title = :title and optional = :optional and productKindId = " + productKindId);
+            query0.setParameter("title", t.getTableView().getItems().get(t.getTablePosition().getRow()).getTitle());
+            query0.setParameter("optional", t.getTableView().getItems().get(t.getTablePosition().getRow()).getOptional());
+            List res = query0.list();
+            for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+                currentProperty = (Properties) iterator.next();
+            }
+        } else if ((t.getTableView().getItems().get(t.getTablePosition().getRow()).getTitle() != null) &&
+                (t.getTableView().getItems().get(t.getTablePosition().getRow()).getOptional() == null) &&
+                (t.getTableView().getItems().get(t.getTablePosition().getRow()).getSymbol() != null)
+                ) {
+            Query query0 = session0.createQuery(
+                    "from Properties where orderNumber = " + orderNumber + " and title = :title and symbol = :symbol and productKindId = " + productKindId);
+            query0.setParameter("title", t.getTableView().getItems().get(t.getTablePosition().getRow()).getTitle());
+            query0.setParameter("symbol", t.getTableView().getItems().get(t.getTablePosition().getRow()).getSymbol());
+            List res = query0.list();
+            for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+                currentProperty = (Properties) iterator.next();
+            }
+        } else if ((t.getTableView().getItems().get(t.getTablePosition().getRow()).getTitle() == null) &&
+                (t.getTableView().getItems().get(t.getTablePosition().getRow()).getOptional() != null) &&
+                (t.getTableView().getItems().get(t.getTablePosition().getRow()).getSymbol() != null)
+                ) {
+            Query query0 = session0.createQuery(
+                    "from Properties where orderNumber = " + orderNumber + " and optional = :optional and symbol = :symbol and productKindId = " + productKindId);
+            query0.setParameter("title", t.getTableView().getItems().get(t.getTablePosition().getRow()).getOptional());
+            query0.setParameter("symbol", t.getTableView().getItems().get(t.getTablePosition().getRow()).getSymbol());
+            List res = query0.list();
+            for (Iterator iterator = res.iterator(); iterator.hasNext(); ) {
+                currentProperty = (Properties) iterator.next();
+            }
+        } else if ((t.getTableView().getItems().get(t.getTablePosition().getRow()).getTitle() == null) &&
+                (t.getTableView().getItems().get(t.getTablePosition().getRow()).getOptional() == null) &&
+                (t.getTableView().getItems().get(t.getTablePosition().getRow()).getSymbol() != null)
+                ) {
+            Query query0 = session0.createQuery(
+                    "from Properties where orderNumber = " + orderNumber + " and symbol = :symbol and productKindId = " + productKindId);
+            query0.setParameter("symbol", t.getTableView().getItems().get(t.getTablePosition().getRow()).getSymbol());
+            List res = query0.list();
+            for (Iterator iterator = res.iterator(); iterator.hasNext(); ) {
+                currentProperty = (Properties) iterator.next();
+            }
+        } else if ((t.getTableView().getItems().get(t.getTablePosition().getRow()).getTitle() == null) &&
+                (t.getTableView().getItems().get(t.getTablePosition().getRow()).getOptional() != null) &&
+                (t.getTableView().getItems().get(t.getTablePosition().getRow()).getSymbol() == null)
+                ) {
+            Query query0 = session0.createQuery(
+                    "from Properties where orderNumber = " + orderNumber + " and optional = :optional and productKindId = " + productKindId);
+            query0.setParameter("title", t.getTableView().getItems().get(t.getTablePosition().getRow()).getOptional());
+            List res = query0.list();
+            for (Iterator iterator = res.iterator(); iterator.hasNext(); ) {
+                currentProperty = (Properties) iterator.next();
+            }
+        } else if ((t.getTableView().getItems().get(t.getTablePosition().getRow()).getTitle() != null) &&
+                (t.getTableView().getItems().get(t.getTablePosition().getRow()).getOptional() == null) &&
+                (t.getTableView().getItems().get(t.getTablePosition().getRow()).getSymbol() == null)
+                ) {
+            System.out.println("title is " + t.getTableView().getItems().get(t.getTablePosition().getRow()).getTitle());
+            Query query0 = session0.createQuery(
+                    "from Properties where orderNumber = " + orderNumber + " and title = :title and productKindId = " + productKindId);
+            query0.setParameter("title", t.getTableView().getItems().get(t.getTablePosition().getRow()).getTitle());
+            List res = query0.list();
+            for (Iterator iterator = res.iterator(); iterator.hasNext(); ) {
+                currentProperty = (Properties) iterator.next();
+            }
+        } else if ((t.getTableView().getItems().get(t.getTablePosition().getRow()).getTitle() == null) &&
+                (t.getTableView().getItems().get(t.getTablePosition().getRow()).getOptional() == null) &&
+                (t.getTableView().getItems().get(t.getTablePosition().getRow()).getSymbol() == null)
+                ) {
+            Query query0 = session0.createQuery(
+                    "from Properties where orderNumber = " + orderNumber + " and productKindId = " + productKindId);
+            List res = query0.list();
+            for (Iterator iterator = res.iterator(); iterator.hasNext(); ) {
+                currentProperty = (Properties) iterator.next();
+            }
+        }
+        session0.close();
+
         String newValue = "";
         String request = "";
-        int productKindId = UtilPack.getProductKindIdFromTitle(productKindsList.getSelectionModel().getSelectedItem());
+
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
         if (fieldName.equals("orderNumber")) {
             newValue = t.getTableView().getItems().get(t.getTablePosition().getRow()).getOrderNumber();
-            request = "UPDATE Properties set " + fieldName + " = " + newValue + " where orderNumber = " + orderNumber + " and productKindId = " + productKindId;
+            System.out.println("newValue is " + newValue + "and orderNumber is " + orderNumber);
+            request = "UPDATE Properties set " + fieldName + " = " + newValue + " where id = " + currentProperty.getId();
         } else {
             switch (fieldName) {
                 case "title":
@@ -4512,6 +4624,27 @@ public class PCGUIController implements Initializable {
         deleteProperty(orderNumber, deletedPropertyTitle);
     }
 
+    @FXML private void exportPropertiesTableToXls() {
+        File file = directoryForExportProperties.showDialog(anchorPane.getScene().getWindow());
+        if (file != null) {
+            //System.out.println("file.getPath() is " + file.getPath());
+            XLSHandler.exportPropertiesByProductKinds(productKindsList.getSelectionModel().getSelectedItem(), file.getPath());
+        }
+    }
+    @FXML private void importPropertiesFromXls() {
+        File file = new FileChooser().showOpenDialog(anchorPane.getScene().getWindow());
+        if (file != null) {
+            //System.out.println("file.getPath() is " + file.getPath());
+            try {
+                XLSHandler.importPropertyValues(file.getAbsolutePath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (BiffException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     // Panes
     @FXML private AnchorPane anchorPane;
     @FXML private AnchorPane editorAnchorPane;
@@ -4682,6 +4815,8 @@ public class PCGUIController implements Initializable {
     @FXML private Button changePlug2ImageButton;
     @FXML private Button addPropertyToTableButton;
     @FXML private Button deletePropertyFromTableButton;
+    @FXML private Button exportPropertiesTableToXlsButton;
+    @FXML private Button importPropertiesFromXlsButton;
 
     // Labels
     @FXML private Label productTabTitle;
@@ -4759,6 +4894,7 @@ public class PCGUIController implements Initializable {
     File fileXLSExport;
     final DirectoryChooser directoryForExport = new DirectoryChooser();
     final DirectoryChooser directoryForExportPrices = new DirectoryChooser();
+    final DirectoryChooser directoryForExportProperties = new DirectoryChooser();
 
     // Lists
     ArrayList<ArrayList<String>> allImportXLSContent = new ArrayList<>(120);

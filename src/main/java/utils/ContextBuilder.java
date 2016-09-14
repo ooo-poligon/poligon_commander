@@ -459,7 +459,9 @@ public class ContextBuilder {
         String selectedProductKind = productKindsList.getSelectionModel().getSelectedItem();
         ProductKinds productKind = new ProductKinds();
         Session session = HibernateUtil.getSessionFactory().openSession();
-        List res = session.createQuery("from ProductKinds where title =\'" + selectedProductKind + "\'").list();
+        Query query = session.createQuery("from ProductKinds where title = :title");
+        query.setParameter("title", selectedProductKind);
+        List res = query.list();
         for (Iterator iterator = res.iterator(); iterator.hasNext();) {
             productKind = (ProductKinds) iterator.next();
         }
@@ -505,7 +507,9 @@ public class ContextBuilder {
         String selectedProductKind = productKindsList.getSelectionModel().getSelectedItem();
         ProductKinds productKind = new ProductKinds();
         Session session = HibernateUtil.getSessionFactory().openSession();
-        List res = session.createQuery("from ProductKinds where title =\'" + selectedProductKind + "\'").list();
+        Query query = session.createQuery("from ProductKinds where title = :title");
+        query.setParameter("title", selectedProductKind);
+        List res = query.list();
         for (Iterator iterator = res.iterator(); iterator.hasNext();) {
             productKind = (ProductKinds) iterator.next();
         }
@@ -537,12 +541,17 @@ public class ContextBuilder {
         Optional<NewProductKind> result = dialog.showAndWait();
         if (result.isPresent()) {
             Session session1 = HibernateUtil.getSessionFactory().openSession();
-            Transaction tx = session1.beginTransaction();
 
+            Transaction tx1 = session1.beginTransaction();
+            Query q1 = session1.createQuery("delete Properties where productKindId =" + productKind.getId());
+            q1.executeUpdate();
+            tx1.commit();
+
+            Transaction tx = session1.beginTransaction();
             Query q = session1.createQuery("delete ProductKinds where id =" + productKind.getId());
             q.executeUpdate();
-
             tx.commit();
+
             session1.close();
         }
     }
@@ -1876,12 +1885,22 @@ public class ContextBuilder {
         Optional<Product> result = dialog.showAndWait();
         if (result.isPresent()) {
             Session session1 = HibernateUtil.getSessionFactory().openSession();
-            Transaction tx = session1.beginTransaction();
 
+            Transaction tx1 = session1.beginTransaction();
+            Query q1 = session1.createQuery("delete PropertyValues where productId=" + product.getId());
+            q1.executeUpdate();
+            tx1.commit();
+
+            Transaction tx2 = session1.beginTransaction();
+            Query q2 = session1.createQuery("delete Files where ownerId=" + product.getId());
+            q2.executeUpdate();
+            tx2.commit();
+
+            Transaction tx = session1.beginTransaction();
             Query q = session1.createQuery("delete Products where id =" + product.getId());
             q.executeUpdate();
-
             tx.commit();
+
             session1.close();
         }
     }
@@ -1926,12 +1945,22 @@ public class ContextBuilder {
 
             if (result.isPresent()) {
                 Session session1 = HibernateUtil.getSessionFactory().openSession();
-                Transaction tx = session1.beginTransaction();
 
+                Transaction tx1 = session1.beginTransaction();
+                Query q1 = session1.createQuery("delete PropertyValues where productId=" + product.getId());
+                q1.executeUpdate();
+                tx1.commit();
+
+                Transaction tx2 = session1.beginTransaction();
+                Query q2 = session1.createQuery("delete Files where ownerId=" + product.getId());
+                q2.executeUpdate();
+                tx2.commit();
+
+                Transaction tx = session1.beginTransaction();
                 Query q = session1.createQuery("delete Products where id =" + product.getId());
                 q.executeUpdate();
-
                 tx.commit();
+
                 session1.close();
             }
         });

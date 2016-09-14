@@ -576,10 +576,18 @@ public class AlertWindow {
         alert.setContentText("Поля \"Производитель\", \"Тип продукта\", \"Категория\" и \"Серия продукта\" должны быть заполнены обязательно!");
         alert.show();
     }
+
     public static void waiting() {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("Внимание!");
         alert.setHeaderText("Подождите...");
+        alert.show();
+    }
+
+    public static void tooManyColumnsForExport() {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Количество устройств в группе больше допустимого!");
+        alert.setHeaderText("Для успешного экспорта количество устройств в группе не должно превышать 252!\nЭкспорт отменён.");
         alert.show();
     }
 }

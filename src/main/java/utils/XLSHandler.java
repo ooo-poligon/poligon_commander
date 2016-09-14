@@ -1,38 +1,25 @@
-/*
- * 
- * 
- */
-package utils;
-
 /**
- *
- * @author kataev
+ * Created by Igor Klekotnev on 25.09.2015.
  */
+
+package utils;
 
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
-import entities.FileTypes;
-import entities.Files;
-import entities.Products;
-import entities.Vendors;
+import entities.*;
+import entities.Properties;
 import javafx.scene.control.Alert;
-import jxl.Cell;
-import jxl.Sheet;
-import jxl.Workbook;
+import jxl.*;
 import jxl.read.biff.BiffException;
 
-import jxl.CellView;
 import jxl.Workbook;
-import jxl.WorkbookSettings;
 import jxl.format.UnderlineStyle;
 import jxl.write.Formula;
 import jxl.write.Label;
@@ -50,9 +37,6 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-/**
- * Created by Igor Klekotnev on 25.09.2015.
- */
 public class XLSHandler {
     private static DBConnection connection = new DBConnection("local");
     //метод для считывания содержимого таблицы
@@ -96,6 +80,269 @@ public class XLSHandler {
         } catch (BiffException e) {
         }
         return columnContent;
+    }
+    public static void exportPropertiesByProductKinds(String selectedProductKind, String targetDir) {
+        ProductKinds pk = new ProductKinds();
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Query query = session.createQuery("from ProductKinds where title = :title");
+        query.setParameter("title", selectedProductKind);
+        List<ProductKinds> list = query.list();
+        for (Iterator iterator = list.iterator(); iterator.hasNext();) {
+            pk = (ProductKinds) iterator.next();
+        }
+        session.close();
+        if (pk != null) {
+            ArrayList<Products> prodList = new ArrayList<>();
+            Session session1 = HibernateUtil.getSessionFactory().openSession();
+            List<ProductKinds> list1 = session1.createQuery("from Products where productKindId=" + pk.getId()).list();
+            for (Iterator iterator = list1.iterator(); iterator.hasNext();) {
+                Products p = (Products) iterator.next();
+                prodList.add(p);
+            }
+            session1.close();
+
+            ArrayList<Properties> propList = new ArrayList<>();
+            Session session2 = HibernateUtil.getSessionFactory().openSession();
+            List<ProductKinds> list2 = session2.createQuery("from Properties where productKindId=" + pk.getId()).list();
+            for (Iterator iterator = list2.iterator(); iterator.hasNext();) {
+                Properties pr = (Properties) iterator.next();
+                propList.add(pr);
+            }
+            session2.close();
+
+            ArrayList<PropertyValues> pvList = new ArrayList<>();
+            Session session3 = HibernateUtil.getSessionFactory().openSession();
+            List<PropertyValues> list3 = session3.createQuery("from PropertyValues").list();
+            for (Iterator iterator = list3.iterator(); iterator.hasNext();) {
+                PropertyValues pv = (PropertyValues) iterator.next();
+                pvList.add(pv);
+            }
+            session3.close();
+
+            if (prodList.size() < 252) {
+                String pkTitle = pk.getTitle().replace(" ", "_").replace("+", "_").replace("\\", "_").replace("/", "_");
+                System.out.println("OS is " + System.getProperty("os.name"));
+                String targetPath = "";
+                if (System.getProperty("os.name").equals("Linux")) {
+                    targetPath = targetDir + "/" + pkTitle + ".xls";
+                } else {
+                    targetPath = targetDir + "\\" + pkTitle + ".xls";
+                }
+                // uncomment next line for windows
+                //String targetPath = targetDir + "\\" + pkTitle + ".xls";
+                // comment out next line for *nix
+                //String targetPath = targetDir + "/" + pkTitle + ".xls";
+                File file = new File(targetPath);
+                WorkbookSettings wbSettings = new WorkbookSettings();
+                wbSettings.setLocale(new Locale("ru", "RU"));
+
+                WritableWorkbook workbook = null;
+                try {
+                    workbook = Workbook.createWorkbook(file, wbSettings);
+                    workbook.createSheet("Properties by product kind", 0);
+                    WritableSheet excelSheet = workbook.getSheet(0);
+                    // arguments(column_number, row_number, cell_content)
+
+                    excelSheet.addCell(new Label(0, 0, pk.getTitle()));
+
+                    if (prodList.size() <= propList.size()) {
+                        for (int r = 0; r < propList.size(); r++) {
+                            excelSheet.addCell(new Label(0, r + 1, propList.get(r).getTitle()));
+                            excelSheet.addCell(new Label(1, r + 1, propList.get(r).getOptional()));
+                            excelSheet.addCell(new Label(2, r + 1, propList.get(r).getSymbol()));
+                            for (int c = 0; c < prodList.size(); c++) {
+                                excelSheet.addCell(new Label(c + 3, 0, prodList.get(c).getTitle()));
+                                for( PropertyValues pv : pvList) {
+                                    int pvPropId = pv.getPropertyId().getId();
+                                    int pvProdId = pv.getProductId().getId();
+                                    int propId = propList.get(r).getId();
+                                    int prodId = prodList.get(c).getId();
+                                    if ((pvPropId == propId) && (pvProdId == prodId)) {
+                                        excelSheet.addCell(new Label (c+3, r+1, pv.getValue()));
+                                    }
+                                }
+
+                            }
+                        }
+                    } else {
+                        for (int c = 0; c < prodList.size(); c++) {
+                            excelSheet.addCell(new Label(c + 3, 0, prodList.get(c).getTitle()));
+                            for (int r = 0; r < propList.size(); r++) {
+                                excelSheet.addCell(new Label(0, r + 1, propList.get(r).getTitle()));
+                                excelSheet.addCell(new Label(1, r + 1, propList.get(r).getOptional()));
+                                excelSheet.addCell(new Label(2, r + 1, propList.get(r).getSymbol()));
+                                for( PropertyValues pv : pvList) {
+                                    int pvPropId = pv.getPropertyId().getId();
+                                    int pvProdId = pv.getProductId().getId();
+                                    int propId = propList.get(r).getId();
+                                    int prodId = prodList.get(c).getId();
+                                    if ((pvPropId == propId) && (pvProdId == prodId)) {
+                                        excelSheet.addCell(new Label (c+3, r+1, pv.getValue()));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    workbook.write();
+                    workbook.close();
+                } catch (WriteException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                AlertWindow.tooManyColumnsForExport();
+            }
+        }
+    }
+    public static void importPropertyValues(String inputFile) throws IOException, BiffException {
+        String productKindTitle = new String();
+        ProductKinds productKind = new ProductKinds();
+        ArrayList<ArrayList<String>> propertyValuesArrays  = new ArrayList<>();
+        ArrayList<Integer> propIdsToDelete = new ArrayList<>();
+
+        File inputWorkbook = new File(inputFile);
+        Workbook w;
+
+        WorkbookSettings ws = new WorkbookSettings();
+        ws.setEncoding("Cp1252");
+
+        try {
+            w = Workbook.getWorkbook(inputWorkbook, ws);
+            Sheet sheet = w.getSheet(0);
+
+            productKindTitle = sheet.getCell(0, 0).getContents();
+            int colQuantity = sheet.getColumns();
+            int rowQuantity = sheet.getRows();
+            if (colQuantity > rowQuantity) {
+                for (int c = 3; c < colQuantity; c++) {
+                    for (int r = 1; r < rowQuantity; r++) {
+                        ArrayList<String> pVal = new ArrayList<>();
+                        //get pv value [0]
+                        pVal.add(sheet.getCell(c, r).getContents());
+                        //get pv property title [1]
+                        pVal.add(sheet.getCell(0, r).getContents());
+                        //get pv property optional [2]
+                        pVal.add(sheet.getCell(1, r).getContents());
+                        //get pv property symbol [3]
+                        pVal.add(sheet.getCell(2, r).getContents());
+                        //get pv product title [4]
+                        pVal.add(sheet.getCell(c, 0).getContents());
+                        propertyValuesArrays.add(pVal);
+                    }
+                }
+            } else {
+                for (int r = 1; r < rowQuantity; r++) {
+                    for (int c = 3; c < colQuantity; c++) {
+                        ArrayList<String> pVal = new ArrayList<>();
+                        //get pv value [0]
+                        pVal.add(sheet.getCell(c, r).getContents());
+                        //get pv property title [1]
+                        pVal.add(sheet.getCell(0, r).getContents());
+                        //get pv property optional [2]
+                        pVal.add(sheet.getCell(1, r).getContents());
+                        //get pv property symbol [3]
+                        pVal.add(sheet.getCell(2, r).getContents());
+                        //get pv product title [4]
+                        pVal.add(sheet.getCell(c, 0).getContents());
+                        propertyValuesArrays.add(pVal);
+                    }
+                }
+            }
+
+        } catch (BiffException e) {}
+
+        //берём экземпляр типа продуктов
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Query query = session.createQuery("from ProductKinds where title = :title");
+        query.setParameter("title", productKindTitle);
+        List<ProductKinds> list = query.list();
+        for (Iterator iterator = list.iterator(); iterator.hasNext();) {
+            productKind = (ProductKinds) iterator.next();
+        }
+        session.close();
+
+        Session session6 = HibernateUtil.getSessionFactory().openSession();
+        List<Properties> list6 = session6.createQuery("from Properties where productKindId = " + productKind.getId()).list();
+        for (Iterator iterator = list6.iterator(); iterator.hasNext();) {
+            Properties property = (Properties) iterator.next();
+            propIdsToDelete.add(property.getId());
+        }
+        session6.close();
+
+        Session session5 = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx5 = session5.beginTransaction();
+        for (Integer propertyId : propIdsToDelete) {
+            Properties prop = (Properties) session5.load(Properties.class, propertyId);
+            Query query5 = session5.createQuery("delete PropertyValues where propertyId = " + prop.getId());
+            query5.executeUpdate();
+        }
+        tx5.commit();
+        session5.close();
+
+        Session session4 = HibernateUtil.getSessionFactory().openSession();
+        ProductKinds pk = (ProductKinds) session4.load(ProductKinds.class, productKind.getId());
+        Transaction tx4 = session4.beginTransaction();
+        Query query4 = session4.createQuery("delete Properties where productKindId =" + pk.getId());
+        query4.executeUpdate();
+        tx4.commit();
+        session4.close();
+
+        if (productKind != null) {
+            int orderNumber = 1;;
+            ArrayList<String> propTitles = new ArrayList<>();
+            for (ArrayList<String> pva : propertyValuesArrays) {
+                if (!propTitles.contains(pva.get(1))) {
+                    Session session0 = HibernateUtil.getSessionFactory().openSession();
+                    Transaction tx0 = session0.beginTransaction();
+
+                    Properties newProperty = new Properties();
+                    newProperty.setTitle(pva.get(1));
+                    newProperty.setOptional(pva.get(2));
+                    newProperty.setSymbol(pva.get(3));
+                    newProperty.setOrderNumber(orderNumber);
+                    newProperty.setProductKindId(productKind);
+                    session0.save(newProperty);
+
+                    tx0.commit();
+                    session0.close();
+                    orderNumber++;
+
+                    propTitles.add(pva.get(1));
+                }
+            }
+
+            for (ArrayList<String> pva : propertyValuesArrays) {
+                Products product = new Products();
+                Properties property = new Properties();
+                PropertyValues pv = new PropertyValues();
+
+                Session session2 = HibernateUtil.getSessionFactory().openSession();
+                Query query2 = session2.createQuery("from Products where title = :title");
+                query2.setParameter("title", pva.get(4));
+                List<ProductKinds> list2 = query2.list();
+                for (Iterator iterator = list2.iterator(); iterator.hasNext(); ) {
+                    product = (Products) iterator.next();
+                }
+                session2.save(product);
+
+                Query query3 = session2.createQuery("from Properties where title = :title");
+                query3.setParameter("title", pva.get(1));
+                List<ProductKinds> list3 = query3.list();
+                for (Iterator iterator = list3.iterator(); iterator.hasNext(); ) {
+                    property = (Properties) iterator.next();
+                }
+                session2.save(property);
+
+                Transaction tx = session2.beginTransaction();
+                pv.setValue(pva.get(0));
+                pv.setPropertyId(property);
+                pv.setProductId(product);
+                session2.save(pv);
+                tx.commit();
+                session2.close();
+            }
+        }
     }
     public static void exportDBTableTo(String dbTable, String targetPath) {
         File file = new File(targetPath);

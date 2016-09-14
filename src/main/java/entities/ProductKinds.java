@@ -45,8 +45,12 @@ public class ProductKinds implements Serializable {
     @Basic(optional = false)
     @Column(name = "title")
     private String title;
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "productKindId")
     private Collection<Products> productsCollection;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "productKindId")
+    private Collection<Properties> propertiesCollection;
 
     public ProductKinds() {
     }
@@ -83,6 +87,14 @@ public class ProductKinds implements Serializable {
 
     public void setProductsCollection(Collection<Products> productsCollection) {
         this.productsCollection = productsCollection;
+    }
+
+    public Collection<Properties> getPropertiesCollection() {
+        return propertiesCollection;
+    }
+
+    public void setPropertiesCollection(Collection<Properties> propertiesCollection) {
+        this.propertiesCollection = propertiesCollection;
     }
 
     @Override

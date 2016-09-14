@@ -89,7 +89,7 @@ public class PoligonCommander extends Application {
         Parent root = FXMLLoader.load(getClass().getResource("/fxml/PCGUI.fxml"));
         Scene scene = new Scene(root);
         mainStage.setScene(scene);
-        mainStage.setTitle("\"Poligon Commander\" (version 1.8)");
+        mainStage.setTitle("\"Poligon Commander\" (version 2.0.4)");
         mainStage.show();
         mainStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override

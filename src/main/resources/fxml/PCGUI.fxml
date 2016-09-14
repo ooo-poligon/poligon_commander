@@ -1784,7 +1784,7 @@
                                                    <children>
                                                       <HBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
                                                          <children>
-                                                            <AnchorPane HBox.hgrow="ALWAYS">
+                                                            <AnchorPane HBox.hgrow="NEVER">
                                                                <children>
                                                                   <Label text="Таблица свойств для типа устройств" AnchorPane.bottomAnchor="3.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
                                                                      <font>
@@ -1799,6 +1799,8 @@
                                                                     <columnConstraints>
                                                                       <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                                                       <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                                        <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                                        <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                                                     </columnConstraints>
                                                                     <rowConstraints>
                                                                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -1806,6 +1808,16 @@
                                                                      <children>
                                                                         <Button fx:id="addPropertyToTableButton" mnemonicParsing="false" onAction="#addPropertyToTable" text="Добавиь свойство" />
                                                                         <Button fx:id="deletePropertyFromTableButton" mnemonicParsing="false" onAction="#deletePropertyFromTable" text="Удалить свойство" GridPane.columnIndex="1" />
+                                                                        <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2">
+                                                                           <children>
+                                                                              <Button fx:id="exportPropertiesTableToXlsButton" layoutX="36.0" layoutY="-1.0" mnemonicParsing="false" onAction="#exportPropertiesTableToXls" text="Экспорт в xls" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                                           </children>
+                                                                        </AnchorPane>
+                                                                         <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="3">
+                                                                             <children>
+                                                                                 <Button fx:id="importPropertiesFromXlsButton" layoutX="36.0" layoutY="-1.0" mnemonicParsing="false" onAction="#importPropertiesFromXls" text="Импорт из xls" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                                             </children>
+                                                                         </AnchorPane>
                                                                      </children>
                                                                   </GridPane>
                                                                </children>
