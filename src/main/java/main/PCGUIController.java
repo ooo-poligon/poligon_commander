@@ -4322,7 +4322,7 @@ public class PCGUIController implements Initializable {
     @FXML private void startExport() {
         String dbTable = tableDBForExportComboBox.getValue();
         String targetLocationPath = fileForExportPathLabel.getText() + "\\" + exportFileNameTextField.getText();
-        XLSHandler.exportDBTableTo(dbTable, targetLocationPath);
+        XLSHandler.exportDBTableTo(dbTable, targetLocationPath, progressBarImportXLS);
     }
     @FXML private void chooseDirectoryForExportPrices() {
         fileXLSExport = directoryForExportPrices.showDialog(anchorPane.getScene().getWindow());
@@ -4332,7 +4332,7 @@ public class PCGUIController implements Initializable {
         }
     }
     @FXML private void startExportPrices() {
-        XLSHandler.exportDBPricesTo(allProductsList, targetDir);
+        XLSHandler.exportDBPricesTo(allProductsList, targetDir, progressBarImportXLS);
     }
     @FXML private void getHeadersRowNumber(KeyEvent e) {
         if(e.getCode().toString().equals("ENTER")) {
