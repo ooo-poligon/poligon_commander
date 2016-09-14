@@ -89,10 +89,6 @@ public class PCGUIController implements Initializable {
         SiteDBSettings siteDBSettings = new SiteDBSettings();
         LocalDBSettings localDBSettings = new LocalDBSettings();
         PriceCalcSettings priceCalcSettings = new PriceCalcSettings();
-        //SiteUrlSettings siteUrlSettings = new SiteUrlSettings();
-        //SiteSettings siteSettings = new SiteSettings();
-        //try {siteUrlTextField.setText(siteUrlSettings.loadSetting());
-        //} catch (NullPointerException ne) {siteUrlTextField.setText("");}
         addCBRTextField.setText(priceCalcSettings.loadSetting("addCBR"));
         addressSiteDB.setText(siteDBSettings.loadSetting("addressSiteDB"));
         portSiteDB.setText(siteDBSettings.loadSetting("portSiteDB"));
@@ -135,13 +131,10 @@ public class PCGUIController implements Initializable {
         populateComboBox ();
         loadImportFields();
         loadExportTables();
-        //buildVendorsTable();
-        //buildSeriesTable();
         buildUsersTable();
         buildCompaniesTable();
         buildGroupsTable();
         buildProductKindsList();
-        //tabBrowserWebView.getEngine().load(siteUrlTextField.getText());
         productsTable.getSelectionModel().setSelectionMode(javafx.scene.control.SelectionMode.MULTIPLE);
         productsTable.getSelectionModel().selectedItemProperty().addListener(
             (observable, oldValue, newValue) -> {
@@ -195,10 +188,7 @@ public class PCGUIController implements Initializable {
                 }
             }
         );
-        //vendorsTable.getSelectionModel().select(0);
-        //handleVendorsTableMousePressed();
         try {fillMainTab(productTabTitle.getText());} catch (SQLException e) {}
-        //System.out.println("OS is " + System.getProperty("os.name"));
     }
     @FXML private void saveAddCBRToDB() throws SQLException {
         PriceCalcSettings priceCalcSettings = new PriceCalcSettings();
@@ -1179,95 +1169,6 @@ public class PCGUIController implements Initializable {
         datasheetFileTable.setContextMenu(datasheetTableContextMenu);
         datasheetFileTable.setItems(data);
     }
-    private void buildVendorsTable() {
-        ObservableList<VendorsTableView> data = FXCollections.observableArrayList();
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        try {
-            List response = session.createQuery("From Vendors").list();
-            for (Iterator iterator = response.iterator(); iterator.hasNext();) {
-                Vendors v = (Vendors) iterator.next();
-                data.add(new VendorsTableView(v.getTitle(), v.getAddress(), v.getRate()));
-            }
-        } catch (HibernateException e) {
-        } finally {
-            session.close();
-        }
-        vendorsTitleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
-        vendorsAddressColumn.setCellValueFactory(new PropertyValueFactory<>("address"));
-        vendorsRateColumn.setCellValueFactory(new PropertyValueFactory<>("rate"));
-        vendorsTableContextMenu = ContextMenuBuilder.create().items(
-                MenuItemBuilder.create().text("Добавить нового производителя").onAction((ActionEvent arg0) -> {
-                    addVendorDialog();
-                }).build()
-        ).build();
-        vendorsTable.setContextMenu(vendorsTableContextMenu);
-        vendorsTable.setItems(data);
-    }
-    private void buildSeriesTable() {
-        ObservableList<SeriesTableView> data = FXCollections.observableArrayList();
-        UtilPack.getAllSeries().stream().forEach(serie -> {
-            data.add(new SeriesTableView(serie.getTitle(), serie.getVendorId().getTitle()));
-        });
-        serieTableColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
-        serieVendorTableColumn.setCellValueFactory(new PropertyValueFactory<>("vendor"));
-        seriesTableContextMenu = ContextMenuBuilder.create().items(
-                MenuItemBuilder.create().text("Добавить новую серию").onAction((ActionEvent arg0) -> {
-                    addSerieDialog();
-                }).build(),
-                MenuItemBuilder.create().text("Редактировать выбранную серию").onAction((ActionEvent arg0) -> {
-                    editSerieDialog(selectedSerie);
-                }).build(),
-                MenuItemBuilder.create().text("Удалить выбранную серию").onAction((ActionEvent arg0) -> {
-                    deleteSerieDialog(selectedSerie);
-                }).build()
-        ).build();
-        seriesTable.setContextMenu(seriesTableContextMenu);
-        seriesTable.setItems(data);
-    }
-    @FXML private void handleVendorsTableMousePressed() {
-        /*selectedVendor = vendorsTable.getSelectionModel().getSelectedItem().getTitle();
-        ObservableList<ProductsTableView> data = FXCollections.observableArrayList();
-        try {
-            allProductsList.stream().forEach(product -> {
-                if(product.getVendor().equals(selectedVendor)) {
-                    data.add(new ProductsTableView(
-                            product.getArticle(),
-                            product.getTitle(),
-                            product.getDescription(),
-                            product.getDeliveryTime(),
-                            product.getAvailable() == 1 ? true : false,
-                            product.getOutdated()  == 1 ? true : false)
-                    );
-                }
-            });
-        } catch (NullPointerException ne) {}
-        buildProductsTable(data);
-        productsTable.getSelectionModel().select(0);
-        onFocusedProductTableItem(selectedProduct);
-        fillProductTab(selectedProduct);*/
-    }
-    @FXML private void handleSeriesTableMousePressed() {
-        /*selectedSerie = seriesTable.getSelectionModel().getSelectedItem().getTitle();
-        ObservableList<ProductsTableView> data = FXCollections.observableArrayList();
-        try {
-            allProductsList.stream().forEach(product -> {
-                if(product.getSerie().equals(selectedSerie)) {
-                    data.add(new ProductsTableView(
-                            product.getArticle(),
-                            product.getTitle(),
-                            product.getDescription(),
-                            product.getDeliveryTime(),
-                            product.getAvailable() == 1 ? true : false,
-                            product.getOutdated()  == 1 ? true : false)
-                    );
-                }
-            });
-        } catch (NullPointerException ne) {}
-        buildProductsTable(data);
-        productsTable.getSelectionModel().select(0);
-        onFocusedProductTableItem(selectedProduct);
-        fillProductTab(selectedProduct);*/
-    }
     private void buildImageView(String selectedProduct) {
         if (selectedProduct == null) {
             selectedProduct = focusedProduct;
@@ -1784,9 +1685,7 @@ public class PCGUIController implements Initializable {
                 AlertWindow.fillRequiredFields();
             }
             Categories category = new Categories();
-            //Series serie = new Series();
             ProductKinds productKind = new ProductKinds();
-            //Vendors vendor = new Vendors();
             Currencies currency = new Currencies();
             try {
                 Session session1 = HibernateUtil.getSessionFactory().openSession();
@@ -1799,18 +1698,6 @@ public class PCGUIController implements Initializable {
                 session1.getTransaction().commit();
                 session1.close();
 
-                /*Session session2 = HibernateUtil.getSessionFactory().openSession();
-                session2.beginTransaction();
-                Query query2 = session2.createQuery("from Series where title = :title");
-                query2.setParameter("title", result.get().getSerie());
-                List res2 = query2.list();
-                for (Iterator iterator = res2.iterator(); iterator.hasNext(); ) {
-                    serie = (Series) iterator.next();
-                }
-                session2.save(serie);
-                session2.getTransaction().commit();
-                session2.close();*/
-
                 Session session3 = HibernateUtil.getSessionFactory().openSession();
                 session3.beginTransaction();
                 List res3 = session3.createQuery("from ProductKinds where id = " + result.get().getProductKindId()).list();
@@ -1820,18 +1707,6 @@ public class PCGUIController implements Initializable {
                 session3.save(productKind);
                 session3.getTransaction().commit();
                 session3.close();
-
-                /*Session session4 = HibernateUtil.getSessionFactory().openSession();
-                session4.beginTransaction();
-                Query query4 = session4.createQuery("from Vendors where id = :id");
-                query4.setParameter("id", result.get().getVendorId());
-                List res4 = query4.list();
-                for (Iterator iterator = res4.iterator(); iterator.hasNext(); ) {
-                    vendor = (Vendors) iterator.next();
-                }
-                session4.save(vendor);
-                session4.getTransaction().commit();
-                session4.close();*/
 
                 Session session5 = HibernateUtil.getSessionFactory().openSession();
                 session5.beginTransaction();
@@ -1850,9 +1725,7 @@ public class PCGUIController implements Initializable {
                 Products product = new Products();
                 product.setTitle(result.get().getTitle());
                 product.setCategoryId(category);
-                //product.setSerie(serie);
                 product.setProductKindId(productKind);
-                //product.setVendor(vendor);
                 product.setDescription(result.get().getDescription());
                 product.setAnons(result.get().getAnons());
                 product.setArticle(result.get().getArticle());
@@ -2127,7 +2000,6 @@ public class PCGUIController implements Initializable {
             newVendorAddress = result.get().getAddress();
             newVendorRate = result.get().getRate();
             createNewVendor();
-            //buildVendorsTable();
         }
     }
     private void createNewVendor() {
@@ -2163,7 +2035,6 @@ public class PCGUIController implements Initializable {
             session1.save(serie);
             tx.commit();
             session1.close();
-            //buildSeriesTable();
         }
     }
     private void editSerieDialog(String selectedSerie) {
@@ -2195,7 +2066,6 @@ public class PCGUIController implements Initializable {
             session1.saveOrUpdate(serie);
             tx.commit();
             session1.close();
-            //buildSeriesTable();
         }
     }
     private void deleteSerieDialog(String selectedSerie) {
@@ -4627,8 +4497,8 @@ public class PCGUIController implements Initializable {
     @FXML private void exportPropertiesTableToXls() {
         File file = directoryForExportProperties.showDialog(anchorPane.getScene().getWindow());
         if (file != null) {
-            //System.out.println("file.getPath() is " + file.getPath());
-            XLSHandler.exportPropertiesByProductKinds(productKindsList.getSelectionModel().getSelectedItem(), file.getPath());
+            XLSHandler.exportPropertiesByProductKinds(productKindsList.getSelectionModel().getSelectedItem(),
+                    file.getPath(), progressBarImportXLS);
         }
     }
     @FXML private void importPropertiesFromXls() {
@@ -4636,7 +4506,7 @@ public class PCGUIController implements Initializable {
         if (file != null) {
             //System.out.println("file.getPath() is " + file.getPath());
             try {
-                XLSHandler.importPropertyValues(file.getAbsolutePath());
+                XLSHandler.importPropertyValues(file.getAbsolutePath(), progressBarImportXLS);
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (BiffException e) {

@@ -597,4 +597,11 @@ public class AlertWindow {
         alert.setHeaderText("Добавьте желаемый тип устройств на вкладке \"Настройки\" и повторите импорт.\nОперация прерввана.");
         alert.show();
     }
+
+    public static void taskComplete(String taskName) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Операция завершена!");
+        alert.setHeaderText(taskName + " выполнен.");
+        alert.show();
+    }
 }

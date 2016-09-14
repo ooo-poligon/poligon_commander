@@ -3,6 +3,8 @@ package utils;
 /**
  * Created by Igor Klekotnev on 20.01.2016.
  */
+import modalwindows.AlertWindow;
+
 import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
@@ -18,7 +20,7 @@ public class URLReader {
             while ((inputLine = in.readLine()) != null) result.add(inputLine);
             in.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            AlertWindow.alertNoRbcServerConnection();
         }
         return result;
     }

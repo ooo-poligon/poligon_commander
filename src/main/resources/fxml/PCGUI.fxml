@@ -1213,11 +1213,19 @@
                                              <children>
                                                 <AnchorPane prefHeight="40.0" prefWidth="652.0">
                                                    <children>
-                                                      <Label layoutX="110.0" layoutY="9.0" text="Импорт данных из XLS-файла" AnchorPane.bottomAnchor="3.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                         <font>
-                                                            <Font name="System Bold" size="20.0" />
-                                                         </font>
-                                                      </Label>
+                                                      <HBox prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                         <children>
+                                                            <AnchorPane HBox.hgrow="ALWAYS">
+                                                               <children>
+                                                                  <Label text="Импорт данных из XLS-файла" AnchorPane.bottomAnchor="3.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                     <font>
+                                                                        <Font name="System Bold" size="20.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                               </children>
+                                                            </AnchorPane>
+                                                         </children>
+                                                      </HBox>
                                                    </children>
                                                 </AnchorPane>
                                                 <AnchorPane VBox.vgrow="ALWAYS">
@@ -1416,61 +1424,15 @@
                                                             </AnchorPane>
                                                             <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
                                                                <children>
-                                                                  <HBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
-                                                                     <children>
-                                                                        <AnchorPane HBox.hgrow="ALWAYS">
-                                                                           <children>
-                                                                              <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                                                 <children>
-                                                                                    <AnchorPane>
-                                                                                       <children>
-                                                                                          <Label text="Наборы свойств:" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                                                                       </children>
-                                                                                    </AnchorPane>
-                                                                                    <AnchorPane disable="true">
-                                                                                       <children>
-                                                                                          <TreeTableView fx:id="propertiesTreeTable" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
-                                                                                            <columns>
-                                                                                              <TreeTableColumn fx:id="propertiesTreeTableTitleColumn" prefWidth="206.0" text="Наименование" />
-                                                                                            </columns>
-                                                                                             <contextMenu>
-                                                                                                <ContextMenu fx:id="propertiesTreeTableContextMenu" />
-                                                                                             </contextMenu>
-                                                                                          </TreeTableView>
-                                                                                       </children>
-                                                                                    </AnchorPane>
-                                                                                 </children>
-                                                                              </VBox>
-                                                                           </children>
-                                                                        </AnchorPane>
-                                                                        <AnchorPane HBox.hgrow="ALWAYS">
-                                                                           <children>
-                                                                              <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                                                 <children>
-                                                                                    <AnchorPane>
-                                                                                       <children>
-                                                                                          <Label text="Набор функций:" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                                                                       </children>
-                                                                                    </AnchorPane>
-                                                                                    <AnchorPane>
-                                                                                       <children>
-                                                                                          <TableView fx:id="functionsTable" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                                                            <columns>
-                                                                                              <TableColumn fx:id="functionsTableTitleColumn" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="155.0" text="Наименование" />
-                                                                                                <TableColumn fx:id="functionsTableSymbolColumn" maxWidth="75.0" prefWidth="51.0" text="Символ" />
-                                                                                            </columns>
-                                                                                             <contextMenu>
-                                                                                                <ContextMenu fx:id="functionsTableContextMenu" />
-                                                                                             </contextMenu>
-                                                                                          </TableView>
-                                                                                       </children>
-                                                                                    </AnchorPane>
-                                                                                 </children>
-                                                                              </VBox>
-                                                                           </children>
-                                                                        </AnchorPane>
-                                                                     </children>
-                                                                  </HBox>
+                                                                  <TableView fx:id="functionsTable" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                    <columns>
+                                                                      <TableColumn fx:id="functionsTableTitleColumn" maxWidth="1.7976931348623157E308" minWidth="450.0" prefWidth="-1.0" text="Наименование функции" />
+                                                                        <TableColumn fx:id="functionsTableSymbolColumn" maxWidth="85.0" minWidth="85.0" prefWidth="85.0" text="Символ" />
+                                                                    </columns>
+                                                                     <contextMenu>
+                                                                        <ContextMenu fx:id="functionsTableContextMenu" />
+                                                                     </contextMenu>
+                                                                  </TableView>
                                                                </children>
                                                             </AnchorPane>
                                                          </children>
