@@ -262,87 +262,93 @@ public class XLSHandler {
         }
         session.close();
 
-        Session session6 = HibernateUtil.getSessionFactory().openSession();
-        List<Properties> list6 = session6.createQuery("from Properties where productKindId = " + productKind.getId()).list();
-        for (Iterator iterator = list6.iterator(); iterator.hasNext();) {
-            Properties property = (Properties) iterator.next();
-            propIdsToDelete.add(property.getId());
-        }
-        session6.close();
-
-        Session session5 = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx5 = session5.beginTransaction();
-        for (Integer propertyId : propIdsToDelete) {
-            Properties prop = (Properties) session5.load(Properties.class, propertyId);
-            Query query5 = session5.createQuery("delete PropertyValues where propertyId = " + prop.getId());
-            query5.executeUpdate();
-        }
-        tx5.commit();
-        session5.close();
-
-        Session session4 = HibernateUtil.getSessionFactory().openSession();
-        ProductKinds pk = (ProductKinds) session4.load(ProductKinds.class, productKind.getId());
-        Transaction tx4 = session4.beginTransaction();
-        Query query4 = session4.createQuery("delete Properties where productKindId =" + pk.getId());
-        query4.executeUpdate();
-        tx4.commit();
-        session4.close();
-
         if (productKind != null) {
-            int orderNumber = 1;;
-            ArrayList<String> propTitles = new ArrayList<>();
-            for (ArrayList<String> pva : propertyValuesArrays) {
-                if (!propTitles.contains(pva.get(1))) {
-                    Session session0 = HibernateUtil.getSessionFactory().openSession();
-                    Transaction tx0 = session0.beginTransaction();
-
-                    Properties newProperty = new Properties();
-                    newProperty.setTitle(pva.get(1));
-                    newProperty.setOptional(pva.get(2));
-                    newProperty.setSymbol(pva.get(3));
-                    newProperty.setOrderNumber(orderNumber);
-                    newProperty.setProductKindId(productKind);
-                    session0.save(newProperty);
-
-                    tx0.commit();
-                    session0.close();
-                    orderNumber++;
-
-                    propTitles.add(pva.get(1));
-                }
+            Session session6 = HibernateUtil.getSessionFactory().openSession();
+            List<Properties> list6 = session6.createQuery("from Properties where productKindId = " + productKind.getId()).list();
+            for (Iterator iterator = list6.iterator(); iterator.hasNext();) {
+                Properties property = (Properties) iterator.next();
+                propIdsToDelete.add(property.getId());
             }
+            session6.close();
 
-            for (ArrayList<String> pva : propertyValuesArrays) {
-                Products product = new Products();
-                Properties property = new Properties();
-                PropertyValues pv = new PropertyValues();
+            Session session5 = HibernateUtil.getSessionFactory().openSession();
+            Transaction tx5 = session5.beginTransaction();
+            for (Integer propertyId : propIdsToDelete) {
+                Properties prop = (Properties) session5.load(Properties.class, propertyId);
+                Query query5 = session5.createQuery("delete PropertyValues where propertyId = " + prop.getId());
+                query5.executeUpdate();
+            }
+            tx5.commit();
+            session5.close();
 
-                Session session2 = HibernateUtil.getSessionFactory().openSession();
-                Query query2 = session2.createQuery("from Products where title = :title");
-                query2.setParameter("title", pva.get(4));
-                List<ProductKinds> list2 = query2.list();
-                for (Iterator iterator = list2.iterator(); iterator.hasNext(); ) {
-                    product = (Products) iterator.next();
+            Session session4 = HibernateUtil.getSessionFactory().openSession();
+            ProductKinds pk = (ProductKinds) session4.load(ProductKinds.class, productKind.getId());
+            Transaction tx4 = session4.beginTransaction();
+            Query query4 = session4.createQuery("delete Properties where productKindId =" + pk.getId());
+            query4.executeUpdate();
+            tx4.commit();
+            session4.close();
+
+            if (productKind != null) {
+                int orderNumber = 1;;
+                ArrayList<String> propTitles = new ArrayList<>();
+                for (ArrayList<String> pva : propertyValuesArrays) {
+                    if (!propTitles.contains(pva.get(1))) {
+                        Session session0 = HibernateUtil.getSessionFactory().openSession();
+                        Transaction tx0 = session0.beginTransaction();
+
+                        Properties newProperty = new Properties();
+                        newProperty.setTitle(pva.get(1));
+                        newProperty.setOptional(pva.get(2));
+                        newProperty.setSymbol(pva.get(3));
+                        newProperty.setOrderNumber(orderNumber);
+                        newProperty.setProductKindId(productKind);
+                        session0.save(newProperty);
+
+                        tx0.commit();
+                        session0.close();
+                        orderNumber++;
+
+                        propTitles.add(pva.get(1));
+                    }
                 }
-                session2.save(product);
 
-                Query query3 = session2.createQuery("from Properties where title = :title");
-                query3.setParameter("title", pva.get(1));
-                List<ProductKinds> list3 = query3.list();
-                for (Iterator iterator = list3.iterator(); iterator.hasNext(); ) {
-                    property = (Properties) iterator.next();
+                for (ArrayList<String> pva : propertyValuesArrays) {
+                    Products product = new Products();
+                    Properties property = new Properties();
+                    PropertyValues pv = new PropertyValues();
+
+                    Session session2 = HibernateUtil.getSessionFactory().openSession();
+                    Query query2 = session2.createQuery("from Products where title = :title");
+                    query2.setParameter("title", pva.get(4));
+                    List<ProductKinds> list2 = query2.list();
+                    for (Iterator iterator = list2.iterator(); iterator.hasNext(); ) {
+                        product = (Products) iterator.next();
+                    }
+                    session2.save(product);
+
+                    Query query3 = session2.createQuery("from Properties where title = :title");
+                    query3.setParameter("title", pva.get(1));
+                    List<ProductKinds> list3 = query3.list();
+                    for (Iterator iterator = list3.iterator(); iterator.hasNext(); ) {
+                        property = (Properties) iterator.next();
+                    }
+                    session2.save(property);
+
+                    Transaction tx = session2.beginTransaction();
+                    pv.setValue(pva.get(0));
+                    pv.setPropertyId(property);
+                    pv.setProductId(product);
+                    session2.save(pv);
+                    tx.commit();
+                    session2.close();
                 }
-                session2.save(property);
-
-                Transaction tx = session2.beginTransaction();
-                pv.setValue(pva.get(0));
-                pv.setPropertyId(property);
-                pv.setProductId(product);
-                session2.save(pv);
-                tx.commit();
-                session2.close();
+            } else {
+                AlertWindow.productKindNotFound();
             }
         }
+
+
     }
     public static void exportDBTableTo(String dbTable, String targetPath) {
         File file = new File(targetPath);

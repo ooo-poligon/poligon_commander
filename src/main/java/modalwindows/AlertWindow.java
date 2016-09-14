@@ -590,4 +590,11 @@ public class AlertWindow {
         alert.setHeaderText("Для успешного экспорта количество устройств в группе не должно превышать 252!\nЭкспорт отменён.");
         alert.show();
     }
+
+    public static void productKindNotFound() {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Внимание! В базе данных нет такого типа устройств!");
+        alert.setHeaderText("Добавьте желаемый тип устройств на вкладке \"Настройки\" и повторите импорт.\nОперация прерввана.");
+        alert.show();
+    }
 }
