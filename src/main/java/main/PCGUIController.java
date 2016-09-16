@@ -3,6 +3,7 @@ package main;
 import com.sun.pdfview.PDFFile;
 import com.sun.pdfview.PDFPage;
 import entities.*;
+import entities.Files;
 import entities.Properties;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -40,9 +41,12 @@ import javafx.stage.FileChooser;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javafx.util.converter.IntegerStringConverter;
+import jcifs.smb.NtlmPasswordAuthentication;
+import jcifs.smb.SmbFile;
 import jxl.read.biff.BiffException;
 import modalwindows.AlertWindow;
 import modalwindows.SetRatesWindow;
+import org.apache.commons.io.IOUtils;
 import org.hibernate.*;
 import org.hibernate.exception.JDBCConnectionException;
 import org.hibernate.procedure.internal.Util;
@@ -55,14 +59,14 @@ import utils.*;
 
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -72,6 +76,8 @@ import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
+import static java.nio.file.Files.copy;
 
 /**
  *
@@ -109,6 +115,12 @@ public class PCGUIController implements Initializable {
         siteOrdersReceiverTextField.setText(SiteSettings.loadSetting("siteOrdersReceiver"));
     }
     @FXML private void resetProgram() throws SQLException {
+        if (!System.getProperty("os.name").contains("Windows")) {
+            fileChooserDirectoryCash = fileChooserDirectoryCash.replace("\\", "/");
+            noImageFile = noImageFile.replace("\\\\", "//").replace("\\", "/");
+            defaultImagesDir = defaultImagesDir.replace("\\\\", "//").replace("\\", "/");
+            defaultPdfsDir = defaultPdfsDir.replace("\\\\", "//").replace("\\", "/");
+        }
         if (loadProgramCounter != 0) {
             getAllProductsList();
             getAllFilesOfProgramList();
@@ -1181,7 +1193,7 @@ public class PCGUIController implements Initializable {
         if (allOwners.contains(selectedProductId)) {
             allFilesOfProgramList.stream().forEach(fileOfProgram -> {
                 if((fileOfProgram.getOwner_id() == selectedProductId) && (fileOfProgram.getFile_type_id() == 1)) {
-                    if (fileOfProgram.getPath().equals("c:\\poligon_images\\")) {
+                    if (fileOfProgram.getPath().equals(defaultImagesDir)) {
                         File picFile = new File(noImageFile);
                         ProductImage.open(picFile, gridPane, imageView);
                     } else {
@@ -1193,6 +1205,7 @@ public class PCGUIController implements Initializable {
         } else {
             File picFile = new File(noImageFile);
             ProductImage.open(picFile, gridPane, imageView);
+
         }
     }
     // Построение дерева категорий каталога
@@ -2364,14 +2377,6 @@ public class PCGUIController implements Initializable {
                         productsTable.refresh();
                         categoriesTree.getSelectionModel().select(categoriesTree.getSelectionModel().getSelectedItem());
                     } catch (SQLException e) {}
-                    /*
-                    Task task = deleteProductsTask();
-                    progressBar.progressProperty().bind(task.progressProperty());
-                    Platform.runLater(task);
-
-                    Thread thread  = new Thread(task);
-                    thread.start();
-                    */
 
                 ;}).build(),
                 SeparatorMenuItemBuilder.create().build(),
@@ -2442,12 +2447,12 @@ public class PCGUIController implements Initializable {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     private String dimsImagePathFromTitle (String productTitle) {
         String validTitle = "";
-        validTitle = "\\\\Server03\\бд_сайта\\poligon_images\\catalog\\TELE\\dims\\" + productTitle.replace(" ", "_").replace("/", "_") + "_dim.jpg";
+        validTitle = defaultImagesDir + "catalog\\" + UtilPack.getVendorFromProductTitle(productTitle) + "\\dims\\" + productTitle.replace(" ", "_").replace("/", "_") + "_dim.jpg";
         return validTitle;
     }
     private String plugsImagePathFromTitle (String productTitle, int plugNumber) {
         String validTitle = "";
-        validTitle = "\\\\Server03\\бд_сайта\\poligon_images\\catalog\\TELE\\plugs\\" + productTitle.replace(" ", "_").replace("/", "_") + "_plug"+ plugNumber +".jpg";
+        validTitle = defaultImagesDir + "catalog\\" + UtilPack.getVendorFromProductTitle(productTitle) + "\\plugs\\" + productTitle.replace(" ", "_").replace("/", "_") + "_plug"+ plugNumber +".jpg";
         return validTitle;
     }
 
@@ -3756,51 +3761,6 @@ public class PCGUIController implements Initializable {
         searchComboBox.getItems().addAll(allProductsTitles);
         AutoCompleteComboBoxListener autoCompleteComboBoxListener = new AutoCompleteComboBoxListener(searchComboBox);
     }
-    // Группа методов для импорта данных в БД из xls-файла
-    public void startProgressBarImportXLS() {
-        Task task = createImportXLSTask();
-        progressBarImportXLS.progressProperty().bind(task.progressProperty());
-        Platform.runLater(task);
-        /*
-        thread  = new Thread(task);
-        thread.start();
-        */
-    }
-    private Task<Void> createImportXLSTask() {
-        return new Task<Void>() {
-            @Override
-            public Void call() throws InterruptedException {
-                try {
-                    allImportXLSContent = XLSHandler.grabData(fileXLS.getAbsolutePath());
-                } catch (IOException ex) {
-                    Logger.getLogger(PCGUIController.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                Platform.runLater(() -> {
-                    //progressIndicator.progressProperty().unbind();
-                    //progressIndicator.setVisible(false);
-                    //progressIndicator.setProgress(0.0);
-                    progressBarImportXLS.progressProperty().unbind();
-                    progressBarImportXLS.setProgress(0.0);
-                });
-                return null;
-            }
-        };
-    }
-    // Создаёт задачу запуска процесса импорта данных из xls-файла в новом потоке.
-    // Параллельно отображается индикатор для этого процесса.
-    private Task<Void> createImportTask() {
-        return new Task<Void>() {
-            @Override
-            public Void call() throws InterruptedException {
-                startImportFromXLSToDB();
-                Platform.runLater(() -> {
-                    progressBarImportXLS.progressProperty().unbind();
-                    progressBarImportXLS.setProgress(0.0);
-                });
-                return null;
-            }
-        };
-    }
     private void compareFieldsMechanics() throws IOException {
         ArrayList<String> compareDetails = new ArrayList<>(20);
         String selectedHeader = sHeader();
@@ -4108,27 +4068,6 @@ public class PCGUIController implements Initializable {
             productKindPropertiesTable.refresh();
         } catch (SQLException e) {}
     }
-    private void  deleteProperty(int orderNumber, String title) {
-        Integer productKindId = UtilPack.getProductKindIdFromTitle(productKindsList.getSelectionModel().getSelectedItem());
-        Properties property = new Properties();
-
-        Session session0 = HibernateUtil.getSessionFactory().openSession();
-        Query query = session0.createQuery("from Properties where orderNumber = " +
-                orderNumber + " and productKindId = " + productKindId);
-        List result = query.list();
-        for (Iterator iterator = result.iterator(); iterator.hasNext();) {
-            property = (Properties) iterator.next();
-        }
-
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = session.beginTransaction();
-        Query query1 = session.createQuery("delete PropertyValues where propertyId=" + property.getId());
-        query1.executeUpdate();
-        Query query2 = session.createQuery("delete Properties where id=" + property.getId() + " and productKindId=" + productKindId);
-        query2.executeUpdate();
-        tx.commit();
-        session.close();
-    }
     private void buildPropertiesTreeTable(String selectedPropertiesKind) {
         ArrayList<Integer> typesIds = new ArrayList<>(10);
         ArrayList<ProductPropertiesTableView> properties = new ArrayList<>(10);
@@ -4256,14 +4195,6 @@ public class PCGUIController implements Initializable {
     @FXML private void getSelectedDBTable() {
         sTable();
     }
-    /*
-    @FXML private void removeProducts() {
-        XLSHandler.removeFromDBProductsInList();
-    }
-    @FXML private void addDiscounts() {
-        XLSHandler.addDiscountsToDb();
-    }
-    */
     @FXML private void getSelectedDBField() {
         sField();
     }
@@ -4276,10 +4207,6 @@ public class PCGUIController implements Initializable {
     }
     @FXML private void compareFields() throws IOException {
         compareFieldsMechanics();
-    }
-    @FXML private void startImportFromXLSToDB() {
-        XLSToDBImport importer = new XLSToDBImport(allCompareDetails);
-        importer.startImport(allImportXLSContent, importFields, allProductsTitles);
     }
     @FXML private void cancelSetImportDetails() {
         ObservableList<String> data = FXCollections.observableArrayList();
@@ -4310,7 +4237,9 @@ public class PCGUIController implements Initializable {
     @FXML private void setChooseXLSButtonPress() {
         fileXLS = fileChooser.showOpenDialog(anchorPane.getScene().getWindow());
         if (fileXLS != null) {
-            startProgressBarImportXLS();
+            try {
+                allImportXLSContent = XLSHandler.grabData(fileXLS.getAbsolutePath(), progressBarImportXLS);
+            } catch (IOException e) {}
         }
     }
     @FXML private void chooseDirectoryForExport() {
@@ -4370,13 +4299,8 @@ public class PCGUIController implements Initializable {
         clear = false;
     }
     @FXML public  void startImportProgressBar() {
-        Task task = createImportTask();
-        progressBarImportXLS.progressProperty().bind(task.progressProperty());
-        Platform.runLater(task);
-        /*
-        thread  = new Thread(task);
-        thread.start();
-        */
+        XLSToDBImport importer = new XLSToDBImport(allCompareDetails);
+        importer.startImport(allImportXLSContent, allProductsTitles);
     }
     @FXML private void handlePropertiesKindSelected() throws SQLException {
         String selectedPropertiesKind = productKindsList.getSelectionModel().getSelectedItem();
@@ -4474,10 +4398,32 @@ public class PCGUIController implements Initializable {
         session.close();
     }
     @FXML private void deletePropertyFromTable() {
-        int ix = productKindPropertiesTable.getSelectionModel().getSelectedIndex();
-        String deletedPropertyTitle = productKindPropertiesTable.getSelectionModel().getSelectedItem().getTitle();
-        int orderNumber = Integer.getInteger(productKindPropertiesTable.getSelectionModel().getSelectedItem().getOrderNumber());
+        String num = productKindPropertiesTable.getSelectionModel().getSelectedItem().getOrderNumber();
+        // I've tried for usual Integer.parseInt(), but in this case it returns null!!!!! I don't know why?!!!
+        int orderNumber = UtilPack.stringToIntByChars(num);
 
+        Integer productKindId = UtilPack.getProductKindIdFromTitle(productKindsList.getSelectionModel().getSelectedItem());
+        Properties property = new Properties();
+
+        Session session0 = HibernateUtil.getSessionFactory().openSession();
+        Query query = session0.createQuery("from Properties where orderNumber = " + orderNumber + " and productKindId = " + productKindId);
+        List result = query.list();
+        for (Iterator iterator = result.iterator(); iterator.hasNext();) {
+            property = (Properties) iterator.next();
+        }
+
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = session.beginTransaction();
+        Query query1 = session.createQuery("delete PropertyValues where propertyId=" + property.getId());
+        query1.executeUpdate();
+        Query query2 = session.createQuery("delete Properties where id=" + property.getId() + " and productKindId=" + productKindId);
+        query2.executeUpdate();
+        tx.commit();
+        session.close();
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        int ix = productKindPropertiesTable.getSelectionModel().getSelectedIndex();
         // Select a row
         if (!(productKindPropertiesTable.getItems().size() == 0)) {
             productKindsPropertiesList.remove(ix);
@@ -4491,7 +4437,6 @@ public class PCGUIController implements Initializable {
         productKindPropertiesTable.requestFocus();
         productKindPropertiesTable.getSelectionModel().select(ix);
         productKindPropertiesTable.getFocusModel().focus(ix);
-        deleteProperty(orderNumber, deletedPropertyTitle);
     }
 
     @FXML private void exportPropertiesTableToXls() {
@@ -4796,10 +4741,13 @@ public class PCGUIController implements Initializable {
     String newVendorDescription;
     String newVendorCurrency;
     String newVendorAddress;
-    String fileChooserDirectoryCash = "C:\\";
     String targetDir;
 
-    private final String noImageFile = "C:\\Users\\gnato\\Desktop\\Igor\\progs\\java_progs\\PoligonCommanderJ\\src\\main\\resources\\images\\noImage.gif";
+    String fileChooserDirectoryCash = "C:\\";
+    String noImageFile = "\\\\Server03\\бд_сайта\\poligon_images\\noImage.gif";
+    String defaultImagesDir = "\\\\Server03\\бд_сайта\\poligon_images\\";
+    String defaultPdfsDir = "\\\\Server03\\бд_сайта\\poligon_datasheets\\datasheets\\";
+
     String selectedCategory = "";
     String focusedProduct = "";
     String parentCategoryTitle = "";

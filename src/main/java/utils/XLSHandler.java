@@ -44,50 +44,48 @@ import javafx.concurrent.Task;
 public class XLSHandler {
     private static DBConnection connection = new DBConnection("local");
     //метод для считывания содержимого таблицы
-    public static ArrayList<ArrayList<String>> grabData(String inFile) throws IOException {
-        ArrayList<ArrayList<String>> allColumnsContent = new ArrayList<>();  
-        File inputWorkbook = new File(inFile);
+    public static ArrayList<ArrayList<String>> grabData(String inFile, ProgressBar progressBarImportXLS) throws IOException {
+        ArrayList<ArrayList<String>> allColumnsContent = new ArrayList<>();
+        Task task = new Task<Void>() {
+            @Override public Void call() {
+                File inputWorkbook = new File(inFile);
 
-        WorkbookSettings ws = new WorkbookSettings();
-        ws.setEncoding("Cp1252");
+                WorkbookSettings ws = new WorkbookSettings();
+                ws.setEncoding("Cp1252");
 
-
-        Workbook w;
-        try {
-            w = Workbook.getWorkbook(inputWorkbook, ws);
-            // получаем первый лист
-            Sheet sheet = w.getSheet(0);
-            for (int c = 0; c < sheet.getColumns(); c++) {
-                ArrayList<String> recentColumnContent = new ArrayList<>();
-                for (int r = 0; r < sheet.getRows(); r++) { 
-                    Cell cellContent = sheet.getCell(c, r);
-                    recentColumnContent.add(cellContent.getContents());
+                Workbook w;
+                try {
+                    w = Workbook.getWorkbook(inputWorkbook, ws);
+                    // получаем первый лист
+                    Sheet sheet = w.getSheet(0);
+                    for (int c = 0; c < sheet.getColumns(); c++) {
+                        ArrayList<String> recentColumnContent = new ArrayList<>();
+                        for (int r = 0; r < sheet.getRows(); r++) {
+                            Cell cellContent = sheet.getCell(c, r);
+                            recentColumnContent.add(cellContent.getContents().trim());
+                        }
+                        allColumnsContent.add(recentColumnContent);
+                        updateProgress(c, sheet.getColumns());
+                    }
+                } catch (BiffException e) {
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                allColumnsContent.add(recentColumnContent);
+                updateProgress(0, 0);
+                Platform.runLater(() -> {
+                    AlertWindow.showInfo("Файл для обработки данных загружен.\nВыберите номер строки с заголовками колонок.");
+                });
+                return null;
             }
-        } catch (BiffException e) {
-        }
+        };
+
+        progressBarImportXLS.progressProperty().bind(task.progressProperty());
+        new Thread(task).start();
+
+        ////////////////////////////////////////////////////////////////////////////
         return allColumnsContent;
     }
-    public static ArrayList<String> grabSelectedColumn(String inFile, Integer columnNumber) throws IOException {
-        ArrayList<String> columnContent = new ArrayList<>();
-        File inputWorkbook = new File(inFile);
-        Workbook w;
-        try {
-            w = Workbook.getWorkbook(inputWorkbook);
-            // получаем первый лист
-            Sheet sheet = w.getSheet(0);
-            for (int r = 0; r < sheet.getRows(); r++) {
-                Cell cellContent = sheet.getCell(columnNumber, r);
-                columnContent.add(cellContent.getContents());
-            }
-        } catch (BiffException e) {
-        }
-        return columnContent;
-    }
-    public static void exportPropertiesByProductKinds(String selectedProductKind,
-                                                      String targetDir,
-                                                      ProgressBar exportImportProgressBar) {
+    public static void exportPropertiesByProductKinds(String selectedProductKind, String targetDir, ProgressBar exportImportProgressBar) {
         Task task = new Task<Void>() {
             @Override public Void call() {
                 ProductKinds pk = new ProductKinds();
@@ -131,10 +129,10 @@ public class XLSHandler {
                         String pkTitle = pk.getTitle().replace(" ", "_").replace("+", "_").replace("\\", "_").replace("/", "_");
                         System.out.println("OS is " + System.getProperty("os.name"));
                         String targetPath = "";
-                        if (System.getProperty("os.name").equals("Linux")) {
-                            targetPath = targetDir + "/" + pkTitle + ".xls";
-                        } else {
+                        if (System.getProperty("os.name").contains("Windows")) {
                             targetPath = targetDir + "\\" + pkTitle + ".xls";
+                        } else {
+                            targetPath = targetDir + "/" + pkTitle + ".xls";
                         }
                         // uncomment next line for windows
                         //String targetPath = targetDir + "\\" + pkTitle + ".xls";
@@ -584,103 +582,6 @@ public class XLSHandler {
         };
         progressBarImportXLS.progressProperty().bind(task.progressProperty());
         new Thread(task).start();
-    }
-    // не работает пока...
-    private static String cleanUp(String string) {
-        String str = new String();
-        if (string.contains("\t") || (string.contains("\n"))) {
-            str = string.replace('\t', ' ');
-            str = str.replace('\n', ' ');
-        }
-        return str;
-    }
-    public static void removeFromDBProductsInList() {
-        ArrayList<String> wrongIds = new ArrayList<>();
-        ArrayList<Products> wrongProducts = new ArrayList<>();
-        ArrayList<FileTypes> allFileTypes = new ArrayList<>();
-        try {
-            wrongIds = grabSelectedColumn("c:\\wrong.xls", 1);
-        } catch (IOException ex) {}
-
-        wrongIds.stream().forEach(wid -> {
-            try {
-                DBConnection connection = new DBConnection("local");
-                connection.getUpdateResult("delete from files where owner_id=" + Integer.parseInt(wid));
-                System.out.println("deleted files for " + wid);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-
-        });
-        wrongIds.stream().forEach(wid -> {
-            try {
-                DBConnection connection = new DBConnection("local");
-                connection.getUpdateResult("delete from quantity where product_id=" + Integer.parseInt(wid));
-                System.out.println("deleted quantity for" + wid);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-
-        });
-        System.out.println("All over");
-        wrongIds.stream().forEach(wid -> {
-            try {
-                connection.getUpdateResult("delete from products where id=" + Integer.parseInt(wid));
-                System.out.println("deleted product " + wid);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        });
-        System.out.println("All over");
-    }
-    public static void addDiscountsToDb() {
-        ArrayList<ArrayList<String>> productsData = new ArrayList<>();
-        try {
-            productsData = grabData("c:\\right1.xls");
-        } catch (IOException ex) {
-        }
-
-        for (int i = 0; i < productsData.get(0).size(); i++) {
-
-
-            try {
-                DBConnection connection = new DBConnection("local");
-                connection.getUpdateResult("update products set rate=" + Double.parseDouble(productsData.get(3).get(i).replace(',', '.')) +
-                        "  where id=" + Double.parseDouble(productsData.get(1).get(i)));
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            try {
-                DBConnection connection = new DBConnection("local");
-                connection.getUpdateResult("update products set discount1=" + Double.parseDouble(productsData.get(4).get(i).replace(',', '.')) +
-                        "  where id=" + Double.parseDouble(productsData.get(1).get(i)));
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            try {
-                DBConnection connection = new DBConnection("local");
-                connection.getUpdateResult("update products set discount2=" + Double.parseDouble(productsData.get(5).get(i).replace(',', '.')) +
-                        "  where id=" + Double.parseDouble(productsData.get(1).get(i)));
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            try {
-                DBConnection connection = new DBConnection("local");
-                connection.getUpdateResult("update products set discount3=" + Double.parseDouble(productsData.get(6).get(i).replace(',', '.')) +
-                        "  where id=" + Double.parseDouble(productsData.get(1).get(i)));
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            try {
-                DBConnection connection = new DBConnection("local");
-                connection.getUpdateResult("update products set special=0" +
-                        "  where id=" + Double.parseDouble(productsData.get(1).get(i)));
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-
-        System.out.println("All over");
     }
     private static Double round2(Double val) {
         return new BigDecimal(val.toString()).setScale(2, RoundingMode.UP).doubleValue();

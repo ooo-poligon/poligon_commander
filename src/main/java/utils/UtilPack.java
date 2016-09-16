@@ -63,7 +63,6 @@ public class UtilPack {
         try {
             parentCatId = getParentCatId(id);
         } catch (SQLException e) {}
-        System.out.println("parentCatId is " + parentCatId);
         if((parentCatId == 1) || (parentCatId == 2)) {
             if((parentCatId == 1) && (id == 5650)) {
                 return "VEMER";
@@ -107,8 +106,8 @@ public class UtilPack {
         try {
             List response = session.createQuery("From Categories where id=" + id).list();
             for (Iterator iterator = response.iterator(); iterator.hasNext();) {
-                Categories categorie = (Categories) iterator.next();
-                parentId = categorie.getParent();
+                Categories category = (Categories) iterator.next();
+                parentId = category.getParent();
             }
         } catch (HibernateException e) {
         } finally {
@@ -167,6 +166,23 @@ public class UtilPack {
             id = productKind.getId();
         }
         return id;
+    }
+    public static Vendors getVendorFromProductTitle (String title) {
+        Vendors vendor = new Vendors();
+        Products product = new Products();
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Query query = session.createQuery("from Products where title = :title");
+        query.setParameter("title", title);
+        List<Products> list = query.list();
+        for (Iterator iterator = list.iterator(); iterator.hasNext();) {
+            product = (Products) iterator.next();
+        }
+        Query query1 = session.createQuery("from Vendors where id = " + product.getId());
+        List<Vendors> list1 = query1.list();
+        for (Iterator iterator = list1.iterator(); iterator.hasNext();) {
+            vendor = (Vendors) iterator.next();
+        }
+        return vendor;
     }
     public static Integer getProductIdFromTitle (String title, ArrayList<Product> allProductsList) {
         final Integer[] id = {0};
@@ -421,5 +437,17 @@ public class UtilPack {
             manager.close();
         }
         return true;
+    }
+    public static int stringToIntByChars(String string) {
+        char[] chars = string.toCharArray();
+        int orderNumber = 0;
+        for (int i = 0; i < chars.length; i++) {
+            int digit = ((int)chars[i] & 0xF);
+            for (int j = 0; j < chars.length-1-i; j++) {
+                digit *= 10;
+            }
+            orderNumber += digit;
+        }
+        return orderNumber;
     }
 }

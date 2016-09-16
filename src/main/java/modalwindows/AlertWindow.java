@@ -59,6 +59,13 @@ public class AlertWindow {
         alert.setContentText(warningText);
         alert.showAndWait();
     }
+    public static void showInfo(String infoText) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Информация");
+        alert.setHeaderText("Сообщение о ходе выполнения:");
+        alert.setContentText(infoText);
+        alert.showAndWait();
+    }
     public static void illegalAction() {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("Внимание!");

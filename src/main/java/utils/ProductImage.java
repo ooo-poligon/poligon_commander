@@ -10,6 +10,8 @@ import entities.Products;
 
 import java.io.*;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -39,6 +41,13 @@ public class ProductImage {
         }
         try {
             String localUrl = file.toURI().toURL().toString();
+            if (!System.getProperty("os.name").contains("Windows")) {
+                String unixPath = "/" + file.getAbsolutePath();
+                file = new File(unixPath);
+                URI uri = file.toURI();
+                URL url = uri.toURL();
+                localUrl = url.toString().replace("file:", "file://");
+            }
             imageView.setImage(new Image(localUrl));
             imageView.setFitHeight(220);
             imageView.setPreserveRatio(true);
@@ -204,8 +213,10 @@ public class ProductImage {
     }
 
     private static String localWindowsPath(String picPath) {
-        ArrayList<String> pathParts = new ArrayList<>();
         String localPath = "\\\\Server03\\бд_сайта\\poligon_images\\catalog";
+        if (!System.getProperty("os.name").contains("Windows")) {
+            localPath = localPath.replace("\\", "/");
+        }
         if (picPath.split("/").length==0) {
             return "";
         } else {
@@ -237,6 +248,9 @@ public class ProductImage {
         }
         fileType = picType;
         resPath = "\\\\Server03\\бд_сайта\\poligon_images\\catalog\\" + vendorTitle + "\\" + fileType + "s\\" + fileName ;
+        if (!System.getProperty("os.name").contains("Windows")) {
+            resPath = resPath.replace("\\", "/");
+        }
         copyFile(file, new File(resPath));
         String sshUser = "";
         String sshPass = "";
@@ -289,6 +303,8 @@ public class ProductImage {
             while ((length = is.read(buffer)) > 0) {
                 os.write(buffer, 0, length);
             }
+        } catch (NullPointerException ne) {
+
         } finally {
             is.close();
             os.close();
