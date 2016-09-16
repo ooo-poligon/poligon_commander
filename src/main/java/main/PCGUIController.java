@@ -41,8 +41,6 @@ import javafx.stage.FileChooser;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javafx.util.converter.IntegerStringConverter;
-import jcifs.smb.NtlmPasswordAuthentication;
-import jcifs.smb.SmbFile;
 import jxl.read.biff.BiffException;
 import modalwindows.AlertWindow;
 import modalwindows.SetRatesWindow;
