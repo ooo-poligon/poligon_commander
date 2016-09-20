@@ -9,6 +9,7 @@ import javafx.collections.transformation.SortedList;
 import javafx.scene.control.CheckBoxTreeItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TreeItem;
+import main.PCGUIController;
 import main.Product;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemOptions;
@@ -26,6 +27,7 @@ import tableviews.ProductPropertiesTableView;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 import java.nio.file.Files;
@@ -36,26 +38,41 @@ import java.nio.file.Files;
 public class UtilPack {
     public static int getCategoryIdFromTitle (String title) {
         int id = 0;
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Query query = session.createQuery("from Categories where title = :title");
-        query.setParameter("title", title);
-        List result = query.list();
-        for (Iterator iterator = result.iterator(); iterator.hasNext();) {
-            Categories category = (Categories) iterator.next();
-            id = category.getId();
-        }
+        try {
+            ResultSet resultSet = PCGUIController.connection.getResult(
+                    "select id from categories where title =\"" +
+                            title.replace("\"", "\\\"") + "\"" );
+            while (resultSet.next()) {
+                id = resultSet.getInt("id");
+            }
+        } catch (SQLException e) {}
+//        Session session = HibernateUtil.getSessionFactory().openSession();
+//        Query query = session.createQuery("from Categories where title = :title");
+//        query.setParameter("title", title);
+//        List result = query.list();
+//        for (Iterator iterator = result.iterator(); iterator.hasNext();) {
+//            Categories category = (Categories) iterator.next();
+//            id = category.getId();
+//        }
         return id;
     }
     public static String getCategoryTitleFromId (int id) {
         String title = "";
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Query query = session.createQuery("from Categories where id = :id");
-        query.setParameter("id", id);
-        List result = query.list();
-        for (Iterator iterator = result.iterator(); iterator.hasNext();) {
-            Categories category = (Categories) iterator.next();
-            title = category.getTitle();
-        }
+        try {
+            ResultSet resultSet = PCGUIController.connection.getResult(
+                    "select title from categories where id =" + id );
+            while (resultSet.next()) {
+                title = resultSet.getString("title");
+            }
+        } catch (SQLException e) {}
+//        Session session = HibernateUtil.getSessionFactory().openSession();
+//        Query query = session.createQuery("from Categories where id = :id");
+//        query.setParameter("id", id);
+//        List result = query.list();
+//        for (Iterator iterator = result.iterator(); iterator.hasNext();) {
+//            Categories category = (Categories) iterator.next();
+//            title = category.getTitle();
+//        }
         return title;
     }
     public static String getCategoryVendorFromId (int id) {
@@ -100,59 +117,89 @@ public class UtilPack {
         }
     }
     public static Integer getParentCatId(String categoryTitle) throws SQLException {
-        Integer id = UtilPack.getCategoryIdFromTitle(categoryTitle);
         Integer parentId = 0;
-        Session session = HibernateUtil.getSessionFactory().openSession();
         try {
-            List response = session.createQuery("From Categories where id=" + id).list();
-            for (Iterator iterator = response.iterator(); iterator.hasNext();) {
-                Categories category = (Categories) iterator.next();
-                parentId = category.getParent();
+            ResultSet resultSet = PCGUIController.connection.getResult(
+                    "select id from categories where title =\"" +
+                            categoryTitle.replace("\"", "\\\"") + "\"" );
+            while (resultSet.next()) {
+                parentId = resultSet.getInt("id");
             }
-        } catch (HibernateException e) {
-        } finally {
-            session.close();
-        }
+        } catch (SQLException e) {}
+//        Integer id = UtilPack.getCategoryIdFromTitle(categoryTitle);
+//        Session session = HibernateUtil.getSessionFactory().openSession();
+//        try {
+//            List response = session.createQuery("From Categories where id=" + id).list();
+//            for (Iterator iterator = response.iterator(); iterator.hasNext();) {
+//                Categories category = (Categories) iterator.next();
+//                parentId = category.getParent();
+//            }
+//        } catch (HibernateException e) {
+//        } finally {
+//            session.close();
+//        }
         return parentId;
     }
     public static Integer getParentCatId(Integer categoryId) throws SQLException {
-        Integer id = categoryId;
         Integer parentId = 0;
-        Session session = HibernateUtil.getSessionFactory().openSession();
         try {
-            List response = session.createQuery("From Categories where id=" + id).list();
-            for (Iterator iterator = response.iterator(); iterator.hasNext();) {
-                Categories categorie = (Categories) iterator.next();
-                parentId = categorie.getParent();
+            ResultSet resultSet = PCGUIController.connection.getResult(
+                    "select parent from categories where id =" + categoryId );
+            while (resultSet.next()) {
+                parentId = resultSet.getInt("parent");
             }
-        } catch (HibernateException e) {
-        } finally {
-            session.close();
-        }
+        } catch (SQLException e) {}
+//        Session session = HibernateUtil.getSessionFactory().openSession();
+//        try {
+//            List response = session.createQuery("From Categories where id=" + id).list();
+//            for (Iterator iterator = response.iterator(); iterator.hasNext();) {
+//                Categories categorie = (Categories) iterator.next();
+//                parentId = categorie.getParent();
+//            }
+//        } catch (HibernateException e) {
+//        } finally {
+//            session.close();
+//        }
         return parentId;
     }
     public static ArrayList<Integer> getPropertyIdFromTitle (String title) {
         ArrayList<Integer> ids = new ArrayList<>();
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Query query = session.createQuery("from Properties where title = :title");
-        query.setParameter("title", title);
-        List result = query.list();
-        for (Iterator iterator = result.iterator(); iterator.hasNext();) {
-            Properties property = (Properties) iterator.next();
-            ids.add(property.getId());
-        }
+        try {
+            ResultSet resultSet = PCGUIController.connection.getResult(
+                    "select id from properties where title =\"" +
+                            title.replace("\"", "\\\"") + "\"" );
+            while (resultSet.next()) {
+                ids.add(resultSet.getInt("id"));
+            }
+        } catch (SQLException e) {}
+//        Session session = HibernateUtil.getSessionFactory().openSession();
+//        Query query = session.createQuery("from Properties where title = :title");
+//        query.setParameter("title", title);
+//        List result = query.list();
+//        for (Iterator iterator = result.iterator(); iterator.hasNext();) {
+//            Properties property = (Properties) iterator.next();
+//            ids.add(property.getId());
+//        }
         return ids;
     }
     public static Integer getPropertyTypeIdFromTitle (String title) {
         Integer id = 0;
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Query query = session.createQuery("from PropertyTypes where title = :title");
-        query.setParameter("title", title);
-        List result = query.list();
-        for (Iterator iterator = result.iterator(); iterator.hasNext();) {
-            PropertyTypes propertyType = (PropertyTypes) iterator.next();
-            id = propertyType.getId();
-        }
+        try {
+            ResultSet resultSet = PCGUIController.connection.getResult(
+                    "select id from property_types where title =\"" +
+                            title.replace("\"", "\\\"") + "\"" );
+            while (resultSet.next()) {
+                id = resultSet.getInt("id");
+            }
+        } catch (SQLException e) {}
+//        Session session = HibernateUtil.getSessionFactory().openSession();
+//        Query query = session.createQuery("from PropertyTypes where title = :title");
+//        query.setParameter("title", title);
+//        List result = query.list();
+//        for (Iterator iterator = result.iterator(); iterator.hasNext();) {
+//            PropertyTypes propertyType = (PropertyTypes) iterator.next();
+//            id = propertyType.getId();
+//        }
         return id;
     }
     public static Integer getPropertyKindIdFromTitle(String selectedPropertiesKind) {
@@ -167,22 +214,31 @@ public class UtilPack {
         }
         return id;
     }
-    public static Vendors getVendorFromProductTitle (String title) {
-        Vendors vendor = new Vendors();
-        Products product = new Products();
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Query query = session.createQuery("from Products where title = :title");
-        query.setParameter("title", title);
-        List<Products> list = query.list();
-        for (Iterator iterator = list.iterator(); iterator.hasNext();) {
-            product = (Products) iterator.next();
-        }
-        Query query1 = session.createQuery("from Vendors where id = " + product.getId());
-        List<Vendors> list1 = query1.list();
-        for (Iterator iterator = list1.iterator(); iterator.hasNext();) {
-            vendor = (Vendors) iterator.next();
-        }
-        return vendor;
+    public static String getVendorFromProductTitle (String title) {
+//        Vendors vendor = new Vendors();
+//        Products product = new Products();
+        String vendor_title = "";
+        try {
+            ResultSet resultSet = PCGUIController.connection.getResult(
+                    "select title from vendors where id = (select vendor_id from products where title =\"" +
+                            title.replace("\"", "\\\"") + "\")" );
+            while (resultSet.next()) {
+                vendor_title = resultSet.getString("title");
+            }
+        } catch (SQLException e) {}
+//        Session session = HibernateUtil.getSessionFactory().openSession();
+//        Query query = session.createQuery("from Products where title = :title");
+//        query.setParameter("title", title);
+//        List<Products> list = query.list();
+//        for (Iterator iterator = list.iterator(); iterator.hasNext();) {
+//            product = (Products) iterator.next();
+//        }
+//        Query query1 = session.createQuery("from Vendors where id = " + product.getId());
+//        List<Vendors> list1 = query1.list();
+//        for (Iterator iterator = list1.iterator(); iterator.hasNext();) {
+//            vendor = (Vendors) iterator.next();
+//        }
+        return vendor_title;
     }
     public static Integer getProductIdFromTitle (String title, ArrayList<Product> allProductsList) {
         final Integer[] id = {0};

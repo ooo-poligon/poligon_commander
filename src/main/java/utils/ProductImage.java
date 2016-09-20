@@ -17,10 +17,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import main.PCGUIController;
+import modalwindows.AlertWindow;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -41,13 +44,13 @@ public class ProductImage {
         }
         try {
             String localUrl = file.toURI().toURL().toString();
-            if (!System.getProperty("os.name").contains("Windows")) {
-                String unixPath = "/" + file.getAbsolutePath();
-                file = new File(unixPath);
-                URI uri = file.toURI();
-                URL url = uri.toURL();
-                localUrl = url.toString().replace("file:", "file://");
-            }
+            //if (!System.getProperty("os.name").contains("Windows")) {
+            //    String unixPath = "/" + file.getAbsolutePath();
+            //    file = new File(unixPath);
+            //    URI uri = file.toURI();
+            //    URL url = uri.toURL();
+            //    localUrl = url.toString().replace("file:", "file://");
+            //}
             imageView.setImage(new Image(localUrl));
             imageView.setFitHeight(220);
             imageView.setPreserveRatio(true);
@@ -66,7 +69,9 @@ public class ProductImage {
         Integer ownerId = 0;
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
-        List ids = session.createSQLQuery("select id from products where title=\"" + selectedProduct + "\"").list();
+        Query query = session.createSQLQuery("select id from products where title= :title");
+        query.setParameter("title", selectedProduct);
+        List ids = query.list();
         for (Iterator iterator = ids.iterator(); iterator.hasNext();) {
             ownerId = (Integer) iterator.next();
         }
@@ -128,7 +133,9 @@ public class ProductImage {
             }
             tx.commit();
             session.close();
-        } catch (TransientObjectException e) {}
+        } catch (TransientObjectException e) {
+            AlertWindow.showErrorMessage("TransientObjectException");
+        }
     }
 
     public static void saveDimImage(File inFile, String selectedProduct) {
@@ -214,9 +221,9 @@ public class ProductImage {
 
     private static String localWindowsPath(String picPath) {
         String localPath = "\\\\Server03\\бд_сайта\\poligon_images\\catalog";
-        if (!System.getProperty("os.name").contains("Windows")) {
-            localPath = localPath.replace("\\", "/");
-        }
+        //if (!System.getProperty("os.name").contains("Windows")) {
+        //    localPath = localPath.replace("\\", "/");
+        //}
         if (picPath.split("/").length==0) {
             return "";
         } else {
@@ -235,7 +242,11 @@ public class ProductImage {
         List result = query.list();
         for(Iterator iterator = result.iterator(); iterator.hasNext();) {
             Products product = (Products) iterator.next();
-            vendorTitle = product.getVendorId().getTitle();
+            if (product.getVendorId().getTitle().equals("COMAT/RELECO")) {
+                vendorTitle = "RELECO";
+            } else {
+                vendorTitle = product.getVendorId().getTitle();
+            }
         }
         session.close();
         String resPath = "";
@@ -248,9 +259,9 @@ public class ProductImage {
         }
         fileType = picType;
         resPath = "\\\\Server03\\бд_сайта\\poligon_images\\catalog\\" + vendorTitle + "\\" + fileType + "s\\" + fileName ;
-        if (!System.getProperty("os.name").contains("Windows")) {
-            resPath = resPath.replace("\\", "/");
-        }
+        //if (!System.getProperty("os.name").contains("Windows")) {
+        //    resPath = resPath.replace("\\", "/");
+        //}
         copyFile(file, new File(resPath));
         String sshUser = "";
         String sshPass = "";
@@ -306,8 +317,12 @@ public class ProductImage {
         } catch (NullPointerException ne) {
 
         } finally {
-            is.close();
-            os.close();
+            try {
+                is.close();
+                os.close();
+            } catch (NullPointerException ne) {
+                AlertWindow.showErrorMessage("Ошибка копирования!");
+            }
         }
     }
 }

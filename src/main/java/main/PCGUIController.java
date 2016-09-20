@@ -1,5 +1,6 @@
 package main;
 
+import com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException;
 import com.sun.pdfview.PDFFile;
 import com.sun.pdfview.PDFPage;
 import entities.*;
@@ -113,12 +114,6 @@ public class PCGUIController implements Initializable {
         siteOrdersReceiverTextField.setText(SiteSettings.loadSetting("siteOrdersReceiver"));
     }
     @FXML private void resetProgram() throws SQLException {
-        if (!System.getProperty("os.name").contains("Windows")) {
-            fileChooserDirectoryCash = fileChooserDirectoryCash.replace("\\", "/");
-            noImageFile = noImageFile.replace("\\\\", "//").replace("\\", "/");
-            defaultImagesDir = defaultImagesDir.replace("\\\\", "//").replace("\\", "/");
-            defaultPdfsDir = defaultPdfsDir.replace("\\\\", "//").replace("\\", "/");
-        }
         if (loadProgramCounter != 0) {
             getAllProductsList();
             getAllFilesOfProgramList();
@@ -160,7 +155,6 @@ public class PCGUIController implements Initializable {
                     datasheetFileTable.refresh();
                 } catch (NullPointerException ex) {}
                 productsTable.setContextMenu(productTableContextMenu);
-                fillProductTab(selectedProduct);
             }
         );
         tabPane.getSelectionModel().selectedItemProperty().addListener(
@@ -195,6 +189,10 @@ public class PCGUIController implements Initializable {
                     } catch (NullPointerException ne) {}
                 } else if (t1.equals(editorTab)) {
                     ExtendHtmlEditor.addPictureFunction(htmlEditor, editorAnchorPane);
+                } else if (t1.equals(productTab)) {
+                    try {
+                        fillProductTab(selectedProduct);
+                    } catch (NullPointerException ne) {}
                 }
             }
         );
@@ -1324,7 +1322,6 @@ public class PCGUIController implements Initializable {
                     }
                     buildProductsTable(data);
                     productsTable.getSelectionModel().select(0);
-                    setVendorSelected(productsTable.getSelectionModel().getSelectedItem().getTitle());
                     focusedProduct = productsTable.getSelectionModel().getSelectedItem().getTitle();
                     onFocusedProductTableItem(selectedProduct);
                 }
@@ -1335,60 +1332,6 @@ public class PCGUIController implements Initializable {
                 return null;
             }
         };
-    }
-    private void buildPropertiesTree(String selectedProduct) {
-        propertiesStackPane.getChildren().clear();
-        //Получаем вид продукта для товара, преданного в параметре
-        ProductKinds kind = new ProductKinds();
-        ArrayList<ProductKindsPropertyTypes> types = new ArrayList<>();
-        ObservableList<PropertiesTreeView> data = FXCollections.observableArrayList();
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        List list = session.createQuery("From Products where id =" + UtilPack.getProductIdFromTitle(selectedProduct, allProductsList)).list();
-        for (Iterator iterator = list.iterator(); iterator.hasNext();) {
-            Products product = (Products) iterator.next();
-            kind = product.getProductKindId();
-        }
-        session.close();
-        //Получаем типы свойств для этого вида товара
-        Session session0 = HibernateUtil.getSessionFactory().openSession();
-        List list0 = session0.createQuery("From ProductKindsPropertyTypes where productKindId =" + kind.getId()).list();
-        for (Iterator iterator0 = list0.iterator(); iterator0.hasNext();) {
-            ProductKindsPropertyTypes kindsType = (ProductKindsPropertyTypes) iterator0.next();
-            types.add(kindsType);
-        }
-        session0.close();
-        types.stream().forEach((type) -> {
-            Session session1 = HibernateUtil.getSessionFactory().openSession();
-            List list1 = session1.createQuery("From PropertyTypes where id=" + type.getPropertyTypeId().getId()).list();
-            for (Iterator iterator1 = list1.iterator(); iterator1.hasNext();) {
-                PropertyTypes propertyType = (PropertyTypes) iterator1.next();
-                data.add(new PropertiesTreeView(propertyType.getId(), propertyType.getTitle(), propertyType.getParent()));
-            }
-            session1.close();
-        });
-        ArrayList<PropertiesTreeView> properties = new ArrayList();
-        data.stream().forEach((section) -> {
-            properties.add(section);
-        });
-        PropertiesTreeView treeRoot = new PropertiesTreeView(0, "Все характекистики", 0);
-        TreeItem<String> rootItem = new TreeItem<> (treeRoot.getTitle());
-        rootItem.setExpanded(true);
-        buildPropertiesTreeNode(properties, rootItem, treeRoot);
-        propertiesTree = new TreeView<> (rootItem);
-        rootItem.setExpanded(true);
-        propertiesTree.setShowRoot(false);
-        EventHandler<MouseEvent> mouseEventHandle = (MouseEvent event) -> {
-            try { handlePropertiesTreeMouseClicked(event); } catch (SQLException e) {}
-        };
-        propertiesTree.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseEventHandle);
-        propertiesStackPane.getChildren().add(propertiesTree);
-    }
-    private void buildPropertiesTreeNode (ArrayList<PropertiesTreeView> properties, TreeItem<String> rootItem, PropertiesTreeView treeRoot) {
-        properties.stream().filter((property) -> (property.getParent().equals(treeRoot.getId()))).forEach((PropertiesTreeView property) -> {
-            TreeItem<String> treeItem = new TreeItem<> (property.getTitle());
-            rootItem.getChildren().add(treeItem);
-            buildPropertiesTreeNode(properties, treeItem, property);
-        });
     }
     // Создаёт модальное окно с деревом категорий товаров для диалога переноса товаров в другую категорию.
     public TreeView<String> buildModalCategoryTree(StackPane stackPane, TreeView treeView) {
@@ -1981,16 +1924,10 @@ public class PCGUIController implements Initializable {
             buildDeliveryTimeTable(selectedProduct);
             buildAnalogsTable(selectedProduct);
             buildDatasheetFileTable(selectedProduct);
-            buildImageView(selectedProduct);
-            setCategorySelected(selectedProduct);
-            setVendorSelected(selectedProduct);
-            setSerieSelected(selectedProduct);
-            buildPropertiesTree(selectedProduct);
-            datasheetFileTable.refresh();
-            setSelectProperty(selectedProduct);
-            buildFunctionsTable1(selectedProduct);
-            setSelectFunction();
             buildAccessoriesTable(selectedProduct);
+            buildImageView(selectedProduct);
+            datasheetFileTable.refresh();
+            setCategorySelected(selectedProduct);
         } catch (NullPointerException ex) {
         } catch (SQLException e) {}
     }
@@ -2166,34 +2103,6 @@ public class PCGUIController implements Initializable {
         } catch (NullPointerException ne) {}
         return allParents;
     }
-    private void setVendorSelected(String selectedProduct) {
-        /*final String[] vendor = {""};
-        allProductsList.stream().forEach(product -> {
-            if(product.getTitle().equals(selectedProduct)) {
-                vendor[0] = product.getVendor();
-            }
-        });
-        for (int i = 0; i < vendorsTable.getItems().size(); i++) {
-            if (vendorsTable.getItems().get(i).getTitle().equals(vendor[0])) {
-                vendorsTable.getSelectionModel().clearAndSelect(i);
-                vendorsTable.scrollTo(vendorsTable.getSelectionModel().getSelectedItem());
-            }
-        }*/
-    }
-    private void setSerieSelected(String selectedProduct) {
-        /*final String[] serie = {""};
-        allProductsList.stream().forEach(product -> {
-            if(product.getTitle().equals(selectedProduct)) {
-                serie[0] = product.getSerie();
-            }
-        });
-        for (int i = 0; i < seriesTable.getItems().size(); i++) {
-            if (seriesTable.getItems().get(i).getTitle().equals(serie[0])) {
-                seriesTable.getSelectionModel().clearAndSelect(i);
-                seriesTable.scrollTo(seriesTable.getSelectionModel().getSelectedItem());
-            }
-        }*/
-    }
     private void setDatasheetFile() throws SQLException {
         fileChooser.setInitialDirectory(new File(fileChooserDirectoryCash));
         File file = fileChooser.showOpenDialog(anchorPane.getScene().getWindow());
@@ -2248,21 +2157,7 @@ public class PCGUIController implements Initializable {
     }
     @FXML public  void startProgressBar(MouseEvent event) {
         Task task = createTask(event);
-        //progressBar.progressProperty().bind(task.progressProperty());
         Platform.runLater(task);
-    }
-    @FXML private void handlePropertiesTreeMouseClicked(MouseEvent event) throws SQLException {
-        ObservableList<ProductPropertiesTableView> data = FXCollections.observableArrayList();
-        // Вызываем метод, возврщающий нам название кликнутого узла
-        Node node = event.getPickResult().getIntersectedNode();
-        // Accept clicks only on node cells, and not on empty spaces of the TreeView
-        if (node instanceof Text || (node instanceof TreeCell && ((TreeCell) node).getText() != null)) {
-            String selectedNode = (String) ((TreeItem)propertiesTree.getSelectionModel().getSelectedItem()).getValue();
-            subPropertiesList(selectedNode);
-            //buildPropertiesTable(selectedNode, productTabTitle.getText());
-            //buildProductPropertiesForKindTable(productTabTitle.getText());
-            propertiesTable.getSelectionModel().select(0);
-        }
     }
     @FXML private void handleProductTableMousePressed(MouseEvent event1) {
         onFocusedProductTableItem(selectedProduct);
@@ -2312,6 +2207,9 @@ public class PCGUIController implements Initializable {
                             loadPdfFile(productsTable.getSelectionModel().getSelectedItem().getTitle());
                         } catch (SQLException e) {}
                     }).build(),
+                    MenuItemBuilder.create().text("Установить изображение...").onAction((ActionEvent arg0) -> {
+                        changePictureForSelectedProducts();
+                    }).build(),
                     MenuItemBuilder.create().text("Изменить производителя устройства").onAction((ActionEvent arg0) -> {
                         ContextBuilder.changeProductVendor(productsTable);
                         try {
@@ -2359,6 +2257,9 @@ public class PCGUIController implements Initializable {
             ).build();
         } else {
             productTableContextMenu = ContextMenuBuilder.create().items(
+                    MenuItemBuilder.create().text("Установить изображение...").onAction((ActionEvent arg0) -> {
+                        changePictureForSelectedProducts();
+                    }).build(),
                 MenuItemBuilder.create().text("Переместить в категорию...").onAction((ActionEvent arg0) -> {
                     try {
                         changeProductCategoryDialog();
@@ -2398,7 +2299,44 @@ public class PCGUIController implements Initializable {
             ).build();
         }
         productsTable.setContextMenu(productTableContextMenu);
-        fillProductTab(selectedProduct);
+        //fillProductTab(selectedProduct);
+    }
+
+    private void changePictureForSelectedProducts() {
+        final ArrayList<String> selectedProductsTitles = new ArrayList<>();
+        productsTable.getSelectionModel().getSelectedItems().stream().forEach((item) -> {
+            try {
+                selectedProductsTitles.add(item.getTitle());
+            } catch (NullPointerException ne) {
+                AlertWindow.showErrorMessage("Ошибка ввода данных.");
+            }
+        });
+        File file = fileChooser.showOpenDialog(anchorPane.getScene().getWindow());
+        if (file != null) {
+            Task task = new Task<Void>() {
+                @Override public Void call() {
+                    int i = 2;
+                    for (String title : selectedProductsTitles) {
+                        ProductImage.save(file, title);
+                        updateProgress(i, selectedProductsTitles.size());
+                        i++;
+                    }
+                    updateProgress(0, 0);
+                    Platform.runLater(() -> {
+                        try {
+                            resetProgram();
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                        AlertWindow.showInfo("Готово!");
+                    });
+                    return null;
+                }
+            };
+            progressBar.progressProperty().bind(task.progressProperty());
+            new Thread(task).start();
+        }
+        try { getAllFilesOfProgramList(); } catch (SQLException e) {}
     }
 
     private Task<Void> deleteProductsTask() {
@@ -2437,7 +2375,7 @@ public class PCGUIController implements Initializable {
         });
         buildProductsTable(data);
         productsTable.getSelectionModel().select(0);
-        setVendorSelected(title[0]);
+        //setVendorSelected(title[0]);
         setCategorySelected(title[0]);
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2476,17 +2414,14 @@ public class PCGUIController implements Initializable {
                 Properties property = (Properties) iterator.next();
                 properties.add(property);
             }
-            session1.close();
-
-            Session session2 = HibernateUtil.getSessionFactory().openSession();
-            List res2 = session2.createQuery(
+            List res2 = session1.createQuery(
                     "from PropertyValues where productId =" + UtilPack.getProductIdFromTitle(selectedProduct, allProductsList)
             ).list();
             for (Iterator iterator = res2.iterator(); iterator.hasNext();) {
                 PropertyValues pv = (PropertyValues) iterator.next();
                 propertyValues.add(pv);
             }
-            session2.close();
+            session1.close();
 
             for (Properties p : properties) {
                 String value = "";
@@ -2631,8 +2566,8 @@ public class PCGUIController implements Initializable {
             session.close();
         } catch (NullPointerException ne) {}
         buildAccessoriesTable(selectedProduct);
-        //buildPropertiesTree(selectedProduct);
         buildFunctionsTable1(selectedProduct);
+        setSelectFunction();
     }
     private void setPropertyValueForProduct(String newValue, String propertyOrderNumber, String propertyTitle, String selectedProduct) {
         ArrayList<Integer> propertyIds = UtilPack.getPropertyIdFromTitle(propertyTitle);
@@ -2929,15 +2864,6 @@ public class PCGUIController implements Initializable {
         File picFile = new File(functionPicturePath);
         ProductImage.open(picFile, functionGridPaneImageView, functionImageView);
     }
-    private void setSelectProperty(String selectedProduct) {
-        ObservableList<ProductPropertiesTableView> data = FXCollections.observableArrayList();
-        propertiesTree.getSelectionModel().select(0);
-        String selectedPropertyTitle = propertiesTree.getSelectionModel().getSelectedItem().getValue();
-        subPropertiesList(selectedPropertyTitle);
-        //buildPropertiesTable(selectedPropertyTitle, selectedProduct);
-        buildProductPropertiesForKindTable(selectedProduct);
-        propertiesTable.getSelectionModel().select(0);
-    }
     private void setSelectFunction() {
         functionDescriptionTextArea.setText("");
         setFunctionPicture(noImageFile);
@@ -3033,8 +2959,6 @@ public class PCGUIController implements Initializable {
             public void handle(MouseEvent mouseEvent) {
                 if(mouseEvent.getButton().equals(MouseButton.PRIMARY)){
                     if(mouseEvent.getClickCount() == 2){
-                        buildPropertiesTree(accessoriesTable.getSelectionModel().getSelectedItem().getTitle());
-                        setSelectProperty(accessoriesTable.getSelectionModel().getSelectedItem().getTitle());
                         buildFunctionsTable1(accessoriesTable.getSelectionModel().getSelectedItem().getTitle());
                         try {
                             setSelectFunction();
@@ -3140,12 +3064,6 @@ public class PCGUIController implements Initializable {
                 pdfFilePath[0] = fileOfProgram.getPath();
             }
         });
-        /*
-        ResultSet resultSet = connection.getResult("select path from files where owner_id=" + productId + " and file_type_id=" + 2);
-        while (resultSet.next()) {
-            pdfFilePath[0] = resultSet.getString("path");
-        }
-        */
         File file = new File(pdfFilePath[0]);
         if (file != null) {
             final Task<PDFFile> loadFileTask = new Task<PDFFile>() {
@@ -4070,7 +3988,7 @@ public class PCGUIController implements Initializable {
         ArrayList<Integer> typesIds = new ArrayList<>(10);
         ArrayList<ProductPropertiesTableView> properties = new ArrayList<>(10);
         Session session = HibernateUtil.getSessionFactory().openSession();
-        List res = session.createQuery("from ProductKindsPropertyTypes where productKindId =" + UtilPack.getPropertyKindIdFromTitle(selectedPropertiesKind)).list();
+        List res = session.createQuery("from ProductKindsPropertyTypes where productKindId =" + UtilPack.getProductKindIdFromTitle(selectedPropertiesKind)).list();
         for (Iterator iterator = res.iterator(); iterator.hasNext();) {
             ProductKindsPropertyTypes kt = (ProductKindsPropertyTypes) iterator.next();
             typesIds.add(kt.getPropertyTypeId().getId());
