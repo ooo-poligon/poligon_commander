@@ -18,9 +18,11 @@ import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.TableColumn.CellEditEvent;
@@ -3757,9 +3759,81 @@ public class PCGUIController implements Initializable {
         productKindsList.setContextMenu(productKindsListContextMenu);
         productKindsList.setItems(items);
     }
-    private void buildProductKindPropertiesTable(String selectedProductKind) {
-        Callback<TableColumn<ProductKindPropertiesTableView, String>, TableCell<ProductKindPropertiesTableView, String>> cellFactory
-                = (TableColumn<ProductKindPropertiesTableView, String> p) -> new EditingCell();
+    private void tableExcelBehavior() {
+        productKindPropertiesTable.setUserData(deletedLines);
+        productKindPropertiesTable.setItems(productKindsPropertiesList);
+        productKindPropertiesTable.getSelectionModel().setCellSelectionEnabled(true);
+        productKindPropertiesTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        productKindPropertiesTable.addEventFilter(KeyEvent.KEY_PRESSED, (KeyEvent t) -> {
+            if (productKindPropertiesTable.getEditingCell() == null && t.getCode() == KeyCode.ENTER) {
+                if (t.isShiftDown()) {
+                    productKindPropertiesTable.getSelectionModel().selectAboveCell();
+                } else {
+                    productKindPropertiesTable.getSelectionModel().selectBelowCell();
+                }
+                t.consume();
+            }
+            if (!t.isControlDown() && t.getCode() == KeyCode.TAB) {
+                if (t.isShiftDown()) {
+                    productKindPropertiesTable.getSelectionModel().selectLeftCell();
+                } else {
+                    productKindPropertiesTable.getSelectionModel().selectRightCell();
+                }
+                t.consume();
+            }
+        });
+
+        productKindPropertiesTable.setOnKeyPressed((KeyEvent t) -> {
+            TablePosition tp;
+            if (!t.isControlDown() && (t.getCode().isLetterKey() || t.getCode().isDigitKey())) {
+                lastKey = t.getText();
+                tp = productKindPropertiesTable.getFocusModel().getFocusedCell();
+                productKindPropertiesTable.edit(tp.getRow(),tp.getTableColumn());
+                lastKey = null;
+            }
+        });
+
+        productKindPropertiesTable.setOnKeyReleased((KeyEvent t) -> {
+            TablePosition tp;
+            switch (t.getCode()) {
+                //other code cut out here
+                case Z:
+                    if (t.isControlDown()) {
+                        if (!deletedLines.isEmpty()) {
+                            productKindsPropertiesList.add(deletedLines.pop());
+                        }
+                        break; //don't break for regular Z
+                    }
+                default:
+                    if (t.getCode().isLetterKey() || t.getCode().isDigitKey()) {
+                        lastKey = t.getText();
+                        tp = productKindPropertiesTable.getFocusModel().getFocusedCell();
+                        productKindPropertiesTable.edit(tp.getRow(), tp.getTableColumn());
+                        lastKey = null;
+                    }
+            }
+        });
+
+        productKindPropertiesTable.sortPolicyProperty().set( new Callback<TableView<ProductKindPropertiesTableView>, Boolean>() {
+            @Override
+            public Boolean call(TableView<ProductKindPropertiesTableView> param) {
+                Comparator<ProductKindPropertiesTableView> comparator = new Comparator<ProductKindPropertiesTableView>() {
+                    @Override
+                    public int compare(ProductKindPropertiesTableView r1, ProductKindPropertiesTableView r2) {
+                        if (param.getComparator() == null) {
+                            return 0;
+                        } else {
+                            return param.getComparator().compare(r1, r2);
+                        }
+                    }
+                };
+                FXCollections.sort(productKindPropertiesTable.getItems(), comparator);
+                return true;
+            }
+        });
+    }
+
+    private void populateProductKindPropertiesList(String selectedProductKind) {
         productKindsPropertiesList.clear();
         ArrayList<Integer> selectedProductKindPropertiesIds = new ArrayList<>();
         ArrayList<Properties> propertiesList = new ArrayList<>();
@@ -3784,9 +3858,16 @@ public class PCGUIController implements Initializable {
         propertiesList.stream().forEach((p) -> {
             productKindsPropertiesList.add(new ProductKindPropertiesTableView(p.getOrderNumber().toString(), p.getTitle(), p.getOptional(), p.getSymbol()));
         });
+    }
+
+    private void buildProductKindPropertiesTable(String selectedProductKind) {
+        populateProductKindPropertiesList(selectedProductKind);
+        tableExcelBehavior();
+        Callback<TableColumn<ProductKindPropertiesTableView, String>, TableCell<ProductKindPropertiesTableView, String>> cellFactory
+                = (TableColumn<ProductKindPropertiesTableView, String> p) -> new EditingCell();
+
         productKindPropertiesOrderColumn.setCellValueFactory(new PropertyValueFactory<>("orderNumber"));
-        productKindPropertiesOrderColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        //productKindPropertiesTitleColumn.setCellFactory(cellFactory);
+        productKindPropertiesOrderColumn.setCellFactory(cellFactory);
         productKindPropertiesOrderColumn.setOnEditCommit(
                 t -> {
                     String orderNumber = (t.getTableView().getItems().get(t.getTablePosition().getRow()).getOrderNumber());
@@ -3795,8 +3876,7 @@ public class PCGUIController implements Initializable {
                 }
         );
         productKindPropertiesTitleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
-        //productKindPropertiesTitleColumn.setCellFactory(cellFactory);
-        productKindPropertiesTitleColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        productKindPropertiesTitleColumn.setCellFactory(cellFactory);
         productKindPropertiesTitleColumn.setOnEditCommit(
                 t -> {
                     String orderNumber = (t.getTableView().getItems().get(t.getTablePosition().getRow()).getOrderNumber());
@@ -3805,8 +3885,7 @@ public class PCGUIController implements Initializable {
                 }
         );
         productKindPropertiesOptionalColumn.setCellValueFactory(new PropertyValueFactory<>("optional"));
-        //productKindPropertiesOptionalColumn.setCellFactory(cellFactory);
-        productKindPropertiesOptionalColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        productKindPropertiesOptionalColumn.setCellFactory(cellFactory);
         productKindPropertiesOptionalColumn.setOnEditCommit(
                 t -> {
                     String orderNumber = (t.getTableView().getItems().get(t.getTablePosition().getRow()).getOrderNumber());
@@ -3815,37 +3894,123 @@ public class PCGUIController implements Initializable {
                 }
         );
         productKindPropertiesSymbolColumn.setCellValueFactory(new PropertyValueFactory<>("symbol"));
-        productKindPropertiesSymbolColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        //productKindPropertiesOptionalColumn.setCellFactory(cellFactory);
+        productKindPropertiesSymbolColumn.setCellFactory(cellFactory);
         productKindPropertiesSymbolColumn.setOnEditCommit(
                 t -> {
                     String orderNumber = (t.getTableView().getItems().get(t.getTablePosition().getRow()).getOrderNumber());
                     (t.getTableView().getItems().get(t.getTablePosition().getRow())).setSymbol(t.getNewValue());
                     setProductKindsPropertyCellValue(orderNumber, "symbol", t);
-                    //addPropertyToTable();
                 }
         );
-
-        productKindPropertiesTable.setItems(productKindsPropertiesList);
-        productKindPropertiesTable.sortPolicyProperty().set( new Callback<TableView<ProductKindPropertiesTableView>, Boolean>() {
-            @Override
-            public Boolean call(TableView<ProductKindPropertiesTableView> param) {
-                Comparator<ProductKindPropertiesTableView> comparator = new Comparator<ProductKindPropertiesTableView>() {
-                    @Override
-                    public int compare(ProductKindPropertiesTableView r1, ProductKindPropertiesTableView r2) {
-                        if (param.getComparator() == null) {
-                            return 0;
-                        } else {
-                            return param.getComparator().compare(r1, r2);
-                        }
-                    }
-                };
-                FXCollections.sort(productKindPropertiesTable.getItems(), comparator);
-                return true;
-            }
-        });
-        //productKindPropertiesTable.addEventHandler();
     }
+
+    private class EditingCell extends TableCell {
+
+        private TextField textField;
+
+        @Override
+        public void startEdit() {
+            if (!isEmpty()) {
+                super.startEdit();
+                createTextField();
+                setText(null);
+                setGraphic(textField);
+                Platform.runLater(() -> {//without this space erases text, f2 doesn't
+                    textField.requestFocus();//also selects
+                });
+                if (lastKey != null) {
+                    textField.setText(lastKey);
+                    Platform.runLater(() -> {
+                        textField.deselect();
+                        textField.end();
+                        textField.positionCaret(textField.getLength()+2);//works sometimes
+                    });
+                }
+            }
+        }
+
+        public void commit(){
+            commitEdit(textField.getText());
+        }
+
+        @Override
+        public void cancelEdit() {
+            super.cancelEdit();
+            try {
+                setText(getItem().toString());
+            } catch (Exception e) {}
+            setGraphic(null);
+        }
+
+        @Override
+        public void updateItem(Object item, boolean empty) {
+            super.updateItem(item, empty);
+
+            if (empty) {
+                setText(null);
+                setGraphic(null);
+            } else if (isEditing()) {
+                if (textField != null) {
+                    textField.setText(getString());
+                }
+                setText(null);
+                setGraphic(textField);
+            } else {
+                setText(getString());
+                setGraphic(null);
+            }
+        }
+
+        private void createTextField() {
+            textField = new TextField(getString());
+
+            //doesn't work if clicking a different cell, only focusing out of table
+            textField.focusedProperty().addListener(
+                    (ObservableValue<? extends Boolean> arg0, Boolean arg1, Boolean arg2) -> {
+                        if (!arg2) commitEdit(textField.getText());
+                    });
+
+            textField.setOnKeyReleased((KeyEvent t) -> {
+                if (t.getCode() == KeyCode.ENTER) {
+                    commitEdit(textField.getText());
+                    EditingCell.this.getTableView().requestFocus();//why does it lose focus??
+                    EditingCell.this.getTableView().getSelectionModel().selectBelowCell();
+                } else if (t.getCode() == KeyCode.ESCAPE) {
+                    cancelEdit();
+                }
+            });
+
+            textField.addEventFilter(KeyEvent.KEY_RELEASED, (KeyEvent t) -> {
+                if (t.getCode() == KeyCode.DELETE) {
+                    t.consume();//stop from deleting line in table keyevent
+                }
+            });
+        }
+
+        private String getString() {
+            return getItem() == null ? "" : getItem().toString();
+        }
+
+        public void commitEdit(String item) {
+
+            // This block is necessary to support commit on losing focus, because the baked-in mechanism
+            // sets our editing state to false before we can intercept the loss of focus.
+            // The default commitEdit(...) method simply bails if we are not editing...
+            if (! isEditing() && ! item.equals(getItem())) {
+                TableView<ProductKindPropertiesTableView> table = getTableView();
+                if (table != null) {
+                    TableColumn<ProductKindPropertiesTableView, String> column = getTableColumn();
+                    CellEditEvent<ProductKindPropertiesTableView, String> event = new CellEditEvent<>(table,
+                            new TablePosition<ProductKindPropertiesTableView,String>(table, getIndex(), column),
+                            TableColumn.editCommitEvent(), item);
+                    Event.fireEvent(column, event);
+                }
+            }
+
+            super.commitEdit(item);
+        }
+    }
+
     private void setProductKindsPropertyCellValue(String orderNumber, String fieldName, CellEditEvent<ProductKindPropertiesTableView, String> t) {
         int productKindId = UtilPack.getProductKindIdFromTitle(productKindsList.getSelectionModel().getSelectedItem());
         Properties currentProperty = new Properties();
@@ -3983,86 +4148,6 @@ public class PCGUIController implements Initializable {
             getAllProductsList();
             productKindPropertiesTable.refresh();
         } catch (SQLException e) {}
-    }
-    private void buildPropertiesTreeTable(String selectedPropertiesKind) {
-        ArrayList<Integer> typesIds = new ArrayList<>(10);
-        ArrayList<ProductPropertiesTableView> properties = new ArrayList<>(10);
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        List res = session.createQuery("from ProductKindsPropertyTypes where productKindId =" + UtilPack.getProductKindIdFromTitle(selectedPropertiesKind)).list();
-        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
-            ProductKindsPropertyTypes kt = (ProductKindsPropertyTypes) iterator.next();
-            typesIds.add(kt.getPropertyTypeId().getId());
-        }
-        session.close();
-        Session session1 = HibernateUtil.getSessionFactory().openSession();
-        List res1 = session1.createQuery("from PropertyTypes").list();
-        for(Iterator iterator =  res1.iterator(); iterator.hasNext();) {
-            PropertyTypes pt = (PropertyTypes) iterator.next();
-            if(typesIds.contains(pt.getId())) {
-                properties.add(new ProductPropertiesTableView(pt.getTitle()));
-            }
-        }
-        session1.close();
-        ObservableList<TreeItem<ProductPropertiesTableView>> treeItems = FXCollections.observableArrayList();
-        properties.stream().forEach((prop) -> {
-            treeItems.add(new TreeItem<ProductPropertiesTableView>(prop));
-        });
-        TreeItem<ProductPropertiesTableView> root = new TreeItem<>(new ProductPropertiesTableView("Все наборы свойств"));
-        root.setExpanded(true);
-        treeItems.stream().forEach((item) -> {
-            ArrayList<TreeItem> children = null;
-            children = UtilPack.treeItemChildren(item);
-            if (children.size() > 0) {
-                children.stream().forEach((child) -> {
-                    item.getChildren().add(child);
-                });
-            }
-            root.getChildren().add(item);
-        });
-        propertiesTreeTableContextMenu = ContextMenuBuilder.create().items(
-                MenuItemBuilder.create().text("Добавить набор свойств").onAction((ActionEvent ae3) -> {
-                    ContextBuilder.addPropertyType(productKindsList);
-                    buildPropertiesTreeTable(selectedPropertiesKind);
-                    buildProductKindsList();
-                    propertiesTreeTable.refresh();
-                    functionsTable.refresh();
-                }).build(),
-                MenuItemBuilder.create().text("Удалить набор свойств").onAction((ActionEvent ae3) -> {
-                    ContextBuilder.removePropertyType(productKindsList, propertiesTreeTable);
-                    buildPropertiesTreeTable(selectedPropertiesKind);
-                    buildProductKindsList();
-                    propertiesTreeTable.refresh();
-                    functionsTable.refresh();
-                }).build(),
-                SeparatorMenuItemBuilder.create().build(),
-                MenuItemBuilder.create().text("Добавить новое свойство").onAction((ActionEvent ae1) -> {
-                    ContextBuilder.createNewProperty();
-                    buildPropertiesTreeTable(selectedPropertiesKind);
-                    buildFunctionsTable(selectedPropertiesKind);
-                    propertiesTreeTable.refresh();
-                    functionsTable.refresh();
-                }).build(),
-                MenuItemBuilder.create().text("Редактировать выбранное свойство").onAction((ActionEvent ae2) -> {
-                    ContextBuilder.updateTheProperty(propertiesTreeTable);
-                    buildPropertiesTreeTable(selectedPropertiesKind);
-                    buildFunctionsTable(selectedPropertiesKind);
-                    propertiesTreeTable.refresh();
-                    functionsTable.refresh();
-                }).build(),
-                MenuItemBuilder.create().text("Удалить выбранное свойство").onAction((ActionEvent ae3) -> {
-                    ContextBuilder.deleteTheProperty(propertiesTreeTable);
-                    buildPropertiesTreeTable(selectedPropertiesKind);
-                    buildFunctionsTable(selectedPropertiesKind);
-                    propertiesTreeTable.refresh();
-                    functionsTable.refresh();
-                }).build()
-
-        ).build();
-        propertiesTreeTable.setContextMenu(propertiesTreeTableContextMenu);
-        propertiesTreeTable.setRoot(root);
-        propertiesTreeTable.setShowRoot(false);
-        propertiesTreeTable.getColumns().setAll(propertiesTreeTableTitleColumn);
-        propertiesTreeTableTitleColumn.setCellValueFactory(new TreeItemPropertyValueFactory("title"));
     }
     private void buildFunctionsTable(String selectedPropertiesKind) {
         ArrayList<Functions> functions = new ArrayList<>(10);
@@ -4296,15 +4381,7 @@ public class PCGUIController implements Initializable {
     }
     @FXML private void addPropertyToTable() {
         int newRowNumber = productKindPropertiesTable.getItems().size() + 1;
-        ProductKindPropertiesTableView newRow = new ProductKindPropertiesTableView(Integer.toString(newRowNumber), "", "", "");
-        productKindsPropertiesList.add(newRow);
-        productKindPropertiesTable.setItems(productKindsPropertiesList);
-        int rowNumber = productKindsPropertiesList.size() - 1;
-        productKindPropertiesTable.requestFocus();
-        productKindPropertiesTable.getSelectionModel().select(rowNumber);
-        productKindPropertiesTable.getFocusModel().focus(rowNumber);
         int productKindId = UtilPack.getProductKindIdFromTitle(productKindsList.getSelectionModel().getSelectedItem());
-        System.out.println("productKindId = " + productKindId);
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
         Query query = session.createSQLQuery("insert into properties (order_number, product_kind_id) values (" + newRowNumber +
@@ -4312,6 +4389,7 @@ public class PCGUIController implements Initializable {
         query.executeUpdate();
         tx.commit();
         session.close();
+        populateProductKindPropertiesList(productKindsList.getSelectionModel().getSelectedItem());
     }
     @FXML private void deletePropertyFromTable() {
         String num = productKindPropertiesTable.getSelectionModel().getSelectedItem().getOrderNumber();
@@ -4329,15 +4407,15 @@ public class PCGUIController implements Initializable {
         }
 
         Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = session.beginTransaction();
+        Transaction tx1 = session.beginTransaction();
         Query query1 = session.createQuery("delete PropertyValues where propertyId=" + property.getId());
         query1.executeUpdate();
+        tx1.commit();
+        Transaction tx2 = session.beginTransaction();
         Query query2 = session.createQuery("delete Properties where id=" + property.getId() + " and productKindId=" + productKindId);
         query2.executeUpdate();
-        tx.commit();
+        tx2.commit();
         session.close();
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         int ix = productKindPropertiesTable.getSelectionModel().getSelectedIndex();
         // Select a row
@@ -4350,9 +4428,7 @@ public class PCGUIController implements Initializable {
         if (ix != 0) {
             ix = ix -1;
         }
-        productKindPropertiesTable.requestFocus();
-        productKindPropertiesTable.getSelectionModel().select(ix);
-        productKindPropertiesTable.getFocusModel().focus(ix);
+        populateProductKindPropertiesList(productKindsList.getSelectionModel().getSelectedItem());
     }
 
     @FXML private void exportPropertiesTableToXls() {
@@ -4389,6 +4465,7 @@ public class PCGUIController implements Initializable {
     @FXML private GridPane   productTabGridPaneImageView;
     @FXML private GridPane   functionGridPaneImageView;
     StackPane stackPaneModal = new StackPane();
+    Stack<ProductKindPropertiesTableView> deletedLines = new Stack<>();
 
     @FXML private HTMLEditor htmlEditor;
     @FXML private TextArea htmlCode;
@@ -4687,4 +4764,5 @@ public class PCGUIController implements Initializable {
     public static ObservableList<String> allProductsTitles = FXCollections.observableArrayList();
     public static ObservableList<CategoriesTreeView> allCategoriesList = FXCollections.observableArrayList();
     public static ObservableList<ProductKindPropertiesTableView> productKindsPropertiesList = FXCollections.observableArrayList();
+    private String lastKey = null;
 }
