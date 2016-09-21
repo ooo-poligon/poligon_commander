@@ -1392,7 +1392,7 @@
                                              <children>
                                                 <AnchorPane>
                                                    <children>
-                                                      <Label text="Типы устройств" AnchorPane.bottomAnchor="3.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="20.0">
+                                                      <Label text="Типы устройств" AnchorPane.bottomAnchor="3.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                          <font>
                                                             <Font name="System Bold" size="20.0" />
                                                          </font>
@@ -1401,26 +1401,26 @@
                                                 </AnchorPane>
                                                 <AnchorPane>
                                                    <children>
-                                                      <GridPane minHeight="-Infinity" prefHeight="260.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                      <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                         <columnConstraints>
                                                           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="42.0" prefWidth="100.0" />
                                                           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                                         </columnConstraints>
                                                         <rowConstraints>
-                                                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                          <RowConstraints vgrow="SOMETIMES" />
                                                         </rowConstraints>
                                                          <children>
-                                                            <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                                                            <AnchorPane>
                                                                <children>
-                                                                  <ListView fx:id="productKindsList" layoutX="31.0" layoutY="-85.0" onMousePressed="#handlePropertiesKindSelected" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
+                                                                  <ListView fx:id="productKindsList" layoutX="31.0" layoutY="-85.0" onKeyPressed="#productKindsMoveUpDownByKeyboard" onMousePressed="#handleProductsKindSelected" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
                                                                      <contextMenu>
                                                                         <ContextMenu fx:id="productKindsListContextMenu" />
                                                                      </contextMenu></ListView>
                                                                </children>
                                                             </AnchorPane>
-                                                            <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
+                                                            <AnchorPane GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
                                                                <children>
-                                                                  <TableView fx:id="functionsTable" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                  <TableView fx:id="functionsTable" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
                                                                     <columns>
                                                                       <TableColumn fx:id="functionsTableTitleColumn" maxWidth="1.7976931348623157E308" minWidth="450.0" prefWidth="-1.0" text="Наименование функции" />
                                                                         <TableColumn fx:id="functionsTableSymbolColumn" maxWidth="85.0" minWidth="85.0" prefWidth="85.0" text="Символ" />
@@ -1734,17 +1734,17 @@
                                           </VBox>
                                        </children>
                                     </AnchorPane>
-                                    <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                    <AnchorPane GridPane.columnIndex="1" GridPane.rowIndex="2">
                                        <children>
                                           <VBox layoutX="269.0" layoutY="78.0" prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="15.0">
                                              <children>
                                                 <AnchorPane VBox.vgrow="ALWAYS">
                                                    <children>
-                                                      <HBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="10.0">
+                                                      <HBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
                                                          <children>
                                                             <AnchorPane>
                                                                <children>
-                                                                  <Label text="Таблица свойств для типа устройств" AnchorPane.bottomAnchor="3.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+                                                                  <Label text="Таблица свойств для типа устройств" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                      <font>
                                                                         <Font name="System Bold" size="20.0" />
                                                                      </font>
@@ -1753,7 +1753,7 @@
                                                             </AnchorPane>
                                                             <AnchorPane HBox.hgrow="ALWAYS">
                                                                <children>
-                                                                  <GridPane nodeOrientation="LEFT_TO_RIGHT" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="40.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+                                                                  <GridPane nodeOrientation="LEFT_TO_RIGHT" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="37.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
                                                                     <columnConstraints>
                                                                       <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                                                       <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />

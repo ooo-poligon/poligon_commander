@@ -1,5 +1,8 @@
 package utils;
 
+import javafx.application.Platform;
+import modalwindows.AlertWindow;
+
 import java.util.ArrayList;
 
 /**
@@ -23,8 +26,17 @@ public class XMLParser {
             }
             counter++;
         }
-        str = str.substring(8, 15).replace(',', '.');
-        value = Double.parseDouble(str);
+        try {
+            str = str.substring(8, 15).replace(',', '.');
+            value = Double.parseDouble(str);
+        } catch (StringIndexOutOfBoundsException e) {
+            AlertWindow.alertNoRbcServerConnection();
+            AlertWindow.showErrorMessage("Не удалось установить соединение с сервером rbc.ru для получения актуальных курсов валют.\n" +
+                    "Обеспечьте соединение с интернетом и повторите запуск программы.");
+            Platform.exit();
+            System.exit(0);
+        }
+
         return value;
     }
 }

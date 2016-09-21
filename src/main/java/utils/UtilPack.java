@@ -202,16 +202,24 @@ public class UtilPack {
 //        }
         return id;
     }
-    public static Integer getPropertyKindIdFromTitle(String selectedPropertiesKind) {
-        Integer id = 0;
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Query query = session.createQuery("from ProductKinds where title = :title");
-        query.setParameter("title", selectedPropertiesKind);
-        List result = query.list();
-        for (Iterator iterator = result.iterator(); iterator.hasNext();) {
-            ProductKinds productKind = (ProductKinds) iterator.next();
-            id = productKind.getId();
-        }
+    public static int getProductKindIdFromTitle (String title) {
+        int id = 0;
+        try {
+            ResultSet resultSet = PCGUIController.connection.getResult(
+                    "select id from product_kinds where title =\"" +
+                            title.replace("\"", "\\\"") + "\"" );
+            while (resultSet.next()) {
+                id = resultSet.getInt("id");
+            }
+        } catch (SQLException e) {}
+//        Session session = HibernateUtil.getSessionFactory().openSession();
+//        Query query = session.createQuery("from ProductKinds where title = :title");
+//        query.setParameter("title", title);
+//        List result = query.list();
+//        for (Iterator iterator = result.iterator(); iterator.hasNext();) {
+//            ProductKinds productKind = (ProductKinds) iterator.next();
+//            id = productKind.getId();
+//        }
         return id;
     }
     public static String getVendorFromProductTitle (String title) {
@@ -260,18 +268,6 @@ public class UtilPack {
             if(product.getTitle().equals(title)) id[0] = product.getCurrencyId();
         });
         return id[0];
-    }
-    public static int getProductKindIdFromTitle (String title) {
-        int id = 0;
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Query query = session.createQuery("from ProductKinds where title = :title");
-        query.setParameter("title", title);
-        List result = query.list();
-        for (Iterator iterator = result.iterator(); iterator.hasNext();) {
-            ProductKinds productKind = (ProductKinds) iterator.next();
-            id = productKind.getId();
-        }
-        return id;
     }
     public static int getCurrencyIdFromTitle (String title) {
         int id = 0;
@@ -362,27 +358,23 @@ public class UtilPack {
         session.close();
         return series;
     }
-    public static ArrayList<TreeItem> treeItemChildren(TreeItem<ProductPropertiesTableView> item) {
-        String itemTitle = item.getValue().getTitle();
-        ArrayList<TreeItem> childTreeItems = new ArrayList<>(10);
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        List res = session.createQuery("from Properties where propertyTypeId=" + UtilPack.getPropertyTypeIdFromTitle(itemTitle)).list();
-        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
-            Properties property = (Properties) iterator.next();
-            childTreeItems.add(new TreeItem(new ProductPropertiesTableView(property.getTitle())));
-        }
-        session.close();
-        return childTreeItems;
-    }
     public static ArrayList<Integer> arrayChildren(Integer parent) {
         ArrayList<Integer> children = new ArrayList<>();
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        List res = session.createQuery("From Categories where parent=" + parent).list();
-        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
-            Categories cat = (Categories) iterator.next();
-            children.add(cat.getId());
-        }
-        session.close();
+        try {
+            ResultSet resultSet = PCGUIController.connection.getResult(
+                    "select id from categories where parent =" + parent );
+            while (resultSet.next()) {
+                children.add(resultSet.getInt("parent"));
+            }
+        } catch (SQLException e) {}
+
+//        Session session = HibernateUtil.getSessionFactory().openSession();
+//        List res = session.createQuery("From Categories where parent=" + parent).list();
+//        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+//            Categories cat = (Categories) iterator.next();
+//            children.add(cat.getId());
+//        }
+//        session.close();
         return children;
     }
     public static String cleanHtml(String rawHtml) {

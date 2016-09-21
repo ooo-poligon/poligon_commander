@@ -1,15 +1,16 @@
 package main;
 
-import com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException;
 import com.sun.pdfview.PDFFile;
 import com.sun.pdfview.PDFPage;
 import entities.*;
-import entities.Files;
 import entities.Properties;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.IntegerBinding;
-import javafx.beans.property.*;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -22,7 +23,6 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.TableColumn.CellEditEvent;
@@ -47,38 +47,31 @@ import javafx.util.converter.IntegerStringConverter;
 import jxl.read.biff.BiffException;
 import modalwindows.AlertWindow;
 import modalwindows.SetRatesWindow;
-import org.apache.commons.io.IOUtils;
 import org.hibernate.*;
 import org.hibernate.exception.JDBCConnectionException;
-import org.hibernate.procedure.internal.Util;
 import settings.*;
 import tableviews.*;
-import tableviews.ProductPropertiesTableView;
 import treeviews.CategoriesTreeView;
 import treeviews.PropertiesTreeView;
 import utils.*;
 
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
-import static java.nio.file.Files.copy;
 
 /**
  *
@@ -89,7 +82,7 @@ public class PCGUIController implements Initializable {
     private static int loadProgramCounter = 0;
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        try { resetProgram(); } catch (SQLException e) {}
+        try { resetProgram(); } catch (SQLException ignored) {}
     }
     // Загружает в память настройки программы, сохранённые в БД
     @FXML public void loadSavedSettings() {
@@ -155,7 +148,7 @@ public class PCGUIController implements Initializable {
                     buildDatasheetFileTable(selectedProduct);
                     buildImageView(selectedProduct);
                     datasheetFileTable.refresh();
-                } catch (NullPointerException ex) {}
+                } catch (NullPointerException ignored) {}
                 productsTable.setContextMenu(productTableContextMenu);
             }
         );
@@ -184,21 +177,23 @@ public class PCGUIController implements Initializable {
                         } catch (SQLException e) {
                             e.printStackTrace();
                         }
-                    } catch (NullPointerException ne) {}
-                } else if (t1.equals(mainTab)) {
+                    } catch (NullPointerException ignored) {
+                    }
+                }
+                else if (t1.equals(mainTab)) {
                     try {
-                        try {fillMainTab(productTabTitle.getText());} catch (SQLException e) {}
-                    } catch (NullPointerException ne) {}
+                        try {fillMainTab(productTabTitle.getText());} catch (SQLException ignored) {}
+                    } catch (NullPointerException ignored) {}
                 } else if (t1.equals(editorTab)) {
                     ExtendHtmlEditor.addPictureFunction(htmlEditor, editorAnchorPane);
                 } else if (t1.equals(productTab)) {
                     try {
                         fillProductTab(selectedProduct);
-                    } catch (NullPointerException ne) {}
+                    } catch (NullPointerException ignored) {}
                 }
             }
         );
-        try {fillMainTab(productTabTitle.getText());} catch (SQLException e) {}
+        try {fillMainTab(productTabTitle.getText());} catch (SQLException ignored) {}
     }
     @FXML private void saveAddCBRToDB() throws SQLException {
         PriceCalcSettings priceCalcSettings = new PriceCalcSettings();
@@ -221,6 +216,16 @@ public class PCGUIController implements Initializable {
             onFocusedProductTableItem(selectedProduct);
         } else if(keyEvent.getCode() == KeyCode.UP) {
             onFocusedProductTableItem(selectedProduct);
+        }
+    }
+    @FXML private void productKindsMoveUpDownByKeyboard(KeyEvent keyEvent) {
+        String selectedProductKind = productKindsList.getSelectionModel().getSelectedItem();
+        if(keyEvent.getCode() == KeyCode.DOWN) {
+            buildFunctionsTable(selectedProductKind);
+            buildProductKindPropertiesTable(selectedProductKind);
+        } else if(keyEvent.getCode() == KeyCode.UP) {
+            buildFunctionsTable(selectedProductKind);
+            buildProductKindPropertiesTable(selectedProductKind);
         }
     }
     public static void getAllProductsList() throws SQLException {
@@ -516,7 +521,7 @@ public class PCGUIController implements Initializable {
                         default:
                             break;
                     }
-                } catch (NullPointerException nex) {}
+                } catch (NullPointerException ignored) {}
             }
             priceType.setCellValueFactory(new PropertyValueFactory<>("type"));
             priceValue.setCellValueFactory(new PropertyValueFactory<>("price"));
@@ -600,7 +605,7 @@ public class PCGUIController implements Initializable {
                         default:
                             break;
                     }
-                } catch (NullPointerException nex) {}
+                } catch (NullPointerException ignored) {}
             }
             priceType.setCellValueFactory(new PropertyValueFactory<>("type"));
             priceValue.setCellValueFactory(new PropertyValueFactory<>("price"));
@@ -1265,20 +1270,31 @@ public class PCGUIController implements Initializable {
         });
     }
     private void subCategoriesList(String selectedNode) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
         try {
-            List subCategories = session.createSQLQuery(
+            ResultSet resultSet = PCGUIController.connection.getResult(
                     "SELECT title FROM categories t1, (SELECT id FROM categories WHERE title=" +
                             "\"" + UtilPack.normalize(selectedNode) +
-                            "\") t2 WHERE t2.id = t1.parent").list();
-            for (Iterator iterator = subCategories.iterator(); iterator.hasNext();) {
-                String sub = (String) iterator.next();
-                subCategoriesTreeViewList.add(new CategoriesTreeView(sub));
+                            "\") t2 WHERE t2.id = t1.parent"
+            );
+            while (resultSet.next()) {
+                subCategoriesTreeViewList.add(new CategoriesTreeView(resultSet.getString("title")));
             }
-        } catch (HibernateException e) {
-        } finally {
-            session.close();
-        }
+        } catch (SQLException e) {}
+
+//        Session session = HibernateUtil.getSessionFactory().openSession();
+//        try {
+//            List subCategories = session.createSQLQuery(
+//                    "SELECT title FROM categories t1, (SELECT id FROM categories WHERE title=" +
+//                            "\"" + UtilPack.normalize(selectedNode) +
+//                            "\") t2 WHERE t2.id = t1.parent").list();
+//            for (Iterator iterator = subCategories.iterator(); iterator.hasNext();) {
+//                String sub = (String) iterator.next();
+//                subCategoriesTreeViewList.add(new CategoriesTreeView(sub));
+//            }
+//        } catch (HibernateException e) {
+//        } finally {
+//            session.close();
+//        }
     }
     ////////////////////////////////////
     private void includeLowerItems(ObservableList<ProductsTableView> data, String selectedNode) throws SQLException {
@@ -1304,37 +1320,7 @@ public class PCGUIController implements Initializable {
             data.add(product);
         });
     }
-
     ////////////////////////////////////////////////////////////////
-    private Task<Void> createTask(MouseEvent event) {
-        return new Task<Void>() {
-            @Override
-            public Void call() throws InterruptedException, SQLException {
-                ObservableList<ProductsTableView> data = FXCollections.observableArrayList();
-                // Вызываем метод, возврщающий нам название кликнутого узла
-                Node node = event.getPickResult().getIntersectedNode();
-                // Accept clicks only on node cells, and not on empty spaces of the TreeView
-                if (node instanceof Text || (node instanceof TreeCell && ((TreeCell) node).getText() != null)) {
-                    String selectedNode = (String) ((CheckBoxTreeItem)categoriesTree.getSelectionModel().getSelectedItem()).getValue();
-                    subCategoriesList(selectedNode);
-                    if (treeViewHandlerMode.isSelected()) {
-                        includeLowerItems(data, selectedNode);
-                    } else {
-                        excludeLowerItems(data, selectedNode);
-                    }
-                    buildProductsTable(data);
-                    productsTable.getSelectionModel().select(0);
-                    focusedProduct = productsTable.getSelectionModel().getSelectedItem().getTitle();
-                    onFocusedProductTableItem(selectedProduct);
-                }
-                Platform.runLater(() -> {
-                    progressBar.progressProperty().unbind();
-                    progressBar.setProgress(0.0);
-                });
-                return null;
-            }
-        };
-    }
     // Создаёт модальное окно с деревом категорий товаров для диалога переноса товаров в другую категорию.
     public TreeView<String> buildModalCategoryTree(StackPane stackPane, TreeView treeView) {
         CategoriesTreeView catalogRoot = new CategoriesTreeView(0, catalogHeader, 0);
@@ -1390,7 +1376,7 @@ public class PCGUIController implements Initializable {
                     if(isCategoryLowest(selectedCategory)) {
                         updateCategoryId(selectedCategory, product.getTitle());
                     } else { AlertWindow.notLowestCategoryAlert(); }
-                } catch (NullPointerException ne) {
+                } catch (NullPointerException ignored) {
                     if(isCategoryLowest(newCatTitle)) {
                         updateCategoryId(newCatTitle, product.getTitle());
                     } else { AlertWindow.notLowestCategoryAlert(); }
@@ -1454,7 +1440,7 @@ public class PCGUIController implements Initializable {
                     if (cat.getTitle().equals(value)) {
                         product.setCategoryId(cat);
                     }
-                } catch (NullPointerException ne) {}
+                } catch (NullPointerException ignored) {}
                 session.save(product);
             }
             session.getTransaction().commit();
@@ -1494,7 +1480,7 @@ public class PCGUIController implements Initializable {
                     if (cat.getId().equals(value)) {
                         product.setCategoryId(cat);
                     }
-                } catch (NullPointerException ne) {}
+                } catch (NullPointerException ignored) {}
                 session.save(product);
             }
             session.getTransaction().commit();
@@ -1930,8 +1916,8 @@ public class PCGUIController implements Initializable {
             buildImageView(selectedProduct);
             datasheetFileTable.refresh();
             setCategorySelected(selectedProduct);
-        } catch (NullPointerException ex) {
-        } catch (SQLException e) {}
+        } catch (NullPointerException | SQLException ignored) {
+        }
     }
     private void addVendorDialog() {
         ObservableList<String> currencies = FXCollections.observableArrayList();
@@ -2043,7 +2029,7 @@ public class PCGUIController implements Initializable {
                     if (c.getTitle().equals(value)) {
                         vendor.setCurrencyId(c);
                     }
-                } catch (NullPointerException ne) {}
+                } catch (NullPointerException ignored) {}
             }
             session.save(vendor);
             session.getTransaction().commit();
@@ -2075,7 +2061,7 @@ public class PCGUIController implements Initializable {
         });
         try {
             recursiveTreeCall(categoriesTree.getRoot(), UtilPack.getCategoryTitleFromId(category[0].getId()));
-        } catch (NullPointerException e) {}
+        } catch (NullPointerException ignored) {}
 
     }
     private void recursiveTreeCall(TreeItem<String> root, String categoryTitle) {
@@ -2102,7 +2088,7 @@ public class PCGUIController implements Initializable {
                 allParents.add(owner.getParent());
                 expandParents(owner.getParent());
             }
-        } catch (NullPointerException ne) {}
+        } catch (NullPointerException ignored) {}
         return allParents;
     }
     private void setDatasheetFile() throws SQLException {
@@ -2155,11 +2141,27 @@ public class PCGUIController implements Initializable {
         return listString;
     }
     @FXML private void handleCategoryTreeMouseClicked(MouseEvent event) {
-        startProgressBar(event);
-    }
-    @FXML public  void startProgressBar(MouseEvent event) {
-        Task task = createTask(event);
-        Platform.runLater(task);
+        ObservableList<ProductsTableView> data = FXCollections.observableArrayList();
+        // Вызываем метод, возврщающий нам название кликнутого узла
+        Node node = event.getPickResult().getIntersectedNode();
+        // Accept clicks only on node cells, and not on empty spaces of the TreeView
+        if (node instanceof Text || (node instanceof TreeCell && ((TreeCell) node).getText() != null)) {
+            String selectedNode = (String) ((CheckBoxTreeItem) categoriesTree.getSelectionModel().getSelectedItem()).getValue();
+            subCategoriesList(selectedNode);
+            if (treeViewHandlerMode.isSelected()) {
+                try {
+                    includeLowerItems(data, selectedNode);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                excludeLowerItems(data, selectedNode);
+            }
+            buildProductsTable(data);
+            productsTable.getSelectionModel().select(0);
+            focusedProduct = productsTable.getSelectionModel().getSelectedItem().getTitle();
+            onFocusedProductTableItem(selectedProduct);
+        }
     }
     @FXML private void handleProductTableMousePressed(MouseEvent event1) {
         onFocusedProductTableItem(selectedProduct);
@@ -2309,7 +2311,7 @@ public class PCGUIController implements Initializable {
         productsTable.getSelectionModel().getSelectedItems().stream().forEach((item) -> {
             try {
                 selectedProductsTitles.add(item.getTitle());
-            } catch (NullPointerException ne) {
+            } catch (NullPointerException ignored) {
                 AlertWindow.showErrorMessage("Ошибка ввода данных.");
             }
         });
@@ -2486,7 +2488,7 @@ public class PCGUIController implements Initializable {
                 }
             }
             session.close();
-        } catch (NullPointerException ne) {}
+        } catch (NullPointerException ignored) {}
 
         try {
             int selectedProductId = UtilPack.getProductIdFromTitle(selectedProduct, allProductsList);
@@ -2514,7 +2516,7 @@ public class PCGUIController implements Initializable {
                 plug1TextArea.setText("");
             }
             session.close();
-        } catch (NullPointerException ne) {}
+        } catch (NullPointerException ignored) {}
 
         try {
             int selectedProductId = UtilPack.getProductIdFromTitle(selectedProduct, allProductsList);
@@ -2542,7 +2544,7 @@ public class PCGUIController implements Initializable {
                 plug2TextArea.setText("");
             }
             session.close();
-        } catch (NullPointerException ne) {}
+        } catch (NullPointerException ignored) {}
 
 
         ProductImage.open(new File(noImageFile), functionGridPaneImageView, functionImageView);
@@ -2566,7 +2568,7 @@ public class PCGUIController implements Initializable {
                 }
             }
             session.close();
-        } catch (NullPointerException ne) {}
+        } catch (NullPointerException ignored) {}
         buildAccessoriesTable(selectedProduct);
         buildFunctionsTable1(selectedProduct);
         setSelectFunction();
@@ -2932,7 +2934,7 @@ public class PCGUIController implements Initializable {
         try {
             String selectedFunction = functionsTable1.getSelectionModel().getSelectedItem().getTitle();
             setFunctionDescriptionAndPicture(selectedFunction);
-        } catch (NullPointerException ne) {}
+        } catch (NullPointerException ignored) {}
     }
     private String getProductKindTitle(String selectedProductTitle) {
         final int[] selectedProductKindID = {0};
@@ -2964,7 +2966,7 @@ public class PCGUIController implements Initializable {
                         buildFunctionsTable1(accessoriesTable.getSelectionModel().getSelectedItem().getTitle());
                         try {
                             setSelectFunction();
-                        } catch (NullPointerException ne) {}
+                        } catch (NullPointerException ignored) {}
                         fillProductTab(accessoriesTable.getSelectionModel().getSelectedItem().getTitle());
                     }
                 }
@@ -3326,42 +3328,42 @@ public class PCGUIController implements Initializable {
         newsListView.setContextMenu(newsItemsListContextMenu);
         try {
             newsListView.setItems(getListItems("news"));
-        } catch (NullPointerException ne) {
+        } catch (NullPointerException ignored) {
             newsListView.setItems(emptyList);
         }
         articlesListView.setContextMenu(articlesListContextMenu);
         try {
             articlesListView.setItems(getListItems("articles"));
-        } catch (NullPointerException ne) {
+        } catch (NullPointerException ignored) {
             articlesListView.setItems(emptyList);
         }
         videosListView.setContextMenu(videosListContextMenu);
         try {
             videosListView.setItems(getListItems("videos"));
-        } catch (NullPointerException ne) {
+        } catch (NullPointerException ignored) {
             videosListView.setItems(emptyList);
         }
         reviewsListView.setContextMenu(reviewsListContextMenu);
         try {
             reviewsListView.setItems(getListItems("reviews"));
-        } catch (NullPointerException ne) {
+        } catch (NullPointerException ignored) {
             reviewsListView.setItems(emptyList);
         }
         additionsListView.setContextMenu(additionsListContextMenu);
         try {
             additionsListView.setItems(getListItems("additions"));
-        } catch (NullPointerException ne) {
+        } catch (NullPointerException ignored) {
             additionsListView.setItems(emptyList);
         }
         contentsListView.setContextMenu(contentsListContextMenu);
         try {
             contentsListView.setItems(getListItems("contents"));
-        } catch (NullPointerException ne) {
+        } catch (NullPointerException ignored) {
             contentsListView.setItems(emptyList);
         }
         try {
             categoriesListView.setItems(getListItems("categories"));
-        } catch (NullPointerException ne) {
+        } catch (NullPointerException ignored) {
             categoriesListView.setItems(emptyList);
         }
     }
@@ -3389,7 +3391,7 @@ public class PCGUIController implements Initializable {
             contentTitleTextField.setText(newsItem.getTitle());
             pageTitleTextField.setDisable(true);
             directoryTitleTextField.setDisable(true);
-        } catch (NullPointerException ne) {
+        } catch (NullPointerException ignored) {
             setEmptyHtmlEditor();
         }
     }
@@ -3409,7 +3411,7 @@ public class PCGUIController implements Initializable {
             contentTitleTextField.setText(article.getTitle());
             pageTitleTextField.setDisable(true);
             directoryTitleTextField.setDisable(true);
-        } catch (NullPointerException ne) {
+        } catch (NullPointerException ignored) {
             setEmptyHtmlEditor();
         }
     }
@@ -3430,7 +3432,7 @@ public class PCGUIController implements Initializable {
             contentTitleTextField.setText(video.getTitle());
             pageTitleTextField.setDisable(true);
             directoryTitleTextField.setDisable(true);
-        } catch (NullPointerException ne) {
+        } catch (NullPointerException ignored) {
             setEmptyHtmlEditor();
         }
     }
@@ -3451,7 +3453,7 @@ public class PCGUIController implements Initializable {
             contentTitleTextField.setText(review.getTitle());
             pageTitleTextField.setDisable(true);
             directoryTitleTextField.setDisable(true);
-        } catch (NullPointerException ne) {
+        } catch (NullPointerException ignored) {
             setEmptyHtmlEditor();
         }
     }
@@ -3472,7 +3474,7 @@ public class PCGUIController implements Initializable {
             contentTitleTextField.setText(addition.getTitle());
             pageTitleTextField.setDisable(true);
             directoryTitleTextField.setDisable(true);
-        } catch (NullPointerException ne) {
+        } catch (NullPointerException ignored) {
             setEmptyHtmlEditor();
         }
     }
@@ -3493,7 +3495,7 @@ public class PCGUIController implements Initializable {
             contentTitleTextField.setText(staticContent.getTitle());
             pageTitleTextField.setText(staticContent.getPage());
             directoryTitleTextField.setText(staticContent.getDirectory());
-        } catch (NullPointerException ne) {
+        } catch (NullPointerException ignored) {
             setEmptyHtmlEditor();
         }
     }
@@ -3514,7 +3516,7 @@ public class PCGUIController implements Initializable {
             contentTitleTextField.setText(category.getTitle());
             pageTitleTextField.setDisable(true);
             directoryTitleTextField.setDisable(true);
-        } catch (NullPointerException ne) {
+        } catch (NullPointerException ignored) {
             setEmptyHtmlEditor();
         }
     }
@@ -3726,7 +3728,6 @@ public class PCGUIController implements Initializable {
         }
     }
     private void buildProductKindsList() {
-        //String selectedPropertiesKind = productKindsList.getSelectionModel().getSelectedItem();
         ObservableList<String> items = FXCollections.observableArrayList();
         Session session = HibernateUtil.getSessionFactory().openSession();
         List res = session.createQuery("from ProductKinds").list();
@@ -3740,19 +3741,16 @@ public class PCGUIController implements Initializable {
                 MenuItemBuilder.create().text("Создать новый тип устройств").onAction((ActionEvent ae1) -> {
                     ContextBuilder.createNewProductKind();
                     buildProductKindsList();
-                    propertiesTreeTable.refresh();
                     functionsTable.refresh();
                 }).build(),
                 MenuItemBuilder.create().text("Редактировать выбранный тип").onAction((ActionEvent ae2) -> {
                     ContextBuilder.updateTheProductKind(productKindsList);
                     buildProductKindsList();
-                    propertiesTreeTable.refresh();
                     functionsTable.refresh();
                 }).build(),
                 MenuItemBuilder.create().text("Удалить выбранный тип устройств").onAction((ActionEvent ae3) -> {
                     ContextBuilder.deleteTheProductKind(productKindsList);
                     buildProductKindsList();
-                    propertiesTreeTable.refresh();
                     functionsTable.refresh();
                 }).build()
         ).build();
@@ -3832,7 +3830,6 @@ public class PCGUIController implements Initializable {
             }
         });
     }
-
     private void populateProductKindPropertiesList(String selectedProductKind) {
         productKindsPropertiesList.clear();
         ArrayList<Integer> selectedProductKindPropertiesIds = new ArrayList<>();
@@ -3859,7 +3856,6 @@ public class PCGUIController implements Initializable {
             productKindsPropertiesList.add(new ProductKindPropertiesTableView(p.getOrderNumber().toString(), p.getTitle(), p.getOptional(), p.getSymbol()));
         });
     }
-
     private void buildProductKindPropertiesTable(String selectedProductKind) {
         populateProductKindPropertiesList(selectedProductKind);
         tableExcelBehavior();
@@ -3903,7 +3899,6 @@ public class PCGUIController implements Initializable {
                 }
         );
     }
-
     private class EditingCell extends TableCell {
 
         private TextField textField;
@@ -4010,7 +4005,6 @@ public class PCGUIController implements Initializable {
             super.commitEdit(item);
         }
     }
-
     private void setProductKindsPropertyCellValue(String orderNumber, String fieldName, CellEditEvent<ProductKindPropertiesTableView, String> t) {
         int productKindId = UtilPack.getProductKindIdFromTitle(productKindsList.getSelectionModel().getSelectedItem());
         Properties currentProperty = new Properties();
@@ -4149,10 +4143,11 @@ public class PCGUIController implements Initializable {
             productKindPropertiesTable.refresh();
         } catch (SQLException e) {}
     }
-    private void buildFunctionsTable(String selectedPropertiesKind) {
+    private void buildFunctionsTable(String selectedProductKind) {
+        int productKindId = UtilPack.getProductKindIdFromTitle(selectedProductKind);
         ArrayList<Functions> functions = new ArrayList<>(10);
         Session session = HibernateUtil.getSessionFactory().openSession();
-        List res = session.createQuery("from Functions where productKindId =" + UtilPack.getPropertyKindIdFromTitle(selectedPropertiesKind)).list();
+        List res = session.createQuery("from Functions where productKindId =" + productKindId).list();
         for (Iterator iterator = res.iterator(); iterator.hasNext();) {
             Functions func = (Functions) iterator.next();
             functions.add(func);
@@ -4166,15 +4161,15 @@ public class PCGUIController implements Initializable {
         functionsTableSymbolColumn.setCellValueFactory(new PropertyValueFactory<>("symbol"));
         functionsTableContextMenu = ContextMenuBuilder.create().items(
                 MenuItemBuilder.create().text("Добавить новую функцию").onAction((ActionEvent ae1) -> {
-                    ContextBuilder.createNewFunction(UtilPack.getPropertyKindIdFromTitle(selectedPropertiesKind));
-                    buildFunctionsTable(selectedPropertiesKind);
+                    ContextBuilder.createNewFunction(productKindId);
+                    buildFunctionsTable(selectedProductKind);
                 }).build(),
                 MenuItemBuilder.create().text("Редактировать выбранную функцию").onAction((ActionEvent ae2) -> {
-                    ContextBuilder.updateTheFunction(UtilPack.getPropertyKindIdFromTitle(selectedPropertiesKind), functionsTable);
+                    ContextBuilder.updateTheFunction(productKindId, functionsTable);
                 }).build(),
                 MenuItemBuilder.create().text("Удалить выбранную функцию").onAction((ActionEvent ae3) -> {
                     ContextBuilder.deleteTheFunction(functionsTable);
-                    buildFunctionsTable(selectedPropertiesKind);
+                    buildFunctionsTable(selectedProductKind);
                 }).build()
         ).build();
         functionsTable.setContextMenu(functionsTableContextMenu);
@@ -4190,7 +4185,7 @@ public class PCGUIController implements Initializable {
         String sh = new String();
         try {
             sh = headersXLS.getSelectionModel().getSelectedItem();
-        } catch (NullPointerException ne) {}
+        } catch (NullPointerException ignored) {}
         return sh;
     }
     @FXML private void getSelectedDBTable() {
@@ -4214,17 +4209,17 @@ public class PCGUIController implements Initializable {
         headersRowNumber = 0;
         try {
             allImportXLSContent.clear();
-        } catch (NullPointerException ne) {
+        } catch (NullPointerException ignored) {
             AlertWindow.showWarning("Нет данных для очистки.");
         }
         try {
             allCompareDetails.clear();
-        } catch (NullPointerException ne) {
+        } catch (NullPointerException ignored) {
             AlertWindow.showWarning("Нет данных для очистки.");
         }
         try {
             comparedPairs.clear();
-        } catch (NullPointerException ne) {
+        } catch (NullPointerException ignored) {
             AlertWindow.showWarning("Нет данных для очистки.");
         }
         headersRowTextField.clear();
@@ -4288,7 +4283,7 @@ public class PCGUIController implements Initializable {
                 allImportXLSContent.stream().forEach((column) -> {
                     data.add(column.get(headersRowNumber));
                 });
-            } catch (NullPointerException ne) {
+            } catch (NullPointerException ignored) {
                 AlertWindow.showWarning("Не введён номер строки, содержащей заголовки колонок в xls-файле. " +
                         "Перед вводом номера строки убедитесь, что xls-файл с данными уже выбран.");
             } catch (IndexOutOfBoundsException ie) {
@@ -4302,13 +4297,6 @@ public class PCGUIController implements Initializable {
     @FXML public  void startImportProgressBar() {
         XLSToDBImport importer = new XLSToDBImport(allCompareDetails);
         importer.startImport(allImportXLSContent, allProductsTitles);
-    }
-    @FXML private void handlePropertiesKindSelected() throws SQLException {
-        String selectedPropertiesKind = productKindsList.getSelectionModel().getSelectedItem();
-        String selectedProductKind    = productKindsList.getSelectionModel().getSelectedItem();
-        //buildPropertiesTreeTable(selectedPropertiesKind);
-        buildFunctionsTable(selectedPropertiesKind);
-        buildProductKindPropertiesTable(selectedProductKind);
     }
     @FXML private void saveAddressSiteDB() {
         SiteDBSettings address = new SiteDBSettings();
@@ -4370,11 +4358,6 @@ public class PCGUIController implements Initializable {
         LocalDBSettings password = new LocalDBSettings();
         password.saveSetting("passwordLocalDB", passwordLocalDB.getText());
     }
-    @FXML private void saveSiteUrlToDb() {
-        SiteUrlSettings siteUrlSettings = new SiteUrlSettings();
-        siteUrlSettings.saveSetting(siteUrlTextField.getText());
-        //tabBrowserWebView.getEngine().load(siteUrlTextField.getText());
-    }
     @FXML private void saveSiteOrdersReceiver() {
         SiteSettings siteSettings = new SiteSettings();
         siteSettings.saveSetting("siteOrdersReceiver", siteOrdersReceiverTextField.getText());
@@ -4430,7 +4413,11 @@ public class PCGUIController implements Initializable {
         }
         populateProductKindPropertiesList(productKindsList.getSelectionModel().getSelectedItem());
     }
-
+    @FXML private void handleProductsKindSelected() throws SQLException {
+        String selectedProductKind = productKindsList.getSelectionModel().getSelectedItem();
+        buildFunctionsTable(selectedProductKind);
+        buildProductKindPropertiesTable(selectedProductKind);
+    }
     @FXML private void exportPropertiesTableToXls() {
         File file = directoryForExportProperties.showDialog(anchorPane.getScene().getWindow());
         if (file != null) {
@@ -4602,17 +4589,8 @@ public class PCGUIController implements Initializable {
     @FXML private TableColumn<ProductKindPropertiesTableView, String> productKindPropertiesOptionalColumn;
     @FXML private TableColumn<ProductKindPropertiesTableView, String> productKindPropertiesSymbolColumn;
 
-    //TreeTableViews
-    @FXML private TreeTableView<ProductPropertiesTableView>  propertiesTreeTable;
-    @FXML private TreeTableColumn<ProductPropertiesTableView, String> propertiesTreeTableTitleColumn;
-
-    //WebView
-    //@FXML private WebView tabBrowserWebView;
-
     // Buttons
     @FXML private Button startImportXLSButton;
-    //@FXML private Button loadSavedSettingsButton;
-    //@FXML Button testButton = new Button();
     @FXML private Button resetButton;
     @FXML private Button chooseFileForExportButton;
     @FXML private Button chooseDirForExportPricesButton;
@@ -4682,7 +4660,6 @@ public class PCGUIController implements Initializable {
     @FXML private TextField titleLocalDB;
     @FXML private TextField userLocalDB;
     @FXML private PasswordField passwordLocalDB;
-    @FXML private TextField siteUrlTextField;
     @FXML private TextField addCBRTextField;
 
     @FXML private TextField categorySearch;
@@ -4723,8 +4700,6 @@ public class PCGUIController implements Initializable {
 
     // Strings
     String selectedProduct;
-    String selectedVendor;
-    String selectedSerie;
     String newCatTitle = "";
     String newCatDescription;
     String newCatPicturePath;
