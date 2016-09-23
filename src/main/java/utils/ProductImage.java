@@ -8,6 +8,8 @@ import entities.FileTypes;
 import entities.Files;
 import entities.Products;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -18,11 +20,13 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import imgscalr.Scalr;
 import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import main.PCGUIController;
+import main.PoligonCommander;
 import modalwindows.AlertWindow;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -31,6 +35,8 @@ import org.hibernate.TransientObjectException;
 import org.hibernate.cfg.Settings;
 import settings.SFTPSettings;
 
+import javax.imageio.ImageIO;
+
 import static utils.SshUtils.sftp;
 
 /**
@@ -38,26 +44,149 @@ import static utils.SshUtils.sftp;
  * @author Igor Klekotnev
  */
 public class ProductImage {
-    public static void open(File file, GridPane gridPane, ImageView imageView) {
+    private static File pngToJpg(File inFile) {
+        String picPath = inFile.getAbsolutePath();
+        String picName = picPath.replace('\\', '@').split("@")[(picPath.replace('\\', '@')).split("@").length - 1];
+        String newPicPath = PoligonCommander.tmpDir.getAbsolutePath() + "\\" + picName + ".jpg";
+        File outFile = new File(newPicPath);
+        try {
+            //read image file
+            BufferedImage bufferedImage = ImageIO.read(inFile);
+
+            // create a blank, RGB, same width and height, and a white background
+            BufferedImage newBufferedImage = new BufferedImage(bufferedImage.getWidth(),
+                    bufferedImage.getHeight(), BufferedImage.TYPE_INT_RGB);
+            newBufferedImage.createGraphics().drawImage(bufferedImage, 0, 0, Color.WHITE, null);
+
+            // write to jpeg file
+            ImageIO.write(newBufferedImage, "jpg", outFile);
+
+        } catch (IOException e) {
+            AlertWindow.showErrorMessage(e.getMessage());
+        }
+        return outFile;
+    }
+
+    public static String makeTemporaryResizedImage(File file) {
+        String picPath = file.getAbsolutePath();
+        String picName = picPath.replace('\\', '@').split("@")[(picPath.replace('\\', '@')).split("@").length - 1];
+        String newPicPath = "";
+        newPicPath = PoligonCommander.tmpDir.getAbsolutePath() + "\\" + picName;
+        BufferedImage in = null;
+        try {
+            in = ImageIO.read(file);
+        } catch (IOException e) {
+            AlertWindow.showErrorMessage("Невозможно открыть файл с изображением.\n" +
+                    "Проверьте, что нужный файл существует\nпо указанному пути:" + file.getAbsolutePath());
+        }
+        BufferedImage out = Scalr.resize(in, 768, 768, null);
+        int pad = Math.abs(out.getHeight() - out.getWidth());
+        if (out.getHeight() > out.getWidth()) {
+            out = Scalr.pad(out, pad, new Color(255,255,255), null);
+            out = Scalr.crop(out, pad/2, pad, 768, 768, null);
+        } else if (out.getHeight() < out.getWidth()) {
+            out = Scalr.pad(out, pad, new Color(255,255,255), null);
+            out = Scalr.crop(out, pad, pad/2, 768, 768, null);
+        }
+        out = Scalr.pad(out, 30, new Color(255,255,255), null);
+        out = Scalr.resize(out, 768, 768, null);
+
+        File outputFile = new File(newPicPath);
+        try {
+            if (picName.endsWith(".jpg") || picName.endsWith(".JPG")) {
+                ImageIO.write(out, "jpg", outputFile);
+            } else if (picName.endsWith(".gif") || picName.endsWith(".GIF")) {
+                ImageIO.write(out, "gif", outputFile);
+            } else if (picName.endsWith(".png") || picName.endsWith(".PNG")) {
+                ImageIO.write(out, "png", outputFile);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            return outputFile.toURI().toURL().toString();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    public static void open(File file, GridPane gridPane, ImageView imageView, String imageType) {
         if (gridPane.getChildren().size()!=0) {
             gridPane.getChildren().clear();
         }
-        try {
-            String localUrl = file.toURI().toURL().toString();
-            //if (!System.getProperty("os.name").contains("Windows")) {
-            //    String unixPath = "/" + file.getAbsolutePath();
-            //    file = new File(unixPath);
-            //    URI uri = file.toURI();
-            //    URL url = uri.toURL();
-            //    localUrl = url.toString().replace("file:", "file://");
-            //}
-            imageView.setImage(new Image(localUrl));
-            imageView.setFitHeight(220);
-            imageView.setPreserveRatio(true);
-            imageView.setSmooth(true);
-            imageView.setCache(true);
-            gridPane.getChildren().add(imageView);
-        } catch (MalformedURLException ex) {}
+        String localUrl = "";
+        switch (imageType) {
+            case "deviceImage": {
+                try {
+                    localUrl = file.toURI().toURL().toString();
+                } catch (MalformedURLException e) {
+                    AlertWindow.showErrorMessage(e.getMessage());
+                }
+                break;
+            }
+            case "categoryImage": {
+                try {
+                    localUrl = file.toURI().toURL().toString();
+                } catch (MalformedURLException e) {
+                    AlertWindow.showErrorMessage(e.getMessage());
+                }
+                break;
+            }
+            case "dimsImage": {
+                try {
+                    localUrl = file.toURI().toURL().toString();
+                } catch (MalformedURLException e) {
+                    AlertWindow.showErrorMessage(e.getMessage());
+                }
+                break;
+            }
+            case "plugsImage": {
+                try {
+                    localUrl = file.toURI().toURL().toString();
+                } catch (MalformedURLException e) {
+                    AlertWindow.showErrorMessage(e.getMessage());
+                }
+                break;
+            }
+            case "functionImage": {
+                try {
+                    localUrl = file.toURI().toURL().toString();
+                } catch (MalformedURLException e) {
+                    AlertWindow.showErrorMessage(e.getMessage());
+                }
+                break;
+            }
+            case "deviceImageSetter": {
+                localUrl = makeTemporaryResizedImage(file);
+                break;
+            }
+            case "categoryImageSetter": {
+                localUrl = makeTemporaryResizedImage(file);
+                break;
+            }
+            case "dimsImageSetter": {
+                localUrl = makeTemporaryResizedImage(file);
+                break;
+            }
+            case "plugsImageSetter": {
+                localUrl = makeTemporaryResizedImage(file);
+                break;
+            }
+            case "functionImageSetter": {
+                localUrl = makeTemporaryResizedImage(file);
+                break;
+            }
+        }
+
+        imageView.setImage(new Image(localUrl));
+        imageView.setFitHeight(220);
+        imageView.setPreserveRatio(true);
+        imageView.setSmooth(true);
+        imageView.setCache(true);
+        gridPane.getChildren().add(imageView);
     }
     public static void save(File inFile, String selectedProduct) {
         File file = null;
@@ -75,7 +204,8 @@ public class ProductImage {
         for (Iterator iterator = ids.iterator(); iterator.hasNext();) {
             ownerId = (Integer) iterator.next();
         }
-        List pictureList = session.createQuery("From Files where ownerId=" + ownerId).list();
+        int fileTypeId = 1;
+        List pictureList = session.createQuery("From Files where fileTypeId=" + fileTypeId + " and ownerId=" + ownerId).list();
         if (pictureList.isEmpty()) {
             Files pictureFile = new Files(file.getName(), file.getPath(), "Это изображение для " + selectedProduct, (new FileTypes(1)), (new Products(ownerId)));
             session.saveOrUpdate(pictureFile);
@@ -94,7 +224,7 @@ public class ProductImage {
         session.close();
     }
 
-    public static void save(String inPicPath, String selectedProduct) {
+    /*public static void save(String inPicPath, String selectedProduct) {
         String picPath = null;
         try {
             picPath = copyToPlace(new File(inPicPath), selectedProduct, "device", null);
@@ -122,6 +252,7 @@ public class ProductImage {
                 for (Iterator iterator = pictureList.iterator(); iterator.hasNext(); ) {
                     Files pic = (Files) iterator.next();
                     if ((pic.getFileTypeId().getId() == 1) && ((!pic.getName().equals(picName(picPath))) || (!pic.getPath().equals(localWindowsPath(picPath))))) {
+                        // TODO: writes full path instead of name only!!! check it out later.
                         pic.setName(picName(picPath));
                         pic.setPath(localWindowsPath(picPath));
                         pic.setDescription("Это изображение для " + selectedProduct);
@@ -136,7 +267,7 @@ public class ProductImage {
         } catch (TransientObjectException e) {
             AlertWindow.showErrorMessage("TransientObjectException");
         }
-    }
+    }*/
 
     public static void saveDimImage(File inFile, String selectedProduct) {
         File file = null;

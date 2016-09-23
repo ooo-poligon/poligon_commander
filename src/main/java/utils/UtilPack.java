@@ -11,6 +11,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TreeItem;
 import main.PCGUIController;
 import main.Product;
+import modalwindows.AlertWindow;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemOptions;
 import org.apache.commons.vfs2.Selectors;
@@ -36,6 +38,18 @@ import java.nio.file.Files;
  * Created by Igor Klekotnev on 11.03.2016.
  */
 public class UtilPack {
+    public static int getVendorIdFromTitle (String title) {
+        int id = 0;
+        try {
+            ResultSet resultSet = PCGUIController.connection.getResult(
+                    "select id from vendors where title =\"" +
+                            title.replace("\"", "\\\"") + "\"" );
+            while (resultSet.next()) {
+                id = resultSet.getInt("id");
+            }
+        } catch (SQLException e) {}
+        return id;
+    }
     public static int getCategoryIdFromTitle (String title) {
         int id = 0;
         try {
@@ -347,16 +361,16 @@ public class UtilPack {
         session.close();
         return vendors;
     }
-    public static ArrayList<Series> getAllSeries() {
-        ArrayList<Series> series = new ArrayList();
+    public static ArrayList<SeriesItems> getAllSeries() {
+        ArrayList<SeriesItems> seriesItems = new ArrayList();
         Session session = HibernateUtil.getSessionFactory().openSession();
-        List result = session.createQuery("from Series").list();
+        List result = session.createQuery("from SeriesItems").list();
         for(Iterator iterator = result.iterator(); iterator.hasNext();) {
-            Series serie = (Series) iterator.next();
-            series.add(serie);
+            SeriesItems s = (SeriesItems) iterator.next();
+            seriesItems.add(s);
         }
         session.close();
-        return series;
+        return seriesItems;
     }
     public static ArrayList<Integer> arrayChildren(Integer parent) {
         ArrayList<Integer> children = new ArrayList<>();
@@ -418,6 +432,9 @@ public class UtilPack {
     }
     public static void copyFile(File source, File dest) throws IOException {
         Files.copy(source.toPath(), dest.toPath());
+        String remotePath = dest.getAbsolutePath().replace("\\\\Server03\\бд_сайта\\poligon_images\\", "http://www.poligon.info/images/")
+                .replace("\\", "/");
+        startFTP(dest.getAbsolutePath(), remotePath);
     }
     public static boolean startFTP(String filepath, String remotePath){
         StandardFileSystemManager manager = new StandardFileSystemManager();
@@ -475,7 +492,7 @@ public class UtilPack {
 
             // Copy local file to sftp server
             remoteFile.copyFrom(localFile, Selectors.SELECT_SELF);
-            System.out.println("File upload successful");
+            AlertWindow.showInfo("Файл загружен на удаленный сервер.");
 
         }
         catch (Exception ex) {

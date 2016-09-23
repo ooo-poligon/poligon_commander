@@ -6,6 +6,7 @@ package utils;
 
 import entities.*;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -204,7 +205,7 @@ public class XLSToDBImport {
                 case ("Путь к файлу изображения устройства"):
                     picPathColumn.addAll(getColumnByHeader(allImportXLSContent, compareDetail.get(0)));
                     for (int i = 0; i < picPathColumn.size(); i++) {
-                        ProductImage.save(picPathColumn.get(i), titlesColumn.get(i).replace(':', ' ').replace('?', '_'));
+                        ProductImage.save(new File(picPathColumn.get(i)), titlesColumn.get(i).replace(':', ' ').replace('?', '_'));
                     }
                     break;
                 case ("Путь к файлу даташит устройства"):
@@ -369,7 +370,7 @@ public class XLSToDBImport {
                 for (Vendors vendor: vendorsList) {
                     try {
                         if (vendor.getTitle().equals(value)) {
-                            product.setVendor(vendor);
+                            product.setVendorId(vendor);
                             session.save(product);
                         }
                     } catch (NullPointerException ne) {}                        
@@ -419,14 +420,14 @@ public class XLSToDBImport {
     private void updateSeries(String value, String productTitle) {
         if (!(value.equals("") || value.equals(null))) {
             ArrayList<String> notInDBProducts = new ArrayList<>();
-            ArrayList<Series> seriesList = new ArrayList<>();
+            ArrayList<SeriesItems> seriesList = new ArrayList<>();
             Integer id = 0;            
             Session session = HibernateUtil.getSessionFactory().openSession();
             session.beginTransaction();
-            Long countL = (Long) session.createQuery("select count(*) from Series").uniqueResult();
+            Long countL = (Long) session.createQuery("select count(*) from SeriesItems").uniqueResult();
             Integer count = (int)(long) countL;
             for (int i = 0; i < count; i++) {
-                Series serie = (Series) session.get(Series.class, i+1);
+                SeriesItems serie = (SeriesItems) session.get(SeriesItems.class, i+1);
                 seriesList.add(serie);
             }            
             List ids = session.createSQLQuery("select id from products where title=\"" + productTitle.replace(':', ' ').replace('?', '_') + "\"").list();
@@ -435,10 +436,10 @@ public class XLSToDBImport {
             }
             if (!(id == 0)) {
                 Products product = (Products) session.get(Products.class, id);
-                for (Series serie: seriesList) {
+                for (SeriesItems seriesItem: seriesList) {
                     try {
-                        if (serie.getTitle().equals(value)) {
-                            product.setSerie(serie);  
+                        if (seriesItem.getTitle().equals(value)) {
+                            product.setSeriesItemId(seriesItem);
                         }
                     } catch (NullPointerException ne) {}                    
                 }

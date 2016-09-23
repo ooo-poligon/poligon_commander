@@ -17,13 +17,18 @@ import javafx.scene.image.*;
 import javafx.scene.layout.*;
 import javafx.stage.*;
 import javafx.util.Duration;
+import modalwindows.AlertWindow;
+import org.apache.commons.io.FileUtils;
 import utils.CurrencyCourse;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 
 public class PoligonCommander extends Application {
+    private static String d = (String.valueOf(Math.random())).substring(2);
     public static final String SPLASH_IMAGE = "/images/splash2_2.png";
+    public static final File tmpDir = new File("\\\\Server03\\бд_сайта\\poligon_images\\temp_" + d);
 
     private Pane splashLayout;
     private ProgressBar loadProgress;
@@ -31,6 +36,7 @@ public class PoligonCommander extends Application {
     private Stage mainStage = new Stage();
     private static final int SPLASH_WIDTH = 600;
     private static final int SPLASH_HEIGHT = 420;
+
 
     public static void main(String[] args) throws Exception {
         launch(args);
@@ -56,6 +62,11 @@ public class PoligonCommander extends Application {
             protected Void call() throws IOException, InterruptedException, SQLException {
 
                 updateMessage("Инициализация базы данных . . .");
+                try {
+                    FileUtils.forceMkdir(tmpDir);
+                } catch (IOException e) {
+                    AlertWindow.showErrorMessage("Не удалось создать временную директорию на локальном сервере, проверьте доступность сетевого соединения,");
+                }
                 PCGUIController.getAllProductsList();
                 PCGUIController.getAllFilesOfProgramList();
                 PCGUIController.getAllQuantitiesList();
@@ -90,11 +101,16 @@ public class PoligonCommander extends Application {
         Scene scene = new Scene(root);
         //scene.getStylesheets().add(this.getClass().getResource("styles/Styles.css").toExternalForm());
         mainStage.setScene(scene);
-        mainStage.setTitle("\"Poligon Commander\" (version 2.2.0)");
+        mainStage.setTitle("\"Poligon Commander\" (version 2.2.2)");
         mainStage.show();
         mainStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent t) {
+                try {
+                    FileUtils.deleteDirectory(tmpDir);
+                } catch (IOException e) {
+                    AlertWindow.showErrorMessage(e.getMessage());
+                }
                 Platform.exit();
                 System.exit(0);
             }

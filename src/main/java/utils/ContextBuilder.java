@@ -974,7 +974,7 @@ public class ContextBuilder {
                 FileChooser fileChooser = new FileChooser();
                 File file = fileChooser.showOpenDialog(grid.getScene().getWindow());
                 if (file != null) {
-                    ProductImage.open(new File(file.getAbsolutePath()), grid1, image1);
+                    ProductImage.open(new File(file.getAbsolutePath()), grid1, image1, "functionImage");
                 }
                 picPath = file.getAbsolutePath();
                 picName = picPath.replace('\\', '@').split("@")[(picPath.replace('\\', '@')).split("@").length - 1];
@@ -1074,7 +1074,7 @@ public class ContextBuilder {
         grid.add(setImageButton, 2, 7);
 
         dialog.getDialogPane().setContent(grid);
-        ProductImage.open(new File(function.getPicturePath()), grid1, image1);
+        ProductImage.open(new File(function.getPicturePath()), grid1, image1, "functionImage");
 
         setImageButton.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
 
@@ -1083,7 +1083,7 @@ public class ContextBuilder {
                 FileChooser fileChooser = new FileChooser();
                 File file = fileChooser.showOpenDialog(grid.getScene().getWindow());
                 if (file != null) {
-                    ProductImage.open(new File(file.getAbsolutePath()), grid1, image1);
+                    ProductImage.open(new File(file.getAbsolutePath()), grid1, image1, "functionImageSetter");
                 }
                 picPath = file.getAbsolutePath();
                 picName = picPath.replace('\\', '@').split("@")[(picPath.replace('\\', '@')).split("@").length - 1];
@@ -1323,7 +1323,7 @@ public class ContextBuilder {
             session4.close();
         }
         functionDescriptionTextArea.setText("");
-        ProductImage.open(new File(noImageFile), functionGridPaneImageView, functionImageView);
+        ProductImage.open(new File(noImageFile), functionGridPaneImageView, functionImageView, "functionImage");
     }
 
     public static void makeNewsItem() {
@@ -2023,8 +2023,8 @@ public class ContextBuilder {
         Session session1 = HibernateUtil.getSessionFactory().openSession();
         for (ProductsTableView selectedProduct : selectedProducts) {
             Transaction tx = session1.beginTransaction();
-            Query query = session1.createQuery("update Products set vendor = :vendor where title = :title");
-            query.setParameter("vendor", selectedVendor);
+            Query query = session1.createQuery("update Products set vendorId = :vendorId where title = :title");
+            query.setParameter("vendorId", UtilPack.getVendorIdFromTitle(selectedVendor.getTitle()));
             query.setParameter("title", selectedProduct.getTitle());
             query.executeUpdate();
             tx.commit();

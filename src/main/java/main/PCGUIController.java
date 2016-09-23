@@ -1,5 +1,6 @@
 package main;
 
+import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import com.sun.pdfview.PDFFile;
 import com.sun.pdfview.PDFPage;
 import entities.*;
@@ -48,6 +49,7 @@ import jxl.read.biff.BiffException;
 import modalwindows.AlertWindow;
 import modalwindows.SetRatesWindow;
 import org.hibernate.*;
+import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.exception.JDBCConnectionException;
 import settings.*;
 import tableviews.*;
@@ -62,6 +64,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -1198,16 +1201,16 @@ public class PCGUIController implements Initializable {
                 if((fileOfProgram.getOwner_id() == selectedProductId) && (fileOfProgram.getFile_type_id() == 1)) {
                     if (fileOfProgram.getPath().equals(defaultImagesDir)) {
                         File picFile = new File(noImageFile);
-                        ProductImage.open(picFile, gridPane, imageView);
+                        ProductImage.open(picFile, gridPane, imageView, "deviceImage");
                     } else {
                         File picFile = new File(fileOfProgram.getPath());
-                        ProductImage.open(picFile, gridPane, imageView);
+                        ProductImage.open(picFile, gridPane, imageView, "deviceImage");
                     }
                 }
             });
         } else {
             File picFile = new File(noImageFile);
-            ProductImage.open(picFile, gridPane, imageView);
+            ProductImage.open(picFile, gridPane, imageView, "deviceImage");
 
         }
     }
@@ -1810,13 +1813,11 @@ public class PCGUIController implements Initializable {
         }
     }
     private void createNewCategory(String whatTree, TreeView<String> treeView) throws SQLException {
-        /*
         if (whatTree.equals("main")) {
             parentCategoryTitle = categoriesTree.getSelectionModel().getSelectedItem().getValue();
         } else if (whatTree.equals("modal")) {
             parentCategoryTitle = treeView.getSelectionModel().getSelectedItem().getValue();
         }
-        */
         parentCategoryTitle = treeView.getSelectionModel().getSelectedItem().getValue();
         Integer parentId = UtilPack.getCategoryIdFromTitle(parentCategoryTitle);
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -1827,13 +1828,17 @@ public class PCGUIController implements Initializable {
         category.setImagePath(newCatPicturePath);
         category.setParent(parentId);
         category.setPublished(0);
-        session.save(category);
+        try {
+            session.save(category);
+        } catch (ConstraintViolationException e) {
+            AlertWindow.showErrorMessage("Создание категории не удалось, возможно, имя новой категории не уникально.");
+        }
         tx.commit();
         session.close();
-        //String picName = newCatPicturePath.replace('\\', '@').split("@")[(newCatPicturePath.replace('\\', '@')).split("@").length - 1];
-        //String targetRemoteCatPixFolder = "images/design/categories/" +
-        //        UtilPack.getCategoryVendorFromId(UtilPack.getCategoryIdFromTitle(parentCategoryTitle)) + picName;
-        //UtilPack.startFTP(newCatPicturePath, targetRemoteCatPixFolder);
+        String picName = newCatPicturePath.replaceFirst("\\\\", "").replace('\\', '@').split("@")[(newCatPicturePath.replaceFirst("\\\\", "").replace('\\', '@')).split("@").length - 1];
+        String targetRemoteCatPixFolder = "images/design/categories/" +
+                UtilPack.getCategoryVendorFromId(UtilPack.getCategoryIdFromTitle(parentCategoryTitle)) + picName;
+        UtilPack.startFTP(newCatPicturePath, targetRemoteCatPixFolder);
     }
     private void editCategory(String categoryTitle, String newTitle, String NewDescription, String NewImagePath) throws SQLException {
         Integer id = UtilPack.getCategoryIdFromTitle (categoryTitle);
@@ -1847,10 +1852,10 @@ public class PCGUIController implements Initializable {
         query.executeUpdate();
         tx.commit();
         session.close();
-        //String picName = NewImagePath.replace('\\', '@').split("@")[(NewImagePath.replace('\\', '@')).split("@").length - 1];
-        //String targetRemoteCatPixFolder = "images/design/categories/" +
-        //        UtilPack.getCategoryVendorFromId(id) + picName;
-        //UtilPack.startFTP(NewImagePath, targetRemoteCatPixFolder);
+        String picName = NewImagePath.replaceFirst("\\\\", "").replace('\\', '@').split("@")[(NewImagePath.replaceFirst("\\\\", "").replace('\\', '@')).split("@").length - 1];
+        String targetRemoteCatPixFolder = "images/design/categories/" +
+                UtilPack.getCategoryVendorFromId(id) + picName;
+        UtilPack.startFTP(NewImagePath, targetRemoteCatPixFolder);
     }
     private void deleteCategory(String categoryTitle) throws SQLException {
         Integer id = UtilPack.getCategoryIdFromTitle (categoryTitle);
@@ -1964,11 +1969,11 @@ public class PCGUIController implements Initializable {
             }
             Session session1 = HibernateUtil.getSessionFactory().openSession();
             Transaction tx = session1.beginTransaction();
-            Series serie = new Series();
-            serie.setTitle(result.get().getTitle());
-            serie.setDescription(result.get().getDescription());
-            serie.setVendorId(vendor);
-            session1.save(serie);
+            SeriesItems seriesItem = new SeriesItems();
+            seriesItem.setTitle(result.get().getTitle());
+            seriesItem.setDescription(result.get().getDescription());
+            seriesItem.setVendorId(vendor);
+            session1.save(seriesItem);
             tx.commit();
             session1.close();
         }
@@ -1976,13 +1981,13 @@ public class PCGUIController implements Initializable {
     private void editSerieDialog(String selectedSerie) {
         Optional<NewSerie> result = AlertWindow.editSerieDialog(selectedSerie);
         if (result.isPresent()) {
-            Series serie = new Series();
+            SeriesItems seriesItem = new SeriesItems();
             Session session0 = HibernateUtil.getSessionFactory().openSession();
-            Query q0 = session0.createQuery("from Series where title = :title");
+            Query q0 = session0.createQuery("from SeriesItems where title = :title");
             q0.setParameter("title", result.get().getTitle());
             List res0 = q0.list();
             for(Iterator iterator = res0.iterator(); iterator.hasNext();) {
-                serie = (Series) iterator.next();
+                seriesItem = (SeriesItems) iterator.next();
             }
             session0.close();
             Vendors vendor = new Vendors();
@@ -1996,10 +2001,10 @@ public class PCGUIController implements Initializable {
             session.close();
             Session session1 = HibernateUtil.getSessionFactory().openSession();
             Transaction tx = session1.beginTransaction();
-            serie.setTitle(result.get().getTitle());
-            serie.setDescription(result.get().getDescription());
-            serie.setVendorId(vendor);
-            session1.saveOrUpdate(serie);
+            seriesItem.setTitle(result.get().getTitle());
+            seriesItem.setDescription(result.get().getDescription());
+            seriesItem.setVendorId(vendor);
+            session1.saveOrUpdate(seriesItem);
             tx.commit();
             session1.close();
         }
@@ -2320,8 +2325,10 @@ public class PCGUIController implements Initializable {
             Task task = new Task<Void>() {
                 @Override public Void call() {
                     int i = 2;
+                    String tempFileName = new File(ProductImage.makeTemporaryResizedImage(file)).getName();
+                    String tempFilePath = PoligonCommander.tmpDir + "\\" + tempFileName;
                     for (String title : selectedProductsTitles) {
-                        ProductImage.save(file, title);
+                        ProductImage.save(new File(tempFilePath), title);
                         updateProgress(i, selectedProductsTitles.size());
                         i++;
                     }
@@ -2466,23 +2473,23 @@ public class PCGUIController implements Initializable {
         functionDescriptionTextArea.setText("");
         try {
             int selectedProductId = UtilPack.getProductIdFromTitle(selectedProduct, allProductsList);
-            ProductImage.open(new File(noImageFile), productDimsGridPane, productDimsImageView);
+            ProductImage.open(new File(noImageFile), productDimsGridPane, productDimsImageView, "dimsImage");
             Session session = HibernateUtil.getSessionFactory().openSession();
             List pics = session.createQuery("from Files where ownerId=" + selectedProductId + " and fileTypeId=" + 4).list();
             if (pics.size()==0) {
                 try {
-                    ProductImage.open(new File(dimsImagePathFromTitle(selectedProduct)), productDimsGridPane, productDimsImageView);
+                    ProductImage.open(new File(dimsImagePathFromTitle(selectedProduct)), productDimsGridPane, productDimsImageView, "dimsImage");
                 } catch (Exception e) {
-                    ProductImage.open(new File(noImageFile), productDimsGridPane, productDimsImageView);
+                    ProductImage.open(new File(noImageFile), productDimsGridPane, productDimsImageView, "dimsImage");
                 }
             } else {
                 for (Iterator iterator = pics.iterator(); iterator.hasNext();) {
                     Files pic = (Files) iterator.next();
                     File picFile = new File(pic.getPath());
                     if (pic.getName() != "" || pic.getName() != null) {
-                        ProductImage.open(picFile, productDimsGridPane, productDimsImageView);
+                        ProductImage.open(picFile, productDimsGridPane, productDimsImageView, "dimsImage");
                     } else {
-                        ProductImage.open(new File(noImageFile), productDimsGridPane, productDimsImageView);
+                        ProductImage.open(new File(noImageFile), productDimsGridPane, productDimsImageView, "dimsImage");
                     }
 
                 }
@@ -2492,15 +2499,15 @@ public class PCGUIController implements Initializable {
 
         try {
             int selectedProductId = UtilPack.getProductIdFromTitle(selectedProduct, allProductsList);
-            ProductImage.open(new File(noImageFile), plug1GridPane, plug1ImageView);
+            ProductImage.open(new File(noImageFile), plug1GridPane, plug1ImageView, "plugsImage");
             plug1TextArea.setText("");
             Session session = HibernateUtil.getSessionFactory().openSession();
             List pics = session.createQuery("from Files where ownerId=" + selectedProductId + " and fileTypeId=" + 3).list();
             if (pics.size()==0) {
                 try {
-                    ProductImage.open(new File(plugsImagePathFromTitle(selectedProduct, 1)), plug1GridPane, plug1ImageView);
+                    ProductImage.open(new File(plugsImagePathFromTitle(selectedProduct, 1)), plug1GridPane, plug1ImageView, "plugsImage");
                 } catch (Exception e) {
-                    ProductImage.open(new File(noImageFile), plug1GridPane, plug1ImageView);
+                    ProductImage.open(new File(noImageFile), plug1GridPane, plug1ImageView, "plugsImage");
                 }
                 plug1TextArea.setText("");
             } else {
@@ -2508,9 +2515,9 @@ public class PCGUIController implements Initializable {
                     Files pic = (Files) iterator.next();
                     File picFile = new File(pic.getPath());
                     if (pic.getName() != "" || pic.getName() != null) {
-                        ProductImage.open(picFile, plug1GridPane, plug1ImageView);
+                        ProductImage.open(picFile, plug1GridPane, plug1ImageView, "plugsImage");
                     } else {
-                        ProductImage.open(new File(noImageFile), plug1GridPane, plug1ImageView);
+                        ProductImage.open(new File(noImageFile), plug1GridPane, plug1ImageView, "plugsImage");
                     }
                 }
                 plug1TextArea.setText("");
@@ -2520,15 +2527,15 @@ public class PCGUIController implements Initializable {
 
         try {
             int selectedProductId = UtilPack.getProductIdFromTitle(selectedProduct, allProductsList);
-            ProductImage.open(new File(noImageFile), plug2GridPane, plug2ImageView);
+            ProductImage.open(new File(noImageFile), plug2GridPane, plug2ImageView, "plugsImage");
             plug2TextArea.setText("");
             Session session = HibernateUtil.getSessionFactory().openSession();
             List pics = session.createQuery("from Files where ownerId=" + selectedProductId + " and fileTypeId=" + 7).list();
             if (pics.size()==0) {
                 try {
-                    ProductImage.open(new File(plugsImagePathFromTitle(selectedProduct, 2)), plug2GridPane, plug2ImageView);
+                    ProductImage.open(new File(plugsImagePathFromTitle(selectedProduct, 2)), plug2GridPane, plug2ImageView, "plugsImage");
                 } catch (Exception e) {
-                    ProductImage.open(new File(noImageFile), plug2GridPane, plug2ImageView);
+                    ProductImage.open(new File(noImageFile), plug2GridPane, plug2ImageView, "plugsImage");
                 }
                 plug2TextArea.setText("");
             } else {
@@ -2536,9 +2543,9 @@ public class PCGUIController implements Initializable {
                     Files pic = (Files) iterator.next();
                     File picFile = new File(pic.getPath());
                     if (pic.getName() != "" || pic.getName() != null) {
-                        ProductImage.open(picFile, plug2GridPane, plug2ImageView);
+                        ProductImage.open(picFile, plug2GridPane, plug2ImageView, "plugsImage");
                     } else {
-                        ProductImage.open(new File(noImageFile), plug2GridPane, plug2ImageView);
+                        ProductImage.open(new File(noImageFile), plug2GridPane, plug2ImageView, "plugsImage");
                     }
                 }
                 plug2TextArea.setText("");
@@ -2547,23 +2554,23 @@ public class PCGUIController implements Initializable {
         } catch (NullPointerException ignored) {}
 
 
-        ProductImage.open(new File(noImageFile), functionGridPaneImageView, functionImageView);
+        ProductImage.open(new File(noImageFile), functionGridPaneImageView, functionImageView, "functionImage");
         try {
             productTabTitle.setText(selectedProduct);
             productTabKind.setText(getProductKindTitle(selectedProduct));
             int selectedProductId = UtilPack.getProductIdFromTitle(selectedProduct, allProductsList);
-            ProductImage.open(new File(noImageFile), productTabGridPaneImageView, productTabImageView);
+            ProductImage.open(new File(noImageFile), productTabGridPaneImageView, productTabImageView, "functionImage");
             picDescriptionTextArea.setText("");
             Session session = HibernateUtil.getSessionFactory().openSession();
             List pics = session.createQuery("from Files where ownerId=" + selectedProductId + " and fileTypeId=" + 1).list();
             if (pics.size()==0) {
-                ProductImage.open(new File(noImageFile), productTabGridPaneImageView, productTabImageView);
+                ProductImage.open(new File(noImageFile), productTabGridPaneImageView, productTabImageView, "functionImage");
                 picDescriptionTextArea.setText("");
             } else {
                 for (Iterator iterator = pics.iterator(); iterator.hasNext();) {
                     Files pic = (Files) iterator.next();
                     File picFile = new File(pic.getPath());
-                    ProductImage.open(picFile, productTabGridPaneImageView, productTabImageView);
+                    ProductImage.open(picFile, productTabGridPaneImageView, productTabImageView, "functionImage");
                     picDescriptionTextArea.setText(pic.getDescription());
                 }
             }
@@ -2866,7 +2873,7 @@ public class PCGUIController implements Initializable {
     };
     private void setFunctionPicture(String functionPicturePath) {
         File picFile = new File(functionPicturePath);
-        ProductImage.open(picFile, functionGridPaneImageView, functionImageView);
+        ProductImage.open(picFile, functionGridPaneImageView, functionImageView, "functionImage");
     }
     private void setSelectFunction() {
         functionDescriptionTextArea.setText("");
@@ -2877,8 +2884,8 @@ public class PCGUIController implements Initializable {
     @FXML private void setPictureButtonPress() {
         File file = fileChooser.showOpenDialog(anchorPane.getScene().getWindow());
         if (file != null) {
-            ProductImage.open(file, gridPane, imageView);
-            ProductImage.open(file, productTabGridPaneImageView, productTabImageView);
+            ProductImage.open(file, gridPane, imageView, "deviceImage");
+            ProductImage.open(file, productTabGridPaneImageView, productTabImageView, "deviceImage");
             ProductImage.save(file, selectedProduct);
         }
         try { getAllFilesOfProgramList(); } catch (SQLException e) {}
@@ -2887,21 +2894,21 @@ public class PCGUIController implements Initializable {
     @FXML private void setDimsImageButtonPress() {
         File file = fileChooser.showOpenDialog(anchorPane.getScene().getWindow());
         if (file != null) {
-            ProductImage.open(file, productDimsGridPane, productDimsImageView);
+            ProductImage.open(file, productDimsGridPane, productDimsImageView, "dimsImage");
             ProductImage.saveDimImage(file, selectedProduct);
         }
     }
     @FXML private void setPlug1ImageButtonPress() {
         File file = fileChooser.showOpenDialog(anchorPane.getScene().getWindow());
         if (file != null) {
-            ProductImage.open(file, plug1GridPane, plug1ImageView);
+            ProductImage.open(file, plug1GridPane, plug1ImageView, "plugsImage");
             ProductImage.savePlugImage(file, selectedProduct, 1);
         }
     }
     @FXML private void setPlug2ImageButtonPress() {
         File file = fileChooser.showOpenDialog(anchorPane.getScene().getWindow());
         if (file != null) {
-            ProductImage.open(file, plug2GridPane, plug2ImageView);
+            ProductImage.open(file, plug2GridPane, plug2ImageView, "plugsImage");
             ProductImage.savePlugImage(file, selectedProduct, 2);
         }
     }
@@ -3742,16 +3749,19 @@ public class PCGUIController implements Initializable {
                     ContextBuilder.createNewProductKind();
                     buildProductKindsList();
                     functionsTable.refresh();
+                    productKindsList.refresh();
                 }).build(),
                 MenuItemBuilder.create().text("Редактировать выбранный тип").onAction((ActionEvent ae2) -> {
                     ContextBuilder.updateTheProductKind(productKindsList);
                     buildProductKindsList();
                     functionsTable.refresh();
+                    productKindsList.refresh();
                 }).build(),
                 MenuItemBuilder.create().text("Удалить выбранный тип устройств").onAction((ActionEvent ae3) -> {
                     ContextBuilder.deleteTheProductKind(productKindsList);
                     buildProductKindsList();
                     functionsTable.refresh();
+                    productKindsList.refresh();
                 }).build()
         ).build();
         productKindsList.setContextMenu(productKindsListContextMenu);

@@ -1,7 +1,7 @@
 package modalwindows;
 
 import entities.Categories;
-import entities.Series;
+import entities.SeriesItems;
 import entities.Vendors;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -13,16 +13,18 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.shape.Line;
 import javafx.stage.FileChooser;
 import main.PCGUIController;
+import main.PoligonCommander;
 import main.Product;
+import org.apache.commons.io.FileUtils;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import utils.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -166,7 +168,8 @@ public class AlertWindow {
                 FileChooser fileChooser = new FileChooser();
                 File file = fileChooser.showOpenDialog(grid.getScene().getWindow());
                 if (file != null) {
-                    ProductImage.open(new File(file.getAbsolutePath()), grid1, image1);
+                    //ProductImage.open(new File(ProductImage.makeTemporaryResizedImage(file)), grid1, image1);
+                    ProductImage.open(new File(file.getAbsolutePath()), grid1, image1, "categoryImageSetter");
                 }
                 picPath = file.getAbsolutePath();
             }
@@ -179,9 +182,12 @@ public class AlertWindow {
         dialog.setResultConverter((ButtonType b) -> {
             if (b == buttonTypeOk) {
                 String picName = picPath.replace('\\', '@').split("@")[(picPath.replace('\\', '@')).split("@").length - 1];
-                String newPicPath = "\\\\Server03\\бд_сайта\\poligon_images\\design\\categories\\" + UtilPack.getCategoryVendorFromId(UtilPack.getCategoryIdFromTitle(parentCategoryTitle)) + "\\" + picName;
+                String tempPath = PoligonCommander.tmpDir.getAbsolutePath() + "\\" + picName;
+                String newPicPath = "\\\\Server03\\бд_сайта\\poligon_images\\design\\categories\\" +
+                        UtilPack.getCategoryVendorFromId(UtilPack.getCategoryIdFromTitle(parentCategoryTitle)) +
+                        "\\" + picName;
                 try {
-                    UtilPack.copyFile(new File(picPath), new File(newPicPath));
+                    UtilPack.copyFile(new File(tempPath), new File(newPicPath));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -221,7 +227,7 @@ public class AlertWindow {
         grid.add(label4, 1, 5);
         grid.add(setImageButton, 2, 6);
         dialog.getDialogPane().setContent(grid);
-        if(details.get(2) != null) ProductImage.open(new File(details.get(2)), grid1, image1);
+        if(details.get(2) != null) ProductImage.open(new File(details.get(2)), grid1, image1, "categoryImage");
         setImageButton.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
@@ -229,7 +235,8 @@ public class AlertWindow {
                 FileChooser fileChooser = new FileChooser();
                 File file = fileChooser.showOpenDialog(grid.getScene().getWindow());
                 if (file != null) {
-                    ProductImage.open(new File(file.getAbsolutePath()), grid1, image1);
+                    //ProductImage.open(new File(ProductImage.makeTemporaryResizedImage(file)), grid1, image1);
+                    ProductImage.open(new File(file.getAbsolutePath()), grid1, image1, "categoryImageSetter");
                 }
                 picPath = file.getAbsolutePath();
             }
@@ -242,9 +249,11 @@ public class AlertWindow {
         dialog.setResultConverter((ButtonType b) -> {
             if (b == buttonTypeOk) {
                 String picName = picPath.replace('\\', '@').split("@")[(picPath.replace('\\', '@')).split("@").length - 1];
-                String newPicPath = "\\\\Server03\\бд_сайта\\poligon_images\\design\\categories\\" + details.get(3) + "\\" + picName;
+                String tempPath = PoligonCommander.tmpDir.getAbsolutePath() + "\\" + picName;
+                String newPicPath = "\\\\Server03\\бд_сайта\\poligon_images\\design\\categories\\" +
+                        details.get(3) + "\\" + picName;
                 try {
-                    UtilPack.copyFile(new File(picPath), new File(newPicPath));
+                    UtilPack.copyFile(new File(tempPath), new File(newPicPath));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -302,7 +311,7 @@ public class AlertWindow {
         ArrayList<String> allProductTypes = UtilPack.getAllProductTypes();
         ArrayList<String> allCurrencies = UtilPack.getAllCurrencies();
         ArrayList<Vendors> allVendors = UtilPack.getAllVendorsEntities();
-        ArrayList<Series> allSeries = UtilPack.getAllSeries();
+        ArrayList<SeriesItems> allSeries = UtilPack.getAllSeries();
         ObservableList<String> productTypesTitles = FXCollections.observableArrayList();
         ObservableList<String> currenciesTitles = FXCollections.observableArrayList();
         ObservableList<String> vendorsTitles = FXCollections.observableArrayList();
@@ -518,17 +527,17 @@ public class AlertWindow {
     }
     public static Optional<NewSerie> editSerieDialog(String selectedSerie) {
         String vendorTitle = "";
-        Series serie = new Series();
+        SeriesItems seriesItem = new SeriesItems();
         Session session = HibernateUtil.getSessionFactory().openSession();
-        Query query = session.createQuery("from Series where title = :title");
+        Query query = session.createQuery("from SeriesItems where title = :title");
         query.setParameter("title", selectedSerie);
         List result = query.list();
         for(Iterator iterator = result.iterator(); iterator.hasNext();) {
-            serie = (Series) iterator.next();
+            seriesItem = (SeriesItems) iterator.next();
         }
         Session session1 = HibernateUtil.getSessionFactory().openSession();
         Query query1 = session1.createQuery("from Vendors where id = :id");
-        query1.setParameter("id", serie.getVendorId().getId());
+        query1.setParameter("id", seriesItem.getVendorId().getId());
         List result1 = query1.list();
         for(Iterator iterator = result1.iterator(); iterator.hasNext();) {
             Vendors vendor = (Vendors) iterator.next();
@@ -548,9 +557,9 @@ public class AlertWindow {
         Label vendorLabel = new Label("Производитель данной серии:  ");
         Label descriptionLabel = new Label("Описание серии (необязательно):  ");
         TextField titleTextField = new TextField();
-        titleTextField.setText(serie.getTitle());
+        titleTextField.setText(seriesItem.getTitle());
         TextArea descriptionTextArea = new TextArea();
-        descriptionTextArea.setText(serie.getDescription());
+        descriptionTextArea.setText(seriesItem.getDescription());
 
         GridPane grid = new GridPane();
         grid.add(titleLabel, 1, 1);
@@ -588,28 +597,24 @@ public class AlertWindow {
         alert.setContentText("Поля \"Производитель\", \"Тип продукта\", \"Категория\" и \"Серия продукта\" должны быть заполнены обязательно!");
         alert.show();
     }
-
     public static void waiting() {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("Внимание!");
         alert.setHeaderText("Подождите...");
         alert.show();
     }
-
     public static void tooManyColumnsForExport() {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("Количество устройств в группе больше допустимого!");
         alert.setHeaderText("Для успешного экспорта количество устройств в группе не должно превышать 252!\nЭкспорт отменён.");
         alert.show();
     }
-
     public static void productKindNotFound() {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("Внимание! В базе данных нет такого типа устройств!");
         alert.setHeaderText("Добавьте желаемый тип устройств на вкладке \"Настройки\" и повторите импорт.\nОперация прерввана.");
         alert.show();
     }
-
     public static void taskComplete(String taskName) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Операция завершена!");

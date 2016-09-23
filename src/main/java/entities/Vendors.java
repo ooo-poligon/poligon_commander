@@ -55,12 +55,9 @@ public class Vendors implements Serializable {
     @Lob
     @Column(name = "description")
     private String description;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "vendor")
-    private Collection<Products> productsCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vendorId")
-    private Collection<Series> seriesCollection;
-    @OneToMany(mappedBy = "vendor")
-    private Collection<Analogs> analogsCollection;
+    private Collection<Products> productsCollection;
+
     @JoinColumn(name = "currency_id", referencedColumnName = "id")
     @ManyToOne
     private Currencies currencyId;
@@ -119,23 +116,7 @@ public class Vendors implements Serializable {
         this.productsCollection = productsCollection;
     }
 
-    @XmlTransient
-    public Collection<Series> getSeriesCollection() {
-        return seriesCollection;
-    }
 
-    public void setSeriesCollection(Collection<Series> seriesCollection) {
-        this.seriesCollection = seriesCollection;
-    }
-
-    @XmlTransient
-    public Collection<Analogs> getAnalogsCollection() {
-        return analogsCollection;
-    }
-
-    public void setAnalogsCollection(Collection<Analogs> analogsCollection) {
-        this.analogsCollection = analogsCollection;
-    }
 
     public Currencies getCurrencyId() {
         return currencyId;

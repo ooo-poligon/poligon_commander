@@ -109,9 +109,9 @@ public class Products implements Serializable {
     @OneToMany(mappedBy = "productId")
     private Collection<Quantity> quantityCollection;
 
-    @JoinColumn(name = "serie", referencedColumnName = "title")
-    @ManyToOne
-    private Series serie;
+//    @JoinColumn(name = "serie", referencedColumnName = "title")
+//    @ManyToOne
+//    private Series serie;
 
     @JoinColumn(name = "category_id", referencedColumnName = "id")
     @ManyToOne
@@ -121,9 +121,13 @@ public class Products implements Serializable {
     @ManyToOne(optional = false)
     private ProductKinds productKindId;
 
-    @JoinColumn(name = "vendor", referencedColumnName = "title")
+//    @JoinColumn(name = "vendor", referencedColumnName = "title")
+//    @ManyToOne(optional = true)
+//    private Vendors vendor;
+
+    @JoinColumn(name = "series_item_id", referencedColumnName = "id")
     @ManyToOne(optional = true)
-    private Vendors vendor;
+    private SeriesItems seriesItemId;
 
     @JoinColumn(name = "vendor_id", referencedColumnName = "id")
     @ManyToOne(optional = true)
@@ -282,12 +286,21 @@ public class Products implements Serializable {
         this.quantityCollection = quantityCollection;
     }
 
-    public Series getSerie() {
-        return serie;
+//    public Series getSerie() {
+//        return serie;
+//    }
+//
+//    public void setSerie(Series serie) {
+//        this.serie = serie;
+//    }
+
+
+    public SeriesItems getSeriesItemId() {
+        return seriesItemId;
     }
 
-    public void setSerie(Series serie) {
-        this.serie = serie;
+    public void setSeriesItemId(SeriesItems seriesItemId) {
+        this.seriesItemId = seriesItemId;
     }
 
     public Categories getCategoryId() {
@@ -306,13 +319,13 @@ public class Products implements Serializable {
         this.productKindId = productKindId;
     }
 
-    public Vendors getVendor() {
-        return vendor;
-    }
-
-    public void setVendor(Vendors vendor) {
-        this.vendor = vendor;
-    }
+//    public Vendors getVendor() {
+//        return vendor;
+//    }
+//
+//    public void setVendor(Vendors vendor) {
+//        this.vendor = vendor;
+//    }
 
     public Vendors getVendorId() {
         return vendorId;

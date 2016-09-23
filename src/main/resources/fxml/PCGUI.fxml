@@ -390,7 +390,7 @@
                                                                   </TableView>
                                                                </children>
                                                             </AnchorPane>
-                                                            <AnchorPane prefHeight="325.0" VBox.vgrow="ALWAYS">
+                                                            <AnchorPane VBox.vgrow="ALWAYS">
                                                                <children>
                                                                   <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="-5.0">
                                                                     <columnConstraints>
@@ -399,8 +399,8 @@
                                                                       <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                                                     </columnConstraints>
                                                                     <rowConstraints>
-                                                                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
-                                                                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                                      <RowConstraints vgrow="NEVER" />
+                                                                      <RowConstraints vgrow="SOMETIMES" />
                                                                     </rowConstraints>
                                                                      <children>
                                                                         <AnchorPane GridPane.columnIndex="1" GridPane.vgrow="NEVER">
@@ -421,7 +421,7 @@
                                                                               </Label>
                                                                            </children>
                                                                         </AnchorPane>
-                                                                        <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                                                        <AnchorPane GridPane.columnIndex="1" GridPane.rowIndex="1">
                                                                            <children>
                                                                               <TextArea fx:id="functionDescriptionTextArea" editable="false" layoutX="15.0" layoutY="-66.0" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                                                            </children>
@@ -433,7 +433,7 @@
                                                                                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                                                                 </columnConstraints>
                                                                                 <rowConstraints>
-                                                                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                                                  <RowConstraints vgrow="SOMETIMES" />
                                                                                 </rowConstraints>
                                                                                  <children>
                                                                                     <ImageView fx:id="functionImageView" fitHeight="100.0" fitWidth="220.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
@@ -491,10 +491,10 @@
                                                                       <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                                                     </columnConstraints>
                                                                     <rowConstraints>
-                                                                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                                      <RowConstraints vgrow="SOMETIMES" />
                                                                     </rowConstraints>
                                                                      <children>
-                                                                        <ImageView fx:id="productTabImageView" fitHeight="220.0" fitWidth="250.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
+                                                                        <ImageView fx:id="productTabImageView" fitHeight="190.0" fitWidth="250.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                                                                      </children>
                                                                   </GridPane>
                                                                </children>
@@ -566,10 +566,10 @@
                                                                                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                                                                 </columnConstraints>
                                                                                 <rowConstraints>
-                                                                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                                                  <RowConstraints vgrow="SOMETIMES" />
                                                                                 </rowConstraints>
                                                                                  <children>
-                                                                                    <ImageView fx:id="productDimsImageView" fitHeight="200.0" fitWidth="230.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
+                                                                                    <ImageView fx:id="productDimsImageView" fitHeight="190.0" fitWidth="230.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                                                                                  </children>
                                                                               </GridPane>
                                                                            </children>
@@ -666,18 +666,18 @@
                                                                      <children>
                                                                         <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                            <children>
-                                                                              <AnchorPane minHeight="220.0">
+                                                                              <AnchorPane>
                                                                                  <children>
-                                                                                    <GridPane fx:id="plug1GridPane" minHeight="220.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                                    <GridPane fx:id="plug1GridPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                                        <children>
-                                                                                          <ImageView fx:id="plug1ImageView" fitHeight="220.0" fitWidth="220.0" pickOnBounds="true" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="NEVER" />
+                                                                                          <ImageView fx:id="plug1ImageView" fitHeight="189.0" fitWidth="220.0" pickOnBounds="true" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="NEVER" />
                                                                                        </children>
                                                                                        <columnConstraints>
                                                                                           <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
                                                                                        </columnConstraints>
                                                                                        <rowConstraints>
-                                                                                          <RowConstraints minHeight="220.0" vgrow="NEVER" />
-                                                                                          <RowConstraints />
+                                                                                          <RowConstraints vgrow="NEVER" />
+                                                                                          <RowConstraints maxHeight="46.0" minHeight="0.0" prefHeight="0.0" />
                                                                                        </rowConstraints>
                                                                                     </GridPane>
                                                                                  </children>
@@ -729,7 +729,7 @@
                                                                                  <children>
                                                                                     <GridPane fx:id="plug2GridPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                                        <children>
-                                                                                          <ImageView fx:id="plug2ImageView" fitHeight="200.0" fitWidth="220.0" pickOnBounds="true" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="NEVER" />
+                                                                                          <ImageView fx:id="plug2ImageView" fitHeight="189.0" fitWidth="220.0" pickOnBounds="true" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="NEVER" />
                                                                                        </children>
                                                                                        <columnConstraints>
                                                                                           <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
@@ -1136,7 +1136,7 @@
                                                       </Label>
                                                    </children>
                                                 </AnchorPane>
-                                                <AnchorPane prefHeight="212.0" prefWidth="512.0" VBox.vgrow="ALWAYS">
+                                                <AnchorPane prefHeight="200.0" prefWidth="512.0" VBox.vgrow="ALWAYS">
                                                    <children>
                                                       <GridPane disable="true" layoutX="118.0" layoutY="-1.0" prefHeight="213.0" prefWidth="373.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-1.0" AnchorPane.topAnchor="-1.0">
                                                         <columnConstraints>
@@ -1350,13 +1350,17 @@
                                                                      <children>
                                                                         <ComboBox fx:id="tableDBForExportComboBox" minWidth="180.0" onAction="#getSelectedDBTable" prefWidth="180.0" promptText="Экспорт таблицы БД" />
                                                                         <Label alignment="CENTER" minWidth="200.0" text=" в файл формата XLS: " HBox.hgrow="ALWAYS" />
-                                                                        <Button fx:id="chooseFileForExportButton" minWidth="140.0" mnemonicParsing="false" onAction="#chooseDirectoryForExport" text="Выбрать папку для экспорта" HBox.hgrow="ALWAYS" />
+                                                                        <Button fx:id="chooseFileForExportButton" minWidth="150.0" mnemonicParsing="false" onAction="#chooseDirectoryForExport" prefWidth="216.0" text="Выбрать папку для экспорта" HBox.hgrow="ALWAYS" />
                                                                         <AnchorPane HBox.hgrow="ALWAYS">
                                                                            <children>
-                                                                              <Label fx:id="fileForExportPathLabel" maxWidth="1.7976931348623157E308" minWidth="150.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="0.0" />
+                                                                              <Label fx:id="fileForExportPathLabel" maxWidth="1.7976931348623157E308" minWidth="150.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0" />
                                                                            </children>
                                                                         </AnchorPane>
-                                                                        <TextField fx:id="exportFileNameTextField" promptText="имя файла..." />
+                                                                        <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                                                                           <children>
+                                                                              <TextField fx:id="exportFileNameTextField" promptText="имя файла..." AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0" />
+                                                                           </children>
+                                                                        </AnchorPane>
                                                                         <Button fx:id="startExportButton" minWidth="55.0" mnemonicParsing="false" onAction="#startExport" text="Пуск!" HBox.hgrow="ALWAYS" />
                                                                      </children>
                                                                   </HBox>

@@ -13,7 +13,7 @@
     <class>entities.Files</class>
     <class>entities.PropertyTypes</class>
     <class>entities.Products</class>
-    <class>entities.Series</class>
+    <class>entities.SeriesItems</class>
     <class>entities.Settings</class>
     <class>entities.ImportFields</class>
     <class>entities.PropertyValues</class>
