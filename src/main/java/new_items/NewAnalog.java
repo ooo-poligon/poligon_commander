@@ -1,4 +1,4 @@
-package utils;
+package new_items;
 
 /**
  * Created by Igor Klekotnev on 16.03.2016.

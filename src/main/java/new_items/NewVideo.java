@@ -1,7 +1,7 @@
-package utils;
+package new_items;
 
 /**
  * Created by Igor Klekotnev on 10.03.2016.
  */
-public class NewReview {
+public class NewVideo {
 }

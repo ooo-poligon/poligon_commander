@@ -7,71 +7,32 @@ package utils;
 import entities.FileTypes;
 import entities.Files;
 import entities.Products;
-
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import imgscalr.Scalr;
-import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
-import main.PCGUIController;
 import main.PoligonCommander;
 import modalwindows.AlertWindow;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.hibernate.TransientObjectException;
-import org.hibernate.cfg.Settings;
-import settings.SFTPSettings;
-
 import javax.imageio.ImageIO;
-
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.net.MalformedURLException;
+import java.util.List;
 import static utils.SshUtils.sftp;
 
 /**
- *
  * @author Igor Klekotnev
  */
-public class ProductImage {
-    private static File pngToJpg(File inFile) {
-        String picPath = inFile.getAbsolutePath();
-        String picName = picPath.replace('\\', '@').split("@")[(picPath.replace('\\', '@')).split("@").length - 1];
-        String newPicPath = PoligonCommander.tmpDir.getAbsolutePath() + "\\" + picName + ".jpg";
-        File outFile = new File(newPicPath);
-        try {
-            //read image file
-            BufferedImage bufferedImage = ImageIO.read(inFile);
-
-            // create a blank, RGB, same width and height, and a white background
-            BufferedImage newBufferedImage = new BufferedImage(bufferedImage.getWidth(),
-                    bufferedImage.getHeight(), BufferedImage.TYPE_INT_RGB);
-            newBufferedImage.createGraphics().drawImage(bufferedImage, 0, 0, Color.WHITE, null);
-
-            // write to jpeg file
-            ImageIO.write(newBufferedImage, "jpg", outFile);
-
-        } catch (IOException e) {
-            AlertWindow.showErrorMessage(e.getMessage());
-        }
-        return outFile;
-    }
+public class ImageFile {
 
     public static String makeTemporaryResizedImage(File file) {
         String picPath = file.getAbsolutePath();
         String picName = picPath.replace('\\', '@').split("@")[(picPath.replace('\\', '@')).split("@").length - 1];
-        String newPicPath = "";
-        newPicPath = PoligonCommander.tmpDir.getAbsolutePath() + "\\" + picName;
+        String newPicPath = PoligonCommander.tmpDir.getAbsolutePath() + "\\" + picName;
         BufferedImage in = null;
         try {
             in = ImageIO.read(file);
@@ -79,17 +40,17 @@ public class ProductImage {
             AlertWindow.showErrorMessage("Невозможно открыть файл с изображением.\n" +
                     "Проверьте, что нужный файл существует\nпо указанному пути:" + file.getAbsolutePath());
         }
-        BufferedImage out = Scalr.resize(in, 768, 768, null);
+        BufferedImage out = Scalr.resize(in, 768, 768);
         int pad = Math.abs(out.getHeight() - out.getWidth());
         if (out.getHeight() > out.getWidth()) {
-            out = Scalr.pad(out, pad, new Color(255,255,255), null);
-            out = Scalr.crop(out, pad/2, pad, 768, 768, null);
+            out = Scalr.pad(out, pad, new Color(255, 255, 255));
+            out = Scalr.crop(out, pad / 2, pad, 768, 768);
         } else if (out.getHeight() < out.getWidth()) {
-            out = Scalr.pad(out, pad, new Color(255,255,255), null);
-            out = Scalr.crop(out, pad, pad/2, 768, 768, null);
+            out = Scalr.pad(out, pad, new Color(255, 255, 255));
+            out = Scalr.crop(out, pad, pad / 2, 768, 768);
         }
-        out = Scalr.pad(out, 30, new Color(255,255,255), null);
-        out = Scalr.resize(out, 768, 768, null);
+        out = Scalr.pad(out, 30, new Color(255, 255, 255));
+        out = Scalr.resize(out, 768, 768);
 
         File outputFile = new File(newPicPath);
         try {
@@ -114,7 +75,7 @@ public class ProductImage {
     }
 
     public static void open(File file, GridPane gridPane, ImageView imageView, String imageType) {
-        if (gridPane.getChildren().size()!=0) {
+        if (gridPane.getChildren().size() != 0) {
             gridPane.getChildren().clear();
         }
         String localUrl = "";
@@ -188,6 +149,7 @@ public class ProductImage {
         imageView.setCache(true);
         gridPane.getChildren().add(imageView);
     }
+
     public static void save(File inFile, String selectedProduct) {
         File file = null;
         try {
@@ -198,76 +160,33 @@ public class ProductImage {
         Integer ownerId = 0;
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
-        Query query = session.createSQLQuery("select id from products where title= :title");
+        Query query = session.createSQLQuery("SELECT id FROM products WHERE title= :title");
         query.setParameter("title", selectedProduct);
         List ids = query.list();
-        for (Iterator iterator = ids.iterator(); iterator.hasNext();) {
-            ownerId = (Integer) iterator.next();
+        for (Object id : ids) {
+            ownerId = (Integer) id;
         }
         int fileTypeId = 1;
         List pictureList = session.createQuery("From Files where fileTypeId=" + fileTypeId + " and ownerId=" + ownerId).list();
         if (pictureList.isEmpty()) {
-            Files pictureFile = new Files(file.getName(), file.getPath(), "Это изображение для " + selectedProduct, (new FileTypes(1)), (new Products(ownerId)));
+            Files pictureFile = null;
+            if (file != null)
+                pictureFile = new Files(file.getName(), file.getPath(), "Это изображение для " + selectedProduct, (new FileTypes(1)), (new Products(ownerId)));
             session.saveOrUpdate(pictureFile);
         } else {
-            for (Iterator iterator = pictureList.iterator(); iterator.hasNext();) {
-                Files pic = (Files) iterator.next();
-                if ((pic.getFileTypeId().getId() == 1) && ((!pic.getName().equals(file.getName())) || (!pic.getPath().equals(file.getPath())))) {
+            for (Object aPictureList : pictureList) {
+                Files pic = (Files) aPictureList;
+                if (file != null && (pic.getFileTypeId().getId() == 1) && ((!pic.getName().equals(file.getName())) || (!pic.getPath().equals(file.getPath())))) {
                     pic.setName(file.getName());
                     pic.setPath(file.getPath());
                     pic.setDescription("Это изображение для " + selectedProduct);
                     session.saveOrUpdate(pic);
                 }
-            }            
+            }
         }
         tx.commit();
         session.close();
     }
-
-    /*public static void save(String inPicPath, String selectedProduct) {
-        String picPath = null;
-        try {
-            picPath = copyToPlace(new File(inPicPath), selectedProduct, "device", null);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Products product = new Products();
-        Session sess = HibernateUtil.getSessionFactory().openSession();
-        Query query = sess.createQuery("from Products where title = :title");
-        query.setParameter("title", selectedProduct);
-        List ids = query.list();
-        for (Iterator iterator = ids.iterator(); iterator.hasNext();) {
-            Products p = (Products) iterator.next();
-            product = p;
-        }
-        sess.close();
-        try {
-            Session session = HibernateUtil.getSessionFactory().openSession();
-            Transaction tx = session.beginTransaction();
-            List pictureList = session.createQuery("From Files where ownerId=" + product.getId() + " and fileTypeId=" + 1).list();
-            if (pictureList.isEmpty()) {
-                Files pictureFile = new Files(picName(picPath), localWindowsPath(picPath), "Это изображение для " + selectedProduct, (new FileTypes(1)), product);
-                session.save(pictureFile);
-            } else {
-                for (Iterator iterator = pictureList.iterator(); iterator.hasNext(); ) {
-                    Files pic = (Files) iterator.next();
-                    if ((pic.getFileTypeId().getId() == 1) && ((!pic.getName().equals(picName(picPath))) || (!pic.getPath().equals(localWindowsPath(picPath))))) {
-                        // TODO: writes full path instead of name only!!! check it out later.
-                        pic.setName(picName(picPath));
-                        pic.setPath(localWindowsPath(picPath));
-                        pic.setDescription("Это изображение для " + selectedProduct);
-                        pic.setOwnerId(product);
-                        pic.setFileTypeId(new FileTypes(1));
-                        session.saveOrUpdate(pic);
-                    }
-                }
-            }
-            tx.commit();
-            session.close();
-        } catch (TransientObjectException e) {
-            AlertWindow.showErrorMessage("TransientObjectException");
-        }
-    }*/
 
     public static void saveDimImage(File inFile, String selectedProduct) {
         File file = null;
@@ -279,18 +198,21 @@ public class ProductImage {
         Integer ownerId = 0;
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
-        List ids = session.createSQLQuery("select id from products where title=\"" + selectedProduct + "\"").list();
-        for (Iterator iterator = ids.iterator(); iterator.hasNext();) {
-            ownerId = (Integer) iterator.next();
+        List ids = session.createSQLQuery(String.format("select id from products where title=\"%s\"", selectedProduct)).list();
+        for (Object id : ids) {
+            ownerId = (Integer) id;
         }
         List pictureList = session.createQuery("From Files where ownerId=" + ownerId + "and file_type_id=" + 4).list();
         if (pictureList.isEmpty()) {
-            Files pictureFile = new Files(file.getName(), file.getPath(), "Это схема габаритов для " + selectedProduct, (new FileTypes(4)), (new Products(ownerId)));
+            Files pictureFile = null;
+            if (file != null) {
+                pictureFile = new Files(file.getName(), file.getPath(), "Это схема габаритов для " + selectedProduct, (new FileTypes(4)), (new Products(ownerId)));
+            }
             session.saveOrUpdate(pictureFile);
         } else {
-            for (Iterator iterator = pictureList.iterator(); iterator.hasNext();) {
-                Files pic = (Files) iterator.next();
-                if ((pic.getFileTypeId().getId() == 4) &&
+            for (Object aPictureList : pictureList) {
+                Files pic = (Files) aPictureList;
+                if (file != null && (pic.getFileTypeId().getId() == 4) &&
                         ((!pic.getName().equals(file.getName())) ||
                                 (!pic.getPath().equals(file.getPath())))) {
                     pic.setName(file.getName());
@@ -314,20 +236,23 @@ public class ProductImage {
         Integer ownerId = 0;
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
-        List ids = session.createSQLQuery("select id from products where title=\"" + selectedProduct + "\"").list();
-        for (Iterator iterator = ids.iterator(); iterator.hasNext();) {
-            ownerId = (Integer) iterator.next();
+        List ids = session.createSQLQuery(String.format("select id from products where title=\"%s\"", selectedProduct)).list();
+        for (Object id : ids) {
+            ownerId = (Integer) id;
         }
         int fileTypeId = 3;
         if (plugNumber == 2) fileTypeId = 7;
         List pictureList = session.createQuery("From Files where ownerId=" + ownerId + "and file_type_id=" + fileTypeId).list();
         if (pictureList.isEmpty()) {
-            Files pictureFile = new Files(file.getName(), file.getPath(), "Это схема подключения №" + plugNumber + " для " + selectedProduct, (new FileTypes(fileTypeId)), (new Products(ownerId)));
+            Files pictureFile = null;
+            if (file != null) {
+                pictureFile = new Files(file.getName(), file.getPath(), "Это схема подключения №" + plugNumber + " для " + selectedProduct, (new FileTypes(fileTypeId)), (new Products(ownerId)));
+            }
             session.saveOrUpdate(pictureFile);
         } else {
-            for (Iterator iterator = pictureList.iterator(); iterator.hasNext();) {
-                Files pic = (Files) iterator.next();
-                if ((pic.getFileTypeId().getId() == fileTypeId) &&
+            for (Object aPictureList : pictureList) {
+                Files pic = (Files) aPictureList;
+                if (file != null && (pic.getFileTypeId().getId() == fileTypeId) &&
                         ((!pic.getName().equals(file.getName())) ||
                                 (!pic.getPath().equals(file.getPath())))) {
                     pic.setName(file.getName());
@@ -341,38 +266,14 @@ public class ProductImage {
         session.close();
     }
 
-    private static String picName(String picPath) {
-        ArrayList<String> pathParts = new ArrayList<>();
-        for (int i = 0; i < picPath.split("/").length; i++) {
-            pathParts.add(picPath.split("/")[i]);
-        }
-        String name = pathParts.get(picPath.split("/").length - 1);
-        return name;
-    }
-
-    private static String localWindowsPath(String picPath) {
-        String localPath = "\\\\Server03\\бд_сайта\\poligon_images\\catalog";
-        //if (!System.getProperty("os.name").contains("Windows")) {
-        //    localPath = localPath.replace("\\", "/");
-        //}
-        if (picPath.split("/").length==0) {
-            return "";
-        } else {
-            for (int i = 0; i < picPath.split("/").length; i++) {
-                localPath += "\\" + picPath.split("/")[i];
-            }
-        }
-        return localPath;
-    }
-
     private static String copyToPlace(File file, String selectedProduct, String picType, Integer plugNumber) throws IOException {
         String vendorTitle = "";
         Session session = HibernateUtil.getSessionFactory().openSession();
         Query query = session.createQuery("from Products where title = :title");
         query.setParameter("title", selectedProduct);
         List result = query.list();
-        for(Iterator iterator = result.iterator(); iterator.hasNext();) {
-            Products product = (Products) iterator.next();
+        for (Object aResult : result) {
+            Products product = (Products) aResult;
             if (product.getVendorId().getTitle().equals("COMAT/RELECO")) {
                 vendorTitle = "RELECO";
             } else {
@@ -380,16 +281,16 @@ public class ProductImage {
             }
         }
         session.close();
-        String resPath = "";
-        String fileName = "";
-        String fileType = "";
-        if( plugNumber != null) {
+        String resPath;
+        String fileName;
+        String fileType;
+        if (plugNumber != null) {
             fileName = selectedProduct.replace(" ", "_").replace("/", "_").replace(",", "_") + "_" + picType + plugNumber + ".jpg";
         } else {
             fileName = selectedProduct.replace(" ", "_").replace("/", "_").replace(",", "_") + "_" + picType + ".jpg";
         }
         fileType = picType;
-        resPath = "\\\\Server03\\бд_сайта\\poligon_images\\catalog\\" + vendorTitle + "\\" + fileType + "s\\" + fileName ;
+        resPath = "\\\\Server03\\бд_сайта\\poligon_images\\catalog\\" + vendorTitle + "\\" + fileType + "s\\" + fileName;
         copyFile(file, new File(resPath));
         String sshUser = "";
         String sshPass = "";
@@ -400,8 +301,8 @@ public class ProductImage {
         query1.setParameter("kind", "SFTPSettings");
         query1.setParameter("title", "userSFTP");
         List result1 = query1.list();
-        for(Iterator iterator = result1.iterator(); iterator.hasNext();) {
-            entities.Settings setting = (entities.Settings) iterator.next();
+        for (Object aResult1 : result1) {
+            entities.Settings setting = (entities.Settings) aResult1;
             sshUser = setting.getTextValue();
         }
         session1.close();
@@ -410,8 +311,8 @@ public class ProductImage {
         query2.setParameter("kind", "SFTPSettings");
         query2.setParameter("title", "passwordSFTP");
         List result2 = query2.list();
-        for(Iterator iterator = result2.iterator(); iterator.hasNext();) {
-            entities.Settings setting = (entities.Settings) iterator.next();
+        for (Object aResult2 : result2) {
+            entities.Settings setting = (entities.Settings) aResult2;
             sshPass = setting.getTextValue();
         }
         session2.close();
@@ -420,12 +321,12 @@ public class ProductImage {
         query3.setParameter("kind", "SFTPSettings");
         query3.setParameter("title", "serverSFTP");
         List result3 = query3.list();
-        for(Iterator iterator = result3.iterator(); iterator.hasNext();) {
-            entities.Settings setting = (entities.Settings) iterator.next();
+        for (Object aResult3 : result3) {
+            entities.Settings setting = (entities.Settings) aResult3;
             sshHost = setting.getTextValue();
         }
         session3.close();
-        String remotePlace = "/var/www/poligon/data/www/poligon.info/images/catalog/" + vendorTitle + "/" + fileType + "s/" ;
+        String remotePlace = "/var/www/poligon/data/www/poligon.info/images/catalog/" + vendorTitle + "/" + fileType + "s/";
         sftp(("file://" + resPath.replace("\\", "/")), ("ssh://" + sshUser + ":" + sshPass + "@" + sshHost + remotePlace));
 
         return resPath;
@@ -442,12 +343,16 @@ public class ProductImage {
             while ((length = is.read(buffer)) > 0) {
                 os.write(buffer, 0, length);
             }
-        } catch (NullPointerException ne) {
+        } catch (NullPointerException ignored) {
 
         } finally {
             try {
-                is.close();
-                os.close();
+                if (is != null) {
+                    is.close();
+                }
+                if (os != null) {
+                    os.close();
+                }
             } catch (NullPointerException ne) {
                 AlertWindow.showErrorMessage("Ошибка копирования!");
             }

@@ -1,16 +1,13 @@
 package utils;
 
-import entities.Functions;
-import entities.Products;
 import entities.ProductsAccessories;
-import entities.ProductsFunctions;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import main.PCGUIController;
+import new_items.NewProductsAccessories;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;

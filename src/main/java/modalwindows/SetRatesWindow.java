@@ -4,12 +4,8 @@ import entities.Categories;
 import entities.Products;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 import utils.HibernateUtil;
-import utils.NewCategory;
 import utils.SetRates;
 
 import java.util.*;

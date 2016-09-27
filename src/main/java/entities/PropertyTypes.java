@@ -36,7 +36,6 @@ public class PropertyTypes implements Serializable {
     private Collection<ProductKindsPropertyTypes> productKindsPropertyTypesCollection;
     private static final long serialVersionUID = 1L;
     @Id
-    @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
     @Basic(optional = false)

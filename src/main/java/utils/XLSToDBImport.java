@@ -205,7 +205,7 @@ public class XLSToDBImport {
                 case ("Путь к файлу изображения устройства"):
                     picPathColumn.addAll(getColumnByHeader(allImportXLSContent, compareDetail.get(0)));
                     for (int i = 0; i < picPathColumn.size(); i++) {
-                        ProductImage.save(new File(picPathColumn.get(i)), titlesColumn.get(i).replace(':', ' ').replace('?', '_'));
+                        ImageFile.save(new File(picPathColumn.get(i)), titlesColumn.get(i).replace(':', ' ').replace('?', '_'));
                     }
                     break;
                 case ("Путь к файлу даташит устройства"):

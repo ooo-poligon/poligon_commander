@@ -31,6 +31,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.Collator;
 import java.util.*;
 import java.nio.file.Files;
 
@@ -52,6 +53,7 @@ public class UtilPack {
         } catch (SQLException e) {}
         return id;
     }
+
     public static int getCategoryImagePathFromTitle (String title) {
         int id = 0;
         try {
@@ -64,6 +66,7 @@ public class UtilPack {
         } catch (SQLException e) {}
         return id;
     }
+
     public static int getCategoryIdFromTitle (String title) {
         int id = 0;
         try {
@@ -74,16 +77,9 @@ public class UtilPack {
                 id = resultSet.getInt("id");
             }
         } catch (SQLException e) {}
-//        Session session = HibernateUtil.getSessionFactory().openSession();
-//        Query query = session.createQuery("from Categories where title = :title");
-//        query.setParameter("title", title);
-//        List result = query.list();
-//        for (Iterator iterator = result.iterator(); iterator.hasNext();) {
-//            Categories category = (Categories) iterator.next();
-//            id = category.getId();
-//        }
         return id;
     }
+
     public static String getCategoryTitleFromId (int id) {
         String title = "";
         try {
@@ -93,16 +89,9 @@ public class UtilPack {
                 title = resultSet.getString("title");
             }
         } catch (SQLException e) {}
-//        Session session = HibernateUtil.getSessionFactory().openSession();
-//        Query query = session.createQuery("from Categories where id = :id");
-//        query.setParameter("id", id);
-//        List result = query.list();
-//        for (Iterator iterator = result.iterator(); iterator.hasNext();) {
-//            Categories category = (Categories) iterator.next();
-//            title = category.getTitle();
-//        }
         return title;
     }
+
     public static String getCategoryVendorFromId (int id) {
         int parentCatId = 0;
         try {
@@ -144,6 +133,7 @@ public class UtilPack {
             return getCategoryVendorFromId (parentCatId);
         }
     }
+
     public static Integer getParentCatId(String categoryTitle) throws SQLException {
         Integer parentId = 0;
         try {
@@ -154,20 +144,9 @@ public class UtilPack {
                 parentId = resultSet.getInt("id");
             }
         } catch (SQLException e) {}
-//        Integer id = UtilPack.getCategoryIdFromTitle(categoryTitle);
-//        Session session = HibernateUtil.getSessionFactory().openSession();
-//        try {
-//            List response = session.createQuery("From Categories where id=" + id).list();
-//            for (Iterator iterator = response.iterator(); iterator.hasNext();) {
-//                Categories category = (Categories) iterator.next();
-//                parentId = category.getParent();
-//            }
-//        } catch (HibernateException e) {
-//        } finally {
-//            session.close();
-//        }
         return parentId;
     }
+
     public static Integer getParentCatId(Integer categoryId) throws SQLException {
         Integer parentId = 0;
         try {
@@ -177,19 +156,9 @@ public class UtilPack {
                 parentId = resultSet.getInt("parent");
             }
         } catch (SQLException e) {}
-//        Session session = HibernateUtil.getSessionFactory().openSession();
-//        try {
-//            List response = session.createQuery("From Categories where id=" + id).list();
-//            for (Iterator iterator = response.iterator(); iterator.hasNext();) {
-//                Categories categorie = (Categories) iterator.next();
-//                parentId = categorie.getParent();
-//            }
-//        } catch (HibernateException e) {
-//        } finally {
-//            session.close();
-//        }
         return parentId;
     }
+
     public static ArrayList<Integer> getPropertyIdFromTitle (String title) {
         ArrayList<Integer> ids = new ArrayList<>();
         try {
@@ -200,16 +169,9 @@ public class UtilPack {
                 ids.add(resultSet.getInt("id"));
             }
         } catch (SQLException e) {}
-//        Session session = HibernateUtil.getSessionFactory().openSession();
-//        Query query = session.createQuery("from Properties where title = :title");
-//        query.setParameter("title", title);
-//        List result = query.list();
-//        for (Iterator iterator = result.iterator(); iterator.hasNext();) {
-//            Properties property = (Properties) iterator.next();
-//            ids.add(property.getId());
-//        }
         return ids;
     }
+
     public static Integer getPropertyTypeIdFromTitle (String title) {
         Integer id = 0;
         try {
@@ -220,16 +182,9 @@ public class UtilPack {
                 id = resultSet.getInt("id");
             }
         } catch (SQLException e) {}
-//        Session session = HibernateUtil.getSessionFactory().openSession();
-//        Query query = session.createQuery("from PropertyTypes where title = :title");
-//        query.setParameter("title", title);
-//        List result = query.list();
-//        for (Iterator iterator = result.iterator(); iterator.hasNext();) {
-//            PropertyTypes propertyType = (PropertyTypes) iterator.next();
-//            id = propertyType.getId();
-//        }
         return id;
     }
+
     public static int getProductKindIdFromTitle (String title) {
         int id = 0;
         try {
@@ -240,19 +195,10 @@ public class UtilPack {
                 id = resultSet.getInt("id");
             }
         } catch (SQLException e) {}
-//        Session session = HibernateUtil.getSessionFactory().openSession();
-//        Query query = session.createQuery("from ProductKinds where title = :title");
-//        query.setParameter("title", title);
-//        List result = query.list();
-//        for (Iterator iterator = result.iterator(); iterator.hasNext();) {
-//            ProductKinds productKind = (ProductKinds) iterator.next();
-//            id = productKind.getId();
-//        }
         return id;
     }
+
     public static String getVendorFromProductTitle (String title) {
-//        Vendors vendor = new Vendors();
-//        Products product = new Products();
         String vendor_title = "";
         try {
             ResultSet resultSet = PCGUIController.connection.getResult(
@@ -262,20 +208,9 @@ public class UtilPack {
                 vendor_title = resultSet.getString("title");
             }
         } catch (SQLException e) {}
-//        Session session = HibernateUtil.getSessionFactory().openSession();
-//        Query query = session.createQuery("from Products where title = :title");
-//        query.setParameter("title", title);
-//        List<Products> list = query.list();
-//        for (Iterator iterator = list.iterator(); iterator.hasNext();) {
-//            product = (Products) iterator.next();
-//        }
-//        Query query1 = session.createQuery("from Vendors where id = " + product.getId());
-//        List<Vendors> list1 = query1.list();
-//        for (Iterator iterator = list1.iterator(); iterator.hasNext();) {
-//            vendor = (Vendors) iterator.next();
-//        }
         return vendor_title;
     }
+
     public static Integer getProductIdFromTitle (String title, ArrayList<Product> allProductsList) {
         final Integer[] id = {0};
         allProductsList.stream().forEach((product) -> {
@@ -283,6 +218,7 @@ public class UtilPack {
         });
         return id[0];
     }
+
     public static String getProductTitleFromId (int id, ArrayList<Product> allProductsList) {
         final String[] title = {""};
         allProductsList.stream().forEach((product) -> {
@@ -290,6 +226,7 @@ public class UtilPack {
         });
         return title[0];
     }
+
     public static Integer getProductCurrency (String title, ArrayList<Product> allProductsList) {
         final Integer[] id = {0};
         allProductsList.stream().forEach((product) -> {
@@ -297,6 +234,7 @@ public class UtilPack {
         });
         return id[0];
     }
+
     public static int getCurrencyIdFromTitle (String title) {
         int id = 0;
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -309,6 +247,7 @@ public class UtilPack {
         }
         return id;
     }
+
     public static String normalize(String string) {
         //проверить корректность работы "normalize" позже
         if (string.contains("\t") || (string.contains("\n"))) {
@@ -331,6 +270,7 @@ public class UtilPack {
         }
         return string;
     }
+
     public static ArrayList<String> getAllProductTypes() {
         ArrayList<String> productTypes = new ArrayList<>();
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -342,6 +282,7 @@ public class UtilPack {
         session.close();
         return productTypes;
     }
+
     public static ArrayList<String> getAllCurrencies() {
         ArrayList<String> currencies = new ArrayList<>();
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -353,6 +294,7 @@ public class UtilPack {
         session.close();
         return currencies;
     }
+
     public static ArrayList<String> getAllVendors() {
         ArrayList<String> vendors = new ArrayList<>();
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -364,6 +306,7 @@ public class UtilPack {
         session.close();
         return vendors;
     }
+
     public static ArrayList<Vendors> getAllVendorsEntities() {
         ArrayList<Vendors> vendors = new ArrayList<>();
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -375,6 +318,7 @@ public class UtilPack {
         session.close();
         return vendors;
     }
+
     public static ArrayList<SeriesItems> getAllSeries() {
         ArrayList<SeriesItems> seriesItems = new ArrayList();
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -386,6 +330,7 @@ public class UtilPack {
         session.close();
         return seriesItems;
     }
+
     public static ArrayList<Integer> arrayChildren(Integer parent) {
         ArrayList<Integer> children = new ArrayList<>();
         try {
@@ -395,16 +340,9 @@ public class UtilPack {
                 children.add(resultSet.getInt("parent"));
             }
         } catch (SQLException e) {}
-
-//        Session session = HibernateUtil.getSessionFactory().openSession();
-//        List res = session.createQuery("From Categories where parent=" + parent).list();
-//        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
-//            Categories cat = (Categories) iterator.next();
-//            children.add(cat.getId());
-//        }
-//        session.close();
         return children;
     }
+
     public static String cleanHtml(String rawHtml) {
         String cleanHtml = new String();
         String cutString1 = "<html dir=\"ltr\"><head></head><body contenteditable=\"true\">";
@@ -413,9 +351,9 @@ public class UtilPack {
         cleanHtml = cleanHtml.replace(cutString2, "");
         return cleanHtml;
     }
+
     public static void checkItemsSelected(CheckBoxTreeItem rootItem){
         for(Object item : rootItem.getChildren()){
-
             Session session = HibernateUtil.getSessionFactory().openSession();
             Transaction tx = session.beginTransaction();
             Query query = session.createQuery("from Categories where title = :title");
@@ -428,25 +366,13 @@ public class UtilPack {
                 tx.commit();
             }
             session.close();
-
-
-            /*
-            try {
-                PCGUIController.connection.getUpdateResult("update categories set published=" +
-                        (((CheckBoxTreeItem) item).selectedProperty().getValue() ? 1 : 0) + "where title=" +
-                        ((CheckBoxTreeItem) item).getValue());
-            } catch (SQLException e) {}
-            */
-            //System.out.println(((CheckBoxTreeItem) item).getValue() + " " + ((CheckBoxTreeItem) item).selectedProperty().getValue());
-
-            //checkItemsSelected((CheckBoxTreeItem) item);
-
         }
-
     }
+
     public static void copyFile(File source, File dest) throws IOException {
         Files.copy(source.toPath(), dest.toPath());
     }
+
     public static void startFTP(String filePath, String remotePlace){
         StandardFileSystemManager manager = new StandardFileSystemManager();
         String sshHost = "";
@@ -490,6 +416,7 @@ public class UtilPack {
             manager.close();
         }
     }
+
     public static int stringToIntByChars(String string) {
         char[] chars = string.toCharArray();
         int orderNumber = 0;
@@ -501,5 +428,11 @@ public class UtilPack {
             orderNumber += digit;
         }
         return orderNumber;
+    }
+
+    public static SortedList<String> sortRussianList(ObservableList<String> items) {
+        Collator collator = Collator.getInstance(Locale.forLanguageTag("ru-RU"));
+        Collections.sort(items, collator);
+        return new SortedList(items);
     }
 }

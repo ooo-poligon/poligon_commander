@@ -1,6 +1,5 @@
 package main;
 
-import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import com.sun.pdfview.PDFFile;
 import com.sun.pdfview.PDFPage;
 import entities.*;
@@ -16,6 +15,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.embed.swing.SwingFXUtils;
@@ -36,7 +36,6 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.scene.web.HTMLEditor;
@@ -48,15 +47,19 @@ import javafx.util.converter.IntegerStringConverter;
 import jxl.read.biff.BiffException;
 import modalwindows.AlertWindow;
 import modalwindows.SetRatesWindow;
+import new_items.NewCategory;
+import new_items.NewSerie;
+import new_items.NewVendor;
 import org.hibernate.*;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.exception.JDBCConnectionException;
-import settings.*;
+import settings.LocalDBSettings;
+import settings.PriceCalcSettings;
+import settings.SiteDBSettings;
+import settings.SiteSettings;
 import tableviews.*;
 import treeviews.CategoriesTreeView;
-import treeviews.PropertiesTreeView;
 import utils.*;
-
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -64,12 +67,12 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.Collator;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -82,7 +85,276 @@ import java.util.stream.Collectors;
  */
 
 public class PCGUIController implements Initializable {
+
+    // Panes
+    @FXML private AnchorPane anchorPane;
+    @FXML private AnchorPane editorAnchorPane;
+    @FXML private StackPane  stackPane;
+    @FXML private GridPane   gridPane;
+    @FXML private GridPane   gridPanePDF;
+    @FXML private GridPane   productDimsGridPane;
+    @FXML private GridPane   plug1GridPane;
+    @FXML private GridPane   plug2GridPane;
+    @FXML private GridPane   productTabGridPaneImageView;
+    @FXML private GridPane   functionGridPaneImageView;
+    @FXML private ScrollPane scroller;
+    StackPane stackPaneModal = new StackPane();
+    Stack<ProductKindPropertiesTableView> deletedLines = new Stack<>();
+
+    @FXML private HTMLEditor htmlEditor;
+    @FXML private TextArea htmlCode;
+
+    // TreeViews
+    @FXML private TreeView<String> categoriesTree;
+    TreeView<String> treeView;
+
+    //Tabs
+    @FXML TabPane tabPane;
+    @FXML Tab mainTab;
+    @FXML Tab productTab;
+    @FXML Tab pdfTab;
+    @FXML Tab settingsTab;
+    @FXML Tab editorTab;
+    @FXML Tab plug1Tab;
+    @FXML Tab plug2Tab;
+
+    // ContextMenus
+    @FXML private ContextMenu treeViewContextMenu;
+    @FXML private ContextMenu productTableContextMenu;
+    @FXML private ContextMenu datasheetTableContextMenu;
+    @FXML private ContextMenu productKindsListContextMenu;
+    @FXML private ContextMenu functionsTableContextMenu;
+    @FXML private ContextMenu functionsTable1ContextMenu;
+    @FXML private ContextMenu accessoriesTableContextMenu;
+    @FXML private ContextMenu newsItemsListContextMenu;
+    @FXML private ContextMenu articlesListContextMenu;
+    @FXML private ContextMenu videosListContextMenu;
+    @FXML private ContextMenu reviewsListContextMenu;
+    @FXML private ContextMenu additionsListContextMenu;
+    @FXML private ContextMenu contentsListContextMenu;
+    @FXML private ContextMenu analogsTableContextMenu;
+    @FXML private ContextMenu usersTableContextMenu;
+    @FXML private ContextMenu companiesTableContextMenu;
+    @FXML private ContextMenu groupsTableContextMenu;
+
+    // TableViews & TableColumns
+    @FXML private TableView<ProductsTableView>            productsTable;
+    @FXML private TableColumn<ProductsTableView, Boolean> productAvailable;
+    @FXML private TableColumn<ProductsTableView, Boolean> productOutdated;
+    @FXML private TableColumn<ProductsTableView, String>  productArticle;
+    @FXML private TableColumn<ProductsTableView, String>  productTitle;
+    @FXML private TableColumn<ProductsTableView, String>  productDescription;
+
+    @FXML private TableView<PricesTableView>              pricesTable;
+    @FXML private TableColumn<PricesTableView, String>    priceType;
+    @FXML private TableColumn<PricesTableView, Double>    priceValue;
+    @FXML private TableColumn<PricesTableView, Double>    priceValueRub;
+
+    @FXML private TableView<QuantityTableView>            quantitiesTable;
+    @FXML private TableColumn<QuantityTableView, String>  quantityStock;
+    @FXML private TableColumn<QuantityTableView, String>  quantityReserved;
+    @FXML private TableColumn<QuantityTableView, String>  quantityOrdered;
+    @FXML private TableColumn<QuantityTableView, Integer> quantityMinimum;
+    @FXML private TableColumn<QuantityTableView, Integer> quantityPiecesPerPack;
+
+    @FXML private TableView<AnalogsTableView>             analogsTable;
+    @FXML private TableColumn<AnalogsTableView, String>   analogTitle;
+    @FXML private TableColumn<AnalogsTableView, String>   analogVendor;
+
+    @FXML private TableView<ProductsTableView>            deliveryTable;
+    @FXML private TableColumn<ProductsTableView, String>  deliveryTime;
+
+    @FXML private TableView<DatasheetTableView>           datasheetFileTable;
+    @FXML private TableColumn<DatasheetTableView, String> datasheetFileName;
+
+    @FXML private TableView<ProductPropertiesForKindTableView>           productPropertiesForKindTable;
+    @FXML private TableColumn<ProductPropertiesForKindTableView, String> productPropertiesForKindOrderNumberColumn;
+    @FXML private TableColumn<ProductPropertiesForKindTableView, String> productPropertiesForKindTitleColumn;
+    @FXML private TableColumn<ProductPropertiesForKindTableView, String> productPropertiesForKindOptionalColumn;
+    @FXML private TableColumn<ProductPropertiesForKindTableView, String> productPropertiesForKindSymbolColumn;
+    @FXML private TableColumn<ProductPropertiesForKindTableView, String> productPropertiesForKindValueColumn;
+
+    @FXML private TableView<FunctionsTableView>           functionsTable;
+    @FXML private TableColumn<FunctionsTableView, String> functionsTableTitleColumn;
+    @FXML private TableColumn<FunctionsTableView, String> functionsTableSymbolColumn;
+
+    @FXML private TableView<FunctionsTableView>           functionsTable1;
+    @FXML private TableColumn<FunctionsTableView, String> functionsTableTitleColumn1;
+    @FXML private TableColumn<FunctionsTableView, String> functionsTableSymbolColumn1;
+
+    @FXML private TableView<AccessoriesTableView>           accessoriesTable;
+    @FXML private TableColumn<AccessoriesTableView, String> accessoriesTableTitleColumn;
+    @FXML private TableColumn<AccessoriesTableView, String> accessoriesTableDescriptionColumn;
+
+    @FXML private TableView<UsersTableView>                 usersTable;
+    @FXML private TableColumn<UsersTableView, Integer>      userIdTableColumn;
+    @FXML private TableColumn<UsersTableView, String>       userNameTableColumn;
+    @FXML private TableColumn<UsersTableView, String>       userEmailTableColumn;
+    @FXML private TableColumn<UsersTableView, String>       userPasswordTableColumn;
+    @FXML private TableColumn<UsersTableView, String>       userGroupTableColumn;
+    @FXML private TableColumn<UsersTableView, String>       userCompanyTableColumn;
+    @FXML private TableColumn<UsersTableView, String>       userPositionTableColumn;
+    @FXML private TableColumn<UsersTableView, String>       userPhoneTableColumn;
+
+    @FXML private TableView<CompaniesTableView>             companiesTable;
+    @FXML private TableColumn<CompaniesTableView, Boolean>  companyDealerColumn;
+    @FXML private TableColumn<CompaniesTableView, String>   companyTitleColumn;
+    @FXML private TableColumn<CompaniesTableView, String>   companyPhoneColumn;
+    @FXML private TableColumn<CompaniesTableView, String>   companyEmailColumn;
+    @FXML private TableColumn<CompaniesTableView, String>   companySiteColumn;
+    @FXML private TableColumn<CompaniesTableView, String>   companyAddressColumn;
+    @FXML private TableColumn<CompaniesTableView, String>   companyFaxColumn;
+
+    @FXML private TableView<GroupsTableView>                groupsTable;
+    @FXML private TableColumn<GroupsTableView, String>      groupTitleColumn;
+    @FXML private TableColumn<GroupsTableView, String>      groupDescriptionColumn;
+
+    @FXML private TableView<ProductKindPropertiesTableView>           productKindPropertiesTable;
+    @FXML private TableColumn<ProductKindPropertiesTableView, String> productKindPropertiesOrderColumn;
+    @FXML private TableColumn<ProductKindPropertiesTableView, String> productKindPropertiesTitleColumn;
+    @FXML private TableColumn<ProductKindPropertiesTableView, String> productKindPropertiesOptionalColumn;
+    @FXML private TableColumn<ProductKindPropertiesTableView, String> productKindPropertiesSymbolColumn;
+
+    // Buttons
+    @FXML private Button startImportXLSButton;
+
+    // Labels
+    @FXML private Label productTabTitle;
+    @FXML private Label pdfTabTitle;
+    @FXML private Label courseEUROLabel;
+    @FXML private Label courseDateLabel;
+    @FXML private Label productTabKind;
+    @FXML private Label fileForExportPathLabel;
+    @FXML private Label dirForExportPricesPathLabel;
+    @FXML private Label currentZoomLabel;
+
+    // ProgressBars
+    @FXML private ProgressBar progressBar;
+    @FXML private ProgressBar progressBarImportXLS;
+
+    // ImageViews
+    @FXML private ImageView imageView;
+    @FXML private ImageView productTabImageView;
+    @FXML private ImageView productDimsImageView;
+    @FXML private ImageView plug1ImageView;
+    @FXML private ImageView plug2ImageView;
+    @FXML private ImageView functionImageView;
+
+    // ListViews
+    @FXML private ListView<String> headersXLS;
+    @FXML private ListView<String> comparedXLSAndDBFields;
+    @FXML private ListView<String> productKindsList;
+    @FXML private ListView<String> newsListView;
+    @FXML private ListView<String> articlesListView;
+    @FXML private ListView<String> videosListView;
+    @FXML private ListView<String> reviewsListView;
+    @FXML private ListView<String> additionsListView;
+    @FXML private ListView<String> categoriesListView;
+    @FXML private ListView<String> contentsListView;
+
+    // ComboBoxes
+    @FXML private ComboBox<String> searchComboBox;
+    @FXML private ComboBox<String> importFieldsComboBox;
+    @FXML private ComboBox<String> tableDBForExportComboBox;
+
+    // TextFields
+    @FXML private TextField headersRowTextField;
+    @FXML private TextArea picDescriptionTextArea;
+    @FXML private TextArea plug1TextArea;
+    @FXML private TextArea plug2TextArea;
+    @FXML private TextArea functionDescriptionTextArea;
+    @FXML private TextField addressSiteDB;
+    @FXML private TextField portSiteDB;
+    @FXML private TextField titleSiteDB;
+    @FXML private TextField userSiteDB;
+    @FXML private PasswordField passwordSiteDB;
+    @FXML private TextField addressLocalDB;
+    @FXML private TextField portLocalDB;
+    @FXML private TextField titleLocalDB;
+    @FXML private TextField userLocalDB;
+    @FXML private PasswordField passwordLocalDB;
+    @FXML private TextField addCBRTextField;
+    @FXML private TextField categorySearch;
+    @FXML private TextField pageTitleTextField;
+    @FXML private TextField directoryTitleTextField;
+    @FXML private TextField contentTitleTextField;
+    @FXML private TitledPane categoriesTitledPane;
+    @FXML private TextField exportFileNameTextField;
+    @FXML private TextField siteOrdersReceiverTextField;
+    @FXML private TextField serverSFTP;
+    @FXML private TextField portSFTP;
+    @FXML private TextField userSFTP;
+    @FXML private TextField passwordSFTP;
+
+    // CheckBoxes
+    @FXML private CheckBox treeViewHandlerMode;
+
+    //Paginations
+    @FXML private Pagination pagination;
+
+    //Files & FileChoosers
+    File fileXLS;
+    File fileXLSExport;
+    final FileChooser fileChooser = new FileChooser();
+    final DirectoryChooser directoryForExport = new DirectoryChooser();
+    final DirectoryChooser directoryForExportPrices = new DirectoryChooser();
+    final DirectoryChooser directoryForExportProperties = new DirectoryChooser();
+
+    // Lists
+    ArrayList<ArrayList<String>> allImportXLSContent = new ArrayList<>(120);
+    ArrayList<ArrayList<String>> allCompareDetails = new ArrayList<>(20);
+    ObservableList<CategoriesTreeView> subCategoriesTreeViewList = FXCollections.observableArrayList();
+    ObservableList<ImportFields> importFields = FXCollections.observableArrayList();
+    ObservableList<String> comparedPairs = FXCollections.observableArrayList();
+
+    // Numbers
+    private Integer headersRowNumber = 0;
+    public Double course;
+    Double basePrice;
+    Double rubRetail;
+    private static final double ZOOM_DELTA = 1.05;
+    Double newVendorRate;
+    Double addCBR;
+
+    // Strings
+    String selectedProduct;
+    String newCatTitle = "";
+    String newCatDescription;
+    String newCatPicturePath;
+    String selectedDBKey = "Наименование продукта";
+    String catalogHeader = "Каталог товаров";
+    String newVendorTitle = "";
+    String newVendorDescription;
+    String newVendorCurrency;
+    String newVendorAddress;
+    String targetDir;
+    String fileChooserDirectoryCash = "C:\\";
+    String noImageFile = "\\\\Server03\\бд_сайта\\poligon_images\\noImage.gif";
+    String defaultImagesDir = "\\\\Server03\\бд_сайта\\poligon_images\\";
+    String defaultPdfsDir = "\\\\Server03\\бд_сайта\\poligon_datasheets\\datasheets\\";
+    String selectedCategory = "";
+    String focusedProduct = "";
+    String parentCategoryTitle = "";
+    private String lastKey = null;
+
+    //booleans
+    boolean clear = true;
+
+    private ObjectProperty<PDFFile> currentFile;
+    private ObjectProperty<ImageView> currentImage;
+    private DoubleProperty zoom;
+    private PageDimensions currentPageDimensions;
+    private ExecutorService imageLoadService;
+    public static DBConnection connection = new DBConnection("local");
+    public static ArrayList<Product> allProductsList = new ArrayList<>(22000);
+    public static ArrayList<FileOfProgram> allFilesOfProgramList = new ArrayList<>(22000);
+    public static ArrayList<QuantityOfProduct> allQuantitiesList = new ArrayList<>();
+    public static ObservableList<String> allProductsTitles = FXCollections.observableArrayList();
+    public static ObservableList<CategoriesTreeView> allCategoriesList = FXCollections.observableArrayList();
+    public static ObservableList<ProductKindPropertiesTableView> productKindsPropertiesList = FXCollections.observableArrayList();
     private static int loadProgramCounter = 0;
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         try { resetProgram(); } catch (SQLException ignored) {}
@@ -785,7 +1057,6 @@ public class PCGUIController implements Initializable {
         }
         return null;
     }
-
     private void buildUsersTable() {
         ObservableList<UsersTableView> data = FXCollections.observableArrayList();
         ObservableList<String> groups = FXCollections.observableArrayList();
@@ -1201,16 +1472,16 @@ public class PCGUIController implements Initializable {
                 if((fileOfProgram.getOwner_id() == selectedProductId) && (fileOfProgram.getFile_type_id() == 1)) {
                     if (fileOfProgram.getPath().equals(defaultImagesDir)) {
                         File picFile = new File(noImageFile);
-                        ProductImage.open(picFile, gridPane, imageView, "deviceImage");
+                        ImageFile.open(picFile, gridPane, imageView, "deviceImage");
                     } else {
                         File picFile = new File(fileOfProgram.getPath());
-                        ProductImage.open(picFile, gridPane, imageView, "deviceImage");
+                        ImageFile.open(picFile, gridPane, imageView, "deviceImage");
                     }
                 }
             });
         } else {
             File picFile = new File(noImageFile);
-            ProductImage.open(picFile, gridPane, imageView, "deviceImage");
+            ImageFile.open(picFile, gridPane, imageView, "deviceImage");
 
         }
     }
@@ -2039,21 +2310,6 @@ public class PCGUIController implements Initializable {
             session.close();
         }
     }
-    private void subPropertiesList(String selectedNode) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        try {
-            List subProperties = session.createSQLQuery(
-                    "SELECT title FROM property_types t1, (SELECT id FROM property_types WHERE title=" +
-                            "\"" + UtilPack.normalize(selectedNode) + "\") t2 WHERE t2.id = t1.parent").list();
-            for (Iterator iterator = subProperties.iterator(); iterator.hasNext();) {
-                String sub = (String) iterator.next();
-                subPropertiesTreeViewList.add(new PropertiesTreeView(sub));
-            }
-        } catch (HibernateException e) {
-        } finally {
-            session.close();
-        }
-    }
     private void setCategorySelected(String selectedProduct) throws SQLException {
         CheckBoxTreeItem<String> productOwner = new CheckBoxTreeItem<>();
         final Categories[] category = {new Categories()};
@@ -2310,7 +2566,6 @@ public class PCGUIController implements Initializable {
         productsTable.setContextMenu(productTableContextMenu);
         //fillProductTab(selectedProduct);
     }
-
     private void changePictureForSelectedProducts() {
         final ArrayList<String> selectedProductsTitles = new ArrayList<>();
         productsTable.getSelectionModel().getSelectedItems().stream().forEach((item) -> {
@@ -2325,10 +2580,10 @@ public class PCGUIController implements Initializable {
             Task task = new Task<Void>() {
                 @Override public Void call() {
                     int i = 2;
-                    String tempFileName = new File(ProductImage.makeTemporaryResizedImage(file)).getName();
+                    String tempFileName = new File(ImageFile.makeTemporaryResizedImage(file)).getName();
                     String tempFilePath = PoligonCommander.tmpDir + "\\" + tempFileName;
                     for (String title : selectedProductsTitles) {
-                        ProductImage.save(new File(tempFilePath), title);
+                        ImageFile.save(new File(tempFilePath), title);
                         updateProgress(i, selectedProductsTitles.size());
                         i++;
                     }
@@ -2349,7 +2604,6 @@ public class PCGUIController implements Initializable {
         }
         try { getAllFilesOfProgramList(); } catch (SQLException e) {}
     }
-
     private Task<Void> deleteProductsTask() {
         return new Task<Void>() {
             @Override
@@ -2402,7 +2656,6 @@ public class PCGUIController implements Initializable {
         validTitle = defaultImagesDir + "catalog\\" + UtilPack.getVendorFromProductTitle(productTitle) + "\\plugs\\" + productTitle.replace(" ", "_").replace("/", "_") + "_plug"+ plugNumber +".jpg";
         return validTitle;
     }
-
     // Заполняет заголовок вкладки свойств товара названием текущего выбранного товара,
     // а также отображает картинку товара, еасли она определена.
     private void fillProductTab(String selectedProduct) {
@@ -2473,23 +2726,23 @@ public class PCGUIController implements Initializable {
         functionDescriptionTextArea.setText("");
         try {
             int selectedProductId = UtilPack.getProductIdFromTitle(selectedProduct, allProductsList);
-            ProductImage.open(new File(noImageFile), productDimsGridPane, productDimsImageView, "dimsImage");
+            ImageFile.open(new File(noImageFile), productDimsGridPane, productDimsImageView, "dimsImage");
             Session session = HibernateUtil.getSessionFactory().openSession();
             List pics = session.createQuery("from Files where ownerId=" + selectedProductId + " and fileTypeId=" + 4).list();
             if (pics.size()==0) {
                 try {
-                    ProductImage.open(new File(dimsImagePathFromTitle(selectedProduct)), productDimsGridPane, productDimsImageView, "dimsImage");
+                    ImageFile.open(new File(dimsImagePathFromTitle(selectedProduct)), productDimsGridPane, productDimsImageView, "dimsImage");
                 } catch (Exception e) {
-                    ProductImage.open(new File(noImageFile), productDimsGridPane, productDimsImageView, "dimsImage");
+                    ImageFile.open(new File(noImageFile), productDimsGridPane, productDimsImageView, "dimsImage");
                 }
             } else {
                 for (Iterator iterator = pics.iterator(); iterator.hasNext();) {
                     Files pic = (Files) iterator.next();
                     File picFile = new File(pic.getPath());
                     if (pic.getName() != "" || pic.getName() != null) {
-                        ProductImage.open(picFile, productDimsGridPane, productDimsImageView, "dimsImage");
+                        ImageFile.open(picFile, productDimsGridPane, productDimsImageView, "dimsImage");
                     } else {
-                        ProductImage.open(new File(noImageFile), productDimsGridPane, productDimsImageView, "dimsImage");
+                        ImageFile.open(new File(noImageFile), productDimsGridPane, productDimsImageView, "dimsImage");
                     }
 
                 }
@@ -2499,15 +2752,15 @@ public class PCGUIController implements Initializable {
 
         try {
             int selectedProductId = UtilPack.getProductIdFromTitle(selectedProduct, allProductsList);
-            ProductImage.open(new File(noImageFile), plug1GridPane, plug1ImageView, "plugsImage");
+            ImageFile.open(new File(noImageFile), plug1GridPane, plug1ImageView, "plugsImage");
             plug1TextArea.setText("");
             Session session = HibernateUtil.getSessionFactory().openSession();
             List pics = session.createQuery("from Files where ownerId=" + selectedProductId + " and fileTypeId=" + 3).list();
             if (pics.size()==0) {
                 try {
-                    ProductImage.open(new File(plugsImagePathFromTitle(selectedProduct, 1)), plug1GridPane, plug1ImageView, "plugsImage");
+                    ImageFile.open(new File(plugsImagePathFromTitle(selectedProduct, 1)), plug1GridPane, plug1ImageView, "plugsImage");
                 } catch (Exception e) {
-                    ProductImage.open(new File(noImageFile), plug1GridPane, plug1ImageView, "plugsImage");
+                    ImageFile.open(new File(noImageFile), plug1GridPane, plug1ImageView, "plugsImage");
                 }
                 plug1TextArea.setText("");
             } else {
@@ -2515,9 +2768,9 @@ public class PCGUIController implements Initializable {
                     Files pic = (Files) iterator.next();
                     File picFile = new File(pic.getPath());
                     if (pic.getName() != "" || pic.getName() != null) {
-                        ProductImage.open(picFile, plug1GridPane, plug1ImageView, "plugsImage");
+                        ImageFile.open(picFile, plug1GridPane, plug1ImageView, "plugsImage");
                     } else {
-                        ProductImage.open(new File(noImageFile), plug1GridPane, plug1ImageView, "plugsImage");
+                        ImageFile.open(new File(noImageFile), plug1GridPane, plug1ImageView, "plugsImage");
                     }
                 }
                 plug1TextArea.setText("");
@@ -2527,15 +2780,15 @@ public class PCGUIController implements Initializable {
 
         try {
             int selectedProductId = UtilPack.getProductIdFromTitle(selectedProduct, allProductsList);
-            ProductImage.open(new File(noImageFile), plug2GridPane, plug2ImageView, "plugsImage");
+            ImageFile.open(new File(noImageFile), plug2GridPane, plug2ImageView, "plugsImage");
             plug2TextArea.setText("");
             Session session = HibernateUtil.getSessionFactory().openSession();
             List pics = session.createQuery("from Files where ownerId=" + selectedProductId + " and fileTypeId=" + 7).list();
             if (pics.size()==0) {
                 try {
-                    ProductImage.open(new File(plugsImagePathFromTitle(selectedProduct, 2)), plug2GridPane, plug2ImageView, "plugsImage");
+                    ImageFile.open(new File(plugsImagePathFromTitle(selectedProduct, 2)), plug2GridPane, plug2ImageView, "plugsImage");
                 } catch (Exception e) {
-                    ProductImage.open(new File(noImageFile), plug2GridPane, plug2ImageView, "plugsImage");
+                    ImageFile.open(new File(noImageFile), plug2GridPane, plug2ImageView, "plugsImage");
                 }
                 plug2TextArea.setText("");
             } else {
@@ -2543,9 +2796,9 @@ public class PCGUIController implements Initializable {
                     Files pic = (Files) iterator.next();
                     File picFile = new File(pic.getPath());
                     if (pic.getName() != "" || pic.getName() != null) {
-                        ProductImage.open(picFile, plug2GridPane, plug2ImageView, "plugsImage");
+                        ImageFile.open(picFile, plug2GridPane, plug2ImageView, "plugsImage");
                     } else {
-                        ProductImage.open(new File(noImageFile), plug2GridPane, plug2ImageView, "plugsImage");
+                        ImageFile.open(new File(noImageFile), plug2GridPane, plug2ImageView, "plugsImage");
                     }
                 }
                 plug2TextArea.setText("");
@@ -2554,23 +2807,23 @@ public class PCGUIController implements Initializable {
         } catch (NullPointerException ignored) {}
 
 
-        ProductImage.open(new File(noImageFile), functionGridPaneImageView, functionImageView, "functionImage");
+        ImageFile.open(new File(noImageFile), functionGridPaneImageView, functionImageView, "functionImage");
         try {
             productTabTitle.setText(selectedProduct);
             productTabKind.setText(getProductKindTitle(selectedProduct));
             int selectedProductId = UtilPack.getProductIdFromTitle(selectedProduct, allProductsList);
-            ProductImage.open(new File(noImageFile), productTabGridPaneImageView, productTabImageView, "functionImage");
+            ImageFile.open(new File(noImageFile), productTabGridPaneImageView, productTabImageView, "functionImage");
             picDescriptionTextArea.setText("");
             Session session = HibernateUtil.getSessionFactory().openSession();
             List pics = session.createQuery("from Files where ownerId=" + selectedProductId + " and fileTypeId=" + 1).list();
             if (pics.size()==0) {
-                ProductImage.open(new File(noImageFile), productTabGridPaneImageView, productTabImageView, "functionImage");
+                ImageFile.open(new File(noImageFile), productTabGridPaneImageView, productTabImageView, "functionImage");
                 picDescriptionTextArea.setText("");
             } else {
                 for (Iterator iterator = pics.iterator(); iterator.hasNext();) {
                     Files pic = (Files) iterator.next();
                     File picFile = new File(pic.getPath());
-                    ProductImage.open(picFile, productTabGridPaneImageView, productTabImageView, "functionImage");
+                    ImageFile.open(picFile, productTabGridPaneImageView, productTabImageView, "functionImage");
                     picDescriptionTextArea.setText(pic.getDescription());
                 }
             }
@@ -2661,138 +2914,6 @@ public class PCGUIController implements Initializable {
         tx.commit();
         session.close();
     }
-    private void buildPropertiesTable(String selectedPropertyType, String selectedProduct) {
-        ObservableList<ProductPropertiesTableView> propertyValues = FXCollections.observableArrayList();
-        ArrayList<Integer> propertyIds = new ArrayList<>(10);
-        ArrayList<PropertyValues> propertyValuesList = new ArrayList<>(10);
-        //ArrayList<ProductPropertiesTableView> propertyValues = new ArrayList<>(10);
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        List res = session.createQuery("from Properties where propertyTypeId =" +
-                UtilPack.getPropertyTypeIdFromTitle(selectedPropertyType)).list();
-        for (Iterator iterator = res.iterator(); iterator.hasNext();) {
-            Properties pr = (Properties) iterator.next();
-            propertyIds.add(pr.getId());
-        }
-        session.close();
-        Session session1 = HibernateUtil.getSessionFactory().openSession();
-        List res1 = session1.createQuery("from PropertyValues where productId=" +
-                UtilPack.getProductIdFromTitle(selectedProduct, allProductsList)).list();
-        for(Iterator iterator =  res1.iterator(); iterator.hasNext();) {
-            PropertyValues pv = (PropertyValues) iterator.next();
-            if(propertyIds.contains(pv.getPropertyId().getId())) {
-                propertyValuesList.add(pv);
-            }
-        }
-        session1.close();
-        String currentTitle = "";
-        for (int i = 0; i < propertyValuesList.size(); i++) {
-            if (!currentTitle.equals(propertyValuesList.get(i).getPropertyId().getTitle())) {
-                propertyValues.add(new ProductPropertiesTableView(
-                        propertyValuesList.get(i).getPropertyId().getTitle(),
-                        propertyValuesList.get(i).getCond(),
-                        propertyValuesList.get(i).getValue(),
-                        propertyValuesList.get(i).getMeasureId().getSymbolEn(),
-                        propertyValuesList.get(i).getId()
-                ));
-                currentTitle = propertyValuesList.get(i).getPropertyId().getTitle();
-            } else {
-                propertyValues.add(new ProductPropertiesTableView(
-                        "",
-                        propertyValuesList.get(i).getCond(),
-                        propertyValuesList.get(i).getValue(),
-                        propertyValuesList.get(i).getMeasureId().getSymbolEn(),
-                        propertyValuesList.get(i).getId()
-                ));
-            }
-        }
-
-        propertyTitleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
-        propertyConditionColumn.setCellValueFactory(new PropertyValueFactory<>("cond"));
-        propertyConditionColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        propertyConditionColumn.setOnEditCommit(
-                new EventHandler<CellEditEvent<ProductPropertiesTableView, String>>() {
-                    @Override
-                    public void handle(CellEditEvent<ProductPropertiesTableView, String> t) {
-                        String cond = t.getOldValue();
-                        Integer productId  = UtilPack.getProductIdFromTitle(selectedProduct, allProductsList);
-                        Integer pvId = 0;
-                        Session session = HibernateUtil.getSessionFactory().openSession();
-                        Query query = session.createQuery("from PropertyValues where cond = :cond and productId=" + productId);
-                        query.setParameter("cond", cond);
-                        List res = query.list();
-                        for(Iterator iterator = res.iterator(); iterator.hasNext();) {
-                            PropertyValues propertyValue = (PropertyValues) iterator.next();
-                            pvId = propertyValue.getId();
-                        }
-                        session.close();
-                        Session session1 = HibernateUtil.getSessionFactory().openSession();
-                        Transaction tx = session1.beginTransaction();
-                        Query query1 = session1.createQuery("update PropertyValues set cond = :cond" + " where id =" + pvId);
-                        query1.setParameter("cond", t.getNewValue());
-                        query1.executeUpdate();
-                        tx.commit();
-                        session1.close();
-                        ((ProductPropertiesTableView) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())
-                        ).setCond(t.getNewValue());
-                    }
-                }
-        );
-        propertyValueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
-        propertyValueColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        propertyValueColumn.setOnEditCommit(
-                new EventHandler<CellEditEvent<ProductPropertiesTableView, String>>() {
-                    @Override
-                    public void handle(CellEditEvent<ProductPropertiesTableView, String> t) {
-                        String value = t.getOldValue();
-                        Integer productId  = UtilPack.getProductIdFromTitle(selectedProduct, allProductsList);
-                        Integer pvId = 0;
-                        Session session = HibernateUtil.getSessionFactory().openSession();
-                        Query query = session.createQuery("from PropertyValues where value = :value and productId=" + productId);
-                        query.setParameter("value", value);
-                        List res = query.list();
-                        for(Iterator iterator = res.iterator(); iterator.hasNext();) {
-                            PropertyValues propertyValue = (PropertyValues) iterator.next();
-                            pvId = propertyValue.getId();
-                        }
-                        session.close();
-                        Session session1 = HibernateUtil.getSessionFactory().openSession();
-                        Transaction tx = session1.beginTransaction();
-                        Query query1 = session1.createQuery("update PropertyValues set value = :value" + " where id =" + pvId);
-                        query1.setParameter("value", t.getNewValue());
-                        query1.executeUpdate();
-                        tx.commit();
-                        session1.close();
-                        ((ProductPropertiesTableView) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())
-                        ).setValue(t.getNewValue());
-                    }
-                }
-        );
-        propertyMeasureColumn.setCellValueFactory(new PropertyValueFactory<>("measure"));
-        propertiesTableContextMenu = ContextMenuBuilder.create().items(
-                MenuItemBuilder.create().text("Добавить новое свойство").onAction((ActionEvent ae1) -> {
-                    ContextBuilder.createNewPropertyValue(productTabTitle, propertiesTree);
-                    //buildPropertiesTable(selectedPropertyType, selectedProduct);
-                    buildProductPropertiesForKindTable(selectedProduct);
-                    propertiesTable.getSelectionModel().select(0);
-                }).build(),
-                MenuItemBuilder.create().text("Редактировать выбранное свойство").onAction((ActionEvent ae2) -> {
-                    ContextBuilder.updateThePropertyValue(productTabTitle, propertiesTree, propertiesTable);
-                    //buildPropertiesTable(selectedPropertyType, selectedProduct);
-                    buildProductPropertiesForKindTable(selectedProduct);
-                    propertiesTable.getSelectionModel().select(0);
-                }).build(),
-                MenuItemBuilder.create().text("Удалить выбранное свойство").onAction((ActionEvent ae3) -> {
-                    ContextBuilder.deleteThePropertyValue(productTabTitle, propertiesTree, propertiesTable);
-                    //buildPropertiesTable(selectedPropertyType, selectedProduct);
-                    buildProductPropertiesForKindTable(selectedProduct);
-                    propertiesTable.getSelectionModel().select(0);
-                }).build()
-        ).build();
-        propertiesTable.setContextMenu(propertiesTableContextMenu);
-        propertiesTable.setItems(propertyValues);
-    }
     private ObservableList<ProductPropertiesForKindTableView> buildProductPropertiesForKindTable(String selectedProduct) {
         Products product = new Products();
         ObservableList<ProductPropertiesForKindTableView> productPropertiesForKind = FXCollections.observableArrayList();
@@ -2873,7 +2994,7 @@ public class PCGUIController implements Initializable {
     };
     private void setFunctionPicture(String functionPicturePath) {
         File picFile = new File(functionPicturePath);
-        ProductImage.open(picFile, functionGridPaneImageView, functionImageView, "functionImage");
+        ImageFile.open(picFile, functionGridPaneImageView, functionImageView, "functionImage");
     }
     private void setSelectFunction() {
         functionDescriptionTextArea.setText("");
@@ -2884,9 +3005,9 @@ public class PCGUIController implements Initializable {
     @FXML private void setPictureButtonPress() {
         File file = fileChooser.showOpenDialog(anchorPane.getScene().getWindow());
         if (file != null) {
-            ProductImage.open(file, gridPane, imageView, "deviceImage");
-            ProductImage.open(file, productTabGridPaneImageView, productTabImageView, "deviceImage");
-            ProductImage.save(file, selectedProduct);
+            ImageFile.open(file, gridPane, imageView, "deviceImage");
+            ImageFile.open(file, productTabGridPaneImageView, productTabImageView, "deviceImage");
+            ImageFile.save(file, selectedProduct);
         }
         try { getAllFilesOfProgramList(); } catch (SQLException e) {}
         fillProductTab(selectedProduct);
@@ -2894,22 +3015,22 @@ public class PCGUIController implements Initializable {
     @FXML private void setDimsImageButtonPress() {
         File file = fileChooser.showOpenDialog(anchorPane.getScene().getWindow());
         if (file != null) {
-            ProductImage.open(file, productDimsGridPane, productDimsImageView, "dimsImage");
-            ProductImage.saveDimImage(file, selectedProduct);
+            ImageFile.open(file, productDimsGridPane, productDimsImageView, "dimsImage");
+            ImageFile.saveDimImage(file, selectedProduct);
         }
     }
     @FXML private void setPlug1ImageButtonPress() {
         File file = fileChooser.showOpenDialog(anchorPane.getScene().getWindow());
         if (file != null) {
-            ProductImage.open(file, plug1GridPane, plug1ImageView, "plugsImage");
-            ProductImage.savePlugImage(file, selectedProduct, 1);
+            ImageFile.open(file, plug1GridPane, plug1ImageView, "plugsImage");
+            ImageFile.savePlugImage(file, selectedProduct, 1);
         }
     }
     @FXML private void setPlug2ImageButtonPress() {
         File file = fileChooser.showOpenDialog(anchorPane.getScene().getWindow());
         if (file != null) {
-            ProductImage.open(file, plug2GridPane, plug2ImageView, "plugsImage");
-            ProductImage.savePlugImage(file, selectedProduct, 2);
+            ImageFile.open(file, plug2GridPane, plug2ImageView, "plugsImage");
+            ImageFile.savePlugImage(file, selectedProduct, 2);
         }
     }
     private void setFunctionDescriptionAndPicture(String selectedFunction) {
@@ -3334,44 +3455,44 @@ public class PCGUIController implements Initializable {
         ).build();
         newsListView.setContextMenu(newsItemsListContextMenu);
         try {
-            newsListView.setItems(getListItems("news"));
+            newsListView.setItems(UtilPack.sortRussianList(getListItems("news")));
         } catch (NullPointerException ignored) {
-            newsListView.setItems(emptyList);
+            newsListView.setItems(UtilPack.sortRussianList(emptyList));
         }
         articlesListView.setContextMenu(articlesListContextMenu);
         try {
-            articlesListView.setItems(getListItems("articles"));
+            articlesListView.setItems(UtilPack.sortRussianList(getListItems("articles")));
         } catch (NullPointerException ignored) {
-            articlesListView.setItems(emptyList);
+            articlesListView.setItems(UtilPack.sortRussianList(emptyList));
         }
         videosListView.setContextMenu(videosListContextMenu);
         try {
-            videosListView.setItems(getListItems("videos"));
+            videosListView.setItems(UtilPack.sortRussianList(getListItems("vdeos")));
         } catch (NullPointerException ignored) {
-            videosListView.setItems(emptyList);
+            videosListView.setItems(UtilPack.sortRussianList(emptyList));
         }
         reviewsListView.setContextMenu(reviewsListContextMenu);
         try {
-            reviewsListView.setItems(getListItems("reviews"));
+            reviewsListView.setItems(UtilPack.sortRussianList(getListItems("reviews")));
         } catch (NullPointerException ignored) {
-            reviewsListView.setItems(emptyList);
+            reviewsListView.setItems(UtilPack.sortRussianList(emptyList));
         }
         additionsListView.setContextMenu(additionsListContextMenu);
         try {
-            additionsListView.setItems(getListItems("additions"));
+            additionsListView.setItems(UtilPack.sortRussianList(getListItems("additions")));
         } catch (NullPointerException ignored) {
-            additionsListView.setItems(emptyList);
+            additionsListView.setItems(UtilPack.sortRussianList(emptyList));
         }
         contentsListView.setContextMenu(contentsListContextMenu);
         try {
-            contentsListView.setItems(getListItems("contents"));
+            contentsListView.setItems(UtilPack.sortRussianList(getListItems("contents")));
         } catch (NullPointerException ignored) {
-            contentsListView.setItems(emptyList);
+            contentsListView.setItems(UtilPack.sortRussianList(emptyList));
         }
         try {
-            categoriesListView.setItems(getListItems("categories"));
+            categoriesListView.setItems(UtilPack.sortRussianList(getListItems("categories")));
         } catch (NullPointerException ignored) {
-            categoriesListView.setItems(emptyList);
+            categoriesListView.setItems(UtilPack.sortRussianList(emptyList));
         }
     }
     private void setEmptyHtmlEditor() {
@@ -3631,6 +3752,11 @@ public class PCGUIController implements Initializable {
             Transaction tx = session.beginTransaction();
             category.setTitle(contentTitleTextField.getText());
             category.setDescription(UtilPack.cleanHtml(htmlEditor.getHtmlText()));
+            category.setSummary(category.getSummary());
+            category.setImagePath(category.getImagePath());
+            category.setParent(category.getParent());
+            category.setPublished(category.getPublished());
+            category.setMoreInfo(category.getMoreInfo());
             session.save(category);
             tx.commit();
             session.close();
@@ -3640,10 +3766,6 @@ public class PCGUIController implements Initializable {
     @FXML private void refreshHtml() {
         htmlEditor.setHtmlText(htmlCode.getText());
     }
-    ///////////////////
-    // Таб "Браузер" //
-    ///////////////////
-    // nothing s here at the time //
     /////////////////////
     // Таб "Настройки" //
     /////////////////////
@@ -3765,7 +3887,8 @@ public class PCGUIController implements Initializable {
                 }).build()
         ).build();
         productKindsList.setContextMenu(productKindsListContextMenu);
-        productKindsList.setItems(items);
+
+        productKindsList.setItems(UtilPack.sortRussianList(items));
     }
     private void tableExcelBehavior() {
         productKindPropertiesTable.setUserData(deletedLines);
@@ -4332,22 +4455,18 @@ public class PCGUIController implements Initializable {
         SiteDBSettings server = new SiteDBSettings();
         server.saveSetting("serverSFTP", serverSFTP.getText());
     }
-    @FXML private TextField serverSFTP;
     @FXML private void savePortSFTP() {
         SiteDBSettings port = new SiteDBSettings();
         port.saveSetting("portSFTP", portSFTP.getText());
     }
-    @FXML private TextField portSFTP;
     @FXML private void saveUserSFTP() {
         SiteDBSettings user = new SiteDBSettings();
         user.saveSetting("userSFTP", userSFTP.getText());
     }
-    @FXML private TextField userSFTP;
     @FXML private void savePasswordSFTP() {
         SiteDBSettings password = new SiteDBSettings();
         password.saveSetting("passwordSFTP", passwordSFTP.getText());
     }
-    @FXML private TextField passwordSFTP;
     @FXML private void saveAddressLocalDB() {
         LocalDBSettings address = new LocalDBSettings();
         address.saveSetting("addressLocalDB", addressLocalDB.getText());
@@ -4438,316 +4557,13 @@ public class PCGUIController implements Initializable {
     @FXML private void importPropertiesFromXls() {
         File file = new FileChooser().showOpenDialog(anchorPane.getScene().getWindow());
         if (file != null) {
-            //System.out.println("file.getPath() is " + file.getPath());
             try {
                 XLSHandler.importPropertyValues(file.getAbsolutePath(), progressBarImportXLS);
             } catch (IOException e) {
-                e.printStackTrace();
+                AlertWindow.showErrorMessage(e.getMessage());
             } catch (BiffException e) {
-                e.printStackTrace();
+                AlertWindow.showErrorMessage(e.getMessage());
             }
         }
     }
-
-    // Panes
-    @FXML private AnchorPane anchorPane;
-    @FXML private AnchorPane editorAnchorPane;
-    @FXML private StackPane  stackPane;
-    @FXML private StackPane  propertiesStackPane;
-    @FXML private GridPane   gridPane;
-    @FXML private GridPane   gridPanePDF;
-    @FXML private GridPane   productDimsGridPane;
-    @FXML private GridPane   plug1GridPane;
-    @FXML private GridPane   plug2GridPane;
-    @FXML private GridPane   productTabGridPaneImageView;
-    @FXML private GridPane   functionGridPaneImageView;
-    StackPane stackPaneModal = new StackPane();
-    Stack<ProductKindPropertiesTableView> deletedLines = new Stack<>();
-
-    @FXML private HTMLEditor htmlEditor;
-    @FXML private TextArea htmlCode;
-    @FXML private HBox textAndButtonsHBox1;
-
-    // TreeViews
-    @FXML private TreeView<String> categoriesTree;
-    @FXML private TreeView<String> propertiesTree;
-    TreeView<String> treeView;
-
-    //Tabs
-    @FXML TabPane tabPane;
-    @FXML Tab mainTab;
-    @FXML Tab productTab;
-    @FXML Tab pdfTab;
-    @FXML Tab settingsTab;
-    @FXML Tab editorTab;
-    @FXML Tab plug1Tab;
-    @FXML Tab plug2Tab;
-
-    // ContextMenus
-    @ FXML private ContextMenu treeViewContextMenu;
-    @ FXML private ContextMenu productTableContextMenu;
-    @ FXML private ContextMenu datasheetTableContextMenu;
-    @ FXML private ContextMenu vendorsTableContextMenu;
-    @ FXML private ContextMenu propertiesTableContextMenu;
-    @ FXML private ContextMenu productKindsListContextMenu;
-    @ FXML private ContextMenu propertiesTreeTableContextMenu;
-    @ FXML private ContextMenu functionsTableContextMenu;
-    @ FXML private ContextMenu functionsTable1ContextMenu;
-    @ FXML private ContextMenu accessoriesTableContextMenu;
-    @ FXML private ContextMenu newsItemsListContextMenu;
-    @ FXML private ContextMenu articlesListContextMenu;
-    @ FXML private ContextMenu videosListContextMenu;
-    @ FXML private ContextMenu reviewsListContextMenu;
-    @ FXML private ContextMenu additionsListContextMenu;
-    @ FXML private ContextMenu contentsListContextMenu;
-    @ FXML private ContextMenu analogsTableContextMenu;
-    @ FXML private ContextMenu seriesTableContextMenu;
-    @ FXML private ContextMenu usersTableContextMenu;
-    @ FXML private ContextMenu companiesTableContextMenu;
-    @ FXML private ContextMenu groupsTableContextMenu;
-
-    // TableViews & TableColumns
-    @FXML private TableView<ProductsTableView>            productsTable;
-    @FXML private TableColumn<ProductsTableView, Boolean> productAvailable;
-    @FXML private TableColumn<ProductsTableView, Boolean> productOutdated;
-    @FXML private TableColumn<ProductsTableView, String>  productArticle;
-    @FXML private TableColumn<ProductsTableView, String>  productTitle;
-    @FXML private TableColumn<ProductsTableView, String>  productDescription;
-
-    @FXML private TableView<PricesTableView>              pricesTable;
-    @FXML private TableColumn<PricesTableView, String>    priceType;
-    @FXML private TableColumn<PricesTableView, Double>    priceValue;
-    @FXML private TableColumn<PricesTableView, Double>    priceValueRub;
-
-    @FXML private TableView<QuantityTableView>            quantitiesTable;
-    @FXML private TableColumn<QuantityTableView, String>  quantityStock;
-    @FXML private TableColumn<QuantityTableView, String>  quantityReserved;
-    @FXML private TableColumn<QuantityTableView, String>  quantityOrdered;
-    @FXML private TableColumn<QuantityTableView, Integer> quantityMinimum;
-    @FXML private TableColumn<QuantityTableView, Integer> quantityPiecesPerPack;
-
-    @FXML private TableView<AnalogsTableView>             analogsTable;
-    @FXML private TableColumn<AnalogsTableView, String>   analogTitle;
-    @FXML private TableColumn<AnalogsTableView, String>   analogVendor;
-
-    @FXML private TableView<ProductsTableView>            deliveryTable;
-    @FXML private TableColumn<ProductsTableView, String>  deliveryTime;
-
-    @FXML private TableView<DatasheetTableView>           datasheetFileTable;
-    @FXML private TableColumn<DatasheetTableView, String> datasheetFileName;
-
-    @FXML private TableView<VendorsTableView>             vendorsTable;
-    @FXML private TableColumn<VendorsTableView, String>   vendorsTitleColumn;
-    @FXML private TableColumn<VendorsTableView, String>   vendorsAddressColumn;
-    @FXML private TableColumn<VendorsTableView, Double>   vendorsRateColumn;
-
-    @FXML private TableView<ProductPropertiesTableView>   propertiesTable;
-    @FXML private TableColumn<ProductPropertiesTableView, String>propertyTitleColumn;
-    @FXML private TableColumn<ProductPropertiesTableView, String>propertyValueColumn;
-    @FXML private TableColumn<ProductPropertiesTableView, String>propertyMeasureColumn;
-    @FXML private TableColumn<ProductPropertiesTableView, String>propertyConditionColumn;
-
-    @FXML private TableView<ProductPropertiesForKindTableView>           productPropertiesForKindTable;
-    @FXML private TableColumn<ProductPropertiesForKindTableView, String> productPropertiesForKindOrderNumberColumn;
-    @FXML private TableColumn<ProductPropertiesForKindTableView, String> productPropertiesForKindTitleColumn;
-    @FXML private TableColumn<ProductPropertiesForKindTableView, String> productPropertiesForKindOptionalColumn;
-    @FXML private TableColumn<ProductPropertiesForKindTableView, String> productPropertiesForKindSymbolColumn;
-    @FXML private TableColumn<ProductPropertiesForKindTableView, String> productPropertiesForKindValueColumn;
-
-    @FXML private TableView<FunctionsTableView>           functionsTable;
-    @FXML private TableColumn<FunctionsTableView, String> functionsTableTitleColumn;
-    @FXML private TableColumn<FunctionsTableView, String> functionsTableSymbolColumn;
-
-    @FXML private TableView<FunctionsTableView>           functionsTable1;
-    @FXML private TableColumn<FunctionsTableView, String> functionsTableTitleColumn1;
-    @FXML private TableColumn<FunctionsTableView, String> functionsTableSymbolColumn1;
-
-    @FXML private TableView<AccessoriesTableView>           accessoriesTable;
-    @FXML private TableColumn<AccessoriesTableView, String> accessoriesTableTitleColumn;
-    @FXML private TableColumn<AccessoriesTableView, String> accessoriesTableDescriptionColumn;
-
-    @FXML private TableView<SeriesTableView>                seriesTable;
-    @FXML private TableColumn<SeriesTableView, String>      serieTableColumn;
-    @FXML private TableColumn<SeriesTableView, String>      serieVendorTableColumn;
-
-    @FXML private TableView<UsersTableView>                 usersTable;
-    @FXML private TableColumn<UsersTableView, Integer>      userIdTableColumn;
-    @FXML private TableColumn<UsersTableView, String>       userNameTableColumn;
-    @FXML private TableColumn<UsersTableView, String>       userEmailTableColumn;
-    @FXML private TableColumn<UsersTableView, String>       userPasswordTableColumn;
-    @FXML private TableColumn<UsersTableView, String>       userGroupTableColumn;
-    @FXML private TableColumn<UsersTableView, String>       userCompanyTableColumn;
-    @FXML private TableColumn<UsersTableView, String>       userPositionTableColumn;
-    @FXML private TableColumn<UsersTableView, String>       userPhoneTableColumn;
-
-    @FXML private TableView<CompaniesTableView>             companiesTable;
-    @FXML private TableColumn<CompaniesTableView, Boolean>  companyDealerColumn;
-    @FXML private TableColumn<CompaniesTableView, String>   companyTitleColumn;
-    @FXML private TableColumn<CompaniesTableView, String>   companyPhoneColumn;
-    @FXML private TableColumn<CompaniesTableView, String>   companyEmailColumn;
-    @FXML private TableColumn<CompaniesTableView, String>   companySiteColumn;
-    @FXML private TableColumn<CompaniesTableView, String>   companyAddressColumn;
-    @FXML private TableColumn<CompaniesTableView, String>   companyFaxColumn;
-
-    @FXML private TableView<GroupsTableView>                groupsTable;
-    @FXML private TableColumn<GroupsTableView, String>      groupTitleColumn;
-    @FXML private TableColumn<GroupsTableView, String>      groupDescriptionColumn;
-
-    @FXML private TableView<ProductKindPropertiesTableView>           productKindPropertiesTable;
-    @FXML private TableColumn<ProductKindPropertiesTableView, String> productKindPropertiesOrderColumn;
-    @FXML private TableColumn<ProductKindPropertiesTableView, String> productKindPropertiesTitleColumn;
-    @FXML private TableColumn<ProductKindPropertiesTableView, String> productKindPropertiesOptionalColumn;
-    @FXML private TableColumn<ProductKindPropertiesTableView, String> productKindPropertiesSymbolColumn;
-
-    // Buttons
-    @FXML private Button startImportXLSButton;
-    @FXML private Button resetButton;
-    @FXML private Button chooseFileForExportButton;
-    @FXML private Button chooseDirForExportPricesButton;
-    @FXML private Button startExportButton;
-    @FXML private Button startExportPricesButton;
-    @FXML private Button changeDimsImageButton;
-    @FXML private Button changePlug1ImageButton;
-    @FXML private Button changePlug2ImageButton;
-    @FXML private Button addPropertyToTableButton;
-    @FXML private Button deletePropertyFromTableButton;
-    @FXML private Button exportPropertiesTableToXlsButton;
-    @FXML private Button importPropertiesFromXlsButton;
-
-    // Labels
-    @FXML private Label productTabTitle;
-    @FXML private Label pdfTabTitle;
-    @FXML private Label courseEUROLabel;
-    @FXML private Label courseDateLabel;
-    @FXML private Label productTabKind;
-    @FXML private Label fileForExportPathLabel;
-    @FXML private Label dirForExportPricesPathLabel;
-
-    // ProgressBars
-    @FXML private ProgressBar progressBar;
-    @FXML private ProgressBar progressBarImportXLS;
-
-    // ImageViews
-    @FXML private ImageView imageView;
-    @FXML private ImageView productTabImageView;
-    @FXML private ImageView productDimsImageView;
-    @FXML private ImageView plug1ImageView;
-    @FXML private ImageView plug2ImageView;
-    @FXML private ImageView functionImageView;
-
-    // ListViews
-    @FXML private ListView<String> headersXLS;
-    @FXML private ListView<String> comparedXLSAndDBFields;
-    @FXML private ListView<String> productKindsList;
-    @FXML private ListView<String> newsListView;
-    @FXML private ListView<String> articlesListView;
-    @FXML private ListView<String> videosListView;
-    @FXML private ListView<String> reviewsListView;
-    @FXML private ListView<String> additionsListView;
-    @FXML private ListView<String> categoriesListView;
-    @FXML private ListView<String> contentsListView;
-
-    // ComboBoxes
-    @FXML private ComboBox<String> searchComboBox;
-    @FXML private ComboBox<String> importFieldsComboBox;
-    @FXML private ComboBox<String> tableDBForExportComboBox;
-
-    // TextFields
-    @FXML private TextField headersRowTextField;
-    @FXML private TextArea picDescriptionTextArea;
-    @FXML private TextArea plug1TextArea;
-    @FXML private TextArea plug2TextArea;
-    @FXML private TextArea functionDescriptionTextArea;
-
-    @FXML private TextField addressSiteDB;
-    @FXML private TextField portSiteDB;
-    @FXML private TextField titleSiteDB;
-    @FXML private TextField userSiteDB;
-    @FXML private PasswordField passwordSiteDB;
-
-    @FXML private TextField addressLocalDB;
-    @FXML private TextField portLocalDB;
-    @FXML private TextField titleLocalDB;
-    @FXML private TextField userLocalDB;
-    @FXML private PasswordField passwordLocalDB;
-    @FXML private TextField addCBRTextField;
-
-    @FXML private TextField categorySearch;
-    @FXML private TextField pageTitleTextField;
-    @FXML private TextField directoryTitleTextField;
-    @FXML private TextField contentTitleTextField;
-    @FXML private TitledPane categoriesTitledPane;
-    @FXML private TextField exportFileNameTextField;
-    @FXML private TextField siteOrdersReceiverTextField;
-
-    // CheckBoxes
-    @FXML private CheckBox treeViewHandlerMode;
-
-    //Files & FileChoosers
-    File fileXLS;
-    final   FileChooser fileChooser = new FileChooser();
-    File fileXLSExport;
-    final DirectoryChooser directoryForExport = new DirectoryChooser();
-    final DirectoryChooser directoryForExportPrices = new DirectoryChooser();
-    final DirectoryChooser directoryForExportProperties = new DirectoryChooser();
-
-    // Lists
-    ArrayList<ArrayList<String>> allImportXLSContent = new ArrayList<>(120);
-    ArrayList<ArrayList<String>> allCompareDetails = new ArrayList<>(20);
-    ObservableList<CategoriesTreeView> subCategoriesTreeViewList = FXCollections.observableArrayList();
-    ObservableList<PropertiesTreeView> subPropertiesTreeViewList = FXCollections.observableArrayList();
-    ObservableList<ImportFields> importFields = FXCollections.observableArrayList();
-    ObservableList<String> comparedPairs = FXCollections.observableArrayList();
-
-    // Numbers
-    private Integer headersRowNumber = 0;
-    public Double course;
-    Double basePrice;
-    Double rubRetail;
-    private static final double ZOOM_DELTA = 1.05;
-    Double newVendorRate;
-    Double addCBR;
-
-    // Strings
-    String selectedProduct;
-    String newCatTitle = "";
-    String newCatDescription;
-    String newCatPicturePath;
-    String selectedDBKey = "Наименование продукта";
-    String catalogHeader = "Каталог товаров";
-    String newVendorTitle = "";
-    String newVendorDescription;
-    String newVendorCurrency;
-    String newVendorAddress;
-    String targetDir;
-
-    String fileChooserDirectoryCash = "C:\\";
-    String noImageFile = "\\\\Server03\\бд_сайта\\poligon_images\\noImage.gif";
-    String defaultImagesDir = "\\\\Server03\\бд_сайта\\poligon_images\\";
-    String defaultPdfsDir = "\\\\Server03\\бд_сайта\\poligon_datasheets\\datasheets\\";
-
-    String selectedCategory = "";
-    String focusedProduct = "";
-    String parentCategoryTitle = "";
-
-    //booleans
-    boolean clear = true;
-
-    //Another ones
-    @FXML  private ScrollPane scroller;
-    @FXML private Pagination pagination;
-    @FXML private Label currentZoomLabel;
-    private ObjectProperty<PDFFile> currentFile;
-    private ObjectProperty<ImageView> currentImage;
-    private DoubleProperty zoom;
-    private PageDimensions currentPageDimensions;
-    private ExecutorService imageLoadService;
-    public static DBConnection connection = new DBConnection("local");
-    public static ArrayList<Product> allProductsList = new ArrayList<>(22000);
-    public static ArrayList<FileOfProgram> allFilesOfProgramList = new ArrayList<>(22000);
-    public static ArrayList<QuantityOfProduct> allQuantitiesList = new ArrayList<>();
-    public static ObservableList<String> allProductsTitles = FXCollections.observableArrayList();
-    public static ObservableList<CategoriesTreeView> allCategoriesList = FXCollections.observableArrayList();
-    public static ObservableList<ProductKindPropertiesTableView> productKindsPropertiesList = FXCollections.observableArrayList();
-    private String lastKey = null;
 }

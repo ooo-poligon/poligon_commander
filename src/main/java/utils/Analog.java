@@ -1,13 +1,13 @@
 package utils;
 
 import entities.*;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import main.PCGUIController;
+import new_items.NewProductsAnalogs;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;

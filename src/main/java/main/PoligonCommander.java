@@ -3,44 +3,45 @@ package main;
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.concurrent.*;
-import javafx.event.EventHandler;
+import javafx.concurrent.Task;
+import javafx.concurrent.Worker;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.*;
-import javafx.scene.Group;
+import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.effect.DropShadow;
-import javafx.scene.image.*;
-import javafx.scene.layout.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.stage.*;
+import javafx.stage.Screen;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import modalwindows.AlertWindow;
 import org.apache.commons.io.FileUtils;
-import utils.CurrencyCourse;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 
 public class PoligonCommander extends Application {
-    public static final String versionNumber = " версия 2.2.5";
-    private static String d = (String.valueOf(Math.random())).substring(2);
+    public static final String versionNumber = " версия 2.3.0";
     public static final String SPLASH_IMAGE = "/images/splash2.png";
+    private static final int SPLASH_WIDTH = 600;
+    private static final int SPLASH_HEIGHT = 420;
+    private static String d = (String.valueOf(Math.random())).substring(2);
     public static final File tmpDir = new File("\\\\Server03\\бд_сайта\\poligon_images\\temp_" + d);
-
     private Pane splashLayout;
     private ProgressBar loadProgress;
     private Label progressText;
-    private Label versionNumberLabel;
+    private Label versionNumberLabel = new Label(versionNumber);
     private Stage mainStage = new Stage();
-    private static final int SPLASH_WIDTH = 600;
-    private static final int SPLASH_HEIGHT = 420;
-
 
     public static void main(String[] args) throws Exception {
         launch(args);
@@ -54,7 +55,6 @@ public class PoligonCommander extends Application {
         loadProgress = new ProgressBar();
         loadProgress.setPrefWidth(SPLASH_WIDTH);
         progressText = new Label("Загрузка данных . . .");
-        versionNumberLabel = new Label(versionNumber);
         splashLayout = new VBox();
         stackPane.getChildren().addAll(splash, versionNumberLabel);
         splashLayout.getChildren().addAll(stackPane, loadProgress, progressText);
@@ -84,7 +84,7 @@ public class PoligonCommander extends Application {
 
                 int count = 0;
                 for (int i = 0; i < PCGUIController.allProductsTitles.size(); i++) {
-                    Thread.sleep(0,001);
+                    Thread.sleep(0, 1);
                     updateProgress(i + 1, PCGUIController.allProductsTitles.size());
                     String nextFriend = PCGUIController.allProductsTitles.get(i);
                     updateMessage("Загружаются товары . . .  " + nextFriend);
@@ -101,30 +101,24 @@ public class PoligonCommander extends Application {
         showSplash(
                 initStage,
                 friendTask,
-                () -> {showMainStage();}
+                () -> {
+                    Parent root = FXMLLoader.load(getClass().getResource("/fxml/PCGUI.fxml"));
+                    Scene scene = new Scene(root);
+                    mainStage.setScene(scene);
+                    mainStage.setTitle("\"Poligon Commander\" (" + versionNumber.subSequence(1, versionNumber.length()) + ")");
+                    mainStage.show();
+                    mainStage.setOnCloseRequest(t -> {
+                        try {
+                            FileUtils.deleteDirectory(tmpDir);
+                        } catch (IOException e) {
+                            AlertWindow.showErrorMessage(e.getMessage());
+                        }
+                        Platform.exit();
+                        System.exit(0);
+                    });
+                }
         );
         new Thread(friendTask).start();
-    }
-
-    private void showMainStage () throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("/fxml/PCGUI.fxml"));
-        Scene scene = new Scene(root);
-        //scene.getStylesheets().add(this.getClass().getResource("styles/Styles.css").toExternalForm());
-        mainStage.setScene(scene);
-        mainStage.setTitle("\"Poligon Commander\" (" + versionNumber.subSequence(1, versionNumber.length()) + ")");
-        mainStage.show();
-        mainStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-            @Override
-            public void handle(WindowEvent t) {
-                try {
-                    FileUtils.deleteDirectory(tmpDir);
-                } catch (IOException e) {
-                    AlertWindow.showErrorMessage(e.getMessage());
-                }
-                Platform.exit();
-                System.exit(0);
-            }
-        });
     }
 
     private void showSplash(
@@ -150,7 +144,7 @@ public class PoligonCommander extends Application {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            } // todo add code to gracefully handle other task states.
+            }
         });
 
         Scene splashScene = new Scene(splashLayout);
@@ -163,6 +157,6 @@ public class PoligonCommander extends Application {
     }
 
     public interface InitCompletionHandler {
-        public void complete() throws IOException;
+        void complete() throws IOException;
     }
 }

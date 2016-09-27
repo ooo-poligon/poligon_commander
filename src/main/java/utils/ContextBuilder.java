@@ -12,6 +12,7 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 import main.Product;
 import modalwindows.AlertWindow;
+import new_items.*;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -988,7 +989,7 @@ public class ContextBuilder {
                 FileChooser fileChooser = new FileChooser();
                 File file = fileChooser.showOpenDialog(grid.getScene().getWindow());
                 if (file != null) {
-                    ProductImage.open(new File(file.getAbsolutePath()), grid1, image1, "functionImage");
+                    ImageFile.open(new File(file.getAbsolutePath()), grid1, image1, "functionImage");
                 }
                 picPath = file.getAbsolutePath();
                 picName = picPath.replace('\\', '@').split("@")[(picPath.replace('\\', '@')).split("@").length - 1];
@@ -1088,7 +1089,7 @@ public class ContextBuilder {
         grid.add(setImageButton, 2, 7);
 
         dialog.getDialogPane().setContent(grid);
-        ProductImage.open(new File(function.getPicturePath()), grid1, image1, "functionImage");
+        ImageFile.open(new File(function.getPicturePath()), grid1, image1, "functionImage");
 
         setImageButton.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
 
@@ -1097,7 +1098,7 @@ public class ContextBuilder {
                 FileChooser fileChooser = new FileChooser();
                 File file = fileChooser.showOpenDialog(grid.getScene().getWindow());
                 if (file != null) {
-                    ProductImage.open(new File(file.getAbsolutePath()), grid1, image1, "functionImageSetter");
+                    ImageFile.open(new File(file.getAbsolutePath()), grid1, image1, "functionImageSetter");
                 }
                 picPath = file.getAbsolutePath();
                 picName = picPath.replace('\\', '@').split("@")[(picPath.replace('\\', '@')).split("@").length - 1];
@@ -1337,7 +1338,7 @@ public class ContextBuilder {
             session4.close();
         }
         functionDescriptionTextArea.setText("");
-        ProductImage.open(new File(noImageFile), functionGridPaneImageView, functionImageView, "functionImage");
+        ImageFile.open(new File(noImageFile), functionGridPaneImageView, functionImageView, "functionImage");
     }
 
     public static void makeNewsItem() {

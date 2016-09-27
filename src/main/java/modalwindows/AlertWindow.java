@@ -17,14 +17,15 @@ import javafx.stage.FileChooser;
 import main.PCGUIController;
 import main.PoligonCommander;
 import main.Product;
-import org.apache.commons.io.FileUtils;
+import new_items.NewCategory;
+import new_items.NewSerie;
+import new_items.NewVendor;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import utils.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -168,8 +169,8 @@ public class AlertWindow {
                 FileChooser fileChooser = new FileChooser();
                 File file = fileChooser.showOpenDialog(grid.getScene().getWindow());
                 if (file != null) {
-                    //ProductImage.open(new File(ProductImage.makeTemporaryResizedImage(file)), grid1, image1);
-                    ProductImage.open(new File(file.getAbsolutePath()), grid1, image1, "categoryImageSetter");
+                    //ImageFile.open(new File(ImageFile.makeTemporaryResizedImage(file)), grid1, image1);
+                    ImageFile.open(new File(file.getAbsolutePath()), grid1, image1, "categoryImageSetter");
                 }
                 picPath = file.getAbsolutePath();
             }
@@ -234,14 +235,14 @@ public class AlertWindow {
         grid.add(label4, 1, 5);
         grid.add(setImageButton, 2, 6);
         dialog.getDialogPane().setContent(grid);
-        if(details.get(2) != null) ProductImage.open(new File(details.get(2)), grid1, image1, "categoryImage");
+        if(details.get(2) != null) ImageFile.open(new File(details.get(2)), grid1, image1, "categoryImage");
         setImageButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(javafx.event.ActionEvent event) {
                 FileChooser fileChooser = new FileChooser();
                 File file = fileChooser.showOpenDialog(grid.getScene().getWindow());
                 if (file != null) {
-                    ProductImage.open(new File(file.getAbsolutePath()), grid1, image1, "categoryImageSetter");
+                    ImageFile.open(new File(file.getAbsolutePath()), grid1, image1, "categoryImageSetter");
                 }
                 picPath = file.getAbsolutePath();
             }

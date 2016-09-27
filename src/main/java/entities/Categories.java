@@ -37,7 +37,6 @@ public class Categories implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
     @Basic(optional = false)
@@ -49,6 +48,8 @@ public class Categories implements Serializable {
     @Lob
     @Column(name = "summary")
     private String summary;
+    @Column(name = "more_info")
+    private String moreInfo;
     @Column(name = "image_path")
     private String imagePath;
     @Column(name = "parent")
@@ -94,7 +95,13 @@ public class Categories implements Serializable {
         this.description = description;
     }
 
+    public String getMoreInfo() {
+        return moreInfo;
+    }
 
+    public void setMoreInfo(String moreInfo) {
+        this.moreInfo = moreInfo;
+    }
 
     public Integer getParent() {
         return parent;
