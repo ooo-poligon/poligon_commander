@@ -540,7 +540,21 @@ public class ContextBuilder {
         });
         Optional<NewProductKind> result = dialog.showAndWait();
         if (result.isPresent()) {
+            ArrayList<Properties> propertiesList = new ArrayList<>();
             Session session1 = HibernateUtil.getSessionFactory().openSession();
+
+            List res1 = session1.createQuery("from Properties where productKindId =" + productKind.getId()).list();
+            for(Iterator iterator = res1.iterator(); iterator.hasNext();) {
+                Properties property = (Properties) iterator.next();
+                propertiesList.add(property);
+            }
+
+            propertiesList.stream().forEach((property) -> {
+                Transaction tx2 = session1.beginTransaction();
+                Query q2 = session1.createQuery("delete PropertyValues where propertyId =" + property.getId());
+                q2.executeUpdate();
+                tx2.commit();
+            });
 
             Transaction tx1 = session1.beginTransaction();
             Query q1 = session1.createQuery("delete Properties where productKindId =" + productKind.getId());

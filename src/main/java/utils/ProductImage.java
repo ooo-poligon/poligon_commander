@@ -390,9 +390,6 @@ public class ProductImage {
         }
         fileType = picType;
         resPath = "\\\\Server03\\бд_сайта\\poligon_images\\catalog\\" + vendorTitle + "\\" + fileType + "s\\" + fileName ;
-        //if (!System.getProperty("os.name").contains("Windows")) {
-        //    resPath = resPath.replace("\\", "/");
-        //}
         copyFile(file, new File(resPath));
         String sshUser = "";
         String sshPass = "";

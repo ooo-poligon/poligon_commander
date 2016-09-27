@@ -1824,7 +1824,7 @@ public class PCGUIController implements Initializable {
         Transaction tx = session.beginTransaction();
         Categories category = new Categories();
         category.setTitle(newCatTitle);
-        category.setDescription(newCatDescription);
+        category.setSummary(newCatDescription);
         category.setImagePath(newCatPicturePath);
         category.setParent(parentId);
         category.setPublished(0);
@@ -1835,26 +1835,24 @@ public class PCGUIController implements Initializable {
         }
         tx.commit();
         session.close();
-        String picName = newCatPicturePath.replaceFirst("\\\\", "").replace('\\', '@').split("@")[(newCatPicturePath.replaceFirst("\\\\", "").replace('\\', '@')).split("@").length - 1];
-        String targetRemoteCatPixFolder = "images/design/categories/" +
-                UtilPack.getCategoryVendorFromId(UtilPack.getCategoryIdFromTitle(parentCategoryTitle)) + picName;
+        String targetRemoteCatPixFolder = "/var/www/poligon/data/www/poligon.info/images/design/categories/" +
+                UtilPack.getCategoryVendorFromId(UtilPack.getCategoryIdFromTitle(parentCategoryTitle)) + "/";
         UtilPack.startFTP(newCatPicturePath, targetRemoteCatPixFolder);
     }
     private void editCategory(String categoryTitle, String newTitle, String NewDescription, String NewImagePath) throws SQLException {
         Integer id = UtilPack.getCategoryIdFromTitle (categoryTitle);
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
-        Query query = session.createQuery("update Categories set title = :title, description = :description, imagePath = :imagePath where id = :id");
+        Query query = session.createQuery("update Categories set title = :title, summary = :summary, imagePath = :imagePath where id = :id");
         query.setParameter("title", newTitle);
-        query.setParameter("description", NewDescription);
+        query.setParameter("summary", NewDescription);
         query.setParameter("imagePath", NewImagePath);
         query.setParameter("id", id);
         query.executeUpdate();
         tx.commit();
         session.close();
-        String picName = NewImagePath.replaceFirst("\\\\", "").replace('\\', '@').split("@")[(NewImagePath.replaceFirst("\\\\", "").replace('\\', '@')).split("@").length - 1];
-        String targetRemoteCatPixFolder = "images/design/categories/" +
-                UtilPack.getCategoryVendorFromId(id) + picName;
+        String targetRemoteCatPixFolder = "/var/www/poligon/data/www/poligon.info/images/design/categories/" +
+                UtilPack.getCategoryVendorFromId(id) + "/";
         UtilPack.startFTP(NewImagePath, targetRemoteCatPixFolder);
     }
     private void deleteCategory(String categoryTitle) throws SQLException {
@@ -1876,7 +1874,7 @@ public class PCGUIController implements Initializable {
             for (Iterator iterator = response.iterator(); iterator.hasNext();) {
                 Categories category = (Categories) iterator.next();
                 details.add(category.getTitle());
-                details.add(category.getDescription());
+                details.add(category.getSummary());
                 details.add(category.getImagePath());
                 details.add(UtilPack.getCategoryVendorFromId(category.getParent()));
             }

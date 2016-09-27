@@ -139,7 +139,7 @@ public class AlertWindow {
         dialog.setResizable(true);
 
         Label label1 = new Label("Введите название:  ");
-        Label label2 = new Label("Описание (необязательно):  ");
+        Label label2 = new Label("Краткое описание:  ");
         Label label3 = new Label("");
         Label label4 = new Label("");
         TextField text1 = new TextField();
@@ -204,7 +204,7 @@ public class AlertWindow {
         dialog.setResizable(true);
 
         Label label1 = new Label("Введите название:  ");
-        Label label2 = new Label("Описание (необязательно):  ");
+        Label label2 = new Label("Краткое описание:  ");
         TextField text1 = new TextField();
         TextArea text2 = new TextArea();
         text1.setText(details.get(0));

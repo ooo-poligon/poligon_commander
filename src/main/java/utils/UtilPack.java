@@ -34,6 +34,8 @@ import java.sql.SQLException;
 import java.util.*;
 import java.nio.file.Files;
 
+import static utils.SshUtils.sftp;
+
 /**
  * Created by Igor Klekotnev on 11.03.2016.
  */
@@ -432,76 +434,49 @@ public class UtilPack {
     }
     public static void copyFile(File source, File dest) throws IOException {
         Files.copy(source.toPath(), dest.toPath());
-        String remotePath = dest.getAbsolutePath().replace("\\\\Server03\\бд_сайта\\poligon_images\\", "http://www.poligon.info/images/")
-                .replace("\\", "/");
-        startFTP(dest.getAbsolutePath(), remotePath);
     }
-    public static boolean startFTP(String filepath, String remotePath){
+    public static void startFTP(String filePath, String remotePlace){
         StandardFileSystemManager manager = new StandardFileSystemManager();
-        String serverAddress = "";
-        String userId = "";
-        String password = "";
+        String sshHost = "";
+        String sshUser = "";
+        String sshPass = "";
         try {
             Session session = HibernateUtil.getSessionFactory().openSession();
-            List list = session.createQuery("from Settings where title = \"serverSFTP\" and kind = \"SFTPSettings\"").list();
+            Query query = session.createQuery("from Settings where title = :title and kind = :kind");
+            query.setParameter("title", "serverSFTP");
+            query.setParameter("kind", "SFTPSettings");
+            List list = query.list();
             for (Iterator iterator = list.iterator(); iterator.hasNext();) {
                 Settings setting = (Settings) iterator.next();
-                serverAddress = setting.getTextValue();
+                sshHost = setting.getTextValue();
+            }
+            Query query1 = session.createQuery("from Settings where title = :title and kind = :kind");
+            query1.setParameter("title", "userSFTP");
+            query1.setParameter("kind", "SFTPSettings");
+            List list1 = query1.list();
+            for (Iterator iterator = list1.iterator(); iterator.hasNext();) {
+                Settings setting = (Settings) iterator.next();
+                sshUser = setting.getTextValue();
+            }
+            Query query2 = session.createQuery("from Settings where title = :title and kind = :kind");
+            query2.setParameter("title", "passwordSFTP");
+            query2.setParameter("kind", "SFTPSettings");
+            List list2 = query2.list();
+            for (Iterator iterator = list2.iterator(); iterator.hasNext();) {
+                Settings setting = (Settings) iterator.next();
+                sshPass = setting.getTextValue();
             }
             session.close();
 
-            Session session1 = HibernateUtil.getSessionFactory().openSession();
-            List list1 = session1.createQuery("from Settings where title = \"userSFTP\" and kind = \"SFTPSettings\"").list();
-            for (Iterator iterator = list1.iterator(); iterator.hasNext();) {
-                Settings setting = (Settings) iterator.next();
-                userId = setting.getTextValue();
-            }
-            session1.close();
-
-            Session session2 = HibernateUtil.getSessionFactory().openSession();
-            List list2 = session2.createQuery("from Settings where title = \"passwordSFTP\" and kind = \"SFTPSettings\"").list();
-            for (Iterator iterator = list2.iterator(); iterator.hasNext();) {
-                Settings setting = (Settings) iterator.next();
-                password = setting.getTextValue();
-            }
-            session2.close();
-
-            //check if the file exists
-            File file = new File(filepath);
-            if (!file.exists())
-                throw new RuntimeException("Error. Local file not found");
-
-            //Initializes the file manager
-            manager.init();
-
-            //Setup our SFTP configuration
-            FileSystemOptions opts = new FileSystemOptions();
-            SftpFileSystemConfigBuilder.getInstance().setStrictHostKeyChecking(opts, "no");
-            SftpFileSystemConfigBuilder.getInstance().setUserDirIsRoot(opts, true);
-            SftpFileSystemConfigBuilder.getInstance().setTimeout(opts, 10000);
-
-            //Create the SFTP URI using the host name, userid, password,  remote path and file name
-            String sftpUri = "sftp://" + userId + ":" + password +  "@" + serverAddress + "/" +
-                    remotePath;
-
-            // Create local file object
-            FileObject localFile = manager.resolveFile(file.getAbsolutePath());
-
-            // Create remote file object
-            FileObject remoteFile = manager.resolveFile(sftpUri, opts);
-
-            // Copy local file to sftp server
-            remoteFile.copyFrom(localFile, Selectors.SELECT_SELF);
+            sftp(("file://" + filePath.replace("\\", "/")), ("ssh://" + sshUser + ":" + sshPass + "@" + sshHost + remotePlace));
             AlertWindow.showInfo("Файл загружен на удаленный сервер.");
-
         }
         catch (Exception ex) {
-            return false;
+            AlertWindow.showErrorMessage(ex.getMessage());
         }
         finally {
             manager.close();
         }
-        return true;
     }
     public static int stringToIntByChars(String string) {
         char[] chars = string.toCharArray();

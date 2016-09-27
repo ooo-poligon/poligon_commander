@@ -9,12 +9,14 @@ import javafx.concurrent.*;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.*;
+import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.*;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.*;
 import javafx.util.Duration;
 import modalwindows.AlertWindow;
@@ -26,13 +28,15 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 public class PoligonCommander extends Application {
+    public static final String versionNumber = " версия 2.2.4";
     private static String d = (String.valueOf(Math.random())).substring(2);
-    public static final String SPLASH_IMAGE = "/images/splash2_2.png";
+    public static final String SPLASH_IMAGE = "/images/splash2.png";
     public static final File tmpDir = new File("\\\\Server03\\бд_сайта\\poligon_images\\temp_" + d);
 
     private Pane splashLayout;
     private ProgressBar loadProgress;
     private Label progressText;
+    private Label versionNumberLabel;
     private Stage mainStage = new Stage();
     private static final int SPLASH_WIDTH = 600;
     private static final int SPLASH_HEIGHT = 420;
@@ -44,13 +48,19 @@ public class PoligonCommander extends Application {
 
     @Override
     public void init() {
+        StackPane stackPane = new StackPane();
         ImageView splash = new ImageView(new Image(SPLASH_IMAGE));
+
         loadProgress = new ProgressBar();
         loadProgress.setPrefWidth(SPLASH_WIDTH);
         progressText = new Label("Загрузка данных . . .");
+        versionNumberLabel = new Label(versionNumber);
         splashLayout = new VBox();
-        //splashLayout.getChildren().addAll(splash);
-        splashLayout.getChildren().addAll(splash, loadProgress, progressText);
+        stackPane.getChildren().addAll(splash, versionNumberLabel);
+        splashLayout.getChildren().addAll(stackPane, loadProgress, progressText);
+        versionNumberLabel.setStyle("-fx-font-size: 8px; -fx-font-weight: bold");
+        versionNumberLabel.setTextFill(Color.WHITE);
+        StackPane.setAlignment(versionNumberLabel, Pos.TOP_LEFT);
         progressText.setAlignment(Pos.CENTER);
         splashLayout.setEffect(new DropShadow());
     }
@@ -101,7 +111,7 @@ public class PoligonCommander extends Application {
         Scene scene = new Scene(root);
         //scene.getStylesheets().add(this.getClass().getResource("styles/Styles.css").toExternalForm());
         mainStage.setScene(scene);
-        mainStage.setTitle("\"Poligon Commander\" (version 2.2.2)");
+        mainStage.setTitle("\"Poligon Commander\" (" + versionNumber.subSequence(1, versionNumber.length()) + ")");
         mainStage.show();
         mainStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override

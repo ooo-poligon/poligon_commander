@@ -46,6 +46,9 @@ public class Categories implements Serializable {
     @Lob
     @Column(name = "description")
     private String description;
+    @Lob
+    @Column(name = "summary")
+    private String summary;
     @Column(name = "image_path")
     private String imagePath;
     @Column(name = "parent")
@@ -91,6 +94,8 @@ public class Categories implements Serializable {
         this.description = description;
     }
 
+
+
     public Integer getParent() {
         return parent;
     }
@@ -101,6 +106,14 @@ public class Categories implements Serializable {
 
     public Integer getPublished() {
         return published;
+    }
+
+    public String getSummary() {
+        return summary;
+    }
+
+    public void setSummary(String summary) {
+        this.summary = summary;
     }
 
     public void setPublished(Integer published) {
