@@ -181,17 +181,24 @@ public class AlertWindow {
         dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
         dialog.setResultConverter((ButtonType b) -> {
             if (b == buttonTypeOk) {
-                String picName = picPath.replace('\\', '@').split("@")[(picPath.replace('\\', '@')).split("@").length - 1];
-                String tempPath = PoligonCommander.tmpDir.getAbsolutePath() + "\\" + picName;
-                String newPicPath = "\\\\Server03\\бд_сайта\\poligon_images\\design\\categories\\" +
-                        UtilPack.getCategoryVendorFromId(UtilPack.getCategoryIdFromTitle(parentCategoryTitle)) +
-                        "\\" + picName;
-                try {
-                    UtilPack.copyFile(new File(tempPath), new File(newPicPath));
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if (picPath.equals("")) {
+                    return new NewCategory(text1.getText(), text2.getText(), picPath);
+                } else {
+                    String picName = picPath.replace('\\', '@').split("@")[(picPath.replace('\\', '@')).split("@").length - 1];
+                    String tempPath = PoligonCommander.tmpDir.getAbsolutePath() + "\\" + picName;
+                    String newPicPath = "\\\\Server03\\бд_сайта\\poligon_images\\design\\categories\\" +
+                            UtilPack.getCategoryVendorFromId(UtilPack.getCategoryIdFromTitle(parentCategoryTitle)) +
+                            "\\" + picName;
+                    try {
+                        UtilPack.copyFile(new File(tempPath), new File(newPicPath));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    return new NewCategory(text1.getText(), text2.getText(), newPicPath);
                 }
-                return new NewCategory(text1.getText(), text2.getText(), newPicPath);
+            }
+            if (b == buttonTypeOk) {
+
             }
             return null;
         });
@@ -229,13 +236,11 @@ public class AlertWindow {
         dialog.getDialogPane().setContent(grid);
         if(details.get(2) != null) ProductImage.open(new File(details.get(2)), grid1, image1, "categoryImage");
         setImageButton.setOnAction(new EventHandler<ActionEvent>() {
-
             @Override
             public void handle(javafx.event.ActionEvent event) {
                 FileChooser fileChooser = new FileChooser();
                 File file = fileChooser.showOpenDialog(grid.getScene().getWindow());
                 if (file != null) {
-                    //ProductImage.open(new File(ProductImage.makeTemporaryResizedImage(file)), grid1, image1);
                     ProductImage.open(new File(file.getAbsolutePath()), grid1, image1, "categoryImageSetter");
                 }
                 picPath = file.getAbsolutePath();
@@ -248,16 +253,18 @@ public class AlertWindow {
         dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
         dialog.setResultConverter((ButtonType b) -> {
             if (b == buttonTypeOk) {
-                String picName = picPath.replace('\\', '@').split("@")[(picPath.replace('\\', '@')).split("@").length - 1];
-                String tempPath = PoligonCommander.tmpDir.getAbsolutePath() + "\\" + picName;
-                String newPicPath = "\\\\Server03\\бд_сайта\\poligon_images\\design\\categories\\" +
-                        details.get(3) + "\\" + picName;
-                try {
-                    UtilPack.copyFile(new File(tempPath), new File(newPicPath));
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if (picPath.equals("")) {
+                    return new NewCategory(text1.getText(), text2.getText(), details.get(2));
+                } else {
+                    String picName = picPath.replace('\\', '@').split("@")[(picPath.replace('\\', '@')).split("@").length - 1];
+                    String tempPath = PoligonCommander.tmpDir.getAbsolutePath() + "\\" + picName;
+                    String newPicPath = "\\\\Server03\\бд_сайта\\poligon_images\\design\\categories\\" +
+                            details.get(3) + "\\" + picName;
+                    try {
+                        UtilPack.copyFile(new File(tempPath), new File(newPicPath));
+                    } catch (IOException e) {}
+                    return new NewCategory(text1.getText(), text2.getText(), newPicPath);
                 }
-                return new NewCategory(text1.getText(), text2.getText(), newPicPath);
             }
             return null;
         });

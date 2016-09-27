@@ -50,21 +50,25 @@
                                               <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
                                             </columnConstraints>
                                             <rowConstraints>
-                                              <RowConstraints maxHeight="600.0" minHeight="-Infinity" percentHeight="90.0" prefHeight="250.4" valignment="CENTER" vgrow="ALWAYS" />
+                                              <RowConstraints maxHeight="600.0" percentHeight="90.0" valignment="CENTER" vgrow="ALWAYS" />
                                                 <RowConstraints maxHeight="600.0" minHeight="-Infinity" percentHeight="10.0" prefHeight="35.60000000000002" valignment="CENTER" vgrow="ALWAYS" />
                                             </rowConstraints>
                                              <children>
-                                                <AnchorPane prefHeight="246.0" prefWidth="305.0">
+                                                <AnchorPane prefHeight="250.0" prefWidth="305.0">
                                                    <children>
-                                                      <GridPane fx:id="gridPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                      <GridPane fx:id="gridPane" alignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                         <columnConstraints>
-                                                          <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" />
+                                                          <ColumnConstraints halignment="CENTER" />
                                                         </columnConstraints>
                                                         <rowConstraints>
-                                                          <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="ALWAYS" />
+                                                          <RowConstraints valignment="CENTER" />
                                                         </rowConstraints>
                                                          <children>
-                                                            <ImageView fx:id="imageView" fitHeight="250.0" fitWidth="250.0" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true" />
+                                                            <AnchorPane GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS">
+                                                               <children>
+                                                                  <ImageView fx:id="imageView" fitHeight="250.0" fitWidth="250.0" layoutX="66.0" layoutY="37.0" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="36.0" AnchorPane.leftAnchor="66.0" AnchorPane.rightAnchor="65.0" AnchorPane.topAnchor="37.0" />
+                                                               </children>
+                                                            </AnchorPane>
                                                          </children>
                                                       </GridPane>
                                                    </children>
@@ -85,7 +89,7 @@
                                                                      <children>
                                                                         <AnchorPane>
                                                                            <children>
-                                                                              <Button fx:id="resetButton" mnemonicParsing="false" onAction="#resetProgram" text="Сброс" textFill="RED" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+                                                                              <Button fx:id="resetButton" mnemonicParsing="false" onAction="#resetProgram" text="Сброс" textFill="RED" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                                                                                  <font>
                                                                                     <Font name="System Bold" size="12.0" />
                                                                                  </font>
@@ -94,7 +98,7 @@
                                                                         </AnchorPane>
                                                                         <AnchorPane HBox.hgrow="ALWAYS">
                                                                            <children>
-                                                                              <ProgressBar fx:id="progressBar" progress="0.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
+                                                                              <ProgressBar fx:id="progressBar" progress="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
                                                                            </children>
                                                                         </AnchorPane>
                                                                      </children>
@@ -433,7 +437,7 @@
                                                                                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                                                                 </columnConstraints>
                                                                                 <rowConstraints>
-                                                                                  <RowConstraints vgrow="SOMETIMES" />
+                                                                                  <RowConstraints minHeight="-Infinity" prefHeight="150.0" vgrow="SOMETIMES" />
                                                                                 </rowConstraints>
                                                                                  <children>
                                                                                     <ImageView fx:id="functionImageView" fitHeight="100.0" fitWidth="220.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
@@ -484,7 +488,7 @@
                                                                   </Label>
                                                                </children>
                                                             </AnchorPane>
-                                                            <AnchorPane fx:id="productTabAnchorPaneImageView" VBox.vgrow="ALWAYS">
+                                                            <AnchorPane fx:id="productTabAnchorPaneImageView" VBox.vgrow="NEVER">
                                                                <children>
                                                                   <GridPane fx:id="productTabGridPaneImageView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                     <columnConstraints>
@@ -494,12 +498,16 @@
                                                                       <RowConstraints vgrow="SOMETIMES" />
                                                                     </rowConstraints>
                                                                      <children>
-                                                                        <ImageView fx:id="productTabImageView" fitHeight="190.0" fitWidth="250.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
+                                                                        <AnchorPane GridPane.vgrow="NEVER">
+                                                                           <children>
+                                                                              <ImageView fx:id="productTabImageView" fitHeight="190.0" fitWidth="250.0" layoutX="63.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="63.0" AnchorPane.rightAnchor="63.0" AnchorPane.topAnchor="0.0" />
+                                                                           </children>
+                                                                        </AnchorPane>
                                                                      </children>
                                                                   </GridPane>
                                                                </children>
                                                             </AnchorPane>
-                                                            <AnchorPane>
+                                                            <AnchorPane VBox.vgrow="NEVER">
                                                                <children>
                                                                   <Label text="Описание картинки (alt):" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
                                                                      <font>
@@ -508,11 +516,11 @@
                                                                   </Label>
                                                                </children>
                                                             </AnchorPane>
-                                                            <AnchorPane>
+                                                            <AnchorPane VBox.vgrow="NEVER">
                                                                <children>
                                                                   <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                      <children>
-                                                                        <AnchorPane VBox.vgrow="ALWAYS">
+                                                                        <AnchorPane>
                                                                            <children>
                                                                               <TextArea fx:id="picDescriptionTextArea" prefHeight="40.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                                                            </children>
@@ -559,22 +567,26 @@
                                                                <children>
                                                                   <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                      <children>
-                                                                        <AnchorPane minHeight="210.0" VBox.vgrow="ALWAYS">
+                                                                        <AnchorPane>
                                                                            <children>
                                                                               <GridPane fx:id="productDimsGridPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                                 <columnConstraints>
                                                                                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                                                                 </columnConstraints>
                                                                                 <rowConstraints>
-                                                                                  <RowConstraints vgrow="SOMETIMES" />
+                                                                                  <RowConstraints prefHeight="200.0" />
                                                                                 </rowConstraints>
                                                                                  <children>
-                                                                                    <ImageView fx:id="productDimsImageView" fitHeight="190.0" fitWidth="230.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
+                                                                                    <AnchorPane maxHeight="200.0" GridPane.halignment="CENTER" GridPane.hgrow="NEVER" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
+                                                                                       <children>
+                                                                                          <ImageView fx:id="productDimsImageView" fitHeight="200.0" fitWidth="230.0" layoutX="73.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="73.0" AnchorPane.rightAnchor="73.0" AnchorPane.topAnchor="0.0" />
+                                                                                       </children>
+                                                                                    </AnchorPane>
                                                                                  </children>
                                                                               </GridPane>
                                                                            </children>
                                                                         </AnchorPane>
-                                                                        <AnchorPane VBox.vgrow="ALWAYS">
+                                                                        <AnchorPane>
                                                                            <children>
                                                                               <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                                 <columnConstraints>
@@ -670,13 +682,17 @@
                                                                                  <children>
                                                                                     <GridPane fx:id="plug1GridPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                                        <children>
-                                                                                          <ImageView fx:id="plug1ImageView" fitHeight="189.0" fitWidth="220.0" pickOnBounds="true" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="NEVER" />
+                                                                                          <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                                                                                             <children>
+                                                                                                <ImageView fx:id="plug1ImageView" fitHeight="189.0" fitWidth="220.0" pickOnBounds="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                                                             </children>
+                                                                                          </AnchorPane>
                                                                                        </children>
                                                                                        <columnConstraints>
                                                                                           <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
                                                                                        </columnConstraints>
                                                                                        <rowConstraints>
-                                                                                          <RowConstraints vgrow="NEVER" />
+                                                                                          <RowConstraints minHeight="-Infinity" prefHeight="189.0" vgrow="NEVER" />
                                                                                           <RowConstraints maxHeight="46.0" minHeight="0.0" prefHeight="0.0" />
                                                                                        </rowConstraints>
                                                                                     </GridPane>
@@ -729,13 +745,17 @@
                                                                                  <children>
                                                                                     <GridPane fx:id="plug2GridPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                                        <children>
-                                                                                          <ImageView fx:id="plug2ImageView" fitHeight="189.0" fitWidth="220.0" pickOnBounds="true" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="NEVER" />
+                                                                                          <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                                                                                             <children>
+                                                                                                <ImageView fx:id="plug2ImageView" fitHeight="189.0" fitWidth="220.0" layoutX="78.0" pickOnBounds="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="78.0" AnchorPane.rightAnchor="78.0" AnchorPane.topAnchor="0.0" />
+                                                                                             </children>
+                                                                                          </AnchorPane>
                                                                                        </children>
                                                                                        <columnConstraints>
                                                                                           <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
                                                                                        </columnConstraints>
                                                                                        <rowConstraints>
-                                                                                          <RowConstraints vgrow="NEVER" />
+                                                                                          <RowConstraints minHeight="-Infinity" prefHeight="189.0" vgrow="NEVER" />
                                                                                           <RowConstraints />
                                                                                        </rowConstraints>
                                                                                     </GridPane>
@@ -1138,7 +1158,7 @@
                                                 </AnchorPane>
                                                 <AnchorPane prefHeight="200.0" prefWidth="512.0" VBox.vgrow="ALWAYS">
                                                    <children>
-                                                      <GridPane disable="true" layoutX="118.0" layoutY="-1.0" prefHeight="213.0" prefWidth="373.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-1.0" AnchorPane.topAnchor="-1.0">
+                                                      <GridPane layoutX="118.0" layoutY="-1.0" prefHeight="213.0" prefWidth="373.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-1.0" AnchorPane.topAnchor="-1.0">
                                                         <columnConstraints>
                                                           <ColumnConstraints hgrow="SOMETIMES" maxWidth="259.0" minWidth="10.0" percentWidth="90.0" prefWidth="259.0" />
                                                           <ColumnConstraints hgrow="SOMETIMES" maxWidth="141.0" minWidth="10.0" percentWidth="10.0" prefWidth="33.0" />

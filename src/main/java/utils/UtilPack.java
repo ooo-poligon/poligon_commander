@@ -52,6 +52,18 @@ public class UtilPack {
         } catch (SQLException e) {}
         return id;
     }
+    public static int getCategoryImagePathFromTitle (String title) {
+        int id = 0;
+        try {
+            ResultSet resultSet = PCGUIController.connection.getResult(
+                    "select image_path from categories where title =\"" +
+                            title.replace("\"", "\\\"") + "\"" );
+            while (resultSet.next()) {
+                id = resultSet.getInt("id");
+            }
+        } catch (SQLException e) {}
+        return id;
+    }
     public static int getCategoryIdFromTitle (String title) {
         int id = 0;
         try {

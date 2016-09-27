@@ -1282,22 +1282,9 @@ public class PCGUIController implements Initializable {
             while (resultSet.next()) {
                 subCategoriesTreeViewList.add(new CategoriesTreeView(resultSet.getString("title")));
             }
-        } catch (SQLException e) {}
-
-//        Session session = HibernateUtil.getSessionFactory().openSession();
-//        try {
-//            List subCategories = session.createSQLQuery(
-//                    "SELECT title FROM categories t1, (SELECT id FROM categories WHERE title=" +
-//                            "\"" + UtilPack.normalize(selectedNode) +
-//                            "\") t2 WHERE t2.id = t1.parent").list();
-//            for (Iterator iterator = subCategories.iterator(); iterator.hasNext();) {
-//                String sub = (String) iterator.next();
-//                subCategoriesTreeViewList.add(new CategoriesTreeView(sub));
-//            }
-//        } catch (HibernateException e) {
-//        } finally {
-//            session.close();
-//        }
+        } catch (SQLException e) {
+            AlertWindow.showErrorMessage(e.getMessage());
+        }
     }
     ////////////////////////////////////
     private void includeLowerItems(ObservableList<ProductsTableView> data, String selectedNode) throws SQLException {
@@ -1313,9 +1300,7 @@ public class PCGUIController implements Initializable {
                 recursiveItems(data, ch);
             });
         } else {
-            getProductList(selectedNode).stream().forEach((product) -> {
-                data.add(product);
-            });
+            excludeLowerItems(data, UtilPack.getCategoryTitleFromId(selectedNode));
         }
     }
     private void excludeLowerItems(ObservableList<ProductsTableView> data, String selectedNode) {
@@ -1835,9 +1820,16 @@ public class PCGUIController implements Initializable {
         }
         tx.commit();
         session.close();
-        String targetRemoteCatPixFolder = "/var/www/poligon/data/www/poligon.info/images/design/categories/" +
-                UtilPack.getCategoryVendorFromId(UtilPack.getCategoryIdFromTitle(parentCategoryTitle)) + "/";
-        UtilPack.startFTP(newCatPicturePath, targetRemoteCatPixFolder);
+        if (newCatPicturePath.contains(".jpg") ||
+                newCatPicturePath.contains(".JPG") ||
+                newCatPicturePath.contains(".png") ||
+                newCatPicturePath.contains(".PNG") ||
+                newCatPicturePath.contains(".gif") ||
+                newCatPicturePath.contains(".GIF")) {
+            String targetRemoteCatPixFolder = "/var/www/poligon/data/www/poligon.info/images/design/categories/" +
+                    UtilPack.getCategoryVendorFromId(UtilPack.getCategoryIdFromTitle(parentCategoryTitle)) + "/";
+            UtilPack.startFTP(newCatPicturePath, targetRemoteCatPixFolder);
+        }
     }
     private void editCategory(String categoryTitle, String newTitle, String NewDescription, String NewImagePath) throws SQLException {
         Integer id = UtilPack.getCategoryIdFromTitle (categoryTitle);
@@ -1851,9 +1843,17 @@ public class PCGUIController implements Initializable {
         query.executeUpdate();
         tx.commit();
         session.close();
-        String targetRemoteCatPixFolder = "/var/www/poligon/data/www/poligon.info/images/design/categories/" +
-                UtilPack.getCategoryVendorFromId(id) + "/";
-        UtilPack.startFTP(NewImagePath, targetRemoteCatPixFolder);
+        if (NewImagePath.contains(".jpg") ||
+                NewImagePath.contains(".JPG") ||
+                NewImagePath.contains(".png") ||
+                NewImagePath.contains(".PNG") ||
+                NewImagePath.contains(".gif") ||
+                NewImagePath.contains(".GIF") &&
+                !NewImagePath.equals(UtilPack.getCategoryImagePathFromTitle(categoryTitle))) {
+            String targetRemoteCatPixFolder = "/var/www/poligon/data/www/poligon.info/images/design/categories/" +
+                    UtilPack.getCategoryVendorFromId(id) + "/";
+            UtilPack.startFTP(NewImagePath, targetRemoteCatPixFolder);
+        }
     }
     private void deleteCategory(String categoryTitle) throws SQLException {
         Integer id = UtilPack.getCategoryIdFromTitle (categoryTitle);
@@ -2155,15 +2155,17 @@ public class PCGUIController implements Initializable {
                 try {
                     includeLowerItems(data, selectedNode);
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    AlertWindow.showErrorMessage(e.getMessage());
                 }
             } else {
                 excludeLowerItems(data, selectedNode);
             }
             buildProductsTable(data);
-            productsTable.getSelectionModel().select(0);
-            focusedProduct = productsTable.getSelectionModel().getSelectedItem().getTitle();
-            onFocusedProductTableItem(selectedProduct);
+            if (!productsTable.getSelectionModel().isEmpty()) {
+                productsTable.getSelectionModel().select(0);
+                focusedProduct = productsTable.getSelectionModel().getSelectedItem().getTitle();
+                onFocusedProductTableItem(selectedProduct);
+            }
         }
     }
     @FXML private void handleProductTableMousePressed(MouseEvent event1) {

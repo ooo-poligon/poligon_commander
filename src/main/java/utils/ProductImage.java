@@ -182,7 +182,7 @@ public class ProductImage {
         }
 
         imageView.setImage(new Image(localUrl));
-        imageView.setFitHeight(220);
+        imageView.setFitHeight(200);
         imageView.setPreserveRatio(true);
         imageView.setSmooth(true);
         imageView.setCache(true);

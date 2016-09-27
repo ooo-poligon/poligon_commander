@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 public class PoligonCommander extends Application {
-    public static final String versionNumber = " версия 2.2.4";
+    public static final String versionNumber = " версия 2.2.5";
     private static String d = (String.valueOf(Math.random())).substring(2);
     public static final String SPLASH_IMAGE = "/images/splash2.png";
     public static final File tmpDir = new File("\\\\Server03\\бд_сайта\\poligon_images\\temp_" + d);
