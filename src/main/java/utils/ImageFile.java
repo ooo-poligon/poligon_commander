@@ -143,7 +143,7 @@ public class ImageFile {
         }
 
         imageView.setImage(new Image(localUrl));
-        imageView.setFitHeight(200);
+        imageView.setFitHeight(194);
         imageView.setPreserveRatio(true);
         imageView.setSmooth(true);
         imageView.setCache(true);

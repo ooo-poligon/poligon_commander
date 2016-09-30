@@ -106,7 +106,7 @@ public class XLSToDBImport {
             newProduct.setPrice(0.0);
             newProduct.setCategoryId(new Categories(4, "Без названия"));
             newProduct.setProductKindId(new ProductKinds(1, "без определения"));
-            newProduct.setVendorId(new Vendors(1, "не указан"));
+            newProduct.setVendorId(new Vendors(15, "не указан"));
             newProduct.setCurrencyId(new Currencies(1, "EUR"));
             session.save(newProduct);
             session.getTransaction().commit();
@@ -361,7 +361,8 @@ public class XLSToDBImport {
                 Vendors vendor = (Vendors) session.get(Vendors.class, i+1);
                 vendorsList.add(vendor);
             }            
-            List ids = session.createSQLQuery("select id from products where title=\"" + productTitle.replace(':', ' ').replace('?', '_') + "\"").list();
+            List ids = session.createSQLQuery("select id from products where title=\"" +
+                    productTitle.replace(':', ' ').replace('?', '_') + "\"").list();
             for (Iterator iterator = ids.iterator(); iterator.hasNext();) {
                 id = (Integer) iterator.next();
             }
@@ -371,7 +372,7 @@ public class XLSToDBImport {
                     try {
                         if (vendor.getTitle().equals(value)) {
                             product.setVendorId(vendor);
-                            session.save(product);
+                            session.saveOrUpdate(product);
                         }
                     } catch (NullPointerException ne) {}                        
                 }

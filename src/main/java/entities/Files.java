@@ -4,7 +4,13 @@
  */
 package entities;
 
+import main.PCGUIController;
+import modalwindows.AlertWindow;
+import utils.UtilPack;
+
 import java.io.Serializable;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -30,6 +36,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Files.findById", query = "SELECT f FROM Files f WHERE f.id = :id"),
     @NamedQuery(name = "Files.findByName", query = "SELECT f FROM Files f WHERE f.name = :name"),
     @NamedQuery(name = "Files.findByPath", query = "SELECT f FROM Files f WHERE f.path = :path"),
+    @NamedQuery(name = "Files.findByOwnerId", query = "SELECT f FROM Files f WHERE ownerId = :ownerId"),
     @NamedQuery(name = "Files.findByDescription", query = "SELECT f FROM Files f WHERE f.description = :description")})
 public class Files implements Serializable {
     private static final long serialVersionUID = 1L;

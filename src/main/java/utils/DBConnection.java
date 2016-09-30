@@ -36,7 +36,8 @@ public class DBConnection {
             String titleDB = siteDBSettings.loadSetting("titleSiteDB");
             String userDB = siteDBSettings.loadSetting("userSiteDB");
             String passwordDB = siteDBSettings.loadSetting("passwordSiteDB");
-            this.dbUrl = "jdbc:mysql://" + addressDB + ":" + portDB + "/" + titleDB;
+            this.dbUrl = "jdbc:mysql://" + addressDB + ":" + portDB + "/" + titleDB + "?useUnicode=true&characterEncoding=UTF-8";
+            //con = DriverManager.getConnection("jdbc:mysql://localhost:3306/myDatabase?useUnicode=true&characterEncoding=UTF-8","user","passwd");
             this.user = userDB;
             this.password = passwordDB;
         } else if (dbLocation.equals("local")) {

@@ -4,7 +4,19 @@
  */
 package tableviews;
 
+import entities.Files;
 import javafx.beans.property.*;
+import main.PCGUIController;
+import main.Product;
+import modalwindows.AlertWindow;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import utils.HibernateUtil;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -138,6 +150,28 @@ public class ProductsTableView {
     
     public StringProperty delivery_timeProperty() {
         return delivery_time;
-    } 
+    }
+
+    public boolean hasPicture() {
+        String name = "";
+        final Product[] owner = new Product[1];
+        PCGUIController.allProductsList.stream().forEach(p -> {
+            if( p.getTitle().equals(title.getValue())) {
+                owner[0] = p;
+            }
+        });
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Query query = session.createQuery("select name from Files where ownerId =" +
+                owner[0].getId() + " and fileTypeId =" + 1);
+        List list = query.list();
+        for(Object o : list) {
+            name = (String) o;
+        }
+        session.close();
+        if (name == null || name.equals("")) {
+            return false;
+        }
+        return true;
+    }
 
 }

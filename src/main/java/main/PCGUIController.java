@@ -346,6 +346,7 @@ public class PCGUIController implements Initializable {
     private PageDimensions currentPageDimensions;
     private ExecutorService imageLoadService;
     public static DBConnection connection = new DBConnection("local");
+    public static DBConnection siteConnection = new DBConnection("site");
     public static ArrayList<Product> allProductsList = new ArrayList<>(22000);
     public static ArrayList<FileOfProgram> allFilesOfProgramList = new ArrayList<>(22000);
     public static ArrayList<QuantityOfProduct> allQuantitiesList = new ArrayList<>();
@@ -422,6 +423,7 @@ public class PCGUIController implements Initializable {
                     buildAnalogsTable(selectedProduct);
                     buildDatasheetFileTable(selectedProduct);
                     buildImageView(selectedProduct);
+                    productTabTitle.setText(selectedProduct);
                     datasheetFileTable.refresh();
                 } catch (NullPointerException ignored) {}
                 productsTable.setContextMenu(productTableContextMenu);
@@ -431,6 +433,7 @@ public class PCGUIController implements Initializable {
             (ov, t, t1) -> {
                 if (t1.equals(pdfTab)) {
                     try {
+                        pagination.setCurrentPageIndex(0);
                         createAndConfigureImageLoadService();
                         currentFile = new SimpleObjectProperty<>();
                         currentImage = new SimpleObjectProperty<>();
@@ -449,8 +452,9 @@ public class PCGUIController implements Initializable {
                         String product = productTabTitle.getText();
                         try {
                             loadPdfFile(product);
+                            zoom.set(2.1);
                         } catch (SQLException e) {
-                            e.printStackTrace();
+                            AlertWindow.showErrorMessage(e.getMessage());
                         }
                     } catch (NullPointerException ignored) {
                     }
@@ -703,6 +707,19 @@ public class PCGUIController implements Initializable {
             });
         }
         productsTable.setItems(data);
+        productsTable.setRowFactory(pt -> new TableRow<ProductsTableView>() {
+            @Override
+            public void updateItem(ProductsTableView item, boolean empty) {
+                super.updateItem(item, empty) ;
+                if (item == null) {
+                    setStyle("");
+                } else if (item.hasPicture() == false) {
+                    setStyle("-fx-background-color: orange;");
+                } else {
+                    setStyle("");
+                }
+            }
+        });
     }
     private void buildDeliveryTimeTable(String selectedProduct) {
         ObservableList<ProductsTableView> data = FXCollections.observableArrayList();
@@ -1451,7 +1468,7 @@ public class PCGUIController implements Initializable {
                         getAllFilesOfProgramList();
                         buildDatasheetFileTable(selectedProduct);
                     } catch (SQLException e) {
-                        e.printStackTrace();
+                        AlertWindow.showErrorMessage(e.getMessage());
                     }
                 }).build()
         ).build();
@@ -2010,6 +2027,9 @@ public class PCGUIController implements Initializable {
                 buildCategoryTree();
                 buildModalCategoryTree(stackPaneModal, treeView);
             }
+            productsTable.requestFocus();
+            onFocusedProductTableItem(selectedProduct);
+            UtilPack.click(productsTable);
         }
     }
     private void editCategoryDialog(String whatTree, TreeView<String> treeView) throws SQLException {
@@ -2023,6 +2043,9 @@ public class PCGUIController implements Initializable {
                 editCategory(categoriesTree.getSelectionModel().getSelectedItem().getValue(), newCatTitle, newCatDescription, newCatPicturePath);
                 getAllCategoriesList();
                 buildCategoryTree();
+                productsTable.requestFocus();
+                onFocusedProductTableItem(selectedProduct);
+                UtilPack.click(productsTable);
             }
         } else if (whatTree.equals("modal")) {
             ArrayList<String> details = getCategoryDetails(treeView.getSelectionModel().getSelectedItem().getValue());
@@ -2035,6 +2058,9 @@ public class PCGUIController implements Initializable {
                 getAllCategoriesList();
                 buildCategoryTree();
                 buildModalCategoryTree(stackPaneModal, treeView);
+                productsTable.requestFocus();
+                onFocusedProductTableItem(selectedProduct);
+                UtilPack.click(productsTable);
             }
         }
     }
@@ -2124,6 +2150,14 @@ public class PCGUIController implements Initializable {
             String targetRemoteCatPixFolder = "/var/www/poligon/data/www/poligon.info/images/design/categories/" +
                     UtilPack.getCategoryVendorFromId(id) + "/";
             UtilPack.startFTP(NewImagePath, targetRemoteCatPixFolder);
+        }
+        try {
+            String queryRemote = "update categories set title=\"" +
+                    newTitle.replace("\"", "\\\"") + "\", summary=\"" + NewDescription +
+                    "\", image_path=\"" + NewImagePath.replace("\\", "\\\\") + "\" where id =" + id;
+            siteConnection.getUpdateResult(queryRemote);
+        } catch (SQLException e) {
+            AlertWindow.showErrorMessage(e.getMessage());
         }
     }
     private void deleteCategory(String categoryTitle) throws SQLException {
@@ -2353,22 +2387,32 @@ public class PCGUIController implements Initializable {
     private void setDatasheetFile() throws SQLException {
         fileChooser.setInitialDirectory(new File(fileChooserDirectoryCash));
         File file = fileChooser.showOpenDialog(anchorPane.getScene().getWindow());
+        String productVendor = UtilPack.getVendorFromProductTitle(selectedProduct);
+        String newFilePath = defaultPdfsDir + productVendor + "\\" + file.getName();
         if (file != null) {
             Session session = HibernateUtil.getSessionFactory().openSession();
             Transaction tx = session.beginTransaction();
-            List pdfList = session.createQuery("From Files where ownerId=" +
-                    UtilPack.getProductIdFromTitle(selectedProduct, allProductsList) + "and fileTypeId=2").list();
+            List pdfList = session.createQuery(
+                    "From Files where ownerId=" +
+                    UtilPack.getProductIdFromTitle(selectedProduct, allProductsList) +
+                    "and fileTypeId=2").list();
             if (pdfList.isEmpty()) {
-                Files pdfFile = new Files(file.getName(), file.getPath(), "Это даташит для " +
-                        selectedProduct, (new FileTypes(2)), (new Products(UtilPack.getProductIdFromTitle(selectedProduct, allProductsList))));
-                session.saveOrUpdate(pdfFile);
+                Files pdfFile = new Files(
+                        file.getName(),
+                        newFilePath,
+                        "Это даташит для " + selectedProduct,
+                        (new FileTypes(2)),
+                        (new Products(UtilPack.getProductIdFromTitle(selectedProduct, allProductsList))
+                        )
+                );
+                session.save(pdfFile);
                 datasheetFileTable.refresh();
             } else {
                 for (Iterator iterator = pdfList.iterator(); iterator.hasNext();) {
                     Files pdf = (Files) iterator.next();
                     if ((!pdf.getName().equals(file.getName())) || (!pdf.getPath().equals(file.getPath()))) {
                         pdf.setName(file.getName());
-                        pdf.setPath(file.getPath());
+                        pdf.setPath(newFilePath);
                         pdf.setDescription("Это даташит для " + selectedProduct);
                         session.saveOrUpdate(pdf);
                         datasheetFileTable.refresh();
@@ -2376,9 +2420,11 @@ public class PCGUIController implements Initializable {
                 }
             }
             fileChooserDirectoryCash = makeCorrectDirectoryPath(file.getPath());
-            System.out.println("fileChooserDirectoryCash is " + fileChooserDirectoryCash);
             tx.commit();
             session.close();
+            try {
+                UtilPack.copyFile(file, new File(newFilePath));
+            } catch (IOException e) {}
         }
         buildDatasheetFileTable(selectedProduct);
         gridPanePDF.getChildren().clear();
@@ -2449,15 +2495,12 @@ public class PCGUIController implements Initializable {
                         }
                     }).build(),
                     MenuItemBuilder.create().text("Открыть просмотр PDF-файла").onAction((ActionEvent arg0) -> {
+                        pagination.setCurrentPageIndex(0);
                         createAndConfigureImageLoadService();
                         currentFile = new SimpleObjectProperty<>();
                         currentImage = new SimpleObjectProperty<>();
                         scroller.contentProperty().bind(currentImage);
                         zoom = new SimpleDoubleProperty(1);
-                        // To implement zooming, we just get a new image from the PDFFile each time.
-                        // This seems to perform well in some basic tests but may need to be improved
-                        // E.g. load a larger image and scale in the ImageView, loading a new image only
-                        // when required.
                         zoom.addListener(new ChangeListener<Number>() {
                             @Override
                             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
@@ -2470,7 +2513,10 @@ public class PCGUIController implements Initializable {
                         tabPane.getSelectionModel().select(pdfTab);
                         try {
                             loadPdfFile(productsTable.getSelectionModel().getSelectedItem().getTitle());
-                        } catch (SQLException e) {}
+                            zoom.set(2.1);
+                        } catch (SQLException e) {
+                            AlertWindow.showErrorMessage(e.getMessage());
+                        }
                     }).build(),
                     MenuItemBuilder.create().text("Установить изображение...").onAction((ActionEvent arg0) -> {
                         changePictureForSelectedProducts();
@@ -3467,7 +3513,7 @@ public class PCGUIController implements Initializable {
         }
         videosListView.setContextMenu(videosListContextMenu);
         try {
-            videosListView.setItems(UtilPack.sortRussianList(getListItems("vdeos")));
+            videosListView.setItems(UtilPack.sortRussianList(getListItems("videos")));
         } catch (NullPointerException ignored) {
             videosListView.setItems(UtilPack.sortRussianList(emptyList));
         }
@@ -3649,6 +3695,7 @@ public class PCGUIController implements Initializable {
         }
     }
     @FXML private void saveContent () {
+        htmlEditor.setHtmlText(htmlCode.getText());
         if (!newsListView.getSelectionModel().getSelectedItems().isEmpty()) {
             NewsItems newsItem = new NewsItems();
             Session session = HibernateUtil.getSessionFactory().openSession();
@@ -3760,6 +3807,32 @@ public class PCGUIController implements Initializable {
             session.save(category);
             tx.commit();
             session.close();
+            String summary = "";
+            if (category.getSummary() != null) {
+                summary = category.getSummary().replace("\"", "\\\"").replace("\\", "\\\\");
+            }
+            String imagePath = "";
+            if (category.getImagePath() != null) {
+                imagePath = category.getImagePath().replace("\\", "\\\\");
+            }
+            String moreInfo = "";
+            if (category.getMoreInfo() != null) {
+                moreInfo = category.getMoreInfo().replace("\\", "\\\\");
+            }
+            try {
+                String queryRemote = "update categories set " +
+                        "title=\"" + contentTitleTextField.getText().replace("\"", "\\\"").replace("\\", "\\\\") +
+                        "\", description=\"" + UtilPack.cleanHtml(htmlEditor.getHtmlText()).replace("\"", "\\\"") +
+                        "\", summary=\"" + summary +
+                        "\", image_path=\"" + imagePath +
+                        "\", parent=" + category.getParent() +
+                        ", published=" + category.getPublished() +
+                        ", more_info=\"" + moreInfo +
+                        "\" where id =" + category.getId();
+                siteConnection.getUpdateResult(queryRemote);
+            } catch (SQLException e) {
+                AlertWindow.showErrorMessage(e.getMessage());
+            }
         }
         populateContentSiteLists();
     }
@@ -4565,5 +4638,8 @@ public class PCGUIController implements Initializable {
                 AlertWindow.showErrorMessage(e.getMessage());
             }
         }
+    }
+    @FXML private void addCategoryInfo() {
+        AlertWindow.addCategoryInfoDialog(categoriesListView.getSelectionModel().getSelectedItem());
     }
 }

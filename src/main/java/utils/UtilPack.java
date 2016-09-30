@@ -26,6 +26,7 @@ import org.hibernate.cfg.*;
 import tableviews.ProductPropertiesForKindTableView;
 import tableviews.ProductPropertiesTableView;
 
+import java.awt.event.InputEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -207,8 +208,36 @@ public class UtilPack {
             while (resultSet.next()) {
                 vendor_title = resultSet.getString("title");
             }
-        } catch (SQLException e) {}
+        } catch (SQLException e) {
+            AlertWindow.showErrorMessage(e.getMessage());
+        }
         return vendor_title;
+    }
+
+    public static String getFilesPathByOwnerIdAndFileTypeId(String ownerTitle, ArrayList<Product> allProductsList, int fileTypeId) {
+        String files_path = "";
+        entities.Files file = new entities.Files();
+        int ownerId = UtilPack.getProductIdFromTitle(ownerTitle, allProductsList);
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Query query = session.createQuery("from Files where ownerId =" +
+                ownerId + " and fileTypeId =" + fileTypeId);
+        List list = query.list();
+        for(Object o : list) {
+            file = (entities.Files) o;
+        }
+        session.close();
+        /*try {
+            ResultSet resultSet = PCGUIController.connection.getResult(
+                    "select path from files where owner_id =" +
+                            ownerId +
+                            " and file_type_id =" + fileTypeId);
+            while (resultSet.next()) {
+                files_path = resultSet.getString("path");
+            }
+        } catch (SQLException e) {
+            AlertWindow.showErrorMessage(e.getMessage());
+        }*/
+        return file.getPath();
     }
 
     public static Integer getProductIdFromTitle (String title, ArrayList<Product> allProductsList) {
@@ -434,5 +463,18 @@ public class UtilPack {
         Collator collator = Collator.getInstance(Locale.forLanguageTag("ru-RU"));
         Collections.sort(items, collator);
         return new SortedList(items);
+    }
+    public static void click(javafx.scene.control.Control control) {
+        java.awt.Point originalLocation = java.awt.MouseInfo.getPointerInfo().getLocation();
+        javafx.geometry.Point2D buttonLocation = control.localToScreen(control.getLayoutBounds().getMinX(), control.getLayoutBounds().getMinY());
+        try {
+            java.awt.Robot robot = new java.awt.Robot();
+            robot.mouseMove((int)buttonLocation.getX(), (int)buttonLocation.getY());
+            robot.mousePress(InputEvent.BUTTON1_MASK);
+            robot.mouseRelease(InputEvent.BUTTON1_MASK);
+            robot.mouseMove((int) originalLocation.getX(), (int)originalLocation.getY());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
