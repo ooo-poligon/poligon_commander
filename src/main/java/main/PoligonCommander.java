@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 public class PoligonCommander extends Application {
-    public static final String versionNumber = " версия 2.3.0";
+    public static final String versionNumber = " версия 2.4.0";
     public static final String SPLASH_IMAGE = "/images/splash2.png";
     private static final int SPLASH_WIDTH = 600;
     private static final int SPLASH_HEIGHT = 420;
