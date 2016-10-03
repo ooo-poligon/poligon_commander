@@ -75,7 +75,9 @@ public class PoligonCommander extends Application {
                 try {
                     FileUtils.forceMkdir(tmpDir);
                 } catch (IOException e) {
-                    AlertWindow.showErrorMessage("Не удалось создать временную директорию на локальном сервере, проверьте доступность сетевого соединения,");
+                    AlertWindow.showErrorMessage(
+                            "Не удалось создать временную директорию на локальном сервере, " +
+                                    "проверьте доступность сетевого соединения,");
                 }
                 PCGUIController.getAllProductsList();
                 PCGUIController.getAllFilesOfProgramList();

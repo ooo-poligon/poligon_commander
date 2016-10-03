@@ -47,6 +47,7 @@ import javafx.util.converter.IntegerStringConverter;
 import jxl.read.biff.BiffException;
 import modalwindows.AlertWindow;
 import modalwindows.SetRatesWindow;
+import new_items.NewAddCategoryInfo;
 import new_items.NewCategory;
 import new_items.NewSerie;
 import new_items.NewVendor;
@@ -73,6 +74,8 @@ import java.nio.channels.FileChannel;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.Collator;
+import java.text.Format;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -3550,6 +3553,13 @@ public class PCGUIController implements Initializable {
         directoryTitleTextField.setDisable(true);
     }
     @FXML private void editSelectedNewsItem() {
+        //newsListView.getSelectionModel().clearSelection();
+        articlesListView.getSelectionModel().clearSelection();
+        videosListView.getSelectionModel().clearSelection();
+        reviewsListView.getSelectionModel().clearSelection();
+        additionsListView.getSelectionModel().clearSelection();
+        contentsListView.getSelectionModel().clearSelection();
+        categoriesListView.getSelectionModel().clearSelection();
         try {
             NewsItems newsItem = new NewsItems();
             String selectedNewsItem = (String)newsListView.getSelectionModel().getSelectedItem();
@@ -3570,6 +3580,13 @@ public class PCGUIController implements Initializable {
         }
     }
     @FXML private void editSelectedArticle() {
+        newsListView.getSelectionModel().clearSelection();
+        //articlesListView.getSelectionModel().clearSelection();
+        videosListView.getSelectionModel().clearSelection();
+        reviewsListView.getSelectionModel().clearSelection();
+        additionsListView.getSelectionModel().clearSelection();
+        contentsListView.getSelectionModel().clearSelection();
+        categoriesListView.getSelectionModel().clearSelection();
         try {
             Articles article = new Articles();
             String selectedArticle = (String)articlesListView.getSelectionModel().getSelectedItem();
@@ -3590,6 +3607,13 @@ public class PCGUIController implements Initializable {
         }
     }
     @FXML private void editSelectedVideo() {
+        newsListView.getSelectionModel().clearSelection();
+        articlesListView.getSelectionModel().clearSelection();
+        //videosListView.getSelectionModel().clearSelection();
+        reviewsListView.getSelectionModel().clearSelection();
+        additionsListView.getSelectionModel().clearSelection();
+        contentsListView.getSelectionModel().clearSelection();
+        categoriesListView.getSelectionModel().clearSelection();
         try {
             Videos video = new Videos();
             String selectedVideo = (String)videosListView.getSelectionModel().getSelectedItem();
@@ -3611,6 +3635,13 @@ public class PCGUIController implements Initializable {
         }
     }
     @FXML private void editSelectedReview() {
+        newsListView.getSelectionModel().clearSelection();
+        articlesListView.getSelectionModel().clearSelection();
+        videosListView.getSelectionModel().clearSelection();
+        //reviewsListView.getSelectionModel().clearSelection();
+        additionsListView.getSelectionModel().clearSelection();
+        contentsListView.getSelectionModel().clearSelection();
+        categoriesListView.getSelectionModel().clearSelection();
         try {
             Reviews review = new Reviews();
             String selectedReview = (String)reviewsListView.getSelectionModel().getSelectedItem();
@@ -3632,6 +3663,13 @@ public class PCGUIController implements Initializable {
         }
     }
     @FXML private void editSelectedAddition() {
+        newsListView.getSelectionModel().clearSelection();
+        articlesListView.getSelectionModel().clearSelection();
+        videosListView.getSelectionModel().clearSelection();
+        reviewsListView.getSelectionModel().clearSelection();
+        //additionsListView.getSelectionModel().clearSelection();
+        contentsListView.getSelectionModel().clearSelection();
+        categoriesListView.getSelectionModel().clearSelection();
         try {
             Additions addition = new Additions();
             String selectedAddition = (String)additionsListView.getSelectionModel().getSelectedItem();
@@ -3653,6 +3691,13 @@ public class PCGUIController implements Initializable {
         }
     }
     @FXML private void editSelectedContent() {
+        newsListView.getSelectionModel().clearSelection();
+        articlesListView.getSelectionModel().clearSelection();
+        videosListView.getSelectionModel().clearSelection();
+        reviewsListView.getSelectionModel().clearSelection();
+        additionsListView.getSelectionModel().clearSelection();
+        //contentsListView.getSelectionModel().clearSelection();
+        categoriesListView.getSelectionModel().clearSelection();
         try {
             StaticContents staticContent = new StaticContents();
             String selectedStaticContent = (String) contentsListView.getSelectionModel().getSelectedItem();
@@ -3674,6 +3719,13 @@ public class PCGUIController implements Initializable {
         }
     }
     @FXML private void editSelectedCategory() {
+        newsListView.getSelectionModel().clearSelection();
+        articlesListView.getSelectionModel().clearSelection();
+        videosListView.getSelectionModel().clearSelection();
+        reviewsListView.getSelectionModel().clearSelection();
+        additionsListView.getSelectionModel().clearSelection();
+        contentsListView.getSelectionModel().clearSelection();
+        //categoriesListView.getSelectionModel().clearSelection();
         try {
             Categories category = new Categories();
             String selectedCategory = (String)categoriesListView.getSelectionModel().getSelectedItem();
@@ -3695,6 +3747,8 @@ public class PCGUIController implements Initializable {
         }
     }
     @FXML private void saveContent () {
+        Format formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String date = formatter.format(new Date());
         htmlEditor.setHtmlText(htmlCode.getText());
         if (!newsListView.getSelectionModel().getSelectedItems().isEmpty()) {
             NewsItems newsItem = new NewsItems();
@@ -3708,9 +3762,19 @@ public class PCGUIController implements Initializable {
             newsItem.setTitle(contentTitleTextField.getText());
             newsItem.setContent(UtilPack.cleanHtml(htmlEditor.getHtmlText()));
             newsItem.setUpdatedAt(new Date());
-            session.save(newsItem);
+            session.saveOrUpdate(newsItem);
             tx.commit();
             session.close();
+            try {
+                String queryRemote = "update news_items set " +
+                        "title=\"" + contentTitleTextField.getText().replace("\"", "\\\"").replace("\\", "\\\\") +
+                        "\", updated_at=\"" + date +
+                        "\", content=\"" + UtilPack.cleanHtml(htmlEditor.getHtmlText()).replace("\"", "\\\"") +
+                        "\" where id =" + newsItem.getId();
+                siteConnection.getUpdateResult(queryRemote);
+            } catch (SQLException e) {
+                AlertWindow.showErrorMessage(e.getMessage());
+            }
         } else if (!articlesListView.getSelectionModel().getSelectedItems().isEmpty()) {
             Articles article = new Articles();
             Session session = HibernateUtil.getSessionFactory().openSession();
@@ -3723,9 +3787,19 @@ public class PCGUIController implements Initializable {
             article.setTitle(contentTitleTextField.getText());
             article.setContent(UtilPack.cleanHtml(htmlEditor.getHtmlText()));
             article.setUpdatedAt(new Date());
-            session.save(article);
+            session.saveOrUpdate(article);
             tx.commit();
             session.close();
+            try {
+                String queryRemote = "update articles set " +
+                        "title=\"" + contentTitleTextField.getText().replace("\"", "\\\"").replace("\\", "\\\\") +
+                        "\", updated_at=\"" + date +
+                        "\", content=\"" + UtilPack.cleanHtml(htmlEditor.getHtmlText()).replace("\"", "\\\"") +
+                        "\" where id =" + article.getId();
+                siteConnection.getUpdateResult(queryRemote);
+            } catch (SQLException e) {
+                AlertWindow.showErrorMessage(e.getMessage());
+            }
         } else if (!videosListView.getSelectionModel().getSelectedItems().isEmpty()) {
             Videos video = new Videos();
             Session session = HibernateUtil.getSessionFactory().openSession();
@@ -3738,9 +3812,19 @@ public class PCGUIController implements Initializable {
             video.setTitle(contentTitleTextField.getText());
             video.setContent(UtilPack.cleanHtml(htmlEditor.getHtmlText()));
             video.setUpdatedAt(new Date());
-            session.save(video);
+            session.saveOrUpdate(video);
             tx.commit();
             session.close();
+            try {
+                String queryRemote = "update videos set " +
+                        "title=\"" + contentTitleTextField.getText().replace("\"", "\\\"").replace("\\", "\\\\") +
+                        "\", updated_at=\"" + date +
+                        "\", content=\"" + UtilPack.cleanHtml(htmlEditor.getHtmlText()).replace("\"", "\\\"") +
+                        "\" where id =" + video.getId();
+                siteConnection.getUpdateResult(queryRemote);
+            } catch (SQLException e) {
+                AlertWindow.showErrorMessage(e.getMessage());
+            }
         } else if (!reviewsListView.getSelectionModel().getSelectedItems().isEmpty()) {
             Reviews review = new Reviews();
             Session session = HibernateUtil.getSessionFactory().openSession();
@@ -3753,9 +3837,19 @@ public class PCGUIController implements Initializable {
             review.setTitle(contentTitleTextField.getText());
             review.setContent(UtilPack.cleanHtml(htmlEditor.getHtmlText()));
             review.setUpdatedAt(new Date());
-            session.save(review);
+            session.saveOrUpdate(review);
             tx.commit();
             session.close();
+            try {
+                String queryRemote = "update reviews set " +
+                        "title=\"" + contentTitleTextField.getText().replace("\"", "\\\"").replace("\\", "\\\\") +
+                        "\", updated_at=\"" + date +
+                        "\", content=\"" + UtilPack.cleanHtml(htmlEditor.getHtmlText()).replace("\"", "\\\"") +
+                        "\" where id =" + review.getId();
+                siteConnection.getUpdateResult(queryRemote);
+            } catch (SQLException e) {
+                AlertWindow.showErrorMessage(e.getMessage());
+            }
         } else if (!additionsListView.getSelectionModel().getSelectedItems().isEmpty()) {
             Additions addition = new Additions();
             Session session = HibernateUtil.getSessionFactory().openSession();
@@ -3768,9 +3862,19 @@ public class PCGUIController implements Initializable {
             addition.setTitle(contentTitleTextField.getText());
             addition.setContent(UtilPack.cleanHtml(htmlEditor.getHtmlText()));
             addition.setUpdatedAt(new Date());
-            session.save(addition);
+            session.saveOrUpdate(addition);
             tx.commit();
             session.close();
+            try {
+                String queryRemote = "update additions set " +
+                        "title=\"" + contentTitleTextField.getText().replace("\"", "\\\"").replace("\\", "\\\\") +
+                        "\", updated_at=\"" + date +
+                        "\", content=\"" + UtilPack.cleanHtml(htmlEditor.getHtmlText()).replace("\"", "\\\"") +
+                        "\" where id =" + addition.getId();
+                siteConnection.getUpdateResult(queryRemote);
+            } catch (SQLException e) {
+                AlertWindow.showErrorMessage(e.getMessage());
+            }
         } else if (!contentsListView.getSelectionModel().getSelectedItems().isEmpty()) {
             StaticContents staticContent = new StaticContents();
             Session session = HibernateUtil.getSessionFactory().openSession();
@@ -3785,9 +3889,21 @@ public class PCGUIController implements Initializable {
             staticContent.setDirectory(directoryTitleTextField.getText());
             staticContent.setContent(UtilPack.cleanHtml(htmlEditor.getHtmlText()));
             staticContent.setUpdatedAt(new Date());
-            session.save(staticContent);
+            session.saveOrUpdate(staticContent);
             tx.commit();
             session.close();
+            try {
+                String queryRemote = "update static_contents set " +
+                        "title=\"" + contentTitleTextField.getText().replace("\"", "\\\"").replace("\\", "\\\\") +
+                        "\", page=\"" + pageTitleTextField.getText().replace("\"", "\\\"") +
+                        "\", directory=\"" + directoryTitleTextField.getText().replace("\"", "\\\"") +
+                        "\", updated_at=\"" + date +
+                        "\", content=\"" + UtilPack.cleanHtml(htmlEditor.getHtmlText()).replace("\"", "\\\"") +
+                        "\" where id =" + staticContent.getId();
+                siteConnection.getUpdateResult(queryRemote);
+            } catch (SQLException e) {
+                AlertWindow.showErrorMessage(e.getMessage());
+            }
         } else if (!categoriesListView.getSelectionModel().getSelectedItems().isEmpty()) {
             Categories category = new Categories();
             Session session = HibernateUtil.getSessionFactory().openSession();
@@ -3799,35 +3915,13 @@ public class PCGUIController implements Initializable {
             Transaction tx = session.beginTransaction();
             category.setTitle(contentTitleTextField.getText());
             category.setDescription(UtilPack.cleanHtml(htmlEditor.getHtmlText()));
-            category.setSummary(category.getSummary());
-            category.setImagePath(category.getImagePath());
-            category.setParent(category.getParent());
-            category.setPublished(category.getPublished());
-            category.setMoreInfo(category.getMoreInfo());
-            session.save(category);
+            session.saveOrUpdate(category);
             tx.commit();
             session.close();
-            String summary = "";
-            if (category.getSummary() != null) {
-                summary = category.getSummary().replace("\"", "\\\"").replace("\\", "\\\\");
-            }
-            String imagePath = "";
-            if (category.getImagePath() != null) {
-                imagePath = category.getImagePath().replace("\\", "\\\\");
-            }
-            String moreInfo = "";
-            if (category.getMoreInfo() != null) {
-                moreInfo = category.getMoreInfo().replace("\\", "\\\\");
-            }
             try {
                 String queryRemote = "update categories set " +
                         "title=\"" + contentTitleTextField.getText().replace("\"", "\\\"").replace("\\", "\\\\") +
                         "\", description=\"" + UtilPack.cleanHtml(htmlEditor.getHtmlText()).replace("\"", "\\\"") +
-                        "\", summary=\"" + summary +
-                        "\", image_path=\"" + imagePath +
-                        "\", parent=" + category.getParent() +
-                        ", published=" + category.getPublished() +
-                        ", more_info=\"" + moreInfo +
                         "\" where id =" + category.getId();
                 siteConnection.getUpdateResult(queryRemote);
             } catch (SQLException e) {
@@ -4640,6 +4734,31 @@ public class PCGUIController implements Initializable {
         }
     }
     @FXML private void addCategoryInfo() {
-        AlertWindow.addCategoryInfoDialog(categoriesListView.getSelectionModel().getSelectedItem());
+        Optional<NewAddCategoryInfo> result = AlertWindow.addCategoryInfoDialog(categoriesListView.getSelectionModel().getSelectedItem());
+        if (result != null) {
+            Categories category = new Categories();
+            Session session = HibernateUtil.getSessionFactory().openSession();
+            List res = session.createQuery(
+                    "from Categories where title=\'" + categoriesListView.getSelectionModel().getSelectedItem() + "\'").list();
+            for (Iterator iterator = res.iterator(); iterator.hasNext();) {
+                category = (Categories) iterator.next();
+            }
+            Transaction tx = session.beginTransaction();
+            category.setMoreInfo(result.get().getMoreInfo());
+            session.saveOrUpdate(category);
+            tx.commit();
+            session.close();
+            String moreInfo = "";
+            if (category.getMoreInfo() != null) {
+                moreInfo = result.get().getMoreInfo().replace("\"", "\\\"");
+            }
+            try {
+                String queryRemote = "update categories set more_info=\"" + moreInfo +
+                        "\" where id =" + category.getId();
+                siteConnection.getUpdateResult(queryRemote);
+            } catch (SQLException e) {
+                AlertWindow.showErrorMessage(e.getMessage());
+            }
+        }
     }
 }

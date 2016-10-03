@@ -601,49 +601,38 @@ public class AlertWindow {
         return dialog.showAndWait();
     }
     public static Optional<NewAddCategoryInfo> addCategoryInfoDialog(String selectedCategory) {
+        Categories category = new Categories();
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Query query = session.createQuery("from Categories where title = :title");
+        query.setParameter("title", selectedCategory);
+        List result = query.list();
+        for(Iterator iterator = result.iterator(); iterator.hasNext();) {
+            category = (Categories) iterator.next();
+        }
+        session.close();
+
         Dialog<NewAddCategoryInfo> dialog = new Dialog<>();
         dialog.setTitle("Дополнительная информация для категории.");
         dialog.setHeaderText("Эта информация показываетс при нажании на кнопку\n" +
                 " \"Дополнительные материалы\" на странице с описанием категории.");
         dialog.setResizable(false);
 
-        Label titleLabel = new Label("Название файла:  ");
         Label descriptionLabel = new Label("HTML разметка:  ");
-        TextField titleTextField = new TextField();
-        titleTextField.setText("ПОКА НЕ РАБОТАЕТ!!!");
         TextArea descriptionTextArea = new TextArea();
-        descriptionTextArea.setText("ПОКА НЕ РАБОТАЕТ!!!");
+        descriptionTextArea.setText(category.getMoreInfo());
 
         GridPane grid = new GridPane();
-        grid.add(titleLabel, 1, 1);
-        grid.add(titleTextField, 2, 1);
-
-        grid.add(descriptionLabel, 1, 2);
-        grid.add(descriptionTextArea, 2, 2);
+        grid.add(descriptionLabel, 1, 1);
+        grid.add(descriptionTextArea, 2, 1);
         dialog.getDialogPane().setContent(grid);
 
-        /*String vendorTitle = "";
-        SeriesItems seriesItem = new SeriesItems();
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Query query = session.createQuery("from SeriesItems where title = :title");
-        query.setParameter("title", selectedSerie);
-        List result = query.list();
-        for(Iterator iterator = result.iterator(); iterator.hasNext();) {
-            seriesItem = (SeriesItems) iterator.next();
-        }
-
-        ArrayList<String> allVendors = UtilPack.getAllVendors();
-        ObservableList<String> vendorsTitles = FXCollections.observableArrayList();
-        vendorsTitles.addAll(allVendors);
-
-        */
         ButtonType buttonTypeOk = new ButtonType("Создать", ButtonBar.ButtonData.OK_DONE);
         ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonBar.ButtonData.CANCEL_CLOSE);
         dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
         dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
         dialog.setResultConverter((ButtonType b) -> {
             if (b == buttonTypeOk) {
-                return new NewAddCategoryInfo();
+                return new NewAddCategoryInfo(descriptionTextArea.getText());
             }
             return null;
         });
