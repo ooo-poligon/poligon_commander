@@ -59,6 +59,9 @@ public class Functions implements Serializable {
     @JoinColumn(name = "product_kind_id", referencedColumnName = "id")
     @ManyToOne
     private ProductKinds productKindId;
+    @JoinColumn(name = "vendor_id", referencedColumnName = "id")
+    @ManyToOne
+    private Vendors vendorId;
 
     public Functions() {
     }
@@ -118,6 +121,14 @@ public class Functions implements Serializable {
 
     public void setProductKindId(ProductKinds productKindId) {
         this.productKindId = productKindId;
+    }
+
+    public Vendors getVendorId() {
+        return vendorId;
+    }
+
+    public void setVendorId(Vendors vendorId) {
+        this.vendorId = vendorId;
     }
 
     @Override

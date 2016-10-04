@@ -10,6 +10,8 @@ import javafx.scene.control.TableView;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
+import main.PCGUIController;
+import main.PoligonCommander;
 import main.Product;
 import modalwindows.AlertWindow;
 import new_items.*;
@@ -24,6 +26,7 @@ import tableviews.VendorsTableView;
 import tableviews.ProductPropertiesTableView;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.Collator;
@@ -454,6 +457,15 @@ public class ContextBuilder {
             session.saveOrUpdate(productKind);
             tx.commit();
             session.close();
+            try {
+                String queryRemote = "insert into product_kinds " +
+                        "(title) values" +
+                        " (\"" + result.get().getTitle().replace("\"", "\\\"").replace("\\", "\\\\") + "\")";
+                PCGUIController.siteConnection.getUpdateResult(queryRemote);
+            } catch (SQLException e) {
+                //AlertWindow.showErrorMessage(e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
     public static void updateTheProductKind(ListView<String> productKindsList) {
@@ -502,6 +514,14 @@ public class ContextBuilder {
             session1.saveOrUpdate(productKind);
             tx.commit();
             session1.close();
+            try {
+                String queryRemote = "update product_kinds set" +
+                        " title=\"" + result.get().getTitle().replace("\"", "\\\"").replace("\\", "\\\\") +
+                        "\" where id =" + productKind.getId();
+                PCGUIController.siteConnection.getUpdateResult(queryRemote);
+            } catch (SQLException e) {
+                AlertWindow.showErrorMessage(e.getMessage());
+            }
         }
     }
     public static void deleteTheProductKind(ListView<String> productKindsList) {
@@ -555,7 +575,18 @@ public class ContextBuilder {
                 Query q2 = session1.createQuery("delete PropertyValues where propertyId =" + property.getId());
                 q2.executeUpdate();
                 tx2.commit();
+                try {
+                    String queryRemote = "delete from property_values where property_id =" + property.getId();
+                    PCGUIController.siteConnection.getUpdateResult(queryRemote);
+                } catch (SQLException e) {
+                    AlertWindow.showErrorMessage(e.getMessage());
+                }
             });
+
+            Transaction tx0 = session1.beginTransaction();
+            Query q0 = session1.createQuery("delete Functions where productKindId =" + productKind.getId());
+            q0.executeUpdate();
+            tx0.commit();
 
             Transaction tx1 = session1.beginTransaction();
             Query q1 = session1.createQuery("delete Properties where productKindId =" + productKind.getId());
@@ -568,6 +599,36 @@ public class ContextBuilder {
             tx.commit();
 
             session1.close();
+
+            propertiesList.stream().forEach((property) -> {
+                try {
+                    String queryRemote = "delete from property_values where property_id =" + property.getId();
+                    PCGUIController.siteConnection.getUpdateResult(queryRemote);
+                } catch (SQLException e) {
+                    AlertWindow.showErrorMessage(e.getMessage());
+                }
+            });
+
+            try {
+                String queryRemote = "delete from functions where product_kind_id =" + productKind.getId();
+                PCGUIController.siteConnection.getUpdateResult(queryRemote);
+            } catch (SQLException e) {
+                AlertWindow.showErrorMessage(e.getMessage());
+            }
+
+            try {
+                String queryRemote = "delete from properties where product_kind_id =" + productKind.getId();
+                PCGUIController.siteConnection.getUpdateResult(queryRemote);
+            } catch (SQLException e) {
+                AlertWindow.showErrorMessage(e.getMessage());
+            }
+
+            try {
+                String queryRemote = "delete from product_kinds where id =" + productKind.getId();
+                PCGUIController.siteConnection.getUpdateResult(queryRemote);
+            } catch (SQLException e) {
+                AlertWindow.showErrorMessage(e.getMessage());
+            }
         }
     }
 
@@ -929,9 +990,33 @@ public class ContextBuilder {
     }
 
     public static void createNewFunction(Integer selectedPropertiesKindID) {
+        final Vendors[] functionVendor = {new Vendors()};
+        ObservableList<Vendors> vendorsList = FXCollections.observableArrayList();
+        ComboBox<String> vendorsComboBox = new ComboBox<>();
+        Session session0 = HibernateUtil.getSessionFactory().openSession();
+        List res0 = session0.createQuery("from Vendors").list();
+        for (Iterator iterator = res0.iterator(); iterator.hasNext();) {
+            Vendors vendor = (Vendors) iterator.next();
+            vendorsList.add(vendor);
+        }
+        session0.close();
+        ObservableList<String> vendorsTitles = FXCollections.observableArrayList();
+        vendorsList.stream().forEach((vendors) -> {
+            vendorsTitles.add(vendors.getTitle());
+        });
+        vendorsComboBox.setItems(vendorsTitles);
+        vendorsComboBox.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                for (Vendors vendor : vendorsList) {
+                    if (vendor.getTitle().equals(vendorsComboBox.getValue())) {
+                        functionVendor[0] = vendor;
+                    }
+                }
+            }
+        });
 
         ProductKinds productKind = new ProductKinds();
-
         Session session = HibernateUtil.getSessionFactory().openSession();
         List res = session.createQuery("from ProductKinds where id =" + selectedPropertiesKindID).list();
         for (Iterator iterator = res.iterator(); iterator.hasNext();) {
@@ -943,6 +1028,12 @@ public class ContextBuilder {
         dialog.setTitle("Добавление новой функции.");
         dialog.setHeaderText("Введите параметры новой функции.");
         dialog.setResizable(true);
+
+        Label labelVendor = new Label("Выберите производителя из списка:  ");
+
+        GridPane gridVendor = new GridPane();
+        gridVendor.add(labelVendor, 1, 1);
+        gridVendor.add(vendorsComboBox, 3, 1);
 
         Label label1 = new Label("Название:  ");
         Label label2 = new Label("Символ:  ");
@@ -976,8 +1067,8 @@ public class ContextBuilder {
 
         grid.add(grid1, 2, 5);
         grid1.add(image1, 0, 0);
-        grid.add(label4, 1, 6);
 
+        grid.add(gridVendor, 2, 6);
         grid.add(setImageButton, 2, 7);
 
         dialog.getDialogPane().setContent(grid);
@@ -1002,7 +1093,20 @@ public class ContextBuilder {
         dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
         dialog.setResultConverter((ButtonType b) -> {
             if (b == buttonTypeOk) {
-                return new NewFunction(text1.getText(), text2.getText(), text3.getText(), picName, picPath);
+                if (picPath.equals("")) {
+                    return new NewFunction(text1.getText(), text2.getText(), text3.getText(), picName, picPath);
+                } else {
+                    String picName = picPath.replace('\\', '@').split("@")[(picPath.replace('\\', '@')).split("@").length - 1];
+                    String tempPath = PoligonCommander.tmpDir.getAbsolutePath() + "\\" + picName;
+                    String newPicPath = "\\\\Server03\\бд_сайта\\poligon_images\\catalog\\" + functionVendor[0].getTitle() + "\\funcs" +
+                            "\\" + picName;
+                    try {
+                        UtilPack.copyFile(new File(tempPath), new File(newPicPath));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    return new NewFunction(text1.getText(), text2.getText(), text3.getText(), picName, newPicPath);
+                }
             }
             return null;
         });
@@ -1018,11 +1122,27 @@ public class ContextBuilder {
             function.setPictureName(result.get().getPictureName());
             function.setPicturePath(result.get().getPicturePath());
             function.setProductKindId(productKind);
+            function.setVendorId(functionVendor[0]);
 
             session1.saveOrUpdate(function);
 
             tx.commit();
             session1.close();
+            try {
+                String queryRemote = "insert into functions " +
+                        "(title,symbol,description,picture_name,picture_path,vendor_id,product_kind_id) values" +
+                        " (\"" + result.get().getTitle().replace("\"", "\\\"").replace("\\", "\\\\") +
+                        "\",\"" + result.get().getSymbol().replace("\"", "\\\"").replace("\\", "\\\\") +
+                        "\",\"" + result.get().getDescription().replace("\"", "\\\"").replace("\\", "\\\\") +
+                        "\",\"" + result.get().getPictureName().replace("\"", "\\\"").replace("\\", "\\\\") +
+                        "\",\"" + result.get().getPicturePath().replace("\"", "\\\"").replace("\\", "\\\\") +
+                        "\"," + functionVendor[0].getId() +
+                        "," + productKind.getId() +")";
+                PCGUIController.siteConnection.getUpdateResult(queryRemote);
+            } catch (SQLException e) {
+                //AlertWindow.showErrorMessage(e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
     public static void updateTheFunction(Integer selectedPropertiesKindID, TableView<FunctionsTableView> functionsTable) {
@@ -1132,6 +1252,19 @@ public class ContextBuilder {
 
             tx.commit();
             session1.close();
+            try {
+                String queryRemote = "update functions set" +
+                        " title=\"" + result.get().getTitle().replace("\"", "\\\"").replace("\\", "\\\\") +
+                        "\", symbol=\"" + result.get().getSymbol().replace("\"", "\\\"").replace("\\", "\\\\") +
+                        "\", description=\"" + result.get().getDescription().replace("\"", "\\\"").replace("\\", "\\\\") +
+                        "\", picture_name=\"" + result.get().getPictureName().replace("\"", "\\\"").replace("\\", "\\\\") +
+                        "\", picture_path=\"" + result.get().getPicturePath().replace("\"", "\\\"").replace("\\", "\\\\") +
+                        "\", product_kind_id=" + productKind.getId() +
+                        " where id =" + function.getId();
+                PCGUIController.siteConnection.getUpdateResult(queryRemote);
+            } catch (SQLException e) {
+                AlertWindow.showErrorMessage(e.getMessage());
+            }
         }
     }
     public static void deleteTheFunction(TableView<FunctionsTableView> functionsTable) {
@@ -1178,6 +1311,12 @@ public class ContextBuilder {
 
             tx.commit();
             session1.close();
+            try {
+                String queryRemote = "delete from functions where id =" + function.getId();
+                PCGUIController.siteConnection.getUpdateResult(queryRemote);
+            } catch (SQLException e) {
+                AlertWindow.showErrorMessage(e.getMessage());
+            }
         }
     }
 
@@ -1252,8 +1391,6 @@ public class ContextBuilder {
         dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
         dialog.setResultConverter((ButtonType b) -> {
             if (b == buttonTypeOk) {
-                System.out.println(selectedFunctionID);
-                System.out.println(selectedProductKindID);
                 return new NewFunctionsProducts(selectedFunctionID, selectedProductID);
             }
             return null;

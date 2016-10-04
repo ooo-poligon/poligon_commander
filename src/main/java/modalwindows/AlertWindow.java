@@ -199,9 +199,6 @@ public class AlertWindow {
                     return new NewCategory(text1.getText(), text2.getText(), newPicPath);
                 }
             }
-            if (b == buttonTypeOk) {
-
-            }
             return null;
         });
         return dialog.showAndWait();

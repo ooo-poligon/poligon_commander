@@ -8,11 +8,15 @@ import entities.FileTypes;
 import entities.Files;
 import entities.Products;
 import imgscalr.Scalr;
+import javafx.event.EventHandler;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
+import main.PCGUIController;
 import main.PoligonCommander;
 import modalwindows.AlertWindow;
+import modalwindows.ImageWindow;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -21,6 +25,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.MalformedURLException;
+import java.sql.SQLException;
 import java.util.List;
 import static utils.SshUtils.sftp;
 
@@ -147,6 +152,15 @@ public class ImageFile {
         imageView.setPreserveRatio(true);
         imageView.setSmooth(true);
         imageView.setCache(true);
+        imageView.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent click) {
+                if (click.getClickCount() == 2) {
+                    ImageWindow imageWindow = new ImageWindow(imageView);
+                    imageWindow.show();
+                }
+            }
+        });
         gridPane.getChildren().add(imageView);
     }
 
@@ -173,6 +187,15 @@ public class ImageFile {
             if (file != null)
                 pictureFile = new Files(file.getName(), file.getPath(), "Это изображение для " + selectedProduct, (new FileTypes(1)), (new Products(ownerId)));
             session.saveOrUpdate(pictureFile);
+            try {
+                String queryRemote = "insert into files set (description,name,path,file_type_id,owner_id) values" +
+                        " (\"Это изображение для " + selectedProduct + "\",\"" + file.getName() +
+                        "\",\"" + file.getPath().replace("\"", "\\\"").replace("\\", "\\\\") +
+                        "\",1," + ownerId + ")";
+                PCGUIController.siteConnection.getUpdateResult(queryRemote);
+            } catch (SQLException e) {
+                AlertWindow.showErrorMessage(e.getMessage());
+            }
         } else {
             for (Object aPictureList : pictureList) {
                 Files pic = (Files) aPictureList;
@@ -181,6 +204,15 @@ public class ImageFile {
                     pic.setPath(file.getPath());
                     pic.setDescription("Это изображение для " + selectedProduct);
                     session.saveOrUpdate(pic);
+                }
+                try {
+                    String queryRemote = "update files set name=\"" + file.getName() +
+                            "\", path=\"" + file.getPath().replace("\"", "\\\"").replace("\\", "\\\\")  +
+                            "\", description=\"Это изображение для " + selectedProduct +
+                            "\" where owner_id =" + ownerId + " and file_type_id=" + 1;
+                    PCGUIController.siteConnection.getUpdateResult(queryRemote);
+                } catch (SQLException e) {
+                    AlertWindow.showErrorMessage(e.getMessage());
                 }
             }
         }
@@ -209,6 +241,15 @@ public class ImageFile {
                 pictureFile = new Files(file.getName(), file.getPath(), "Это схема габаритов для " + selectedProduct, (new FileTypes(4)), (new Products(ownerId)));
             }
             session.saveOrUpdate(pictureFile);
+            try {
+                String queryRemote = "insert into files set (description,name,path,file_type_id,owner_id) values" +
+                        " (\"Это схема габаритов для " + selectedProduct + "\",\"" + file.getName() +
+                        "\",\"" + file.getPath().replace("\"", "\\\"").replace("\\", "\\\\") +
+                        "\",4," + ownerId + ")";
+                PCGUIController.siteConnection.getUpdateResult(queryRemote);
+            } catch (SQLException e) {
+                AlertWindow.showErrorMessage(e.getMessage());
+            }
         } else {
             for (Object aPictureList : pictureList) {
                 Files pic = (Files) aPictureList;
@@ -219,6 +260,15 @@ public class ImageFile {
                     pic.setPath(file.getPath());
                     pic.setDescription("Это схема габаритов для " + selectedProduct);
                     session.saveOrUpdate(pic);
+                }
+                try {
+                    String queryRemote = "update files set name=\"" + file.getName() +
+                            "\", path=\"" + file.getPath().replace("\"", "\\\"").replace("\\", "\\\\") +
+                            "\", description=\"Это схема габаритов для " + selectedProduct +
+                            "\" where owner_id =" + ownerId + " and file_type_id =" + 4;
+                    PCGUIController.siteConnection.getUpdateResult(queryRemote);
+                } catch (SQLException e) {
+                    AlertWindow.showErrorMessage(e.getMessage());
                 }
             }
         }
@@ -249,6 +299,15 @@ public class ImageFile {
                 pictureFile = new Files(file.getName(), file.getPath(), "Это схема подключения №" + plugNumber + " для " + selectedProduct, (new FileTypes(fileTypeId)), (new Products(ownerId)));
             }
             session.saveOrUpdate(pictureFile);
+            try {
+                String queryRemote = "insert into files set (description,name,path,file_type_id,owner_id) values" +
+                        " (\"Это схема подключения №" + plugNumber + " для " + selectedProduct + "\",\"" + file.getName() +
+                        "\",\"" + file.getPath().replace("\"", "\\\"").replace("\\", "\\\\") +
+                        "\"," + fileTypeId + "," + ownerId + ")";
+                PCGUIController.siteConnection.getUpdateResult(queryRemote);
+            } catch (SQLException e) {
+                AlertWindow.showErrorMessage(e.getMessage());
+            }
         } else {
             for (Object aPictureList : pictureList) {
                 Files pic = (Files) aPictureList;
@@ -259,6 +318,15 @@ public class ImageFile {
                     pic.setPath(file.getPath());
                     pic.setDescription("Это схема подключения №" + plugNumber + " для " + selectedProduct);
                     session.saveOrUpdate(pic);
+                }
+                try {
+                    String queryRemote = "update files set name=\"" + file.getName() +
+                            "\", path=\"" + file.getPath().replace("\"", "\\\"").replace("\\", "\\\\") +
+                            "\", description=\"Это схема подключения №" + plugNumber + " для " + selectedProduct +
+                            "\" where owner_id =" + ownerId + " and file_type_id=" + fileTypeId;
+                    PCGUIController.siteConnection.getUpdateResult(queryRemote);
+                } catch (SQLException e) {
+                    AlertWindow.showErrorMessage(e.getMessage());
                 }
             }
         }

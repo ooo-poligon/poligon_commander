@@ -46,6 +46,7 @@ import javafx.util.StringConverter;
 import javafx.util.converter.IntegerStringConverter;
 import jxl.read.biff.BiffException;
 import modalwindows.AlertWindow;
+import modalwindows.ImageWindow;
 import modalwindows.SetRatesWindow;
 import new_items.NewAddCategoryInfo;
 import new_items.NewCategory;
@@ -3054,9 +3055,11 @@ public class PCGUIController implements Initializable {
     @FXML private void setPictureButtonPress() {
         File file = fileChooser.showOpenDialog(anchorPane.getScene().getWindow());
         if (file != null) {
-            ImageFile.open(file, gridPane, imageView, "deviceImage");
-            ImageFile.open(file, productTabGridPaneImageView, productTabImageView, "deviceImage");
-            ImageFile.save(file, selectedProduct);
+            String tempFileName = new File(ImageFile.makeTemporaryResizedImage(file)).getName();
+            String tempFilePath = PoligonCommander.tmpDir + "\\" + tempFileName;
+            ImageFile.open(new File(tempFilePath), gridPane, imageView, "deviceImage");
+            ImageFile.open(new File(tempFilePath), productTabGridPaneImageView, productTabImageView, "deviceImage");
+            ImageFile.save(new File(tempFilePath), selectedProduct);
         }
         try { getAllFilesOfProgramList(); } catch (SQLException e) {}
         fillProductTab(selectedProduct);
@@ -3064,22 +3067,28 @@ public class PCGUIController implements Initializable {
     @FXML private void setDimsImageButtonPress() {
         File file = fileChooser.showOpenDialog(anchorPane.getScene().getWindow());
         if (file != null) {
-            ImageFile.open(file, productDimsGridPane, productDimsImageView, "dimsImage");
-            ImageFile.saveDimImage(file, selectedProduct);
+            String tempFileName = new File(ImageFile.makeTemporaryResizedImage(file)).getName();
+            String tempFilePath = PoligonCommander.tmpDir + "\\" + tempFileName;
+            ImageFile.open(new File(tempFilePath), productDimsGridPane, productDimsImageView, "dimsImage");
+            ImageFile.saveDimImage(new File(tempFilePath), selectedProduct);
         }
     }
     @FXML private void setPlug1ImageButtonPress() {
         File file = fileChooser.showOpenDialog(anchorPane.getScene().getWindow());
         if (file != null) {
-            ImageFile.open(file, plug1GridPane, plug1ImageView, "plugsImage");
-            ImageFile.savePlugImage(file, selectedProduct, 1);
+            String tempFileName = new File(ImageFile.makeTemporaryResizedImage(file)).getName();
+            String tempFilePath = PoligonCommander.tmpDir + "\\" + tempFileName;
+            ImageFile.open(new File(tempFilePath), plug1GridPane, plug1ImageView, "plugsImage");
+            ImageFile.savePlugImage(new File(tempFilePath), selectedProduct, 1);
         }
     }
     @FXML private void setPlug2ImageButtonPress() {
         File file = fileChooser.showOpenDialog(anchorPane.getScene().getWindow());
         if (file != null) {
-            ImageFile.open(file, plug2GridPane, plug2ImageView, "plugsImage");
-            ImageFile.savePlugImage(file, selectedProduct, 2);
+            String tempFileName = new File(ImageFile.makeTemporaryResizedImage(file)).getName();
+            String tempFilePath = PoligonCommander.tmpDir + "\\" + tempFileName;
+            ImageFile.open(new File(tempFilePath), plug2GridPane, plug2ImageView, "plugsImage");
+            ImageFile.savePlugImage(new File(tempFilePath), selectedProduct, 2);
         }
     }
     private void setFunctionDescriptionAndPicture(String selectedFunction) {
@@ -4049,8 +4058,11 @@ public class PCGUIController implements Initializable {
                 MenuItemBuilder.create().text("Удалить выбранный тип устройств").onAction((ActionEvent ae3) -> {
                     ContextBuilder.deleteTheProductKind(productKindsList);
                     buildProductKindsList();
-                    functionsTable.refresh();
                     productKindsList.refresh();
+                    productKindsList.getFocusModel().focus(0);
+                    buildFunctionsTable(productKindsList.getSelectionModel().getSelectedItem());
+                    functionsTable.refresh();
+                    UtilPack.click(productKindsList);
                 }).build()
         ).build();
         productKindsList.setContextMenu(productKindsListContextMenu);

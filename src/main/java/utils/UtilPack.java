@@ -6,9 +6,7 @@ import entities.Settings;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
-import javafx.scene.control.CheckBoxTreeItem;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TreeItem;
+import javafx.scene.control.*;
 import main.PCGUIController;
 import main.Product;
 import modalwindows.AlertWindow;
@@ -25,6 +23,7 @@ import org.hibernate.Transaction;
 import org.hibernate.cfg.*;
 import tableviews.ProductPropertiesForKindTableView;
 import tableviews.ProductPropertiesTableView;
+import tableviews.ProductsTableView;
 
 import java.awt.event.InputEvent;
 import java.io.File;
