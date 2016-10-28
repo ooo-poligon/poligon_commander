@@ -76,6 +76,21 @@ public final class SshUtils {
         }
     }
 
+    public static boolean sftpBoolean(String fromUri, String toUri) {
+        URI from = URI.create(fromUri);
+        URI to = URI.create(toUri);
+
+        if (SSH.equals(to.getScheme()) && FILE.equals(from.getScheme())) {
+            upload(from, to);
+            return true;
+        } else if (SSH.equals(from.getScheme()) && FILE.equals(to.getScheme())) {
+            download(from, to);
+            return true;
+        } else {
+            throw new IllegalArgumentException();
+        }
+    }
+
     private static void upload(URI from, URI to) {
         try (SessionHolder<ChannelSftp> session = new SessionHolder<>("sftp", to);
              FileInputStream fis = new FileInputStream(new File(from))) {

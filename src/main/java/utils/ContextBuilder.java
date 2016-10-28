@@ -31,14 +31,18 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.Collator;
 import java.text.DateFormat;
+import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static utils.SshUtils.sftp;
 
 /**
  * Created by Igor Klekotnev on 13.01.2016.
  */
 public class ContextBuilder {
     private static String picPath = "";
+    private static String newPicPath = "";
     private static String picName = "";
     private static Integer selectedPropertyTypeID = 0;
     private static Integer selectedProductKindID  = 0;
@@ -1479,19 +1483,54 @@ public class ContextBuilder {
     }
 
     public static void makeNewsItem() {
+        Date currentDate = new Date();
+        Format formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String date = formatter.format(currentDate);
         Dialog<NewNewsItem> dialog = new Dialog<>();
         dialog.setTitle("Добавить новость");
         dialog.setHeaderText("После добавления новости, её содержимое можно\nотредактировать и сохранить в окне редактора.");
-        dialog.setResizable(false);
+        dialog.setResizable(true);
+        dialog.setWidth(800.0);
+        dialog.setHeight(600.0);
 
         Label label1 = new Label("Введите название новости: ");
         TextField textField1 = new TextField();
+        Label label2 = new Label("Введите краткое описание: ");
+        TextArea textArea = new TextArea();
+        Label label3 = new Label("Введите текст новости: ");
+        TextArea textArea1 = new TextArea();
+
+        Button setImageButton = new Button("Выбрать изображение");
+        ImageView image1 = new ImageView();
+        image1.setFitWidth(300.0);
+        image1.setPreserveRatio(true);
 
         GridPane grid = new GridPane();
+        GridPane grid1 = new GridPane();
+
+        grid1.add(image1, 0, 0);
+
         grid.add(label1, 1, 1);
         grid.add(textField1, 2, 1);
+        grid.add(label2, 1, 2);
+        grid.add(textArea, 2, 2);
+        grid.add(label3, 1, 3);
+        grid.add(textArea1, 2, 3);
+        grid.add(grid1, 2, 4);
+        grid.add(setImageButton, 2, 5);
 
         dialog.getDialogPane().setContent(grid);
+        setImageButton.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
+            @Override
+            public void handle(javafx.event.ActionEvent event) {
+                FileChooser fileChooser = new FileChooser();
+                File file = fileChooser.showOpenDialog(grid.getScene().getWindow());
+                if (file != null) {
+                    ImageFile.open(new File(file.getAbsolutePath()), grid1, image1, "contentImage");
+                }
+                picPath = file.getAbsolutePath();
+            }
+        });
 
         ButtonType buttonTypeOk = new ButtonType("Добавить", ButtonBar.ButtonData.OK_DONE);
         ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonBar.ButtonData.CANCEL_CLOSE);
@@ -1499,22 +1538,86 @@ public class ContextBuilder {
         dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
         dialog.setResultConverter((ButtonType b) -> {
             if (b == buttonTypeOk) {
-                return new NewNewsItem();
+                String picName = picPath.replace('\\', '@').split("@")[(picPath.replace('\\', '@')).split("@").length - 1];
+                String tempPath = PoligonCommander.tmpDir.getAbsolutePath() + "\\" + picName;
+                newPicPath = "\\\\Server03\\бд_сайта\\poligon_images\\content\\news\\" + picName;
+
+                String remotePlace = "/var/www/poligon/data/www/poligon.info/images/content/news/";
+                try {
+                    UtilPack.copyFile((new File(picPath)), (new File(newPicPath)));
+                } catch (IOException e) {
+                    AlertWindow.showErrorMessage(e.getMessage());
+                }
+                String sshUser = "";
+                String sshPass = "";
+                String sshHost = "";
+
+                Session session1 = HibernateUtil.getSessionFactory().openSession();
+                Query query1 = session1.createQuery("from entities.Settings where kind = :kind and title = :title");
+                query1.setParameter("kind", "SFTPSettings");
+                query1.setParameter("title", "userSFTP");
+                List result1 = query1.list();
+                for (Object aResult1 : result1) {
+                    entities.Settings setting = (entities.Settings) aResult1;
+                    sshUser = setting.getTextValue();
+                }
+                session1.close();
+                Session session2 = HibernateUtil.getSessionFactory().openSession();
+                Query query2 = session2.createQuery("from entities.Settings where kind = :kind and title = :title");
+                query2.setParameter("kind", "SFTPSettings");
+                query2.setParameter("title", "passwordSFTP");
+                List result2 = query2.list();
+                for (Object aResult2 : result2) {
+                    entities.Settings setting = (entities.Settings) aResult2;
+                    sshPass = setting.getTextValue();
+                }
+                session2.close();
+                Session session3 = HibernateUtil.getSessionFactory().openSession();
+                Query query3 = session3.createQuery("from entities.Settings where kind = :kind and title = :title");
+                query3.setParameter("kind", "SFTPSettings");
+                query3.setParameter("title", "serverSFTP");
+                List result3 = query3.list();
+                for (Object aResult3 : result3) {
+                    entities.Settings setting = (entities.Settings) aResult3;
+                    sshHost = setting.getTextValue();
+                }
+                session3.close();
+
+                sftp(("file://" + newPicPath.replace("\\", "/")), ("ssh://" + sshUser + ":" + sshPass + "@" + sshHost + remotePlace));
+
+            return new NewNewsItem(textField1.getText(), textArea.getText(),
+                    textArea1.getText(), newPicPath, date, date);
             }
             return null;
         });
         Optional<NewNewsItem> result = dialog.showAndWait();
         if (result.isPresent()) {
-            Date currentDate = new Date();
             Session session = HibernateUtil.getSessionFactory().openSession();
             Transaction tx = session.beginTransaction();
             NewsItems ni = new NewsItems();
             ni.setTitle(textField1.getText());
+            ni.setPreview(textArea.getText());
+            ni.setContent(textArea1.getText());
+            ni.setImagePath(newPicPath);
             ni.setCreatedAt(currentDate);
             ni.setUpdatedAt(currentDate);
             session.save(ni);
             tx.commit();
             session.close();
+            try {
+                String queryRemote = "insert into news_items " +
+                        "(title,preview,content,image_path,created_at,updated_at) values" +
+                        " (\"" + result.get().getTitle().replace("\"", "\\\"").replace("\\", "\\\\") +
+                        "\",\"" + result.get().getPreview().replace("\"", "\\\"").replace("\\", "\\\\") +
+                        "\",\"" + result.get().getContent().replace("\"", "\\\"").replace("\\", "\\\\") +
+                        "\",\"" + result.get().getImagePath().replace("\"", "\\\"").replace("\\", "\\\\") +
+                        "\",\"" + result.get().getCreatedAt() +
+                        "\",\"" + result.get().getUpdatedAt() +"\")";
+                PCGUIController.siteConnection.getUpdateResult(queryRemote);
+            } catch (SQLException e) {
+                AlertWindow.showErrorMessage(e.getMessage());
+                //e.printStackTrace();
+            }
         }
     }
     public static void makeArticle() {
@@ -1770,6 +1873,12 @@ public class ContextBuilder {
 
             tx.commit();
             session1.close();
+            try {
+                String queryRemote = "delete from news_items where id =" + newsItem.getId();
+                PCGUIController.siteConnection.getUpdateResult(queryRemote);
+            } catch (SQLException e) {
+                AlertWindow.showErrorMessage(e.getMessage());
+            }
         }
     }
     public static void deleteArticle(ListView articlesListView) {

@@ -152,7 +152,7 @@ public class ProductsTableView {
         return delivery_time;
     }
 
-    public boolean hasPicture() {
+    public boolean hasFile(int fileType) {
         String name = "";
         final Product[] owner = new Product[1];
         PCGUIController.allProductsList.stream().forEach(p -> {
@@ -160,15 +160,36 @@ public class ProductsTableView {
                 owner[0] = p;
             }
         });
+        /*try {
+            ResultSet resultSet = PCGUIController.connection.getResult(
+                    "select name from files where owner_id =" +
+                            owner[0].getId() + " and file_type_id =" + fileType);
+            while( resultSet.next()) {
+                name = resultSet.getString("name");
+            }
+        } catch (SQLException ignored) {}*/
         Session session = HibernateUtil.getSessionFactory().openSession();
         Query query = session.createQuery("select name from Files where ownerId =" +
-                owner[0].getId() + " and fileTypeId =" + 1);
+                owner[0].getId() + " and fileTypeId =" + fileType);
         List list = query.list();
         for(Object o : list) {
             name = (String) o;
         }
         session.close();
         if (name == null || name.equals("")) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean hasPropertyValues() {
+        final Product[] product = new Product[1];
+        PCGUIController.allProductsList.stream().forEach(p -> {
+            if( p.getTitle().equals(title.getValue())) {
+                product[0] = p;
+            }
+        });
+        if (!PCGUIController.productsWithPropertyValues.contains(product[0].getId())) {
             return false;
         }
         return true;

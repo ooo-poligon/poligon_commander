@@ -517,27 +517,33 @@ public class XLSHandler {
                         workbook.createSheet("Prices for " + vendor.getTitle(), 0);
                         WritableSheet excelSheet = workbook.getSheet(0);
 
-                        Label  caption1 = new Label ( 0, 0, "Название"); excelSheet.addCell(caption1);
-                        Label  caption2 = new Label ( 1, 0, "Базовая цена"); excelSheet.addCell(caption2);
-                        Label  caption3 = new Label ( 2, 0, "10+"); excelSheet.addCell(caption3);
-                        Label  caption4 = new Label ( 3, 0, "Опт"); excelSheet.addCell(caption4);
-                        Label  caption5 = new Label ( 4, 0, "Дилер"); excelSheet.addCell(caption5);
+                        Label  caption0 = new Label ( 0, 0, "Артикул"); excelSheet.addCell(caption0);
+                        Label  caption1 = new Label ( 1, 0, "Название"); excelSheet.addCell(caption1);
+                        Label  caption6 = new Label ( 2, 0, "Краткое описание"); excelSheet.addCell(caption6);
+                        Label  caption2 = new Label ( 3, 0, "Базовая цена"); excelSheet.addCell(caption2);
+                        Label  caption3 = new Label ( 4, 0, "10+"); excelSheet.addCell(caption3);
+                        Label  caption4 = new Label ( 5, 0, "Опт"); excelSheet.addCell(caption4);
+                        Label  caption5 = new Label ( 6, 0, "Дилер"); excelSheet.addCell(caption5);
                         int j = 1;
                         // iteration begins from 1 because row with number 0 occupies captions row, made just before
                         for (int i = 1; i < allProductsList.size(); i++) {
                             if (allProductsList.get(i).getVendorId() == (vendor.getId())) {
-                                Label  title = new Label ( 0, j, allProductsList.get(i).getTitle());
+                                Label  article = new Label ( 0, j, allProductsList.get(i).getArticle());
+                                Label  title = new Label ( 1, j, allProductsList.get(i).getTitle());
+                                Label  description = new Label ( 2, j, allProductsList.get(i).getDescription());
+                                excelSheet.addCell(article);
                                 excelSheet.addCell(title);
+                                excelSheet.addCell(description);
 
                                 Double retail_price = allProductsList.get(i).getPrice() * allProductsList.get(i).getRate();
                                 Double discount_ten_plus = retail_price - (retail_price / 100) * allProductsList.get(i).getDiscount1();
                                 Double discount_opt = retail_price - (retail_price / 100) * allProductsList.get(i).getDiscount2();
                                 Double discount_dealer = retail_price - (retail_price / 100) * allProductsList.get(i).getDiscount3();
-                                Number price = new Number( 1, j, round2(retail_price));
+                                Number price = new Number( 3, j, round2(retail_price));
                                 excelSheet.addCell(price);
                                 if (allProductsList.get(i).getSpecial() != 0) {
                                     retail_price = retail_price - (retail_price / 100) * allProductsList.get(i).getSpecial();
-                                    price = new Number( 1, j, round2(retail_price));
+                                    price = new Number( 3, j, round2(retail_price));
                                     excelSheet.addCell(price);
                                 }
                                 retail_price = allProductsList.get(i).getPrice() * allProductsList.get(i).getRate();
@@ -551,13 +557,13 @@ public class XLSHandler {
                                     discount_dealer = retail_price - (retail_price / 100) * allProductsList.get(i).getSpecial();
                                 }
 
-                                Number discount1 = new Number( 2, j, round2(discount_ten_plus));
+                                Number discount1 = new Number( 4, j, round2(discount_ten_plus));
                                 excelSheet.addCell(discount1);
 
-                                Number discount2 = new Number( 3, j, round2(discount_opt));
+                                Number discount2 = new Number( 5, j, round2(discount_opt));
                                 excelSheet.addCell(discount2);
 
-                                Number discount3 = new Number( 4, j, round2(discount_dealer));
+                                Number discount3 = new Number( 6, j, round2(discount_dealer));
                                 excelSheet.addCell(discount3);
                                 j++;
                             } else {

@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 public class PoligonCommander extends Application {
-    public static final String versionNumber = " версия 2.4.0";
+    public static final String versionNumber = " версия 2.8.0";
     public static final String SPLASH_IMAGE = "/images/splash2.png";
     private static final int SPLASH_WIDTH = 600;
     private static final int SPLASH_HEIGHT = 420;
@@ -83,6 +83,7 @@ public class PoligonCommander extends Application {
                 PCGUIController.getAllFilesOfProgramList();
                 PCGUIController.getAllQuantitiesList();
                 PCGUIController.getAllCategoriesList();
+                PCGUIController.getAllProductsWithPropertyValuesList();
 
                 int count = 0;
                 for (int i = 0; i < PCGUIController.allProductsTitles.size(); i++) {

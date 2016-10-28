@@ -2,8 +2,10 @@ package utils;
 
 import javafx.application.Platform;
 import modalwindows.AlertWindow;
+import new_items.NewCurrencyCourse;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 /**
  * Created by Igor Klekotnev on 20.01.2016.
@@ -30,11 +32,15 @@ public class XMLParser {
             str = str.substring(8, 15).replace(',', '.');
             value = Double.parseDouble(str);
         } catch (StringIndexOutOfBoundsException e) {
-            AlertWindow.alertNoRbcServerConnection();
-            AlertWindow.showErrorMessage("Не удалось установить соединение с сервером rbc.ru для получения актуальных курсов валют.\n" +
-                    "Обеспечьте соединение с интернетом и повторите запуск программы.");
-            Platform.exit();
-            System.exit(0);
+            Optional<NewCurrencyCourse> result = AlertWindow.newCurrencyCourseDialog();;
+            if (result.isPresent()) {
+                return result.get().getCourse();
+            }
+//            AlertWindow.alertNoRbcServerConnection();
+//            AlertWindow.showErrorMessage("Не удалось установить соединение с сервером rbc.ru для получения актуальных курсов валют.\n" +
+//                    "Обеспечьте соединение с интернетом и повторите запуск программы.");
+//            Platform.exit();
+//            System.exit(0);
         }
 
         return value;

@@ -36,6 +36,7 @@ import java.util.*;
 import java.nio.file.Files;
 
 import static utils.SshUtils.sftp;
+import static utils.SshUtils.sftpBoolean;
 
 /**
  * Created by Igor Klekotnev on 11.03.2016.
@@ -401,7 +402,7 @@ public class UtilPack {
         Files.copy(source.toPath(), dest.toPath());
     }
 
-    public static void startFTP(String filePath, String remotePlace){
+    public static void startFTP(String filePath, String remotePlace, boolean showMessage){
         StandardFileSystemManager manager = new StandardFileSystemManager();
         String sshHost = "";
         String sshUser = "";
@@ -434,8 +435,8 @@ public class UtilPack {
             }
             session.close();
 
-            sftp(("file://" + filePath.replace("\\", "/")), ("ssh://" + sshUser + ":" + sshPass + "@" + sshHost + remotePlace));
-            AlertWindow.showInfo("Файл загружен на удаленный сервер.");
+            boolean success = sftpBoolean(("file://" + filePath.replace("\\", "/")), ("ssh://" + sshUser + ":" + sshPass + "@" + sshHost + remotePlace));
+            if (showMessage && success) AlertWindow.showInfo("Файл загружен на удаленный сервер.");
         }
         catch (Exception ex) {
             AlertWindow.showErrorMessage(ex.getMessage());

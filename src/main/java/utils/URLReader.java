@@ -20,7 +20,7 @@ public class URLReader {
             while ((inputLine = in.readLine()) != null) result.add(inputLine);
             in.close();
         } catch (IOException e) {
-            AlertWindow.alertNoRbcServerConnection();
+            //AlertWindow.alertNoRbcServerConnection();
         }
         return result;
     }

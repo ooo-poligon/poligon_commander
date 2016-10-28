@@ -4,9 +4,7 @@
  */
 package utils;
 
-import entities.FileTypes;
-import entities.Files;
-import entities.Products;
+import entities.*;
 import imgscalr.Scalr;
 import javafx.event.EventHandler;
 import javafx.scene.image.Image;
@@ -26,6 +24,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.sql.SQLException;
+import java.util.Iterator;
 import java.util.List;
 import static utils.SshUtils.sftp;
 
@@ -118,6 +117,14 @@ public class ImageFile {
                 break;
             }
             case "functionImage": {
+                try {
+                    localUrl = file.toURI().toURL().toString();
+                } catch (MalformedURLException e) {
+                    AlertWindow.showErrorMessage(e.getMessage());
+                }
+                break;
+            }
+            case "contentImage": {
                 try {
                     localUrl = file.toURI().toURL().toString();
                 } catch (MalformedURLException e) {
@@ -334,31 +341,158 @@ public class ImageFile {
         session.close();
     }
 
-    private static String copyToPlace(File file, String selectedProduct, String picType, Integer plugNumber) throws IOException {
-        String vendorTitle = "";
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Query query = session.createQuery("from Products where title = :title");
-        query.setParameter("title", selectedProduct);
-        List result = query.list();
-        for (Object aResult : result) {
-            Products product = (Products) aResult;
-            if (product.getVendorId().getTitle().equals("COMAT/RELECO")) {
-                vendorTitle = "RELECO";
-            } else {
-                vendorTitle = product.getVendorId().getTitle();
-            }
+    public static void saveContentImage(File inFile, String contentType, String contentTitle) {
+        File file = null;
+        try {
+            file = new File(copyToPlace(inFile, (contentType + "@" + inFile.getName()), "content", null));
+        } catch (IOException e) {
+            AlertWindow.showErrorMessage(e.getMessage());
         }
+
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = session.beginTransaction();
+        switch (contentType) {
+            case "news":
+                NewsItems item = new NewsItems();
+                Query query = session.createQuery("from NewsItems where title = :title");
+                query.setParameter("title", contentTitle);
+                List list = query.list();
+                for (Iterator iterator = list.iterator(); iterator.hasNext();) {
+                    item = (NewsItems) iterator.next();
+                }
+                if (file != null) {
+                    item.setImagePath(file.getAbsolutePath());
+                    session.saveOrUpdate(item);
+                    try {
+                        String queryRemote = "update news_items set image_path=\"" + "\\\\\\\\Server03\\\\бд_сайта\\\\poligon_images\\\\content\\\\" + contentType + "\\\\" + file.getName() +
+                                "\" where id =" + item.getId();
+                        PCGUIController.siteConnection.getUpdateResult(queryRemote);
+                    } catch (SQLException e) {
+                        AlertWindow.showErrorMessage(e.getMessage());
+                    }
+                }
+                break;
+            case "articles":
+                Articles item1 = new Articles();
+                Query query1 = session.createQuery("from Articles where title = :title");
+                query1.setParameter("title", contentTitle);
+                List list1 = query1.list();
+                for (Iterator iterator = list1.iterator(); iterator.hasNext();) {
+                    item1 = (Articles) iterator.next();
+                }
+                if (file != null) {
+                    item1.setImagePath(file.getAbsolutePath());
+                    session.saveOrUpdate(item1);
+                }
+                try {
+                    String queryRemote = "update articles set image_path=\"" + "\\\\\\\\Server03\\\\бд_сайта\\\\poligon_images\\\\content\\\\" + contentType + "\\\\" + file.getName() +
+                            "\" where id =" + item1.getId();
+                    PCGUIController.siteConnection.getUpdateResult(queryRemote);
+                } catch (SQLException e) {
+                    AlertWindow.showErrorMessage(e.getMessage());
+                }
+                break;
+            case "videos":
+                Videos item2 = new Videos();
+                Query query2 = session.createQuery("from Videos where title = :title");
+                query2.setParameter("title", contentTitle);
+                List list2 = query2.list();
+                for (Iterator iterator = list2.iterator(); iterator.hasNext();) {
+                    item2 = (Videos) iterator.next();
+                }
+                if (file != null) {
+                    item2.setImagePath(file.getAbsolutePath());
+                    session.saveOrUpdate(item2);
+                }
+                try {
+                    String queryRemote = "update videos set image_path=\"" + "\\\\\\\\Server03\\\\бд_сайта\\\\poligon_images\\\\content\\\\" + contentType + "\\\\" + file.getName() +
+                            "\" where id =" + item2.getId();
+                    PCGUIController.siteConnection.getUpdateResult(queryRemote);
+                } catch (SQLException e) {
+                    AlertWindow.showErrorMessage(e.getMessage());
+                }
+                break;
+            case "reviews":
+                Reviews item3 = new Reviews();
+                Query query3 = session.createQuery("from Reviews where title = :title");
+                query3.setParameter("title", contentTitle);
+                List list3 = query3.list();
+                for (Iterator iterator = list3.iterator(); iterator.hasNext();) {
+                    item3 = (Reviews) iterator.next();
+                }
+                if (file != null) {
+                    item3.setImagePath(file.getAbsolutePath());
+                    session.saveOrUpdate(item3);
+                }
+                try {
+                    String queryRemote = "update reviews set image_path=\"" + "\\\\\\\\Server03\\\\бд_сайта\\\\poligon_images\\\\content\\\\" + contentType + "\\\\" + file.getName() +
+                            "\" where id =" + item3.getId();
+                    PCGUIController.siteConnection.getUpdateResult(queryRemote);
+                } catch (SQLException e) {
+                    AlertWindow.showErrorMessage(e.getMessage());
+                }
+                break;
+            case "additions":
+                Additions item4 = new Additions();
+                Query query4 = session.createQuery("from Additions where title = :title");
+                query4.setParameter("title", contentTitle);
+                List list4 = query4.list();
+                for (Iterator iterator = list4.iterator(); iterator.hasNext();) {
+                    item4 = (Additions) iterator.next();
+                }
+                if (file != null) {
+                    item4.setImagePath(file.getAbsolutePath());
+                    session.saveOrUpdate(item4);
+                }
+                try {
+                    String queryRemote = "update additions set image_path=\"" + "\\\\\\\\Server03\\\\бд_сайта\\\\poligon_images\\\\content\\\\" + contentType + "\\\\" + file.getName() +
+                            "\" where id =" + item4.getId();
+                    PCGUIController.siteConnection.getUpdateResult(queryRemote);
+                } catch (SQLException e) {
+                    AlertWindow.showErrorMessage(e.getMessage());
+                }
+                break;
+        }
+        tx.commit();
         session.close();
+    }
+
+    private static String copyToPlace(File file, String selectedProduct, String picType, Integer plugNumber) throws IOException {
         String resPath;
         String fileName;
-        String fileType;
-        if (plugNumber != null) {
-            fileName = selectedProduct.replace(" ", "_").replace("/", "_").replace(",", "_") + "_" + picType + plugNumber + ".jpg";
+        String fileType = picType;
+        String vendorTitle = "";
+        String remotePlace = "";
+        if (picType != "content") {
+            Session session = HibernateUtil.getSessionFactory().openSession();
+            Query query = session.createQuery("from Products where title = :title");
+            query.setParameter("title", selectedProduct);
+            List result = query.list();
+            for (Object aResult : result) {
+                Products product = (Products) aResult;
+                if (product.getVendorId().getTitle().equals("COMAT/RELECO")) {
+                    vendorTitle = "RELECO";
+                } else {
+                    vendorTitle = product.getVendorId().getTitle();
+                }
+            }
+            session.close();
+
+            if (plugNumber != null) {
+                fileName = selectedProduct.replace(" ", "_").replace("/", "_").replace(",", "_") + "_" + picType + plugNumber + ".jpg";
+            } else {
+                fileName = selectedProduct.replace(" ", "_").replace("/", "_").replace(",", "_") + "_" + picType + ".jpg";
+            }
+
+            resPath = "\\\\Server03\\бд_сайта\\poligon_images\\catalog\\" + vendorTitle + "\\" + fileType + "s\\" + fileName;
+            remotePlace = "/var/www/poligon/data/www/poligon.info/images/catalog/" + vendorTitle + "/" + fileType + "s/";
         } else {
-            fileName = selectedProduct.replace(" ", "_").replace("/", "_").replace(",", "_") + "_" + picType + ".jpg";
+            String contentType = selectedProduct.split("@")[0];
+            String picture = selectedProduct.split("@")[1];
+            resPath = "\\\\Server03\\бд_сайта\\poligon_images\\" + picType + "\\" + contentType + "\\" + picture;
+            remotePlace = "/var/www/poligon/data/www/poligon.info/images/"+ picType + "/" + contentType + "/";
         }
-        fileType = picType;
-        resPath = "\\\\Server03\\бд_сайта\\poligon_images\\catalog\\" + vendorTitle + "\\" + fileType + "s\\" + fileName;
+
         copyFile(file, new File(resPath));
         String sshUser = "";
         String sshPass = "";
@@ -394,7 +528,7 @@ public class ImageFile {
             sshHost = setting.getTextValue();
         }
         session3.close();
-        String remotePlace = "/var/www/poligon/data/www/poligon.info/images/catalog/" + vendorTitle + "/" + fileType + "s/";
+
         sftp(("file://" + resPath.replace("\\", "/")), ("ssh://" + sshUser + ":" + sshPass + "@" + sshHost + remotePlace));
 
         return resPath;

@@ -53,6 +53,8 @@ public class Videos implements Serializable {
     private Date updatedAt;
     @Column(name = "title")
     private String title;
+    @Column(name = "image_path")
+    private String imagePath;
     @Lob
     @Column(name = "content")
     private String content;
@@ -108,6 +110,14 @@ public class Videos implements Serializable {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
     }
 
     @Override

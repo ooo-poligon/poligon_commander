@@ -3,6 +3,7 @@ package modalwindows;
 import entities.Categories;
 import entities.SeriesItems;
 import entities.Vendors;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -17,10 +18,7 @@ import javafx.stage.FileChooser;
 import main.PCGUIController;
 import main.PoligonCommander;
 import main.Product;
-import new_items.NewAddCategoryInfo;
-import new_items.NewCategory;
-import new_items.NewSerie;
-import new_items.NewVendor;
+import new_items.*;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import utils.*;
@@ -93,7 +91,7 @@ public class AlertWindow {
     public static void showErrorMessage(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setContentText(message);
-        alert.show();
+        alert.showAndWait();
     }
     public static void showErrorDeleteRefs() {
         Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -610,7 +608,7 @@ public class AlertWindow {
 
         Dialog<NewAddCategoryInfo> dialog = new Dialog<>();
         dialog.setTitle("Дополнительная информация для категории.");
-        dialog.setHeaderText("Эта информация показываетс при нажании на кнопку\n" +
+        dialog.setHeaderText("Эта информация показывается при нажатии на кнопку\n" +
                 " \"Дополнительные материалы\" на странице с описанием категории.");
         dialog.setResizable(false);
 
@@ -665,5 +663,36 @@ public class AlertWindow {
         alert.setTitle("Операция завершена!");
         alert.setHeaderText(taskName + " выполнен.");
         alert.show();
+    }
+    public static Optional<NewCurrencyCourse> newCurrencyCourseDialog() {
+        Dialog<NewCurrencyCourse> dialog = new Dialog<>();
+        dialog.setTitle("Внимание! Нет связи с сервером \"CBR\"!");
+        dialog.setHeaderText("Введите текущий курс EURO в виде\n" +
+                "десятичной дроби с разделителем \".\"");
+
+        Label label1 = new Label("Курс EURO:  ");
+        TextField text1 = new TextField();
+
+        GridPane grid = new GridPane();
+        grid.add(label1, 1, 1);
+        grid.add(text1, 2, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        ButtonType buttonTypeOk = new ButtonType("Ввести", ButtonBar.ButtonData.OK_DONE);
+        ButtonType buttonTypeCancel = new ButtonType("Отменить", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
+        dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
+        dialog.setResultConverter((ButtonType b) -> {
+            if (b == buttonTypeOk) {
+                return new NewCurrencyCourse(Double.parseDouble(text1.getText()));
+            } else {
+                AlertWindow.showErrorMessage("Работа программы без установленного курса валюты недопустима.\nПрограмма будет закрыта");
+                Platform.exit();
+            System.exit(0);
+            }
+            return null;
+        });
+        return dialog.showAndWait();
     }
 }

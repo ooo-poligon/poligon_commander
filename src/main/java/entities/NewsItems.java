@@ -53,6 +53,11 @@ public class NewsItems implements Serializable {
     private Date updatedAt;
     @Column(name = "title")
     private String title;
+    @Column(name = "image_path")
+    private String imagePath;
+    @Lob
+    @Column(name = "preview")
+    private String preview;
     @Lob
     @Column(name = "content")
     private String content;
@@ -108,6 +113,22 @@ public class NewsItems implements Serializable {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
+    }
+
+    public String getPreview() {
+        return preview;
+    }
+
+    public void setPreview(String preview) {
+        this.preview = preview;
     }
 
     @Override
